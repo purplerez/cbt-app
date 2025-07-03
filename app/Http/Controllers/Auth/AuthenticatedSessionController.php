@@ -8,6 +8,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
+use App\Providers\RouteServiceProvider;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -26,7 +27,7 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
-        $request->session()->regenerate();
+        session()->regenerate();
 
         $user = auth()->user();
 
@@ -41,6 +42,7 @@ class AuthenticatedSessionController extends Controller
         }
 
         // return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->intended(RouteServiceProvider::home());
     }
 
     /**
