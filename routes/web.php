@@ -5,7 +5,7 @@ use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\siswa\DashboardController;
+// use App\Http\Controllers\siswa\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
