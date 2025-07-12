@@ -20,7 +20,7 @@ return new class extends Migration
             $table->enum('role', ['admin', 'kepala', 'guru', 'siswa'])->default('siswa');
             $table->boolean('is_active')->default(true);
            $table->foreignId('school_id')->nullabe()->constrained('schools')->cascadeOnDelete()->default(1);
-           $table->foreignId('grade_id')->nullable()->constrained('grades')->nullOnDelete()->default(1);
+        //    $table->foreignId('grade_id')->nullable()->constrained('grades')->nullOnDelete()->default(1);
             $table->rememberToken();
             $table->timestamps();
         });

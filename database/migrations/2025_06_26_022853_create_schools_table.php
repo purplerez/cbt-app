@@ -14,8 +14,13 @@ return new class extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('npsn');
             $table->text('address')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('email')->nullable();
             $table->string('code');
+            $table->string('logo')->nullable();
+            $table->enum('status',['0', '1'])->default('1'); // 0 : inactive, 1 : active
             $table->timestamps();
         });
     }
