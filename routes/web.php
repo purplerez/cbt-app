@@ -5,6 +5,8 @@ use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SchoolController;
+use App\Models\School;
 // use App\Http\Controllers\siswa\DashboardController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +28,8 @@ Route::middleware('auth')->group(function () {
 // super admin page
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('schools', [SchoolController::class, 'index'])->name('schools');
+
 });
 
 Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->group(function(){
