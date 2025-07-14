@@ -9,17 +9,17 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    @if (session('error'))
-                        <div class="mb-4 text-red-600">
-                            {{ session('error') }}
-                        </div>
 
-                    @endif
 
 
                     <form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
                         @csrf
-
+                        {{-- @if (session('error'))
+                            <div class="mb-4 text-red-600">
+                                {{ session('error') }}
+                            </div>
+                        @endif --}}
+                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Nama Sekolah</label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}" required
