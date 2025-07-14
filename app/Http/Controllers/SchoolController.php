@@ -4,9 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSchoolRequest;
 use App\Models\School;
-use Illuminate\Container\Attributes\Log;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log as FacadesLog;
+use Illuminate\Support\Facades\DB;
 
 class SchoolController extends Controller
 {
@@ -32,19 +31,33 @@ class SchoolController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreSchoolRequest $request)
+ public function store(StoreSchoolRequest $request)
     {
-
-        // dd($request->all());
+        // dd($request);
         try {
             $validatedData = $request->validated();
 
+            if($request->hasFile('logo')) {
+                $logo = $request->file('logo');
+
+                $imageName = time().'.'.$logo->extension();
+                $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
+                $validatedData['logo'] = $destinationPath;
+
+            }
+            else {
+                throw new \Exception('Logo is required and must be a valid image file');
+            }
+
             School::create($validatedData);
+
+
             return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil ditambahkan');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Validation failed: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Validation failed: ' . $e->getMessage()]);
         }
     }
+
 
     /**
      * Display the specified resource.
