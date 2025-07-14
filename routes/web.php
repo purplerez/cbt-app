@@ -29,6 +29,11 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
     Route::get('schools', [SchoolController::class, 'index'])->name('schools');
+    Route::get('inputsekolah', function () {
+        return view('admin.inputsekolah');
+    })->name('inputsekolah');
+    Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
+
 
 });
 
