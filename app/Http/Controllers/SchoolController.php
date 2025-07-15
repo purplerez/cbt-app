@@ -51,10 +51,9 @@ class SchoolController extends Controller
 
             School::create($validatedData);
 
-
             return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil ditambahkan');
         } catch (\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Validation failed: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
         }
     }
 
@@ -86,8 +85,17 @@ class SchoolController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(School $school)
     {
         //
+        try{
+        $school->delete();
+        return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil dihapus');
+        }
+        catch(\Exception $e){
+            return redirect()->route('admin.schools')->withErrors(['error' =>'Delete Failed ', $e->getMessage()]);
+        }
+
+
     }
 }

@@ -41,6 +41,7 @@
                             <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
                             <textarea name="address" id="address" rows="3"
                                     class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                                    <x-input-error :messages="$errors->get('address')" class="mb-4" />
                         </div>
 
                         <!-- Telepon -->
@@ -55,6 +56,7 @@
                             <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                             <input type="email" name="email" id="email"
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('email')" class="mb-4" />
                         </div>
 
                         <!-- Kode Sekolah -->
@@ -62,6 +64,7 @@
                             <label for="code" class="block text-sm font-medium text-gray-700">Kode Sekolah</label>
                             <input type="text" name="code" id="code" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('code')" class="mb-4" />
                         </div>
 
                         <!-- Logo -->
@@ -69,6 +72,7 @@
                             <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label>
                             <input type="file" name="logo" id="logo"
                                 class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <x-input-error :messages="$errors->get('logo')" class="mb-4" />
                         </div>
 
 

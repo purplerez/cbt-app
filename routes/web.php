@@ -33,6 +33,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.inputsekolah');
     })->name('inputsekolah');
     Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
+    Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
+
 
 
 });
