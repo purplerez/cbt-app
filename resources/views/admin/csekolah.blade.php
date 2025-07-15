@@ -29,7 +29,7 @@
                                     <td class="px-4 py-2 border">{{ $school->address }}</td>
                                     <td class="px-4 py-2 border">{{ $school->code }}</td>
                                     <td class="px-4 py-2 border">
-                                        <a href="{{-- route('admin.schools.edit', $school->id) --}}" class="btn btn-primary">Edit</a>
+                                        <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a>
                                         <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')

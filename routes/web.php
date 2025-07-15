@@ -34,7 +34,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     })->name('inputsekolah');
     Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
     Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
-
+    Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
+    Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
 
 
 });

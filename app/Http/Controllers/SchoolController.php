@@ -69,9 +69,22 @@ class SchoolController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(School $school)
     {
         //
+        try{
+            $dataSchool = School::findOrFail($school->id);
+
+            if (!$dataSchool) {
+                return redirect()->route('admin.schools')->withErrors(['error' => 'School not found']);
+            }
+
+            return view('admin.editsekolah', compact('dataSchool'));
+        }
+        catch(\Exception $e){
+
+            return redirect()->route('admin.schools')->withErrors(['error' =>'Searching data failed : ', $e->getMessage()]);
+        }
     }
 
     /**
@@ -80,6 +93,45 @@ class SchoolController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'npsn' => ['required', 'string', 'max:255'],
+            'address' => ['nullable', 'string'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'email' => ['nullable', 'string', 'email', 'max:255'],
+            'code' => ['required', 'string', 'max:50'],
+            'logo' => ['nullable', 'image', 'max:2048'], // max 2MB
+        ]);
+        try {
+            $school = School::findOrFail($id);
+
+            $school->name = $request->input('name');
+            $school->npsn = $request->input('npsn');
+            $school->address = $request->input('address');
+            $school->phone = $request->input('phone');
+            $school->email = $request->input('email');
+            $school->code = $request->input('code');
+
+
+            if ($request->hasFile('logo')) {
+                $logo = $request->file('logo');
+
+                // delete old logo if exists
+                if ($school->logo && file_exists(public_path($school->logo))) {
+                    unlink(public_path($school->logo));
+                }
+
+                // save new logo
+                $imageName = time() . '.' . $logo->extension();
+                $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
+                $school->logo = $destinationPath;
+            }
+            $school->save();
+
+            return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil diupdate');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -89,7 +141,12 @@ class SchoolController extends Controller
     {
         //
         try{
+        // delete logo file if exists
+        if ($school->logo && file_exists(public_path($school->logo))) {
+            unlink(public_path($school->logo));
+        }
         $school->delete();
+
         return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil dihapus');
         }
         catch(\Exception $e){
