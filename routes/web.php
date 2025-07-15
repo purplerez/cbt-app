@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminController;
+use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
@@ -28,6 +29,8 @@ Route::middleware('auth')->group(function () {
 // super admin page
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+    // Routing for schools management
     Route::get('schools', [SchoolController::class, 'index'])->name('schools');
     Route::get('inputsekolah', function () {
         return view('admin.inputsekolah');
@@ -37,7 +40,21 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
     Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
 
+    // Routing for grade management
+    Route::get('grades', [GradeController::class, 'index'])->name('grades');
+    Route::get('grades/create', function ()
+    {
+        return view('admin.inputgrades');
+    })->name('input.grades');
+    Route::post('grades/create', [GradeController::class, 'store'])->name('grades.store');
 
+    Route::get('students', [SchoolController::class, 'students'])->name('students');
+    Route::get('teachers', [SchoolController::class, 'teachers'])->name('teachers');
+    Route::get('headmasters', [SchoolController::class, 'headmasters'])->name('headmasters');
+    Route::get('subjects', [SchoolController::class, 'subjects'])->name('subjects');
+    Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
+    Route::get('results', [SchoolController::class, 'results'])->name('results');
+    Route::get('settings', [SchoolController::class, 'settings'])->name('settings');
 });
 
 Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->group(function(){
