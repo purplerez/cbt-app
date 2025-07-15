@@ -33,9 +33,36 @@
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Admin Dashboard') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.dashboard')">
+                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.schools')">
                             {{ __('Sekolah') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.grades')" :active="request()->routeIs('admin.grades')">
+                            {{ __('Tingkat') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.students')" :active="request()->routeIs('admin.students')">
+                            {{ __('Siswa') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.teachers')" :active="request()->routeIs('admin.teachers')">
+                            {{ __('Guru') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.headmasters')" :active="request()->routeIs('admin.headmasters')">
+                            {{ __('Kepala Sekolah') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Mata Pelajaran') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Jadwal Ujian') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.questions')" :active="request()->routeIs('admin.questions')">
+                            {{ __('Soal') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.results')" :active="request()->routeIs('admin.results')">
+                            {{ __('Hasil Ujian') }}
+                        </x-nav-link>
+                        {{-- <x-nav-link :href="route('admin.settings')" :active="request()->routeIs('admin.dashboard')">
+                            {{ __('Pengaturan') }}
+                        </x-nav-link> --}}
                     @elseif (auth()->user()->hasRole('guru'))
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
                             {{ __('Guru Dashboard') }}
