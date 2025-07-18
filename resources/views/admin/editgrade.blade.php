@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Tambah Data Tingkat') }}
+            {{ __('Edit Data Tingkat') }}
         </h2>
     </x-slot>
 
@@ -10,17 +10,14 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <form action="{{ route('admin.grades.store') }}" method="post" enctype="multipart/form-data">
+                    <form action="{{ route('admin.grades.update', $grade->id) }}" method="post">
                         @csrf
-                        {{-- @if (session('error'))
-                            <div class="mb-4 text-red-600">
-                                {{ session('error') }}
-                            </div>
-                        @endif --}}
+                        @method('PUT')
+
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Tingkat</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                            <input type="text" name="name" id="name" value="{{ $grade->name }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>

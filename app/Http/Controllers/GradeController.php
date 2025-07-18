@@ -72,6 +72,9 @@ class GradeController extends Controller
     public function edit(string $id)
     {
         //
+        $grade = Grade::findOrFail($id);
+
+        return view('admin.editgrade', compact('grade'));
     }
 
     /**
@@ -80,6 +83,25 @@ class GradeController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+        try{
+            $grade = Grade::findOrFail($id);
+
+            // Check if the grade name already exists
+            $existingGrade = Grade::where('name', $request->name)->where('id', '!=', $id)->first();
+            if ($existingGrade) {
+                throw new \Exception('Tingkat sudah ada');
+                // return redirect()->back()->withErrors(['error' => 'Tingkat sudah ada']);
+            }
+
+            $grade->update($validatedData);
+            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil diperbarui');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -88,5 +110,12 @@ class GradeController extends Controller
     public function destroy(string $id)
     {
         //
+        try {
+            $grade = Grade::findOrFail($id);
+            $grade->delete();
+            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 }

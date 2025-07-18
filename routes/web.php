@@ -7,6 +7,7 @@ use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\SubjectController;
 use App\Models\School;
 // use App\Http\Controllers\siswa\DashboardController;
 use Illuminate\Support\Facades\Route;
@@ -36,9 +37,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.inputsekolah');
     })->name('inputsekolah');
     Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
-    Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
     Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
     Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
+    Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
 
     // Routing for grade management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
@@ -47,11 +48,18 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.inputgrades');
     })->name('input.grades');
     Route::post('grades/create', [GradeController::class, 'store'])->name('grades.store');
+    Route::get('grades/{grade}/edit', [GradeController::class, 'edit'])->name('grades.edit');
+    Route::put('grades/{grade}', [GradeController::class, 'update'])->name('grades.update');
+    Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
+
+    // routing for subjects management
+    Route::get('subjects', [SubjectController::class, 'subjects'])->name('subjects');
+
 
     Route::get('students', [SchoolController::class, 'students'])->name('students');
     Route::get('teachers', [SchoolController::class, 'teachers'])->name('teachers');
     Route::get('headmasters', [SchoolController::class, 'headmasters'])->name('headmasters');
-    Route::get('subjects', [SchoolController::class, 'subjects'])->name('subjects');
+
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
     Route::get('results', [SchoolController::class, 'results'])->name('results');
     Route::get('settings', [SchoolController::class, 'settings'])->name('settings');
