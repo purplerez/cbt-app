@@ -39,6 +39,9 @@
                         <x-nav-link :href="route('admin.grades')" :active="request()->routeIs('admin.grades')">
                             {{ __('Tingkat') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Mata Pelajaran') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.students')" :active="request()->routeIs('admin.students')">
                             {{ __('Siswa') }}
                         </x-nav-link>
@@ -47,9 +50,6 @@
                         </x-nav-link>
                         <x-nav-link :href="route('admin.headmasters')" :active="request()->routeIs('admin.headmasters')">
                             {{ __('Kepala Sekolah') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Mata Pelajaran') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Jadwal Ujian') }}

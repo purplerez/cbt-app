@@ -53,7 +53,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
 
     // routing for subjects management
-    Route::get('subjects', [SubjectController::class, 'subjects'])->name('subjects');
+    Route::get('subjects', [SubjectController::class, 'index'])->name('subjects');
+    Route::get('subjects/create', [SubjectController::class, 'create'])->name('subjects.create');
+    Route::post('subjects/create', [SubjectController::class, 'store'])->name('subjects.store');
+
 
 
     Route::get('students', [SchoolController::class, 'students'])->name('students');
