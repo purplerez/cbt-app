@@ -10,7 +10,7 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <a href="{{ route('admin.inputsekolah')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    <a href="{{ route('admin.subjects.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
@@ -26,11 +26,11 @@
                                 <tr>
                                     <td class="px-4 py-2 border">{{ $subject->id }}</td>
                                     <td class="px-4 py-2 border">{{ $subject->name }}</td>
-                                    <td class="px-4 py-2 border">{{ $school->sekolah }}</td>
-                                    <td class="px-4 py-2 border">{{ $school->code }}</td>
+                                    <td class="px-4 py-2 border">{{ $subject->school_name }}</td>
+                                    <td class="px-4 py-2 border">{{ $subject->code }}</td>
                                     <td class="px-4 py-2 border">
-                                        <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a>
-                                        <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline-block">
+                                        <a href="{{ route('admin.schools.edit', $subject->id) }}" class="btn btn-primary">Edit</a>
+                                        <form action="{{ route('admin.schools.destroy', $subject->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>

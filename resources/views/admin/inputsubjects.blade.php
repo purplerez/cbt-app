@@ -37,6 +37,13 @@
                             <x-input-error :messages="$errors->get('school_id')" class="mt-1" />
                         </div>
 
+                         <div>
+                            <label for="code" class="block text-sm font-medium text-gray-700">Code</label>
+                            <input type="text" name="code" id="code" value="{{ old('code') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('code')" class="mt-1" />
+                        </div>
+
 
                         <!-- Tombol Submit -->
                         <div class="pt-4">

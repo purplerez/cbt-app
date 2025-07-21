@@ -45,6 +45,7 @@ class SubjectController extends Controller
         $request->validate([
             'name' => 'required',
             'school_id' => 'required|exists:schools,id',
+            'code' => 'required|unique:subjects,code',
         ]);
         try {
             $existingSubject = Subject::where('name', $request->name)->where('school_id', $request->school_id)->first();
@@ -54,6 +55,7 @@ class SubjectController extends Controller
             Subject::create([
                 'name' => $request->name,
                 'school_id' => $request->school_id,
+                'code' => $request->code,
             ]);
             return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil ditambahkan');
         } catch (\Exception $e) {
