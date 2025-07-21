@@ -77,6 +77,13 @@ class SubjectController extends Controller
     public function edit(string $id)
     {
         //
+        try{
+        $subject = Subject::findOrFail($id);
+        $schools = School::all();
+        return view('admin.editsubject', compact('subject', 'schools'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -85,6 +92,23 @@ class SubjectController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        $request->validate([
+            'name' => 'required',
+            'school_id' => 'required|exists:schools,id',
+            'code' => 'required|unique:subjects,code,',
+        ]);
+
+        try {
+            $subject = Subject::findOrFail($id);
+            $subject->update([
+                'name' => $request->name,
+                'school_id' => $request->school_id,
+                'code' => $request->code,
+            ]);
+            return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 
     /**
@@ -93,5 +117,12 @@ class SubjectController extends Controller
     public function destroy(string $id)
     {
         //
+        try {
+            $subject = Subject::findOrFail($id);
+            $subject->delete();
+            return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+        }
     }
 }
