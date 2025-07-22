@@ -17,6 +17,7 @@
                                 <th class="px-4 py-2 border">No</th>
                                 <th class="px-4 py-2 border">Nama Sekolah</th>
                                 <th class="px-4 py-2 border">Alamat</th>
+                                <th class="px-4 py-2 border">Status</th>
                                 <th class="px-4 py-2 border">Kode Sekolah</th>
                                 <th class="px-4 py-2 border">Action</th>
                             </tr>
@@ -29,6 +30,12 @@
                                     <td class="px-4 py-2 border">{{ $school->address }}</td>
                                     <td class="px-4 py-2 border">{{ $school->code }}</td>
                                     <td class="px-4 py-2 border">
+                                        <form action="{{ route('admin.schools.manage', $school->id) }}" method="post">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                Manage
+                                            </button>
+                                        </form>
                                         <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a>
                                         <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline-block">
                                             @csrf

@@ -40,6 +40,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
     Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
     Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
+    Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
 
     // Routing for grade management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
