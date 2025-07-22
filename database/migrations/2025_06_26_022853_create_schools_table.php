@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('schools', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('npsn');
+            $table->string('npsn')->default('0')->nullable();
             $table->text('address')->nullable();
             $table->string('phone')->nullable();
             $table->string('email')->nullable();
