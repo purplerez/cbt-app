@@ -36,6 +36,7 @@
                                                 Manage
                                             </button>
                                         </form>
+                                        {{-- <a href={{ route('admin.schools.manage', $school->id) }} class="btn px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Manage</a> --}}
                                         <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a>
                                         <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline-block">
                                             @csrf
