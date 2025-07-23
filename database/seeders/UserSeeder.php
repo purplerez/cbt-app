@@ -22,7 +22,7 @@ class UserSeeder extends Seeder
             Role::firstOrCreate(['name' => $role]);
         }
 
-        $admin = User::firstOrCreate(['name' => 'admin', 'email' => 'admin@gmail.com', 'password' => '12345678','school_id' => 1]);
+        $admin = User::firstOrCreate(['name' => 'admin', 'email' => 'admin@gmail.com', 'password' => '12345678']);
         $admin->assignRole('admin');
 
         User::factory(10)->create()->each(function ($user) {

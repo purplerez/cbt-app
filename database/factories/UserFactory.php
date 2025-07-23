@@ -30,7 +30,7 @@ class UserFactory extends Factory
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
             'role' => ['admin', 'kepala', 'guru', 'siswa'][mt_rand(0, 3)],
-            'school_id' => mt_rand(1, 3), // Assuming you have 10 schools in your database
+            'is_active' => 1,
         ];
     }
 
