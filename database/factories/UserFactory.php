@@ -27,9 +27,9 @@ class UserFactory extends Factory
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => static::$password ??= Hash::make('password'),
+            'password' => bcrypt('password'), // Using bcrypt directly for consistency
             'remember_token' => Str::random(10),
-            'role' => ['admin', 'kepala', 'guru', 'siswa'][mt_rand(0, 3)],
+            'role' => null, // Let the seeder explicitly set this to match Spatie role
             'is_active' => 1,
         ];
     }

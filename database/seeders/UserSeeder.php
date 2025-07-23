@@ -16,22 +16,50 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        // Clear cache
+        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Create roles with explicit guard
         $roles = ['admin', 'kepala', 'guru', 'siswa'];
         foreach ($roles as $role) {
-            Role::firstOrCreate(['name' => $role]);
+            Role::firstOrCreate([
+                'name' => $role,
+                'guard_name' => 'web'
+            ]);
         }
 
-        $admin = User::firstOrCreate(['name' => 'admin', 'email' => 'admin@gmail.com', 'password' => '12345678']);
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Administrator',
+                'password' => bcrypt('12345678'),
+                'role' => 'admin',
+                'is_active' => 1,
+                'email_verified_at' => now()
+            ]
+        );
+        
+        // Clear and reassign role
+        $admin->syncRoles([]); // Clear existing roles
         $admin->assignRole('admin');
 
-        User::factory(10)->create()->each(function ($user) {
-            $role = $user->role;
-            if(in_array($role, ['kepala', 'guru', 'siswa'])) {
+        // Create users with specific roles
+        foreach (['kepala', 'guru', 'siswa'] as $role) {
+            User::factory(3)->create([
+                'role' => $role,
+                'is_active' => 1,
+                'email_verified_at' => now()
+            ])->each(function ($user) use ($role) {
+                $user->syncRoles([]); // Clear any existing roles
                 $user->assignRole($role);
-            } else {
-                $user->assignRole('siswa'); // Default role if not matched
-            }
-        });
+            });
+        }
+
+        /* Verify role assignments
+        \Log::info('Admin users: ' . User::role('admin')->count());
+        \Log::info('Kepala users: ' . User::role('kepala')->count());
+        \Log::info('Guru users: ' . User::role('guru')->count());
+        \Log::info('Siswa users: ' . User::role('siswa')->count());
+        */
     }
 }
