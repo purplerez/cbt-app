@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class School extends Model
 {
-    //
     use HasFactory;
 
     protected $fillable = [
@@ -20,4 +19,19 @@ class School extends Model
         'logo',
         'status',
     ];
+
+    public function headmaster()
+    {
+        return $this->hasOne(Headmaster::class);
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    public function teachers()
+    {
+        return $this->hasMany(Teacher::class);
+    }
 }
