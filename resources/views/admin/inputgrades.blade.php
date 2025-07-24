@@ -20,7 +20,7 @@
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                         <div>
                             <label for="name" class="block text-sm font-medium text-gray-700">Tingkat</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                            <input autofocus type="text" name="name" id="name" value="{{ old('name') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
