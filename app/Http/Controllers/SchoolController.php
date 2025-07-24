@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSchoolRequest;
+use App\Models\Grade;
 use App\Models\School;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -154,5 +155,49 @@ class SchoolController extends Controller
         }
 
 
+    }
+
+    public function manage(School $school)
+    {
+        try {
+            // Set session data
+            session([
+                'school_id' => $school->id,
+                'school_name' => $school->name,
+                'school_code' => $school->code,
+            ]);
+
+
+            // Redirect ke halaman manage dengan GET request
+            return redirect()->route('admin.schools.manage.view', $school);
+        }
+        catch(\Exception $e) {
+            return redirect()->route('admin.schools')
+                ->withErrors(['error' => 'Manage School Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function manageView(School $school)
+    {
+        try {
+            // Pastikan session sekolah ada
+            if (!session('school_id')) {
+                return redirect()->route('admin.schools')
+                    ->withErrors(['error' => 'School session not found']);
+            }
+
+            $students = $school->students()->get();
+            $teachers = $school->teachers()->get();
+            $head = $school->headmasters()->get();
+            $grade = Grade::all();
+            // $school = School::findOrFail($school->id);
+
+
+            return view('admin.managesekolah', compact('school', 'students', 'teachers', 'head', 'grade'));
+        }
+        catch(\Exception $e) {
+            return redirect()->route('admin.schools')
+                ->withErrors(['error' => 'Manage School Failed : ' . $e->getMessage()]);
+        }
     }
 }
