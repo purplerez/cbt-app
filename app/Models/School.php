@@ -20,7 +20,7 @@ class School extends Model
         'status',
     ];
 
-    public function headmaster()
+    public function headmasters()
     {
         return $this->hasOne(Headmaster::class);
     }
@@ -33,5 +33,10 @@ class School extends Model
     public function teachers()
     {
         return $this->hasMany(Teacher::class);
+    }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
     }
 }
