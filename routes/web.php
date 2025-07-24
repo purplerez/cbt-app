@@ -7,6 +7,7 @@ use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SchoolController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Models\School;
 // use App\Http\Controllers\siswa\DashboardController;
@@ -45,6 +46,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('schools/{school}/nonaktif', [SchoolController::class, 'nonaktif'])->name('sekolah.nonaktif');
 
 
+    // Routing for student management
+    Route::post('students', [StudentController::class, 'store'])->name('students.store');
+    Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
+    Route::post('students/update', [StudentController::class, 'update'])->name('students.update');
+
+
     // Routing for grade management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
     Route::get('grades/create', function ()
@@ -66,7 +73,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 
 
-    Route::get('students', [SchoolController::class, 'students'])->name('students');
+    // Route::get('students', [SchoolController::class, 'students'])->name('students');
+
     Route::get('teachers', [SchoolController::class, 'teachers'])->name('teachers');
     Route::get('headmasters', [SchoolController::class, 'headmasters'])->name('headmasters');
 
