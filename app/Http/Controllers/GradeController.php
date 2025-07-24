@@ -24,7 +24,6 @@ class GradeController extends Controller
     public function create()
     {
         //
-
     }
 
     /**
@@ -37,7 +36,6 @@ class GradeController extends Controller
             'name' => 'required'
         ]);
         try {
-
             $existingGrade = Grade::where('name', $request->name)->first();
             if ($existingGrade) {
                 throw new \Exception('Tingkat sudah ada');

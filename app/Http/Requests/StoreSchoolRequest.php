@@ -28,7 +28,7 @@ class StoreSchoolRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:20'],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'code' => ['required', 'string', 'max:50'],
-            'logo' => ['nullable', 'image', 'max:2048'], // max 2MB
+            'logo' => ['nullable', 'image', 'max:2048', 'mimes:jpeg,png,jpg,gif'], // max 2MB
     //      'status' => ['required', 'in:0,1'], // '0' for inactive, '1' for active
             //
         ];
