@@ -22,10 +22,10 @@ class Teacher extends Model
     {
         return $this->belongsTo(School::class);
     }
-    public function subjects()
-    {
-        return $this->belongsToMany(Subject::class, 'teacher_subjects');
-    }
+    // public function subjects()
+    // {
+    //     return $this->belongsToMany(Subject::class, 'teacher_subjects');
+    // }
 
     /*yet
     public function classes()

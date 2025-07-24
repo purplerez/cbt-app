@@ -17,4 +17,6 @@ class Subject extends Model
         'school_id',
         'code',
     ];
+
+    
 }
