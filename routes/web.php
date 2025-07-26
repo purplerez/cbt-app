@@ -8,6 +8,7 @@ use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
 use App\Models\School;
 // use App\Http\Controllers\siswa\DashboardController;
@@ -48,8 +49,16 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Routing for student management
     Route::post('students', [StudentController::class, 'store'])->name('students.store');
-    Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
     Route::post('students/update', [StudentController::class, 'update'])->name('students.update');
+    Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
+
+    // Routing for teacher management
+    Route::post('teachers', [TeacherController::class, 'store'])->name('teachers.store');
+    Route::post('teachers/update', [TeacherController::class, 'update'])->name('teachers.update');
+    Route::delete('teachers/{teacher}', [TeacherController::class, 'destroy'])->name('guru.destroy');
+
+    // Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
+    // Route::post('students/update', [StudentController::class, 'update'])->name('students.update');
 
 
     // Routing for grade management
