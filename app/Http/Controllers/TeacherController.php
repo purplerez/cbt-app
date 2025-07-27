@@ -167,6 +167,8 @@ class TeacherController extends Controller
                 'h_photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB
             ]);
 
+           // dd($validated);
+
             // check existing nip in the same school
             if (Headmaster::where('nip', $request->h_nip)->where('school_id', session()->get('school_id'))->exists()) {
                 return redirect()->back()->withInput()->withErrors(['error' => 'NIP sudah terdaftar di sekolah ini']);
@@ -199,7 +201,9 @@ class TeacherController extends Controller
                 'school_id' => session()->get('school_id')
             ]);
 
-            Headmaster::create(
+            // dd($teacherData);
+
+            $head = Headmaster::create(
                 [
                     'nip' => $teacherData['h_nip'],
                     'name' => $teacherData['h_name'],
@@ -210,6 +214,7 @@ class TeacherController extends Controller
                     'school_id' => $teacherData['school_id'],
                 ]
             );
+            // dd($head);
             DB::commit();
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                    ->with('success', 'Data kepala sekolah berhasil ditambahkan <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');

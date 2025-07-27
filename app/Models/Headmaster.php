@@ -14,9 +14,9 @@ class Headmaster extends Model
         'school_id',
         'name',
         'nip',
-        'email',
-        'phone',
-        'school_id',
+        'gender',
+        'address',
+        'photo',
     ];
 
     public function school()

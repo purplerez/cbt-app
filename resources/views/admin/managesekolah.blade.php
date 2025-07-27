@@ -374,32 +374,30 @@
                                         <form id="kepalaSekolahForm" action="{{ route('admin.head.update', $school->id) }}" method="post" enctype="multipart/form-data">
                                             <div class="space-y-4">
                                                 <div>
-                                                    <label for="kepsek_nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                                                    <input value="{{ $headmaster->nip }}" type="text" id="kepsek_nip" name="head_nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <label for="h_nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                                                    <input value="{{ $headmaster->nip }}" type="text" id="h_nip" name="h_nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                                                    <input value="{{ $headmaster->name }}" type="text" id="kepsek_nama" name="head_name" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <label for="h_nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                                                    <input value="{{ $headmaster->name }}" type="text" id="h_nama" name="h_name" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_gender" class="block text-sm font-medium text-gray-700">Gender</label>
-                                                    <select name="gender" id="kepsek_gender" class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                    <label for="h_gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                                    <select name="h_gender" id="h_gender" class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                                         <option value="L" @if($headmaster->gender == 'L') selected @endif >Laki - Laki</option>
                                                         <option value="P" @if($headmaster->gender == 'P') selected @endif>Perempuan</option>
                                                     </select>
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                                                    <textarea id="kepsek_address" name="address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                                                        {{ $headmaster->address }}
-                                                    </textarea>
+                                                    <label for="h_address" class="block text-sm font-medium text-gray-700">Alamat</label>
+                                                    <textarea id="h_address" name="h_address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $headmaster->address }}</textarea>
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                                                    <label for="kepsek_photo" class="block text-sm font-medium text-gray-700">
+                                                    <label for="h_photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                                                    <label for="h_photo" class="block text-sm font-medium text-gray-700">
                                                         <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
                                                     </label>
-                                                    <input type="file" id="kepsek_photo" name="photo" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input type="file" id="h_photo" name="h_photo" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                             </div>
                                             <div class="mt-6">

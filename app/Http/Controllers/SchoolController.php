@@ -189,6 +189,7 @@ class SchoolController extends Controller
             $students = $school->students()->get();
             $teachers = $school->teachers()->get();
             $head = $school->headmasters()->get();
+            $subjects = $school->subjects()->get();
             $grade = Grade::all();
             // $school = School::findOrFail($school->id);
 
