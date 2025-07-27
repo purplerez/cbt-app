@@ -55,7 +55,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Routing for teacher management
     Route::post('teachers', [TeacherController::class, 'store'])->name('teachers.store');
     Route::post('teachers/update', [TeacherController::class, 'update'])->name('teachers.update');
-    Route::delete('teachers/{teacher}', [TeacherController::class, 'destroy'])->name('guru.destroy');
+    Route::delete('teachers/{teacher}', [TeacherController::class, 'destroy'])->name('teacher.destroy');
+
+    // Routing for headmaster management
+    Route::post('headmasters', [TeacherController::class, 'storeHeadmaster'])->name('head.store');
+    Route::post('headmasters/update', [TeacherController::class, 'updateHeadmaster'])->name('head.update');
+
 
     // Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
     // Route::post('students/update', [StudentController::class, 'update'])->name('students.update');

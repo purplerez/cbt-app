@@ -248,14 +248,107 @@
                                                 <tbody>
                                                     <!-- Data guru akan ditampilkan disini -->
                                                     @forelse ($teachers as $teacher)
-                                                        <tr>
+                                                        <tr class="border-b-slate-50">
                                                             <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->nip }}</td>
                                                             <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->name }}</td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                <button class="text-blue-600 hover:text-blue-900">Edit</button>
-                                                                <button class="text-red-600 hover:text-red-900">Hapus</button>
+                                                                <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="editGuruModal{{ $teacher->id }}">
+                                                                    Ubah
+                                                                </button>
+                                                                <form action="{{route('admin.teacher.destroy', $teacher->id)}}" method="POST" class="inline-block">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
+                                                                </form>
                                                             </td>
                                                         </tr>
+
+                                                        {{--edit guru modal --}}
+                                                        <div id="editGuruModal{{ $teacher->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+                                                            <div class="min-h-screen px-4 text-center">
+                                                                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+                                                                <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                                    <div class="flex items-center justify-between">
+                                                                        <h3 class="text-lg font-medium text-gray-900">Edit Data Guru</h3>
+                                                                        <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('editSiswaModal')"><span class="sr-only">Close</span></button>
+                                                                    </div>
+                                                                    <form id="editGuruForm" class="mt-4" action="{{ route('admin.teachers.update') }}" method="post" enctype="multipart/form-data">
+                                                                        @csrf
+                                                                        {{-- @if (session('error'))
+                                                                            <div class="mb-4 text-red-600">
+                                                                                {{ session('error') }}
+                                                                            </div>
+                                                                        @endif --}}
+                                                                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                                                            <div>
+                                                                            <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                                                                            <input type="text" name="nip" id="nip" value="{{$teacher->nip}}" required
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                            <x-input-error :messages="$errors->get('nip')" class="mt-1" />
+                                                                            <input type="hidden" name="old_nis" value="{{$teacher->nip}}">
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="t_name" class="block text-sm font-medium text-gray-700">Name</label>
+                                                                            <input type="text" name="t_name" id="t_name" value="{{$teacher->name }}" required
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="t_gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                                                            <select name="t_gender" id="gender" required
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                    <option value="L" @if($teacher->gender == 'L') selected @endif >Laki - Laki</option>
+                                                                                    <option value="P" @if($teacher->gender == 'P') selected @endif>Perempuan</option>
+                                                                            </select>
+                                                                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="t_photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                                                                            <label for="t_photo" class="block text-sm font-medium text-gray-700">
+                                                                                <img src="{{ Storage::url($teacher->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
+                                                                            </label>
+                                                                            <input type="file" name="t_photo" id="t_photo"
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                            <input type="hidden" name="old_photo" value="{{ $teacher->photo }}">
+                                                                            <x-input-error :messages="$errors->get('photo')" class="mt-1" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <label for="t_address" class="block text-sm font-medium text-gray-700">Alamat</label>
+                                                                            <textarea name="t_address" id="t_address" rows="3" required
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ $teacher->address }}</textarea>
+                                                                            <x-input-error :messages="$errors->get('address')" class="mt-1" />
+                                                                        </div>
+                                                                        {{-- <input type="hidden" name="school_id" value="{{ $school->id }}"> --}}
+
+
+
+                                                                        {{-- <div>
+                                                                            <label for="name" class="block text-sm font-medium text-gray-700">Sekolah</label>
+                                                                            <select name="school_id" id="school_id" required
+                                                                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                <option value="">Pilih Sekolah</option>
+                                                                                @foreach ($schools as $school)
+                                                                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                                                @endforeach
+                                                                            </select>
+                                                                            <x-input-error :messages="$errors->get('school_id')" class="mt-1" />
+                                                                        </div> --}}
+
+                                                                        {{--hidden input --}}
+                                                                        <input type="hidden" name="teacher_id" value="{{$teacher->id}}" />
+
+                                                                        <!-- Tombol Submit -->
+                                                                        <div class="pt-4">
+                                                                            <button type="submit"
+                                                                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
+                                                                                Simpan Perubahan
+                                                                            </button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        {{-- end modal edit guru --}}
 
                                                     @empty
                                                         <tr>
@@ -276,31 +369,55 @@
                                         <h3 class="text-lg font-medium">Data Kepala Sekolah</h3>
                                     </div>
                                     <div class="p-4">
-                                        <form id="kepalaSekolahForm">
+                                        @forelse($head as $headmaster)
+
+                                        <form id="kepalaSekolahForm" action="{{ route('admin.head.update', $school->id) }}" method="post" enctype="multipart/form-data">
                                             <div class="space-y-4">
                                                 <div>
                                                     <label for="kepsek_nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                                                    <input  type="text" id="kepsek_nip" name="nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input value="{{ $headmaster->nip }}" type="text" id="kepsek_nip" name="head_nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                                 <div>
                                                     <label for="kepsek_nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                                                    <input type="text" id="kepsek_nama" name="nama" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input value="{{ $headmaster->name }}" type="text" id="kepsek_nama" name="head_name" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_email" class="block text-sm font-medium text-gray-700">Email</label>
-                                                    <input type="email" id="kepsek_email" name="email" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <label for="kepsek_gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                                                    <select name="gender" id="kepsek_gender" class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                        <option value="L" @if($headmaster->gender == 'L') selected @endif >Laki - Laki</option>
+                                                        <option value="P" @if($headmaster->gender == 'P') selected @endif>Perempuan</option>
+                                                    </select>
                                                 </div>
                                                 <div>
-                                                    <label for="kepsek_phone" class="block text-sm font-medium text-gray-700">No. Telepon</label>
-                                                    <input type="text" id="kepsek_phone" name="phone" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <label for="kepsek_address" class="block text-sm font-medium text-gray-700">Alamat</label>
+                                                    <textarea id="kepsek_address" name="address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                        {{ $headmaster->address }}
+                                                    </textarea>
+                                                </div>
+                                                <div>
+                                                    <label for="kepsek_photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                                                    <label for="kepsek_photo" class="block text-sm font-medium text-gray-700">
+                                                        <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
+                                                    </label>
+                                                    <input type="file" id="kepsek_photo" name="photo" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                             </div>
                                             <div class="mt-6">
                                                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                    Simpan Data
+                                                    Rubah Data
+                                                </button>
+                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                    Hapus Data
                                                 </button>
                                             </div>
                                         </form>
+                                        @empty
+                                            <p class="text-gray-500 align-center">
+                                                <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md align-center hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" onclick="openModal('addKepalaModal')">
+                                                    + Tambah Kepala Sekolah
+                                                </button>
+                                            </p>
+                                        @endforelse
                                     </div>
                                 </div>
                             </div>
@@ -466,6 +583,73 @@
                         <input type="file" id="photo" name="photo" required
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <x-input-error :messages="$errors->get('photo')" class="mt-1" />
+                    </div>
+                </div>
+                <div class="flex justify-end mt-6 space-x-3">
+                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeModal('addGuruModal')">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Kepala Sekolah Modal -->
+<div id="addKepalaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="min-h-screen px-4 text-center">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+            <div class="flex items-center justify-between pb-3 border-b">
+                <h3 class="text-lg font-medium text-gray-900">Tambah Data Kepala Sekolah</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
+                    <span class="sr-only">Close</span>
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="addGuruForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                        <input type="text" id="nip" name="h_nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <x-input-error :messages="$errors->get('h_nip')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
+                        <input type="text" id="name" name="h_name" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <x-input-error :messages="$errors->get('h_name')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
+                        <select name="h_gender" id="gender" required
+                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <option value="L">Laki - Laki</option>
+                            <option value="P">Perempuan</option>
+                        </select>
+                        <x-input-error :messages="$errors->get('h_gender')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
+                        <textarea id="address" name="h_address" rows="3" required
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                        <x-input-error :messages="$errors->get('h_address')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="kepsek_email" class="block text-sm font-medium text-gray-700">Email</label>
+                        <input type="email" id="kepsek_email" name="h_email" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <x-input-error :messages="$errors->get('h_email')" class="mt-1" />
+                    </div>
+                    <div>
+                        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
+                        <input type="file" id="photo" name="h_photo" required
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <x-input-error :messages="$errors->get('h_photo')" class="mt-1" />
                     </div>
                 </div>
                 <div class="flex justify-end mt-6 space-x-3">

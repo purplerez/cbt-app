@@ -10,6 +10,8 @@ class Headmaster extends Model
     protected $table = 'headmasters';
 
     protected $fillable = [
+        'user_id',
+        'school_id',
         'name',
         'nip',
         'email',
