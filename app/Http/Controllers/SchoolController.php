@@ -193,8 +193,7 @@ class SchoolController extends Controller
             $grade = Grade::all();
             // $school = School::findOrFail($school->id);
 
-
-            return view('admin.managesekolah', compact('school', 'students', 'teachers', 'head', 'grade'));
+            return view('admin.managesekolah', compact('school', 'students', 'teachers', 'head', 'grade', 'subjects'));
         }
         catch(\Exception $e) {
             return redirect()->route('admin.schools')
