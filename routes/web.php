@@ -59,6 +59,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Routing for headmaster management
     Route::post('headmasters', [TeacherController::class, 'storeHeadmaster'])->name('head.store');
+    Route::get('headmasters/{headmaster}/edit', [TeacherController::class, 'editHeadmaster'])->name('head.edit');
     Route::post('headmasters/update', [TeacherController::class, 'updateHeadmaster'])->name('head.update');
 
 

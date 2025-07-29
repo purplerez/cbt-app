@@ -228,4 +228,64 @@ class TeacherController extends Controller
             return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
         }
     }
+
+    public function editHeadmaster($id){
+
+        return redirect()->route('admin.schools.manage', session()->get('school_id'))
+                   ->with('success', '<script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>')
+                   ->with('edit', true);
+                   //->with('edit', true);
+    }
+
+    public function updateHeadmaster(Request $request){
+        DB::beginTransaction();
+        try{
+            $validated = $request->validate([
+                'h_nip' => 'required|unique:headmasters,nip',
+                'h_name' => 'required|string|max:255',
+                'h_gender' => 'required|in:L,P',
+                'h_address' => 'required|string',
+                'h_photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB
+            ]);
+
+            $head = Headmaster::findOrFail($request->h_id);
+            $head->update([
+                'nip' => $validated['h_nip'],
+                'name' => $validated['h_name'],
+                'gender' => $validated['h_gender'],
+                'address' => $validated['h_address'],
+            ]);
+
+            // Handle photo upload
+            if ($request->hasFile('h_photo')) {
+                $imageName = $request->h_nip . '.' . $request->file('h_photo')->extension();
+                $photoPath = $request->file('h_photo')->storeAs('assets/images/head', $imageName, 'public');
+                $validated['h_photo'] = $photoPath;
+                // delete old photo if exists
+                if ($head->photo && file_exists(public_path($head->photo))) {
+                    unlink(public_path($head->photo));
+                }
+                $head->update([
+                    'photo' => $validated['h_photo'],
+                ]);
+            }
+
+            // update user
+            $user = User::findOrFail($head->user_id);
+            $user->name = $validated['h_name'];
+            $user->email = $validated['h_nip']."@headmaster.test";
+            $user->save();
+
+            DB::commit();
+            return redirect()->route('admin.schools.manage', session()->get('school_id'))
+                   ->with('success', 'Data kepala sekolah berhasil diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+        }
+        catch(\Exception $e)
+        {
+            DB::rollBack();
+
+            return redirect()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
+                     ->with('success', 'Data kepala sekolah berhasil diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+        }
+    }
 }

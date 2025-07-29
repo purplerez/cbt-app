@@ -371,44 +371,58 @@
                                     <div class="p-4">
                                         @forelse($head as $headmaster)
 
-                                        <form id="kepalaSekolahForm" action="{{ route('admin.head.update', $school->id) }}" method="post" enctype="multipart/form-data">
+                                        <form id="kepalaSekolahForm" action="{{ route('admin.head.update') }}" method="post" enctype="multipart/form-data">
+                                            @csrf
                                             <div class="space-y-4">
                                                 <div>
                                                     <label for="h_nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                                                    <input value="{{ $headmaster->nip }}" type="text" id="h_nip" name="h_nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input value="{{ $headmaster->nip }}" type="text" id="h_nip" name="h_nip" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" @if(session('edit') == false) disabled @endif >
                                                 </div>
                                                 <div>
                                                     <label for="h_nama" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                                                    <input value="{{ $headmaster->name }}" type="text" id="h_nama" name="h_name" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input value="{{ $headmaster->name }}" type="text" id="h_nama" name="h_name" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" @if(session('edit') == false) disabled @endif>
                                                 </div>
                                                 <div>
                                                     <label for="h_gender" class="block text-sm font-medium text-gray-700">Gender</label>
-                                                    <select name="h_gender" id="h_gender" class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                    <select name="h_gender" id="h_gender" class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500" @if(session('edit') == false) disabled @endif>
                                                         <option value="L" @if($headmaster->gender == 'L') selected @endif >Laki - Laki</option>
                                                         <option value="P" @if($headmaster->gender == 'P') selected @endif>Perempuan</option>
                                                     </select>
                                                 </div>
                                                 <div>
                                                     <label for="h_address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                                                    <textarea id="h_address" name="h_address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $headmaster->address }}</textarea>
+                                                    <textarea @if(session('edit') == false) disabled @endif id="h_address" name="h_address" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $headmaster->address }}</textarea>
                                                 </div>
                                                 <div>
                                                     <label for="h_photo" class="block text-sm font-medium text-gray-700">Photo</label>
                                                     <label for="h_photo" class="block text-sm font-medium text-gray-700">
                                                         <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
                                                     </label>
-                                                    <input type="file" id="h_photo" name="h_photo" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                    <input @if(session('edit') == false) disabled @endif type="file" id="h_photo" name="h_photo" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>
                                             </div>
+                                            @if(session('edit') == false)
+                                                </form>
+                                            @endif
                                             <div class="mt-6">
-                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                                                    Rubah Data
-                                                </button>
-                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                @if(session('edit') == true)
+                                                {{-- @method('PUT') --}}
+                                                    <input type="hidden" name="h_id" value="{{ $headmaster->id }}" />
+                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                                        Simpan Perubahan
+                                                    </button>
+                                                    </form>
+                                                @else
+                                                    <a href="{{ route('admin.head.edit', $headmaster->id) }}" class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                                                       Rubah Data
+                                                    </a>
+                                                @endif
+
+                                                <button type="submit" class="px-4 py-2 pl-6 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                                     Hapus Data
                                                 </button>
                                             </div>
-                                        </form>
+
                                         @empty
                                             <p class="text-gray-500 align-center">
                                                 <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md align-center hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" onclick="openModal('addKepalaModal')">
@@ -610,7 +624,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="addGuruForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
+            <form id="addHeadForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
                     <div>
