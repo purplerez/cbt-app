@@ -36,9 +36,11 @@
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.schools')">
                             {{ __('Sekolah') }}
                         </x-nav-link>
-                       
                         <x-nav-link :href="route('admin.grades')" :active="request()->routeIs('admin.grades')">
                             {{ __('Tingkat') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.questions.types')" :active="request()->routeIs('admin.grades')">
+                            {{ __('Jenis Ujian') }}
                         </x-nav-link>
                          {{--
                         <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
@@ -54,7 +56,7 @@
                             {{ __('Kepala Sekolah') }}
                         </x-nav-link>
                         --}}
-                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
+                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Jadwal Ujian') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.questions')" :active="request()->routeIs('admin.questions')">

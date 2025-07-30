@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminController;
+use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
@@ -80,19 +82,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
 
     // routing for subjects management
-    Route::get('subjects', [SubjectController::class, 'index'])->name('subjects');
-    Route::get('subjects/create', [SubjectController::class, 'create'])->name('subjects.create');
+    // Route::get('subjects', [SubjectController::class, 'index'])->name('subjects');
+    // Route::get('subjects/create', [SubjectController::class, 'create'])->name('subjects.create');
     Route::post('subjects/create', [SubjectController::class, 'store'])->name('subjects.store');
     Route::delete('subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
-    Route::get('subjects/{subject}/edit', [SubjectController::class, 'edit'])->name('subjects.edit');
+    // Route::get('subjects/{subject}/edit', [SubjectController::class, 'edit'])->name('subjects.edit');
     Route::post('subjects/update', [SubjectController::class, 'update'])->name('subjects.update');
+
+    // Routing for question types management
+    Route::get('question/type', [QuestionController::class, 'typeindex'])->name('questions.types');
+    Route::get('question/type/create', function() {
+        return view('admin.inputquestiontype');
+    })->name('question.type.create');
+    Route::post('question/type/create', [QuestionController::class, 'typestore'])->name('question.type.store');
 
 
 
     // Route::get('students', [SchoolController::class, 'students'])->name('students');
-
-    Route::get('teachers', [SchoolController::class, 'teachers'])->name('teachers');
-    Route::get('headmasters', [SchoolController::class, 'headmasters'])->name('headmasters');
 
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
     Route::get('results', [SchoolController::class, 'results'])->name('results');
