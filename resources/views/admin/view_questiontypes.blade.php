@@ -26,10 +26,10 @@
                                     <td class="px-4 py-2 border">{{ $type->name }}</td>
                                     <td class="px-4 py-2 border">
                                         <a href="{{ route('admin.question.type.edit', $type->id) }}" class="btn btn-primary">Edit</a>
-                                        <form action="{{ route('admin.grades.destroy', $type->id) }}" method="POST" class="inline-block">
+                                        <form action="{{ route('admin.question.type.destroy', $type->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>
+                                            <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition" onclick="return confirm('Apakah Anda yakin ingin menghapus Jenis Ujian ini?')">Delete</button>
                                         </form>
                                 </tr>
                             @empty

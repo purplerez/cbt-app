@@ -97,8 +97,19 @@ class QuestionController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function typedestroy(string $id)
     {
         //
+        try{
+            $type = QuestionTypes::findOrFail($id);
+            $type->delete();
+
+            return redirect()->route('admin.questions.types')->with('success', 'Jenis Soal berhasil dihapus');
+        }
+        catch(\Exception $e)
+        {
+
+            return redirect()->route('admin.question.types')->withErrors(['error' => 'Gagal menghapus jenis soal :'.$e->getMessage()]);
+        }
     }
 }
