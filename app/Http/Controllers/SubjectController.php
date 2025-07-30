@@ -124,7 +124,8 @@ class SubjectController extends Controller
         try {
             $subject = Subject::findOrFail($id);
             $subject->delete();
-            return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil dihapus');
+            return redirect()->route('admin.schools.manage', session()->get('school_id'))
+                    ->with('success', 'Data Mata Pelajaran berhasil Dihapus <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
