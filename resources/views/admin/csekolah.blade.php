@@ -28,6 +28,13 @@
                                     <td class="px-4 py-2 border">{{ $school->id }}</td>
                                     <td class="px-4 py-2 border">{{ $school->name }}</td>
                                     <td class="px-4 py-2 border">{{ $school->address }}</td>
+                                    <td class="px-4 py-2 border">
+                                        @if ($school->status == '1')
+                                            <span class="font-semibold text-green-600">Aktif</span>
+                                        @else
+                                            <span class="font-semibold text-red-600">Non-Aktif</span>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-2 border">{{ $school->code }}</td>
                                     <td class="px-4 py-2 border">
                                         <form action="{{ route('admin.schools.manage', $school->id) }}" method="post">

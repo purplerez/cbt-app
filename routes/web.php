@@ -45,6 +45,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
     Route::get('schools/{school}/manage', [SchoolController::class, 'manageView'])->name('schools.manage.view');
     Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
+    Route::get('schools/{school}/active', [SchoolController::class, 'active'])->name('school.active');
 
 
     // Routing for student management

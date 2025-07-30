@@ -21,38 +21,54 @@
                                     </div>
                                 </div>
                                 <nav class="space-y-2">
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa">
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="sekolah" @if($school->status == '0') disabled @endif >
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        </svg>
+                                        Data Sekolah
+                                    </button>
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa" @if($school->status == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
                                         Data Siswa
                                     </button>
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="guru">
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="guru" @if($school->status == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                         </svg>
                                         Data Guru
                                     </button>
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="kepala">
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="kepala" @if($school->status == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                         Data Kepala Sekolah
                                     </button>
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="subjects">
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="subjects" @if($school->status == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                         </svg>
                                         Data Mata Pelajaran
                                     </button>
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" data-modal-target="nonAktifModal">
-                                    {{-- <a href="{{route('admin.sekolah.nonaktif', $school->id)}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun"> --}}
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        Non-Aktifkan Akun
-                                    </a>
-                                    </button>
+                                    @if($school->status == '0')
+                                        {{-- button aktifkan --}}
+                                        <a href="{{ route('admin.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                            </svg>
+                                            Aktifkan Akun
+                                        </a>
+                                    @else
+                                        <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" data-modal-target="nonAktifModal">
+                                        {{-- <a href="{{route('admin.sekolah.nonaktif', $school->id)}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun"> --}}
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            Non-Aktifkan Akun
+                                        {{-- </a> --}}
+                                        </button>
+                                    @endif
                                 </nav>
                             </div>
                         </div>
@@ -60,6 +76,41 @@
                         <!-- Main Content -->
                         <div class="w-3/4">
                             <div class="tab-content">
+
+                            <!-- Sekolah Tab -->
+                            <div class="hidden tab-pane" id="sekolah">
+                                <div class="bg-white rounded-lg shadow">
+
+                                    <div class="flex items-center justify-between p-4 border-b">
+                                        <h3 class="text-lg font-medium">Data Sekolah</h3>
+                                    </div>
+                                    <div class="p-4">
+                                        <div class="overflow-x-auto">
+                                            {{-- style for the logo --}}
+                                            <div class="flex items-center pb-4 mb-4 space-x-4 border-b">
+                                                <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full place-items-center">
+                                            </div>
+                                            <h2 class="mt-2 text-lg font-semibold">Nama Sekolah: {{ $school->name }}</h2>
+                                            <h4 class="mt-2 text-lg font-semibold">Kepala Sekolah: {{ $school->headmasters->name ?? 'Belum ada' }}</h4>
+                                            <p class="text-gray-600">NPSN: {{ $school->npsn }}</p>
+                                            <p class="text-gray-600">Alamat: {{ $school->address }}</p>
+                                            <p class="text-gray-600">Telepon: {{ $school->phone }}</p>
+                                            <p class="text-gray-600">Email: {{ $school->email }}</p>
+
+                                            <p class="text-gray-600">Status:
+                                                @if ($school->status == '1')
+                                                    <span class="text-green-600">Aktif</span>
+                                                @else
+                                                    <span class="text-red-600">Non-Aktif</span>
+                                                @endif
+                                            </p>
+                                            <p class="text-gray-600">Jumlah Siswa: {{ $school->students()->count() ?? 'Belum ada' }}</p>
+                                            <p class="text-gray-600">Jumlah Guru: {{ $school->teachers()->count() ?? 'Belum ada' }}</p>
+                                            <p class="text-gray-600">Jumlah Mata Pelajaran: {{ $school->subjects()->count() ?? 'Belum ada' }}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- Siswa Tab -->
                             <div class="hidden tab-pane" id="siswa">
@@ -172,8 +223,8 @@
                                                                         </div>
                                                                         <div>
                                                                             <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                                                                            <label for="photo" class="block text-sm font-medium text-gray-700">
-                                                                                <img src="{{ Storage::url($student->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
+                                                                            <label for="photo_current" class="block text-sm font-medium text-gray-700">
+                                                                                <img src="{{ Storage::url($student->photo) }}" alt="Current" class="w-12 h-12 mb-2 rounded-full">
                                                                             </label>
                                                                             <input type="file" name="photo" id="photo"  required
                                                                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -862,8 +913,8 @@
                         <p class="text-sm text-gray-700">Apakah Anda yakin ingin menonaktifkan <strong>{{ strtoupper(session('school_name')) }}</strong> ini?</p>
                         <div class="pt-4">
                             <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Lanjutkan
+                                    class="w-full px-4 py-2 text-white transition bg-red-600 rounded hover:bg-red-700">
+                                Lanjut Non-Aktifkan
                             </button>
                             {{-- tombol batal --}}
                             <button type="button" class="w-full px-4 py-2 mt-2 text-white transition bg-gray-600 rounded hover:bg-gray-700" onclick="closeModal('nonAktifModal')">
