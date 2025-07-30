@@ -262,7 +262,7 @@
                                                                 <form action="{{route('admin.teacher.destroy', $teacher->id)}}" method="POST" class="inline-block">
                                                                     @csrf
                                                                     @method('DELETE')
-                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
+                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus data Guru ini?')">Hapus</button>
                                                                 </form>
                                                             </td>
                                                         </tr>
@@ -481,7 +481,7 @@
                                                             <form action="{{route('admin.subjects.destroy', $subject->id)}}" method="POST" class="inline-block">
                                                                 @csrf
                                                                 @method('DELETE')
-                                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
+                                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus Mata Pelajaran ini?')">Hapus</button>
                                                             </form>
                                                         </tr>
                                                         {{--edit siswa modal --}}
