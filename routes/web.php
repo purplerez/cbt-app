@@ -84,7 +84,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('subjects/create', [SubjectController::class, 'store'])->name('subjects.store');
     Route::delete('subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
     Route::get('subjects/{subject}/edit', [SubjectController::class, 'edit'])->name('subjects.edit');
-    Route::put('subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+    Route::post('subjects/update', [SubjectController::class, 'update'])->name('subjects.update');
 
 
 

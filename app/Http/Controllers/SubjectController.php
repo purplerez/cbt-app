@@ -44,22 +44,23 @@ class SubjectController extends Controller
         //
         $request->validate([
             'name' => 'required',
-            'school_id' => 'required|exists:schools,id',
             'code' => 'required|unique:subjects,code',
         ]);
         try {
-            $existingSubject = Subject::where('name', $request->name)->where('school_id', $request->school_id)->first();
+            $school_id = session('school_id');
+            $existingSubject = Subject::where('name', $request->name)->where('school_id', $school_id)->first();
             if ($existingSubject) {
                 throw new \Exception('Mata pelajaran sudah ada di sekolah ini');
             }
             Subject::create([
                 'name' => $request->name,
-                'school_id' => $request->school_id,
+                'school_id' => $school_id,
                 'code' => $request->code,
             ]);
-            return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil ditambahkan');
+            return redirect()->route('admin.schools.manage', session()->get('school_id'))
+                    ->with('success', 'Data Mata Pelajaran berhasil ditambahkan <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
         }
     }
 
@@ -89,23 +90,26 @@ class SubjectController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request)
     {
         //
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required',
-            'school_id' => 'required|exists:schools,id',
             'code' => 'required|unique:subjects,code,',
+            'subject_id' => 'required|exists:subjects,id',
         ]);
 
         try {
+            $id = $validated['subject_id'];
+
             $subject = Subject::findOrFail($id);
             $subject->update([
                 'name' => $request->name,
-                'school_id' => $request->school_id,
+                'school_id' => session('school_id'),
                 'code' => $request->code,
             ]);
-            return redirect()->route('admin.subjects')->with('success', 'Mata pelajaran berhasil diperbarui');
+            return redirect()->route('admin.schools.manage', session()->get('school_id'))
+                    ->with('success', 'Data Mata Pelajaran berhasil dirubah <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
