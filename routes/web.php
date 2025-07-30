@@ -95,6 +95,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         return view('admin.inputquestiontype');
     })->name('question.type.create');
     Route::post('question/type/create', [QuestionController::class, 'typestore'])->name('question.type.store');
+    Route::get('question/type/{type}/edit', [QuestionController::class, 'typeedit'])->name('question.type.edit');
+    Route::put('question/type/{type}/update', [QuestionController::class, 'typeupdate'])->name('question.type.update');
+
 
 
 

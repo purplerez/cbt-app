@@ -25,7 +25,7 @@
                                     <td class="px-4 py-2 border">{{ $type->id }}</td>
                                     <td class="px-4 py-2 border">{{ $type->name }}</td>
                                     <td class="px-4 py-2 border">
-                                        <a href="{{ route('admin.grades.edit', $type->id) }}" class="btn btn-primary">Edit</a>
+                                        <a href="{{ route('admin.question.type.edit', $type->id) }}" class="btn btn-primary">Edit</a>
                                         <form action="{{ route('admin.grades.destroy', $type->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')

@@ -58,17 +58,40 @@ class QuestionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function typeedit(int $type)
     {
         //
+        try{
+            $type = QuestionTypes::findOrFail($type);
+
+            return view('admin.editquestiontype', compact('type'));
+        }
+        catch(\Exception $e){
+
+            return redirect()->route('admin.questions.types')->withErrors(['error' => 'Jenis Soal tidak ditemukan : '.$e->getMessage()]);
+        }
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function typeupdate(Request $request, string $id)
     {
         //
+        try{
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+            ]);
+
+            $type = QuestionTypes::findOrFail($id);
+            $type->update($validated);
+
+            return redirect()->route('admin.questions.types')->with('success', 'Jenis Soal berhasil dirubah');
+        }
+        catch(\Exception $e)
+        {
+            return redirect()->back()->withInput()->withErrors((['error' => 'Gagal Merubah Jenis Soal : '.$e->getMessage()]));
+        }
     }
 
     /**
