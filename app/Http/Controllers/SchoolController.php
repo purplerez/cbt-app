@@ -200,4 +200,44 @@ class SchoolController extends Controller
                 ->withErrors(['error' => 'Manage School Failed : ' . $e->getMessage()]);
         }
     }
+
+    public function inactive(Request $request)
+    {
+        // Nonaktifkan sekolah
+        // Set status to 0
+        // Destroy session school
+        try {
+            $school = School::findOrFail(session('school_id'));
+
+            if (!session('school_id')) {
+                throw new \Exception('School session not found');
+            }
+
+            if ($school->id != session('school_id')) {
+                throw new \Exception('School ID mismatch');
+            }
+
+            $school = School::findOrFail(session('school_id'));
+            // if (!$school) {
+            //     return redirect()->route('admin.schools')
+            //         ->withErrors(['error' => 'School not found']);
+            // }
+            $school->status = '0';
+            $school->save();
+
+            // destroy session for school
+            session()->forget(['school_id', 'school_name', 'school_code']);
+
+            // set status inactive
+
+
+            // Redirect ke halaman nonaktif dengan GET request
+            return redirect()->route('admin.schools')
+                ->with('success', 'Sekolah berhasil dinonaktifkan <script>setTimeout(function(){ showTab(\'manage\'); }, 100);</script>');
+                // ->with('success', 'Sekolah berhasil dinonaktifkan');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.schools')
+                ->withErrors(['error' => 'Nonaktifkan Sekolah Failed : ' . $e->getMessage()]);
+        }
+    }
 }

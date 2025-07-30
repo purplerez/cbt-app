@@ -45,12 +45,14 @@
                                         </svg>
                                         Data Mata Pelajaran
                                     </button>
-                                    <a href="{{route('admin.sekolah.nonaktif', $school->id)}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun">
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" data-modal-target="nonAktifModal">
+                                    {{-- <a href="{{route('admin.sekolah.nonaktif', $school->id)}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun"> --}}
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
                                         Non-Aktifkan Akun
                                     </a>
+                                    </button>
                                 </nav>
                             </div>
                         </div>
@@ -834,6 +836,42 @@
                     </button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Non Aktifkan Sekolah Modal -->
+<div id="nonAktifModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+    <div class="min-h-screen px-4 text-center">
+        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+            <div class="flex items-center justify-between pb-3 border-b">
+                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Sekolah</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('nonAktifModal')">
+                    <span class="sr-only">Close</span>
+                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            {{-- <form  class="mt-4"> --}}
+                <form id="nonAktifForm" class="mt-4" action="{{ route('admin.school.inactive') }}" method="post" enctype="multipart/form-data">
+                        @csrf
+
+                        <!-- Tombol Submit -->
+                        <p class="text-sm text-gray-700">Apakah Anda yakin ingin menonaktifkan <strong>{{ strtoupper(session('school_name')) }}</strong> ini?</p>
+                        <div class="pt-4">
+                            <button type="submit"
+                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
+                                Lanjutkan
+                            </button>
+                            {{-- tombol batal --}}
+                            <button type="button" class="w-full px-4 py-2 mt-2 text-white transition bg-gray-600 rounded hover:bg-gray-700" onclick="closeModal('nonAktifModal')">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+            {{-- </form> --}}
         </div>
     </div>
 </div>

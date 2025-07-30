@@ -44,7 +44,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
     Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
     Route::get('schools/{school}/manage', [SchoolController::class, 'manageView'])->name('schools.manage.view');
-    Route::get('schools/{school}/nonaktif', [SchoolController::class, 'nonaktif'])->name('sekolah.nonaktif');
+    Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
 
 
     // Routing for student management
