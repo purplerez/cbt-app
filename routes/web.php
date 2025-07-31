@@ -99,6 +99,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('question/type/{type}/update', [QuestionController::class, 'typeupdate'])->name('question.type.update');
     Route::delete('question/type/{type}/destroy', [QuestionController::class, 'typedestroy'])->name('question.type.destroy');
 
+    Route::get('exams', [ExamController::class, 'index'])->name('exams');
+    Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
+
+
 
 
 

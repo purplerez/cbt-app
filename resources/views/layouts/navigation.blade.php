@@ -42,6 +42,9 @@
                         <x-nav-link :href="route('admin.questions.types')" :active="request()->routeIs('admin.grades')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.exams')" :active="request()->routeIs('admin.grades')">
+                            {{ __('Ujian') }}
+                        </x-nav-link>
                          {{--
                         <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Mata Pelajaran') }}
