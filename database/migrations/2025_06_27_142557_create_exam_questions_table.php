@@ -20,7 +20,7 @@ return new class extends Migration
             $table->text('answer_key');
             $table->decimal('points', 5, 2)->default(1.00);
             $table->foreignId('created_by')->constrained('users')->restrictOnDelete();
-            $table->foreignId('school_id')->constrained('schools')->restrictOnDelete();
+            // $table->foreignId('school_id')->constrained('schools')->restrictOnDelete();
             $table->timestamps();
         });
     }

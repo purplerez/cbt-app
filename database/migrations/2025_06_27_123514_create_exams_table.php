@@ -13,15 +13,14 @@ return new class extends Migration
     {
         Schema::create('exams', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->constrained('subjects')->nullable();
+            $table->foreignId('exam_type_id')->constrained('exam_types')->nullable();
             $table->string('title');
             $table->text('description')->nullable();
             $table->integer('duration')->nullable();
-            $table->integer('total_soal')->nullable();
+            $table->integer('total_quest')->nullable();
             $table->integer('score_minimal')->nullable();
             $table->foreignId('created_by')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('school_id')->constrained('schools')->nullable();
-            $table->boolean('is_global')->default(false);
+            // $table->boolean('is_global')->default(false);
             $table->boolean('is_active')->default(true);
             $table->timestamps();
         });

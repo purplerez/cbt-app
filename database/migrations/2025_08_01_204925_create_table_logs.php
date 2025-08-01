@@ -11,17 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('exam_logs', function (Blueprint $table) {
+        Schema::create('logs', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('session_id')->constrained('exam_sessions')->cascadeOnDelete();
-            $table->string('action')->nullable();
-            $table->json('details')->nullable();
+            $table->foreignId('user_id')->constrained('users');
+            $table->string('log_desc');
             $table->string('ip_address', 45)->nullable();
             $table->text('user_agent')->nullable();
             $table->string('device')->nullable();
             $table->timestamp('created_at')->useCurrent();
-            $table->index(['session_id', 'action']);
-            $table->index('created_at');
+            $table->index(['user_id', 'created_at']);
         });
     }
 
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('exam_logs');
+        Schema::dropIfExists('table_logs');
     }
 };
