@@ -29,7 +29,7 @@
                                     <td class="px-4 py-2 border">{{ $exam->id }}</td>
                                     <td class="px-4 py-2 border">{{ $exam->title }}</td>
                                     <td class="px-4 py-2 border">
-                                        @if($exam->is_active == 'Y')
+                                        @if($exam->is_active == true)
                                             <span class="font-semibold text-green-600">Aktif</span>
                                         @else
                                             <span class="font-semibold text-red-600">Non-Aktif</span>

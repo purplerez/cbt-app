@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Exam;
+use App\Models\Examtype;
+use App\Models\Grade;
+use App\Models\Question;
+use App\Models\QuestionTypes;
 use App\Models\User;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Http\Request;
@@ -12,9 +16,10 @@ class ExamController extends Controller
     //
     public function index(){
         // fetch all data
-        $exams = Exam::where('is_global', true)->get();
+        $exams = Examtype::where('is_global', true)->get();
+        $grade = Grade::all();
 
-        return view('admin.view_examglobal', compact('exams'));
+        return view('admin.view_examglobal', compact('exams', 'grade'));
     }
 
     public function create(){
@@ -27,20 +32,25 @@ class ExamController extends Controller
         try{
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'deskripsi' => 'nullable|string|max:255',
-                'durasi' => 'required|integer',
-                'total_soal' => 'required|integer',
-                'skor' => 'required|integer',
+                'start' => 'required|date',
+                'end' => 'required|date|after_or_equal:start',
             ]);
 
-            $validated['is_global'] = true;
-            $validated['is_active'] = true;
-            $validated['subject_id'] = null;
+
+
             $validated['school_id'] = null;
-            $validated['created_by'] = auth()->user()->id;
+            $validated['grade_id'] = null;
             $validated['title'] = $validated['name'];
 
-            Exam::create($validated);
+            Examtype::create([
+                'title' => $validated['title'],
+                'school_id' => null,
+                'grade_id' => null,
+                'start_time' => $validated['start'],
+                'end_time' => $validated['end'],
+                'is_active' => true,
+                'is_global' => true,
+            ])->save();
 
             return redirect()->route('admin.exams')->with('success', 'Data Ujian Bersama telah dibuat');
         }
@@ -52,11 +62,11 @@ class ExamController extends Controller
 
     public function manage(Request $request, $exam){
         try{
-            $ex = Exam::findOrFail($exam);
+            $ex = Examtype::findOrFail($exam);
 
             // set session exam
             session([
-                'examid' => $ex->i,
+                'examid' => $ex->id,
                 'examname' => $ex->name,
             ]);
 
@@ -65,6 +75,23 @@ class ExamController extends Controller
         catch(\Exception $e)
         {
             return redirect()->route('admin.exams')->withErrors(['error' => 'Ujian Gagal di Load : '.$e->getMessage()]);
+        }
+    }
+
+    public function manageView(){
+        try{
+
+            if(!session('examid')){
+                throw new \Exception('Ujian Tidak ditemukan');
+            }
+
+            $soal = Question::where('exam_id', session('examid'))->get();
+
+            return view('admin.manageexams', compact('soal'));
+        }
+        catch(\Exception $e)
+        {
+            return redirect()->route('admin.exams')->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
         }
     }
 }
