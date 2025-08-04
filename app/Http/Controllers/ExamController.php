@@ -67,7 +67,8 @@ class ExamController extends Controller
             // set session exam
             session([
                 'examid' => $ex->id,
-                'examname' => $ex->name,
+                'examname' => $ex->title,
+                'is_active' => $ex->is_active,
             ]);
 
             return redirect()->route('admin.exams.manage.view', $ex);
@@ -78,12 +79,12 @@ class ExamController extends Controller
         }
     }
 
-    public function manageView(){
+    public function manageView(Examtype $examtype){
         try{
-
             if(!session('examid')){
                 throw new \Exception('Ujian Tidak ditemukan');
             }
+            // dd();
 
             $soal = Question::where('exam_id', session('examid'))->get();
 

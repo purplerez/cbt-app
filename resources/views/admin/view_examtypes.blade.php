@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Master Data Jenis Ujian') }}
+            {{ __('Master Data Jenis Ujian') }} {{-- Pilihan Ganda, esai, benar salah, pilihan ganda kompleks  --}}
         </h2>
     </x-slot>
 
