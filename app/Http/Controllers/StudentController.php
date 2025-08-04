@@ -74,7 +74,7 @@ class StudentController extends Controller
 
             DB::commit();
             return redirect()->route('admin.schools.manage.view', session()->get('school_id'))
-                ->with('success', 'Data siswa berhasil ditambahkan');
+                 ->with('success', 'Data guru berhasil ditambahkan <script>setTimeout(function(){ showTab(\'siswa\'); }, 100);</script>');
         } catch (\Exception $e) {
             DB::rollBack();
 
