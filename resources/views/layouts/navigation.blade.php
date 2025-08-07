@@ -60,14 +60,14 @@
                         </x-nav-link>
                         --}}
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Jadwal Ujian') }}
+                            {{ __('Log Aktifitas') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.questions')" :active="request()->routeIs('admin.questions')">
+                        {{-- <x-nav-link :href="route('admin.questions')" :active="request()->routeIs('admin.questions')">
                             {{ __('Soal') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.results')" :active="request()->routeIs('admin.results')">
                             {{ __('Hasil Ujian') }}
-                        </x-nav-link>
+                        </x-nav-link> --}}
                         {{-- <x-nav-link :href="route('admin.settings')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Pengaturan') }}
                         </x-nav-link> --}}

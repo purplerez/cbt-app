@@ -104,6 +104,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('exams/create',[ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage',[ExamController::class, 'manageView'])->name('exams.manage.view');
+    Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
+
 
 
 

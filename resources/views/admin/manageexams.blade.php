@@ -15,17 +15,17 @@
                         <div class="w-1/4 pr-6">
                             <div class="p-4 bg-white rounded-lg shadow">
                                 <nav class="space-y-2">
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="sekolah" @if(session('is_active') == '0') disabled @endif >
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="exams" @if(session('is_active') == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
-                                        Bank Soal
+                                        Mapel Ujian
                                     </button>
                                     <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa" @if(session('is_active') == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
-                                        Data Siswa
+                                        Peserta
                                     </button>
                                     <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="guru" @if(session('is_active') == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -71,17 +71,84 @@
                         <div class="w-3/4">
                             <div class="tab-content">
 
-                            <!-- Sekolah Tab -->
-                            <div class="hidden tab-pane" id="sekolah">
+                            <!-- Add ujian Tab -->
+                            <div class="hidden tab-pane" id="exams">
                                 <div class="bg-white rounded-lg shadow">
-
+                                    @if(session('success'))
+                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
+                                    @endif
                                     <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Sekolah</h3>
+                                        <h3 class="text-lg font-medium">Data Materi Ujian</h3>
+                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addUjianModal">
+                                            + Tambah Materi Ujian
+                                        </button>
                                     </div>
+
                                     <div class="p-4">
                                         <div class="overflow-x-auto">
                                             {{-- style for the logo --}}
+                                            <div class="overflow-x-auto">
+                                            <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody class="bg-white divide-y divide-gray-200">
+                                                    @forelse ($exam as $exam)
+                                                    <tr>
+                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            {{$exam->id}}
+                                                        </td>
+                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            {{$exam->title}}
+                                                        </td>
+                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            {{$exam->is_active}}
+                                                        </td>
+                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            <button data-tab="banksoal{{ $exam->id }}" class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                                Bank Soal
+                                                            </button>
+                                                            {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
+                                                            <form action="{{route('admin.siswa.destroy', $exam->id)}}" method="POST" class="inline-block">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
+                                                            </form>
+                                                        </tr>
+                                                        @empty
+                                                        <tr>
+                                                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada data materi ujian.</td>
+                                                        </tr>
+                                                        @endforelse
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <!-- Bank Soal Tab -->
+                            <div class="hidden tab-pane" id="banksoal{{ $exam->id }}">
+                                <div class="bg-white rounded-lg shadow">
+                                    @if(session('success'))
+                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
+                                    @endif
+                                    <div class="flex items-center justify-between p-4 border-b">
+                                        <h3 class="text-lg font-medium">Data Soal</h3>
+                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSiswaModal">
+                                            + Tambah Soal
+                                        </button>
+                                    </div>
+                                    <div class="p-4">
+                                        <div class="overflow-x-auto">
+                                            <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                                banksoal{{ $exam->id }}
                                         </div>
                                     </div>
                                 </div>
@@ -173,13 +240,13 @@
     </div>
 
 <!-- Add Siswa Modal -->
-<div id="addSiswaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<div id="addUjianModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="min-h-screen px-4 text-center">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Siswa Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addSiswaModal')">
+                <h3 class="text-lg font-medium text-gray-900">Tambah Materi Ujian</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addUjianModal')">
                     <span class="sr-only">Close</span>
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -187,7 +254,7 @@
                 </button>
             </div>
             {{-- <form  class="mt-4"> --}}
-                <form id="addSiswaForm" class="mt-4" action="{{ route('admin.students.store') }}" method="post" enctype="multipart/form-data">
+                <form id="addUjianForm" class="mt-4" action="{{ route('admin.exam.store')}}" method="post" enctype="multipart/form-data">
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
@@ -196,70 +263,38 @@
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                             <div>
-                            <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
-                            <input type="text" name="nis" id="nis" value="{{ old('nis') }}" required
+                            <label for="title" class="block text-sm font-medium text-gray-700">Judul Materi</label>
+                            <input type="text" name="title" id="title" value="{{ old('title') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('nis')" class="mt-1" />
+                            <x-input-error :messages="$errors->get('title')" class="mt-1" />
                         </div>
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
+                            <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                            <textarea name="description" id="description" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                            <x-input-error :messages="$errors->get('description')" class="mt-1" />
+                        </div>
+                        <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-700">Durasi</label>
+                            <input type="number" name="duration" id="duration" value="{{ old('name') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            {{-- buat keterangan input dibawah tag input --}}
+                            <span class="text-sm text-gray-500">*Dalam detik</span>
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
                         <div>
-                            <label for="grade_id" class="block text-sm font-medium text-gray-700">Kelas</label>
+                            <label for="total_quest" class="block text-sm font-medium text-gray-700">Jumlah soal ditampilkan</label>
+                            <input type="number" name="total_quest" id="total_quest" value="{{ old('total_quest') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('total_quest')" class="mt-1" />
+                        </div>
+                        <div>
+                            <label for="score_minimal" class="block text-sm font-medium text-gray-700">Skor minimal</label>
+                            <input type="number" name="score_minimal" id="score_minimal" value="{{ old('score_minimal') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('score_minimal')" class="mt-1" />
+                        </div>
 
-                            <x-input-error :messages="$errors->get('grade_id')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                            <select name="gender" id="gender" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="L">Laki - Laki</option>
-                                    <option value="P">Perempuan</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="p_birth" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
-                            <input type="text" name="p_birth" id="p_birth" value="{{ old('p_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('p_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="d_birth" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                            <input type="date" name="d_birth" id="d_birth" value="{{ old('d_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('d_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                            <input type="file" name="photo" id="photo"  required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('photo')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                            <textarea name="address" id="address" rows="3" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('address') }}</textarea>
-                            <x-input-error :messages="$errors->get('address')" class="mt-1" />
-                        </div>
-                        {{-- <input type="hidden" name="school_id" value="{{ $school->id }}"> --}}
-
-
-
-                        {{-- <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Sekolah</label>
-                            <select name="school_id" id="school_id" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Sekolah</option>
-                                @foreach ($schools as $school)
-                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('school_id')" class="mt-1" />
-                        </div> --}}
 
                         <!-- Tombol Submit -->
                         <div class="pt-4">

@@ -8,15 +8,14 @@ class Exam extends Model
 {
     //
     protected $fillable = [
-        'subject_id',
+        'exam_type_id',
+        // 'subject_id',
         'title',
-        'deskripsi',
-        'durasi',
-        'total_soal',
+        'description',
+        'duration',
+        'total_quest',
         'score_minimal',
         'created_by',
-        'school_id',
-        'is_global',
         'is_active',
     ];
 
@@ -30,10 +29,10 @@ class Exam extends Model
         return $this->hasMany(Question::class);
     }
 
-    public function school()
-    {
-        return $this->belongsTo(School::class);
-    }
+    // public function school()
+    // {
+    //     return $this->belongsTo(School::class);
+    // }
 
     public function creator()
     {

@@ -87,12 +87,38 @@ class ExamController extends Controller
             // dd();
 
             $soal = Question::where('exam_id', session('examid'))->get();
+            $exam = Exam::where('exam_type_id', session('examid'))->get();
 
-            return view('admin.manageexams', compact('soal'));
+
+            return view('admin.manageexams', compact('soal', 'exam'));
         }
         catch(\Exception $e)
         {
             return redirect()->route('admin.exams')->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
+        }
+    }
+
+    public function examstore(Request $request){
+        try{
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'duration' => 'required|integer',
+                'total_quest' => 'required|integer',
+                'score_minimal' => 'required|integer',
+            ]);
+
+            $validated['exam_type_id'] = session('examid');
+            $validated['created_by'] = auth()->user()->id;
+            $validated['is_active'] = true;
+
+            Exam::create($validated)->save();
+
+            return redirect()->route('admin.exams.manage.view', session('examid'))
+                            ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'exams\'); }, 100);</script>');
+        }
+        catch (\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
         }
     }
 }
