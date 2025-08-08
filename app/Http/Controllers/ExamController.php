@@ -121,4 +121,38 @@ class ExamController extends Controller
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
         }
     }
+
+    public function examquestion(Request $request, $exam){
+        try{
+            $exam = Exam::findOrFail($exam);
+            // $questions = Question::where('exam_id', $exam->id)->get();
+
+            session([
+                'perexamid' => $exam->id,
+                'perexamname' => $exam->title,
+            ]);
+
+            return redirect()->route('admin.exams.manage.question', $exam);
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
+        }
+    }
+
+    public function banksoal(Exam $exam){
+        try{
+            //dd all session available
+            // dd(session()->all());
+
+            $questions = Question::where('exam_id', session('perexamid'))
+                                    ->with('questiontype')
+                                    ->get();
+
+            return view('admin.manageperexam', compact('questions'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
+        }
+    }
+
 }
