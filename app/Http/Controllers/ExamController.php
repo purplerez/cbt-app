@@ -147,9 +147,9 @@ class ExamController extends Controller
             $questions = Question::where('exam_id', session('perexamid'))
                                     ->get();
 
-            $arrJenis = ['0' => "Pilihan Ganda", '1' => "Pilihan Ganda Kompleks", '2' => "Benar Salah", '3' => "Essay"];
+            // $arrJenis = ['0' => "Pilihan Ganda", '1' => "Pilihan Ganda Kompleks", '2' => "Benar Salah", '3' => "Essay"];
 
-            $questions[0]->question_type_id = $arrJenis[$questions[0]->question_type_id];
+            // $questions[0]->question_type_id = $arrJenis[$questions[0]->question_type_id];
 
             return view('admin.manageperexam', compact('questions'));
         }

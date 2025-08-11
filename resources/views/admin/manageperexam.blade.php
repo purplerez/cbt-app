@@ -99,7 +99,7 @@
                                                                 {{$q->question_text}}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                {{ $q->question_type_id }}
+                                                                {{ $q->question_type_label }}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                 {{ $q->points }}

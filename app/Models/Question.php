@@ -19,6 +19,18 @@ class Question extends Model
         'created_by',
     ];
 
+    public function getQuestionTypeLabelAttribute()
+    {
+        $arrJenis = [
+            '0' => "Pilihan Ganda",
+            '1' => "Pilihan Ganda Kompleks",
+            '2' => "Benar Salah",
+            '3' => "Essay"
+        ];
+
+        return $arrJenis[(string)$this->question_type_id] ?? 'Tidak Diketahui';
+    }
+
     public function questionType(){
         return $this->belongsTo(QuestionTypes::class);
     }
