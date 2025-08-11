@@ -99,10 +99,10 @@
                                                                 {{$q->question_text}}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                {{ $q->qtype->name }}
+                                                                {{ $q->question_type_id }}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                {{ $q->point }}
+                                                                {{ $q->points }}
                                                             </td>
                                                             {{-- <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                 {{$exam->is_active}}
@@ -145,14 +145,61 @@
                                         <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
                                     @endif
                                     <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Siswa</h3>
-                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSiswaModal">
+                                        <h3 class="text-lg font-medium">Bank Soal</h3>
+                                        {{-- <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSiswaModal">
                                             + Tambah Siswa
-                                        </button>
+                                        </button> --}}
                                     </div>
                                     <div class="p-4">
                                         <div class="overflow-x-auto">
                                             <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                                <form action="{{ route('admin.exams.question.store', session('perexamid')) }}" method="post" class="mb-4">
+                                                    @csrf
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <label for="question_text" class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                            <textarea id="question_text" name="question_text" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                        </div>
+                                                        <div>
+                                                            <label for="options" class="block text-sm font-medium text-gray-700">Pilihan Jawaban</label>
+                                                            <div id="choices-container" class="space-y-2">
+                                                                <div class="flex items-start gap-2 choice-item" data-choice-id="1">
+                                                                    <textarea name="choices[1]" rows="3"
+                                                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                    <button type="button" class="remove-choice text-red-500 hover:text-red-700" onclick="removeChoice(this)">
+                                                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" id="add-choice"
+                                                                class="mt-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                                                                + Add Choice
+                                                            </button>
+                                                        </div>
+
+                                                        {{-- answer --}}
+                                                        <div>
+                                                            <label for="answer_key" class="block text-sm font-medium text-gray-700">Kunci Jawaban</label>
+                                                            <div id="answer-key-container"></div>
+                                                        </div>
+
+                                                        {{--  points --}}
+                                                        <div>
+                                                            <label for="points" class="block text-sm font-medium text-gray-700">Point</label>
+                                                            <input type="number" name="points" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                        </div>
+
+                                                        {{--  button --}}
+                                                        <div>
+                                                            <button type="submit"
+                                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+                                                                Simpan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
 
                                         </div>
                                     </div>
@@ -547,6 +594,74 @@
 </div>
 
 @push('scripts')
+<script>
+    let choiceCounter = 1;
+    const container = document.getElementById('choices-container');
+    const answerKeyContainer = document.getElementById('answer-key-container');
+
+    // Add choice
+    document.getElementById('add-choice').addEventListener('click', function () {
+        choiceCounter++;
+        let div = document.createElement('div');
+        div.classList.add('flex', 'items-start', 'gap-2', 'choice-item');
+        div.dataset.choiceId = choiceCounter;
+        div.innerHTML = `
+            <textarea name="choices[${choiceCounter}]" rows="3"
+                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+            <button type="button" class="remove-choice text-red-500 hover:text-red-700" onclick="removeChoice(this)">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        `;
+        container.appendChild(div);
+        renderAnswerKey();
+    });
+
+    // Remove choice
+    function removeChoice(button) {
+        button.parentElement.remove();
+        renderAnswerKey();
+    }
+
+    // Render Answer Key automatically
+    function renderAnswerKey() {
+        answerKeyContainer.innerHTML = '';
+        let choices = container.querySelectorAll('.choice-item');
+
+        if (choices.length === 0) {
+            // Essay mode
+            answerKeyContainer.innerHTML = `
+                <textarea name="answer_key" rows="3"
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+            `;
+            return;
+        }
+
+        // Multiple-choice mode → render checkboxes (for multiple correct answers)
+        let checkboxes = '';
+        choices.forEach((choice, index) => {
+            let id = choice.dataset.choiceId || index + 1;
+            // corespond the text I input in textarea in answer options
+            let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`
+            checkboxes += `
+                <label class="flex items-center gap-2">
+                    <input type="checkbox" name="answer_key[]" value="${id}">
+                    ${text}
+                </label>
+            `;
+        });
+        answerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxes}</div>`;
+    }
+
+    // Initial render
+    renderAnswerKey();
+</script>
+
+
+
+
 <script>
         document.addEventListener('DOMContentLoaded', function() {
         // Handle success message auto-hide
