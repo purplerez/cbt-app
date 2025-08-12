@@ -108,25 +108,31 @@
                                                                 {{$exam->is_active}}
                                                             </td> --}}
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                <form method="post" action="{{-- route('admin.exams.question') --}}">
-                                                                    @csrf
-                                                                    {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
-                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                                                        Bank Soal
-                                                                    </button>
-                                                                </form>
-                                                                {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
-                                                                <form action="{{}}" method="POST" class="inline-block">
-                                                                    @csrf
-                                                                    @method('DELETE')
-                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
-                                                                </form>
-                                                            </tr>
-                                                            @empty
-                                                                <tr>
-                                                                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">Belum ada data soal.</td>
-                                                                </tr>
-                                                            @endforelse
+                                                                <div class="flex space-x-2">
+                                                                    <form method="post" action="{{-- route('admin.exams.question') --}}">
+
+                                                                        @csrf
+                                                                        {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
+                                                                        <button class="px-4 py-2 text-xs font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                                            Ubah
+                                                                        </button>
+                                                                    </form>
+                                                                    {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
+                                                                    <form action="{{}}" method="POST" class="inline-block">
+                                                                        @csrf
+                                                                        @method('DELETE')
+                                                                        <button type="submit" class="px-4 py-2 text-xs font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus Soal ini?')">
+                                                                            Hapus
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                                </td>
+                                                        </tr>
+                                                        @empty
+                                                        <tr>
+                                                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">Belum ada data soal.</td>
+                                                        </tr>
+                                                        @endforelse
 
                                                     </tbody>
                                                 </table>
