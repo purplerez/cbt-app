@@ -108,13 +108,12 @@
                                                                 {{$exam->is_active}}
                                                             </td> --}}
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                <form method="post" action="{{-- route('admin.exams.question') --}}">
-                                                                    @csrf
+
                                                                     {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
-                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
-                                                                        Bank Soal
+                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="editSoalModal" onclick="openEditSoalModal({{ $q->id }})">
+                                                                        Ubah
                                                                     </button>
-                                                                </form>
+
                                                                 {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
                                                                 <form action="{{}}" method="POST" class="inline-block">
                                                                     @csrf
@@ -166,7 +165,7 @@
                                                                 <div class="flex items-start gap-2 choice-item" data-choice-id="1">
                                                                     <textarea name="choices[1]" rows="3"
                                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                                    <button type="button" class="remove-choice text-red-500 hover:text-red-700" onclick="removeChoice(this)">
+                                                                    <button type="button" class="text-red-500 remove-choice hover:text-red-700" onclick="removeChoice(this)">
                                                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                                         </svg>
@@ -174,7 +173,7 @@
                                                                 </div>
                                                             </div>
                                                             <button type="button" id="add-choice"
-                                                                class="mt-2 px-3 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600">
+                                                                class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
                                                                 + Add Choice
                                                             </button>
                                                         </div>
@@ -271,7 +270,7 @@
     </div>
 
 <!-- Add Siswa Modal -->
-<div id="addSiswaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<div id="editSoalModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="min-h-screen px-4 text-center">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
@@ -608,7 +607,7 @@
         div.innerHTML = `
             <textarea name="choices[${choiceCounter}]" rows="3"
                 class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
-            <button type="button" class="remove-choice text-red-500 hover:text-red-700" onclick="removeChoice(this)">
+            <button type="button" class="text-red-500 remove-choice hover:text-red-700" onclick="removeChoice(this)">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                           d="M6 18L18 6M6 6l12 12" />
