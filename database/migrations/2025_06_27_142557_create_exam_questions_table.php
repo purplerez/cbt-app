@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('exam_questions', function (Blueprint $table) {
             $table->id();
             $table->foreignId('exam_id')->constrained('exams')->cascadeOnDelete();
-            $table->foreignId('question_type_id')->constrained('qtypes')->restrictOnDelete();
+            $table->enum('question_type_id', ['0', '1', '2', '3', '4'])->default('0'); // 0: Essay, 1: Multiple Choice, 2: True/False, 3: Fill in the Blank, 4: Matching
             $table->text('question_text');
             $table->json('choices')->nullable();
             $table->text('answer_key');
