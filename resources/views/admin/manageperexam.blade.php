@@ -110,17 +110,107 @@
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
 
                                                                     {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
-                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="editSoalModal" onclick="openEditSoalModal({{ $q->id }})">
+                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="editSoalModal{{ $q->id }}" onclick="openEditSoalModal({{ $q->id }})">
                                                                         Ubah
                                                                     </button>
 
                                                                 {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
-                                                                <form action="{{}}" method="POST" class="inline-block">
+                                                                <form action="{{--  --}}" method="POST" class="inline-block">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
                                                                 </form>
                                                             </tr>
+                                                            {{--  edit data --}}
+
+                                                                    <div id="editSoalModal{{ $q->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto" data-choices="{{ $q->choices }}" data-answer-key="{{ $q->answer_key }}">
+                                                                        <div class="min-h-screen px-4 text-center">
+                                                                            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
+
+                                                                            </div>
+                                                                            <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                                                <div class="flex items-center justify-between pb-3 border-b">
+                                                                                    <h3 class="text-lg font-medium text-gray-900">Ubah Soal</h3>
+                                                                                    <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('editSoalModal')">
+                                                                                        <span class="sr-only">Close</span>
+                                                                                        <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                                        </svg>
+                                                                                    </button>
+                                                                                </div>
+                                                                                {{-- <form  class="mt-4"> --}}
+                                                                                    <form action="{{-- route('admin.exams.question.update', $q->id) --}}" method="post" class="mb-4">
+                                                                                        @csrf
+                                                                                        @method('PUT')
+                                                                                        <div class="space-y-4">
+                                                                                            <!-- Question Text -->
+                                                                                            <div>
+                                                                                                <label for="edit_question_text" class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                                                                <textarea id="edit_question_text" name="question_text" rows="3"
+                                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
+                                                                                            </div>
+
+                                                                                            @if($q->question_type_id != 3)
+                                                                                            <!-- Choices (for multiple-choice questions) -->
+                                                                                            <div>
+                                                                                                <label for="options" class="block text-sm font-medium text-gray-700">Pilihan Jawaban</label>
+                                                                                                <div id="edit-choices-container-{{ $q->id }}" class="space-y-2">
+                                                                                                    @if($q->choices)
+                                                                                                        @foreach(json_decode($q->choices, true) as $key => $choice)
+                                                                                                            <div class="flex items-start gap-2 edit-choice-item" data-choice-id="{{ $key }}">
+                                                                                                                <textarea name="choices[{{ $key }}]" rows="3"
+                                                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
+                                                                                                                <button type="button" class="text-red-500 hover:text-red-700" onclick="QuestionEditForm.removeChoice(this)">
+                                                                                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                                                                    </svg>
+                                                                                                                </button>
+                                                                                                            </div>
+                                                                                                        @endforeach
+                                                                                                    @endif
+                                                                                                </div>
+                                                                                                <button type="button" id="edit-add-choice-{{ $q->id }}"
+                                                                                                    class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
+                                                                                                    + Tambah Pilihan
+                                                                                                </button>
+                                                                                            </div>
+
+                                                                                            <!-- Answer Key for Multiple Choice -->
+                                                                                            <div>
+                                                                                                <label for="answer_key" class="block text-sm font-medium text-gray-700">Kunci Jawaban</label>
+                                                                                                <div id="edit-answer-key-container-{{ $q->id }}"></div>
+                                                                                            </div>
+                                                                                            @else
+                                                                                            <!-- Answer Key for Essay -->
+                                                                                            <div>
+                                                                                                <label for="answer_key" class="block text-sm font-medium text-gray-700">Kunci Jawaban</label>
+                                                                                                <textarea name="answer_key" rows="3"
+                                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->answer_key }}</textarea>
+                                                                                            </div>
+                                                                                            @endif
+
+                                                                                            <!-- Points -->
+                                                                                            <div>
+                                                                                                <label for="points" class="block text-sm font-medium text-gray-700">Point</label>
+                                                                                                <input type="number" name="points" value="{{ $q->points }}"
+                                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                                                            </div>
+
+                                                                                            <!-- Submit Button -->
+                                                                                            <div>
+                                                                                                <button type="submit"
+                                                                                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+                                                                                                    Update Soal
+                                                                                                </button>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                    </form>
+
+                                                                                {{-- </form> --}}
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                            {{-- end of edit data --}}
                                                             @empty
                                                                 <tr>
                                                                     <td colspan="4" class="px-6 py-4 text-center text-gray-500">Belum ada data soal.</td>
@@ -270,7 +360,7 @@
     </div>
 
 <!-- Add Siswa Modal -->
-<div id="editSoalModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<div id="" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="min-h-screen px-4 text-center">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
@@ -593,6 +683,122 @@
 </div>
 
 @push('scripts')
+<!-- edit js -->
+<script>
+function initEditForm(questionId, choices, answerKey) {
+    // Parse choices and answerKey if they're strings
+    if (typeof choices === 'string') {
+        try {
+            choices = JSON.parse(choices);
+        } catch (e) {
+            console.error('Failed to parse choices:', e);
+            choices = null;
+        }
+    }
+    if (typeof answerKey === 'string') {
+        try {
+            answerKey = JSON.parse(answerKey);
+        } catch (e) {
+            console.error('Failed to parse answerKey:', e);
+            answerKey = null;
+        }
+    }
+
+    let editChoiceCounter = choices ? Object.keys(choices).length : 0;
+    const editContainer = document.getElementById(`edit-choices-container-${questionId}`);
+    const editAnswerKeyContainer = document.getElementById(`edit-answer-key-container-${questionId}`);
+    const addChoiceButton = document.getElementById(`edit-add-choice-${questionId}`);
+
+    if (!editContainer || !editAnswerKeyContainer) return;
+
+    function renderEditAnswerKey() {
+        editAnswerKeyContainer.innerHTML = '';
+        let choiceElements = editContainer.querySelectorAll('.edit-choice-item');
+
+        if (choiceElements.length === 0) {
+            // Essay mode
+            editAnswerKeyContainer.innerHTML = `
+                <textarea name="answer_key" rows="3"
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+            `;
+            return;
+        }
+
+        let isMultipleAnswer = Array.isArray(answerKey) && answerKey.length > 1;
+        let inputType = isMultipleAnswer ? 'checkbox' : 'radio';
+
+        let checkboxes = '';
+        choiceElements.forEach((choice, index) => {
+            let id = choice.dataset.choiceId;
+            let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
+            let checked = Array.isArray(answerKey) && answerKey.includes(id.toString()) ? 'checked' : '';
+            checkboxes += `
+                <label class="flex items-center gap-2">
+                    <input type="${inputType}" name="answer_key[]" value="${id}" ${checked}>
+                    ${text}
+                </label>
+            `;
+        });
+        editAnswerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxes}</div>`;
+    }
+
+    function removeChoice(button) {
+        button.parentElement.remove();
+        renderEditAnswerKey();
+    }
+
+    // Add click handler for the add choice button
+    if (addChoiceButton) {
+        addChoiceButton.addEventListener('click', function() {
+            editChoiceCounter++;
+            let div = document.createElement('div');
+            div.classList.add('flex', 'items-start', 'gap-2', 'edit-choice-item');
+            div.dataset.choiceId = editChoiceCounter.toString();
+            div.innerHTML = `
+                <textarea name="choices[${editChoiceCounter}]" rows="3"
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove(); initEditForm(${questionId}, null, ${JSON.stringify(answerKey)})">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            `;
+            editContainer.appendChild(div);
+            renderEditAnswerKey();
+        });
+    }
+
+    // Add input handler for choices container
+    if (editContainer) {
+        editContainer.addEventListener('input', renderEditAnswerKey);
+    }
+
+    // Initial render
+    renderEditAnswerKey();
+}
+
+// Initialize edit form when modal is opened
+function openEditSoalModal(questionId) {
+    const modal = document.getElementById(`editSoalModal${questionId}`);
+    if (modal) {
+        modal.classList.remove('hidden');
+
+        // Get data from modal's dataset
+        const choices = modal.dataset.choices;
+        const answerKey = modal.dataset.answerKey;
+
+        console.log('Modal data:', {
+            choices: choices,
+            answerKey: answerKey
+        });
+
+        initEditForm(questionId, choices, answerKey);
+    }
+}
+
+</script>
+<!-- end edit js -->
+
 <script>
     let choiceCounter = 1;
     const container = document.getElementById('choices-container');
