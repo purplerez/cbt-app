@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Question;
 use App\Models\QuestionTypes;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class QuestionController extends Controller
 {
@@ -83,6 +84,7 @@ class QuestionController extends Controller
 
     public function update(Request $request, $exam){
         // dd($request->all());
+        DB::beginTransaction();
         try{
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
@@ -134,12 +136,27 @@ class QuestionController extends Controller
             $validated['question_type_id'] = $type;
 
             $question = Question::findOrFail($exam);
-            $question->update($validated);
 
-            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
+            $question->update($validated);
+            DB::commit();
+
+            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
         }
         catch(\Exception $e){
+            DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Merubah soal :'.$e->getMessage()]);
+        }
+    }
+
+    public function destroy($exam){
+        try{
+            $question = Question::findOrFail($exam);
+            $question->delete();
+
+            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+        }
+        catch(\Exception $e){
+            return redirect()->route('admin.exams.manage.question', session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : '.$e->getMessage()]);
         }
     }
 

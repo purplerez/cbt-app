@@ -133,10 +133,10 @@
                                                                     </button>
 
                                                                 {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
-                                                                <form action="{{--  --}}" method="POST" class="inline-block">
+                                                                <form action="{{route('admin.exams.questions.destroy', $q->id)}}" method="POST" class="inline-block">
                                                                     @csrf
                                                                     @method('DELETE')
-                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
+                                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')">Hapus</button>
                                                                 </form>
                                                             </tr>
                                                             {{--  edit data --}}
