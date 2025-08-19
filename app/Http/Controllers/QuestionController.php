@@ -81,6 +81,68 @@ class QuestionController extends Controller
         }
     }
 
+    public function update(Request $request, $exam){
+        // dd($request->all());
+        try{
+            $choices = $request->input('choices', []);
+            $answerKey = $request->input('answer_key', []);
+            $type = '';
+
+            // type : 0 pilihan ganda, 1 pilihan ganda kompleks
+            // type : 2 benar salah, 3 esai
+            if(is_array($choices) && count($choices) > 2){
+                if(count($answerKey) > 1){
+                    $type = '1';
+                }
+                else {
+                    $type = '0';
+                }
+            }
+            else if(is_array($choices) && count($choices) == 2){
+                if(count($answerKey) == 1){
+                    $type = '2';
+                }
+            }
+            // check if it is esai who doesn't have a choices
+            else {
+                $type = '3';
+            }
+
+            if($type != '3') {
+                $validated = $request->validate([
+                    'question_text' => 'required|string',
+                    'choices' => 'required|array|min:2',
+                    'choices.*' => 'required|string|max:255',
+                    'answer_key' => 'required|array|min:1',
+                    'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
+                    'points' => 'required|numeric|min:1'
+                ]);
+                $validated['choices'] = json_encode($validated['choices']);
+                $validated['answer_key'] = json_encode($validated['answer_key']);
+            }
+            else {
+                $validated = $request->validate([
+                    'question_text' => 'required|string|max:255',
+                    'answer_key' => 'required|string|max:255',
+                    'points' => 'required|numeric|min:1'
+                ]);
+                $validated['choices'] = null;
+            }
+
+            $validated['exam_id'] = session('perexamid');
+            $validated['created_by'] = auth()->user()->id;
+            $validated['question_type_id'] = $type;
+
+            $question = Question::findOrFail($exam);
+            $question->update($validated);
+
+            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Merubah soal :'.$e->getMessage()]);
+        }
+    }
+
     /**
      * Show the form for creating a new resource.
      */

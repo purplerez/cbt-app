@@ -111,6 +111,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
 
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
+    Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
 
 
 

@@ -23,8 +23,8 @@
                                 </div>
                                 <nav class="space-y-2">
                                     <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="banksoal" @if(session('is_active') == '0') disabled @endif >
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" class="w-5 h-5 mr-2">
+                                            <path stroke-linecap="round" stroke-width="2"  stroke-linejoin="round" d="M6.429 9.75 2.25 12l4.179 2.25m0-4.5 5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0 4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0-5.571 3-5.571-3" />
                                         </svg>
                                         Bank Soal {{ session('perexamname') }}
                                     </button>
@@ -95,11 +95,29 @@
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                 {{$q->id}}
                                                             </td>
-                                                            <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            <td class="px-6 py-4 text-sm text-gray-800 whitespace-wrap">
                                                                 {{$q->question_text}}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                {{ $q->question_type_label }}
+                                                                <!-- span for question type label according to the question type id different type has different background colour -->
+                                                                @if($q->question_type_id == 0)
+                                                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-blue-700 bg-blue-100 rounded-full">
+                                                                        PG
+                                                                    </span>
+                                                                @elseif($q->question_type_id == 1)
+                                                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-green-700 bg-green-100 rounded-full">
+                                                                        PG Kompleks
+                                                                    </span>
+                                                                @elseif($q->question_type_id == 2)
+                                                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-yellow-700 bg-yellow-100 rounded-full">
+                                                                        Benar/Salah
+                                                                    </span>
+                                                                @else
+                                                                    <span class="inline-block px-2 py-1 text-xs font-semibold text-gray-700 bg-gray-100 rounded-full">
+                                                                     Isian Singkat
+                                                                    </span>
+                                                                @endif
+                                                                {{-- {{ $q->question_type_id }} --}}
                                                             </td>
                                                             <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                 {{ $q->points }}
@@ -139,7 +157,7 @@
                                                                                     </button>
                                                                                 </div>
                                                                                 {{-- <form  class="mt-4"> --}}
-                                                                                    <form action="{{-- route('admin.exams.question.update', $q->id) --}}" method="post" class="mb-4">
+                                                                                    <form action="{{ route('admin.exams.question.update', $q->id) }}" method="post" class="mb-4">
                                                                                         @csrf
                                                                                         @method('PUT')
                                                                                         <div class="space-y-4">
@@ -160,7 +178,7 @@
                                                                                                             <div class="flex items-start gap-2 edit-choice-item" data-choice-id="{{ $key }}">
                                                                                                                 <textarea name="choices[{{ $key }}]" rows="3"
                                                                                                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
-                                                                                                                <button type="button" class="text-red-500 hover:text-red-700" onclick="QuestionEditForm.removeChoice(this)">
+                                                                                                                <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
                                                                                                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                                                                                     </svg>
@@ -178,7 +196,19 @@
                                                                                             <!-- Answer Key for Multiple Choice -->
                                                                                             <div>
                                                                                                 <label for="answer_key" class="block text-sm font-medium text-gray-700">Kunci Jawaban</label>
-                                                                                                <div id="edit-answer-key-container-{{ $q->id }}"></div>
+                                                                                                <div id="edit-answer-key-container-{{ $q->id }}">
+                                                                                                    @if(is_array(json_decode($q->answer_key)))
+                                                                                                        @foreach(json_decode($q->choices, true) as $key => $choice)
+                                                                                                            <div class="flex items-center gap-2">
+                                                                                                                <input type="{{ count(json_decode($q->answer_key)) > 1 ? 'checkbox' : 'radio' }}"
+                                                                                                                       name="answer_key[]"
+                                                                                                                       value="{{ $key }}"
+                                                                                                                       {{ in_array($key, json_decode($q->answer_key)) ? 'checked' : '' }}>
+                                                                                                                <span>{{ $choice }}</span>
+                                                                                                            </div>
+                                                                                                        @endforeach
+                                                                                                    @endif
+                                                                                                </div>
                                                                                             </div>
                                                                                             @else
                                                                                             <!-- Answer Key for Essay -->
@@ -685,11 +715,45 @@
 @push('scripts')
 <!-- edit js -->
 <script>
-function initEditForm(questionId, choices, answerKey) {
+// Global variable to store current answer keys
+let currentAnswerKeys = {};
+// Global variable to store current answer keys
+let currentAnswerKeys = {};
+    function updateAnswerKey(input, questionId) {
+        if (!currentAnswerKeys[questionId]) {
+            currentAnswerKeys[questionId] = [];
+        }
+
+        if (input.type === 'radio') {
+            currentAnswerKeys[questionId] = [input.value];
+        } else {
+            if (input.checked) {
+                currentAnswerKeys[questionId].push(input.value);
+            } else {
+                currentAnswerKeys[questionId] = currentAnswerKeys[questionId].filter(val => val !== input.value);
+            }
+        }
+
+        // Update hidden input
+        const hiddenInput = document.getElementById(`answer_key_${questionId}`);
+        if (hiddenInput) {
+            hiddenInput.value = JSON.stringify(currentAnswerKeys[questionId]);
+        }
+
+        console.log('Updated answer key:', currentAnswerKeys[questionId]);
+    }
+
+    function initEditForm(questionId, choices, answerKey) {
+        console.log('Init Edit Form with:', { questionId, choices, answerKey });
+
+        // Initialize current answer key for this question
+        currentAnswerKeys[questionId] = Array.isArray(answerKey) ? answerKey : (answerKey ? [answerKey] : []);
+
     // Parse choices and answerKey if they're strings
     if (typeof choices === 'string') {
         try {
             choices = JSON.parse(choices);
+            console.log('Parsed choices:', choices);
         } catch (e) {
             console.error('Failed to parse choices:', e);
             choices = null;
@@ -698,13 +762,12 @@ function initEditForm(questionId, choices, answerKey) {
     if (typeof answerKey === 'string') {
         try {
             answerKey = JSON.parse(answerKey);
+            console.log('Parsed answerKey:', answerKey);
         } catch (e) {
             console.error('Failed to parse answerKey:', e);
-            answerKey = null;
+            answerKey = answerKey || '';  // Keep string value for essay type
         }
-    }
-
-    let editChoiceCounter = choices ? Object.keys(choices).length : 0;
+    }    let editChoiceCounter = choices ? Object.keys(choices).length : 0;
     const editContainer = document.getElementById(`edit-choices-container-${questionId}`);
     const editAnswerKeyContainer = document.getElementById(`edit-answer-key-container-${questionId}`);
     const addChoiceButton = document.getElementById(`edit-add-choice-${questionId}`);
@@ -712,6 +775,7 @@ function initEditForm(questionId, choices, answerKey) {
     if (!editContainer || !editAnswerKeyContainer) return;
 
     function renderEditAnswerKey() {
+        if (!editAnswerKeyContainer) return;
         editAnswerKeyContainer.innerHTML = '';
         let choiceElements = editContainer.querySelectorAll('.edit-choice-item');
 
@@ -719,13 +783,28 @@ function initEditForm(questionId, choices, answerKey) {
             // Essay mode
             editAnswerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
-                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">${answerKey || ''}</textarea>
             `;
             return;
         }
 
-        let isMultipleAnswer = Array.isArray(answerKey) && answerKey.length > 1;
-        let inputType = isMultipleAnswer ? 'checkbox' : 'radio';
+        // Determine if it's multiple choice or single choice
+        let choiceCount = choiceElements.length;
+        let isMultipleAnswer = false;
+
+        if (Array.isArray(answerKey)) {
+            // More than one answer = multiple choice complex
+            isMultipleAnswer = answerKey.length > 1;
+        } else if (answerKey) {
+            // Convert string to array for existing data
+            answerKey = [answerKey];
+        } else {
+            // Default to empty array
+            answerKey = [];
+        }
+
+        // True/False uses radio, Multiple choice complex uses checkbox, regular multiple choice uses radio
+        let inputType = choiceCount === 2 ? 'radio' : (isMultipleAnswer ? 'checkbox' : 'radio');
 
         let checkboxes = '';
         choiceElements.forEach((choice, index) => {
@@ -777,17 +856,35 @@ function initEditForm(questionId, choices, answerKey) {
     renderEditAnswerKey();
 }
 
-// Initialize edit form when modal is opened
+    // Initialize edit form when modal is opened
 function openEditSoalModal(questionId) {
     const modal = document.getElementById(`editSoalModal${questionId}`);
     if (modal) {
         modal.classList.remove('hidden');
 
         // Get data from modal's dataset
-        const choices = modal.dataset.choices;
-        const answerKey = modal.dataset.answerKey;
+        let choices = modal.dataset.choices;
+        let answerKey = modal.dataset.answerKey;
 
-        console.log('Modal data:', {
+        try {
+            choices = JSON.parse(choices);
+        } catch (e) {
+            console.error('Failed to parse choices:', e);
+            choices = {};
+        }
+
+        try {
+            answerKey = JSON.parse(answerKey);
+            // Ensure answerKey is always an array for multiple choice questions
+            if (typeof answerKey === 'string' && choices) {
+                answerKey = [answerKey];
+            }
+        } catch (e) {
+            console.error('Failed to parse answerKey:', e);
+            answerKey = choices ? [] : '';
+        }
+
+        console.log('Processed modal data:', {
             choices: choices,
             answerKey: answerKey
         });
@@ -795,7 +892,6 @@ function openEditSoalModal(questionId) {
         initEditForm(questionId, choices, answerKey);
     }
 }
-
 </script>
 <!-- end edit js -->
 
