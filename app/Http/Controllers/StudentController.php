@@ -36,6 +36,13 @@ class StudentController extends Controller
                 throw new \Exception('NIS already exists');
             }
 
+            // Check if email already exists
+            $email = $request->nis . '@student.test';
+            $existingUser = User::where('email', $email)->first();
+            if ($existingUser) {
+                throw new \Exception('A user with this NIS already exists in the system');
+            }
+
             // upload the photo
             if ($request->hasFile('photo')) {
                 $imageName = $request->nis.'.'.$request->file('photo')->extension();
