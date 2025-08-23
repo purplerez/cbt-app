@@ -336,10 +336,34 @@
                                         <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" onclick="openModal('addGuruModal')">
                                             + Tambah Guru
                                         </button>
+                                        {{-- dropdown sekolah --}}
+                                        <!-- School Dropdown -->
+                                        <div class="mb-6">
+                                            <label for="school_filter" class="block text-sm font-medium text-gray-700">Pilih Sekolah</label>
+                                            <select id="school_filter" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                                <option value="">Pilih Sekolah</option>
+                                                @foreach($schools as $school)
+                                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                @endforeach
+                                            </select>
+                                            <input type="hidden" id="current-exam-id" value="{{ session('perexamid') }}">
+                                        </div>
                                     </div>
                                     <div class="p-4">
                                         <div class="overflow-x-auto">
-
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="student-list-body" class="bg-white divide-y divide-gray-200">
+                                                    <!-- Students will be loaded here dynamically -->
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
@@ -609,72 +633,7 @@
     </div>
 </div>
 
-<!-- Add Kepala Sekolah Modal -->
-<div id="addKepalaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Data Kepala Sekolah</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <form id="addHeadForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                        <input type="text" id="nip" name="h_nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_nip')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input type="text" id="name" name="h_name" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_name')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select name="h_gender" id="gender" required
-                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="L">Laki - Laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('h_gender')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="address" name="h_address" rows="3" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                        <x-input-error :messages="$errors->get('h_address')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="kepsek_email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="kepsek_email" name="h_email" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_email')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="h_photo" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_photo')" class="mt-1" />
-                    </div>
-                </div>
-                <div class="flex justify-end mt-6 space-x-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeModal('addGuruModal')">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
+
 
 <!-- Non Aktifkan Sekolah Modal -->
 <div id="nonAktifModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
@@ -713,6 +672,85 @@
 </div>
 
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const schoolDropdown = document.getElementById('school_filter');
+    if (schoolDropdown) {
+        schoolDropdown.addEventListener('change', function() {
+            const schoolId = this.value;
+            if (schoolId) {
+                fetchStudents(schoolId);
+            } else {
+                document.getElementById('student-list-body').innerHTML = '';
+            }
+        });
+    }
+});
+
+function fetchStudents(schoolId) {
+    const examId = '{{ $exam->id }}'; // Get the exam ID from the current page
+    fetch(`/api/schools/${schoolId}/students?exam_id=${examId}`)
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('student-list-body');
+            tbody.innerHTML = '';
+
+            data.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.nis}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.name}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.grade?.name || '-'}</td>
+                    <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                        ${student.is_assigned ?
+                            '<span class="text-green-600">Sudah Terdaftar</span>' :
+                            `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900">
+                                Tambah ke Ujian
+                            </button>`
+                        }
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error fetching students');
+        });
+}
+
+function addStudentToExam(studentId) {
+    const examId = '{{ $exam->id }}';
+    fetch('/api/exams/add-student', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            exam_id: examId,
+            student_id: studentId
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Siswa berhasil ditambahkan ke ujian');
+            // Refresh the student list
+            fetchStudents(document.getElementById('school_filter').value);
+        } else {
+            alert(data.message || 'Gagal menambahkan siswa ke ujian');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error adding student to exam');
+    });
+}
+</script>
+
+<!-- Student List Management -->
+<script src="{{ asset('js/student-list.js') }}"></script>
 <!-- edit js -->
 <script>
 // Global variable to store current answer keys

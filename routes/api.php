@@ -1,11 +1,17 @@
 <?php
 
-use App\Http\Controllers\Api\ExamController;
+use App\Http\Controllers\API\ExamController;
+use App\Http\Controllers\API\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 
+
 Route::apiResource('exams', ExamController::class);
+
+// Student routes
+Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool']);
+Route::post('/exams/add-student', [StudentController::class, 'addStudentToExam']);
 
 Route::get('/user', function (Request $request) {
     return $request->user();

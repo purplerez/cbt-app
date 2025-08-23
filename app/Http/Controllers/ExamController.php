@@ -7,6 +7,7 @@ use App\Models\Examtype;
 use App\Models\Grade;
 use App\Models\Question;
 use App\Models\QuestionTypes;
+use App\Models\School;
 use App\Models\User;
 use Illuminate\Foundation\Auth\User as AuthUser;
 use Illuminate\Http\Request;
@@ -125,7 +126,6 @@ class ExamController extends Controller
     public function examquestion(Request $request, $exam){
         try{
             $exam = Exam::findOrFail($exam);
-            // $questions = Question::where('exam_id', $exam->id)->get();
 
             session([
                 'perexamid' => $exam->id,
@@ -141,17 +141,12 @@ class ExamController extends Controller
 
     public function banksoal(Exam $exam){
         try{
-            //dd all session available
-            // dd(session()->all());
-
             $questions = Question::where('exam_id', session('perexamid'))
                                     ->get();
 
-            // $arrJenis = ['0' => "Pilihan Ganda", '1' => "Pilihan Ganda Kompleks", '2' => "Benar Salah", '3' => "Essay"];
+            $schools = School::where('status', '1')->get();
 
-            // $questions[0]->question_type_id = $arrJenis[$questions[0]->question_type_id];
-
-            return view('admin.manageperexam', compact('questions'));
+            return view('admin.manageperexam', compact('questions', 'schools', 'exam'));
         }
         catch(\Exception $e){
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
