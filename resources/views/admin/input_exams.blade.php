@@ -56,9 +56,9 @@
                         </div>
                         <div>
                             <label for="selesai" class="block text-sm font-medium text-gray-700">Tanggal Selesai</label>
-                            <input type="date" name="selesai" id="selesai" value="{{ old('selesai') }}" required
+                            <input type="date" name="end" id="end" value="{{ old('end') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('start')" class="mt-1" />
+                            <x-input-error :messages="$errors->get('end')" class="mt-1" />
                         </div>
 
                         <!-- Tombol Submit -->
