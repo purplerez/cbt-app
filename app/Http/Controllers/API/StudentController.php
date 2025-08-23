@@ -17,12 +17,12 @@ class StudentController extends Controller
     {
         try {
             $examId = request()->query('exam_id');
-            
+
             $students = Student::with(['grade', 'user'])
                 ->where('school_id', $schoolId)
                 ->get()
                 ->map(function ($student) use ($examId) {
-                    $student->is_assigned = $student->user && 
+                    $student->is_assigned = $student->user &&
                         Preassigned::where('user_id', $student->user->id)
                                   ->where('exam_id', $examId)
                                   ->exists();
@@ -74,7 +74,7 @@ class StudentController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Siswa berhasil ditambahkan ke ujian'
-            ]);
+            ], 200);
 
         } catch (\Exception $e) {
             return response()->json([

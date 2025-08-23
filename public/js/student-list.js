@@ -31,6 +31,8 @@ function fetchStudents(schoolId) {
         return;
     }
 
+    console.log('Fetching students for school:', schoolId, 'exam:', examId);
+
     fetch(`/api/schools/${schoolId}/students?exam_id=${examId}`)
         .then(response => {
             if (!response.ok) {
@@ -39,6 +41,7 @@ function fetchStudents(schoolId) {
             return response.json();
         })
         .then(data => {
+            console.log('Received data:', data);
             updateStudentList(data);
         })
         .catch(error => {
@@ -47,11 +50,14 @@ function fetchStudents(schoolId) {
         });
 }
 
-function updateStudentList(students) {
+function updateStudentList(response) {
     const tbody = document.getElementById('student-list-body');
     if (!tbody) return;
 
     tbody.innerHTML = '';
+    
+    // Handle the Laravel Resource response structure
+    const students = response.data || [];
 
     if (!Array.isArray(students) || students.length === 0) {
         tbody.innerHTML = '<tr><td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada siswa ditemukan</td></tr>';
