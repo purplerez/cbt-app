@@ -22,7 +22,7 @@
                                     </div>
                                 </div>
                                 <nav class="space-y-2">
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="sekolah" @if(session('is_active') == '0') disabled @endif >
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="ujian" @if(session('is_active') == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
@@ -79,7 +79,7 @@
                             <div class="tab-content">
 
                             <!-- Sekolah Tab -->
-                            <div class="hidden tab-pane" id="sekolah">
+                            <div class="hidden tab-pane" id="ujian">
                                 <div class="bg-white rounded-lg shadow">
 
                                      @if(session('success'))
@@ -236,13 +236,13 @@
     </div>
 
 <!-- Add Siswa Modal -->
-<div id="addSiswaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+<div id="addUjianModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="min-h-screen px-4 text-center">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Siswa Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addSiswaModal')">
+                <h3 class="text-lg font-medium text-gray-900">Tambah Materi Ujian</h3>
+                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addUjianModal')">
                     <span class="sr-only">Close</span>
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -250,7 +250,7 @@
                 </button>
             </div>
             {{-- <form  class="mt-4"> --}}
-                <form id="addSiswaForm" class="mt-4" action="{{ route('admin.students.store') }}" method="post" enctype="multipart/form-data">
+                <form id="addUjianForm" class="mt-4" action="{{ route('admin.exam.store') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
@@ -259,76 +259,35 @@
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                             <div>
-                            <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
-                            <input type="text" name="nis" id="nis" value="{{ old('nis') }}" required
+                            <label for="title" class="block text-sm font-medium text-gray-700">Judul Ujian</label>
+                            <input type="text" name="title" id="title" value="{{ old('title') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('nis')" class="mt-1" />
+                            <x-input-error :messages="$errors->get('title')" class="mt-1" />
                         </div>
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="grade_id" class="block text-sm font-medium text-gray-700">Kelas</label>
-                            <select name="grade_id" id="grade_id" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Kelas</option>
-
-                                    <option value="0">Name</option>
-
-                            </select>
-                            <x-input-error :messages="$errors->get('grade_id')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                            <select name="gender" id="gender" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="L">Laki - Laki</option>
-                                    <option value="P">Perempuan</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="p_birth" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
-                            <input type="text" name="p_birth" id="p_birth" value="{{ old('p_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('p_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="d_birth" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                            <input type="date" name="d_birth" id="d_birth" value="{{ old('d_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('d_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                            <input type="file" name="photo" id="photo"  required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('photo')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                            <textarea name="address" id="address" rows="3" required
+                            <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                            <textarea name="description" id="description" rows="3" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('address') }}</textarea>
-                            <x-input-error :messages="$errors->get('address')" class="mt-1" />
+                            <x-input-error :messages="$errors->get('description')" class="mt-1" />
                         </div>
-                        {{-- <input type="hidden" name="school_id" value="{{ $school->id }}"> --}}
-
-
-
-                        {{-- <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Sekolah</label>
-                            <select name="school_id" id="school_id" required
+                        <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-700">Durasi</label>
+                            <input type="number" name="duration" id="duration" value="{{ old('duration') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Sekolah</option>
-                                @foreach ($schools as $school)
-                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('school_id')" class="mt-1" />
-                        </div> --}}
+                            <x-input-error :messages="$errors->get('duration')" class="mt-1" />
+                        </div>
+                        <div>
+                            <label for="total_quest" class="block text-sm font-medium text-gray-700">Total Soal Ditampilkan</label>
+                            <input type="number" name="total_quest" id="total_quest" value="{{ old('total_quest') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('total_quest')" class="mt-1" />
+                        </div>
+                        <div>
+                            <label for="score_minimal" class="block text-sm font-medium text-gray-700">Nilai Minimal</label>
+                            <input type="number" name="score_minimal" id="score_minimal" value="{{ old('score_minimal') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('score_minimal')" class="mt-1" />
+                        </div>
 
                         <!-- Tombol Submit -->
                         <div class="pt-4">

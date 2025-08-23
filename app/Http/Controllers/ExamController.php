@@ -115,7 +115,7 @@ class ExamController extends Controller
             Exam::create($validated)->save();
 
             return redirect()->route('admin.exams.manage.view', session('examid'))
-                            ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'exams\'); }, 100);</script>');
+                            ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch (\Exception $e){
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
