@@ -230,7 +230,7 @@
                                                                             <label for="photo_current" class="block text-sm font-medium text-gray-700">
                                                                                 <img src="{{ Storage::url($student->photo) }}" alt="Current" class="w-12 h-12 mb-2 rounded-full">
                                                                             </label>
-                                                                            <input type="file" name="photo" id="photo"  required
+                                                                            <input type="file" name="photo" id="photo"
                                                                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                                                             <input type="hidden" name="old_photo" value="{{ $student->photo }}">
                                                                             <x-input-error :messages="$errors->get('photo')" class="mt-1" />
@@ -677,7 +677,7 @@
                         </div>
                         <div>
                             <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                            <input type="file" name="photo" id="photo"  required
+                            <input type="file" name="photo" id="photo"
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('photo')" class="mt-1" />
                         </div>
@@ -810,7 +810,7 @@
                     </div>
                     <div>
                         <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="photo" required
+                        <input type="file" id="photo" name="photo"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <x-input-error :messages="$errors->get('photo')" class="mt-1" />
                     </div>
@@ -877,7 +877,7 @@
                     </div>
                     <div>
                         <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="h_photo" required
+                        <input type="file" id="photo" name="h_photo"
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <x-input-error :messages="$errors->get('h_photo')" class="mt-1" />
                     </div>
