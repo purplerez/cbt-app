@@ -153,6 +153,12 @@ class ExamController extends Controller
         }
     }
 
+    public function exitbanksoal(){
+        session()->forget(['perexamid', 'perexamname']);
+
+        return redirect()->route('admin.exams.manage.view', session('examid'));
+    }
+
 
 
 
