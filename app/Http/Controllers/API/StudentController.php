@@ -20,6 +20,16 @@ class StudentController extends Controller
 
             $students = Student::with(['grade', 'user'])
                 ->where('school_id', $schoolId)
+                ->join('grades', 'students.grade_id', '=', 'grades.id')
+                ->select('students.*')
+                ->orderByRaw("
+                    CASE
+                        WHEN grades.name LIKE 'XII%' THEN 1
+                        WHEN grades.name LIKE 'XI%' THEN 2
+                        WHEN grades.name LIKE 'X%' THEN 3
+                        ELSE 4
+                    END
+                ")
                 ->get()
                 ->map(function ($student) use ($examId) {
                     $student->is_assigned = $student->user &&
@@ -27,6 +37,13 @@ class StudentController extends Controller
                                   ->where('exam_id', $examId)
                                   ->exists();
                     return $student;
+                })
+                ->sort(function ($a, $b) {
+                    // Sort by assignment status (assigned students first)
+                    if ($a->is_assigned !== $b->is_assigned) {
+                        return $b->is_assigned - $a->is_assigned;
+                    }
+                    return 0;
                 });
 
             return StudentResource::collection($students);
