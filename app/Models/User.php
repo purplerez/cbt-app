@@ -9,7 +9,7 @@ use Illuminate\Notifications\Notifiable;
 // use Laravel\Sanctum\Contracts\HasApiTokens;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable
 {
@@ -49,5 +49,18 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get all exam sessions for the user.
+     */
+    public function examSessions(): HasMany
+    {
+        return $this->hasMany(ExamSession::class);
+    }
+
+    public function preassigned(): HasMany
+    {
+        return $this->hasMany(Preassigned::class);
     }
 }

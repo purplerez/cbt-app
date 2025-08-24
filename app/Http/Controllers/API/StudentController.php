@@ -9,7 +9,9 @@ use App\Models\Student;
 use App\Models\Exam;
 use App\Models\Preassigned;
 use App\Models\User;
+use App\Models\ExamSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class StudentController extends Controller
 {
@@ -97,6 +99,99 @@ class StudentController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal menambahkan siswa ke ujian'
+            ], 500);
+        }
+    }
+
+    public function getExamParticipants($examId)
+    {
+        try {
+            $schoolId = request()->query('school_id');
+
+            $query = Student::with(['grade', 'user', 'user.examSessions' => function($query) use ($examId) {
+                $query->where('exam_id', $examId)
+                      ->orderBy('updated_at', 'desc');
+            }])
+            ->whereHas('user.preassigned', function($query) use ($examId) {
+                $query->where('exam_id', $examId);
+            });
+
+            if ($schoolId) {
+                $query->where('school_id', $schoolId);
+            }
+
+            $participants = $query->get()
+                ->map(function ($student) use ($examId) {
+                    $lastSession = $student->user->examSessions
+                        ->where('exam_id', $examId)
+                        ->first();
+
+                    return [
+                        'id' => $student->id,
+                        'nis' => $student->nis,
+                        'name' => $student->name,
+                        'grade' => $student->grade->name,
+                        'last_activity' => $lastSession ? [
+                            'status' => $lastSession->status,
+                            'start_time' => $lastSession->started_at,
+                            'submit_time' => $lastSession->submited_at,
+                            'time_remaining' => $lastSession->time_remaining,
+                            'score' => $lastSession->total_score,
+                            'attempt' => $lastSession->attempt_number,
+                            'ip' => $lastSession->ip_address
+                        ] : null
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data' => $participants
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching participants: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function getExamStats($examId)
+    {
+        try {
+            $schoolId = request()->query('school_id');
+
+            $query = Preassigned::where('exam_id', $examId)
+                ->join('users', 'preassigneds.user_id', '=', 'users.id')
+                ->join('students', 'users.id', '=', 'students.user_id');
+
+            if ($schoolId) {
+                $query->where('students.school_id', $schoolId);
+            }
+
+            $totalParticipants = $query->count();
+
+            $stats = [
+                'total_participants' => $totalParticipants,
+                'active_participants' => ExamSession::where('exam_id', $examId)
+                    ->where('status', 'progress')
+                    ->whereIn('user_id', $query->pluck('users.id'))
+                    ->count(),
+                'submitted_participants' => ExamSession::where('exam_id', $examId)
+                    ->where('status', 'submited')
+                    ->whereIn('user_id', $query->pluck('users.id'))
+                    ->count()
+            ];
+
+            return response()->json([
+                'success' => true,
+                'data' => $stats
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error fetching stats: ' . $e->getMessage()
             ], 500);
         }
     }

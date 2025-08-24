@@ -34,6 +34,13 @@
                                         </svg>
                                         Peserta
                                     </button>
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="logujian">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-width="2" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path stroke-linecap="round" stroke-width="2" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        Log Ujian
+                                    </button>
                                    {{--  <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"> --}}
                                         <a href="{{route('admin.exams.question.exit')}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun">
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -375,17 +382,73 @@
                                 </div>
                             </div>
 
-                            <!-- Kepala Sekolah Tab -->
-                            <div class="hidden tab-pane" id="kepala">
+                            <!-- Log Ujian Tab -->
+                            <div class="hidden tab-pane" id="logujian">
                                 <div class="bg-white rounded-lg shadow">
+                                    <!-- Hidden exam ID field -->
+                                    <input type="hidden" id="current-exam-id" value="{{ session('perexamid') }}">
+
                                     @if(session('success'))
                                         <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
                                     @endif
-                                    <div class="p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Kepala Sekolah</h3>
-                                    </div>
-                                    <div class="p-4">
 
+                                    <input type="hidden" id="current-exam-id" value="{{ session('perexamid') }}">
+
+                                    <!-- Statistics Cards -->
+                                    <div class="grid grid-cols-1 gap-4 p-4 sm:grid-cols-3">
+                                        <div class="p-4 bg-white rounded-lg shadow">
+                                            <h3 class="text-lg font-semibold text-gray-700">Total Peserta</h3>
+                                            <p id="total-participants" class="text-2xl font-bold text-blue-600">0</p>
+                                        </div>
+                                        <div class="p-4 bg-white rounded-lg shadow">
+                                            <h3 class="text-lg font-semibold text-gray-700">Peserta Aktif</h3>
+                                            <p id="active-participants" class="text-2xl font-bold text-green-600">0</p>
+                                        </div>
+                                        <div class="p-4 bg-white rounded-lg shadow">
+                                            <h3 class="text-lg font-semibold text-gray-700">Sudah Submit</h3>
+                                            <p id="submitted-participants" class="text-2xl font-bold text-gray-600">0</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Filter Section -->
+                                    <div class="p-4 border-b">
+                                        <div class="flex items-center justify-between">
+                                            <h3 class="text-lg font-medium">Log Aktifitas Peserta</h3>
+                                            <div class="w-64">
+                                                <label for="school_filter_logs" class="block text-sm font-medium text-gray-700">Filter Sekolah</label>
+                                                <select id="school_filter_logs" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                                                    <option value="">Semua Sekolah</option>
+                                                    @foreach($schools as $school)
+                                                        <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Log Table -->
+                                    <div class="p-4">
+                                        <div class="overflow-x-auto">
+                                            <table class="min-w-full divide-y divide-gray-200">
+                                                <thead class="bg-gray-50">
+                                                    <tr>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aktifitas Terakhir</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="participant-logs-body" class="bg-white divide-y divide-gray-200">
+                                                    <!-- Data will be populated by JavaScript -->
+                                                    <tr>
+                                                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                                                            Memuat data...
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -678,6 +741,8 @@
 </div>
 
 @push('scripts')
+<!-- Participant Logs Management -->
+<script src="{{ asset('js/participant-logs.js') }}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const schoolDropdown = document.getElementById('school_filter');
@@ -1094,9 +1159,6 @@ function openEditSoalModal(questionId) {
                 showTab(tabId);
             });
         });
-
-        // Initialize forms
-        initializeForms();
     });
 
         function showTab(tabId) {
