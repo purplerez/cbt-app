@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ExamLogResource;
 use App\Models\Student;
 use App\Models\Exam;
 use App\Models\ExamLog;
@@ -18,10 +19,10 @@ class ExamlogController extends Controller
                                 ->where('exam_id', session('perexamid'))
                                 ->first();
 
-            $log = ExamLog::where('session_id', $session->id)->get();
+            $log = ExamLog::with('examsession.user')->where('session_id', $session->id)->get();
 
             // Log
-            // return Student
+            return ExamLogResource::collection($log);
         }
         catch(\Exception $e){
             return response()->json([
