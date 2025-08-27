@@ -129,6 +129,7 @@ class StudentController extends Controller
 
                     return [
                         'id' => $student->id,
+                        'user_id' => $student->user_id,
                         'nis' => $student->nis,
                         'name' => $student->name,
                         'grade' => $student->grade->name,
