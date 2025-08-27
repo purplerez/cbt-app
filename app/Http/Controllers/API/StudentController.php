@@ -7,6 +7,7 @@ use App\Http\Resources\StudentResource;
 use App\Models\School;
 use App\Models\Student;
 use App\Models\Exam;
+use App\Models\ExamLog;
 use App\Models\Preassigned;
 use App\Models\User;
 use App\Models\ExamSession;
@@ -187,7 +188,6 @@ class StudentController extends Controller
                 'success' => true,
                 'data' => $stats
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
