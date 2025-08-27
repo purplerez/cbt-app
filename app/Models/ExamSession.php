@@ -42,4 +42,8 @@ class ExamSession extends Model
     {
         return $this->belongsTo(Exam::class);
     }
+
+    public function ExamLogs(){
+        return $this->hasMany(ExamLog::class);
+    }
 }
