@@ -10,6 +10,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -62,5 +63,10 @@ class User extends Authenticatable
     public function preassigned(): HasMany
     {
         return $this->hasMany(Preassigned::class);
+    }
+
+    public function student():HasOne
+    {
+        return $this->hasOne(Student::class);
     }
 }
