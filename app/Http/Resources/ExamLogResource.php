@@ -23,6 +23,9 @@ class ExamLogResource extends JsonResource
             'user_agent' => $this->user_agent,
             'device' => $this->device,
             'created_at' => $this->created_at,
+            'user' => [
+                'id' => $this->examsession->user->id,
+            ],
         ];
     }
 }

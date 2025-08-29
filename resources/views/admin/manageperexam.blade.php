@@ -454,16 +454,14 @@
                             </div>
 
                             <!-- Subjects Tab -->
-                            <div class="hidden tab-pane" id="subjects">
+                            <div class="hidden tab-pane" id="detaillog">
                                 <div class="bg-white rounded-lg shadow">
                                     @if(session('success'))
                                         <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
                                     @endif
                                     <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Mata Pelajaran</h3>
-                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSubjectModal">
-                                            + Tambah Mapel
-                                        </button>
+                                        <h3 class="text-lg font-medium">Detail Log Peserta</h3>
+
                                     </div>
                                     <div class="p-4">
                                         <div class="overflow-x-auto">
