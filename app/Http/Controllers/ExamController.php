@@ -104,6 +104,8 @@ class ExamController extends Controller
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
                 'duration' => 'required|integer',
                 'total_quest' => 'required|integer',
                 'score_minimal' => 'required|integer',
