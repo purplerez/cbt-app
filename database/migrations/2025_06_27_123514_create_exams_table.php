@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('exam_type_id')->constrained('exam_types')->nullable();
             $table->string('title');
             $table->text('description')->nullable();
+            $table->datetime('start_date')->nullable();
+            $table->datetime('end_date')->nullable();
             $table->integer('duration')->nullable();
             $table->integer('total_quest')->nullable();
             $table->integer('score_minimal')->nullable();

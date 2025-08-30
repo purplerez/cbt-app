@@ -19,8 +19,8 @@ return new class extends Migration
             $table->foreignId('grade_id')->nullable()->constrained('grades');
             $table->dateTime('start_time');
             $table->dateTime('end_time');
-            $table->boolean('is_active')->default(true);
-            $table->boolean('is_global')->default(false);
+            $table->enum('is_active', ['1','0'])->default('1');
+            $table->enum('is_global', ['1','0'])->default('0');
             $table->timestamps();
         });
     }
