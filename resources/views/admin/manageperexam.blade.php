@@ -41,6 +41,13 @@
                                         </svg>
                                         Log Ujian
                                     </button>
+                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="nilaiujian">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-width="2" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                                            <path stroke-linecap="round" stroke-width="2" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                                        </svg>
+                                        Nilai
+                                    </button>
                                    {{--  <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"> --}}
                                         <a href="{{route('admin.exams.question.exit')}}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" title="Non-aktifkan Akun">
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -453,7 +460,7 @@
                                 </div>
                             </div>
 
-                            <!-- Subjects Tab -->
+                            <!-- Detail Log Tab -->
                             <div class="hidden tab-pane" id="detaillog">
                                 <div class="bg-white rounded-lg shadow">
                                     @if(session('success'))
@@ -479,264 +486,6 @@
             </div>
         </div>
     </div>
-
-<!-- Add Siswa Modal -->
-<div id="" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Siswa Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addSiswaModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            {{-- <form  class="mt-4"> --}}
-                <form id="addSiswaForm" class="mt-4" action="{{ route('admin.students.store') }}" method="post" enctype="multipart/form-data">
-                        @csrf
-                        {{-- @if (session('error'))
-                            <div class="mb-4 text-red-600">
-                                {{ session('error') }}
-                            </div>
-                        @endif --}}
-                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
-                            <div>
-                            <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
-                            <input type="text" name="nis" id="nis" value="{{ old('nis') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('nis')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="grade_id" class="block text-sm font-medium text-gray-700">Kelas</label>
-                            <select name="grade_id" id="grade_id" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Kelas</option>
-
-                                    <option value="0">Name</option>
-
-                            </select>
-                            <x-input-error :messages="$errors->get('grade_id')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                            <select name="gender" id="gender" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                    <option value="L">Laki - Laki</option>
-                                    <option value="P">Perempuan</option>
-                            </select>
-                            <x-input-error :messages="$errors->get('gender')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="p_birth" class="block text-sm font-medium text-gray-700">Tempat Lahir</label>
-                            <input type="text" name="p_birth" id="p_birth" value="{{ old('p_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('p_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="d_birth" class="block text-sm font-medium text-gray-700">Tanggal Lahir</label>
-                            <input type="date" name="d_birth" id="d_birth" value="{{ old('d_birth') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('d_birth')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                            <input type="file" name="photo" id="photo"  required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('photo')" class="mt-1" />
-                        </div>
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                            <textarea name="address" id="address" rows="3" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('address') }}</textarea>
-                            <x-input-error :messages="$errors->get('address')" class="mt-1" />
-                        </div>
-                        {{-- <input type="hidden" name="school_id" value="{{ $school->id }}"> --}}
-
-
-
-                        {{-- <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Sekolah</label>
-                            <select name="school_id" id="school_id" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                <option value="">Pilih Sekolah</option>
-                                @foreach ($schools as $school)
-                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
-                                @endforeach
-                            </select>
-                            <x-input-error :messages="$errors->get('school_id')" class="mt-1" />
-                        </div> --}}
-
-                        <!-- Tombol Submit -->
-                        <div class="pt-4">
-                            <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Simpan Data
-                            </button>
-                        </div>
-                    </form>
-            {{-- </form> --}}
-        </div>
-    </div>
-</div>
-
-<!-- Add Subject Modal -->
-<div id="addSubjectModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Mata Pelajaran Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addSubjectModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            {{-- <form  class="mt-4"> --}}
-                <form id="addSubjectForm" class="mt-4" action="{{ route('admin.subjects.store') }}" method="post" enctype="multipart/form-data">
-                       @csrf
-                        {{-- @if (session('error'))
-                            <div class="mb-4 text-red-600">
-                                {{ session('error') }}
-                            </div>
-                        @endif --}}
-                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
-                        </div>
-
-                         <div>
-                            <label for="code" class="block text-sm font-medium text-gray-700">Code</label>
-                            <input type="text" name="code" id="code" value="{{ old('code') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('code')" class="mt-1" />
-                        </div>
-
-
-                        <!-- Tombol Submit -->
-                        <div class="pt-4">
-                            <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Simpan Data
-                            </button>
-                        </div>
-                    </form>
-            {{-- </form> --}}
-        </div>
-    </div>
-</div>
-
-
-<!-- Add Guru Modal -->
-<div id="addGuruModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Guru Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <form id="addGuruForm" class="mt-4" action="{{ route('admin.teachers.store') }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                        <input type="text" id="nip" name="nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input type="text" id="name" name="name" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select name="gender" id="gender" required
-                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="L">Laki - Laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('gender')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="address" name="address" rows="3" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                        <x-input-error :messages="$errors->get('address')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="photo" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('photo')" class="mt-1" />
-                    </div>
-                </div>
-                <div class="flex justify-end mt-6 space-x-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeModal('addGuruModal')">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-
-
-<!-- Non Aktifkan Sekolah Modal -->
-<div id="nonAktifModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Sekolah</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('nonAktifModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            {{-- <form  class="mt-4"> --}}
-                <form id="nonAktifForm" class="mt-4" action="{{ route('admin.school.inactive') }}" method="post" enctype="multipart/form-data">
-                        @csrf
-
-                        <!-- Tombol Submit -->
-                        <p class="text-sm text-gray-700">Apakah Anda yakin ingin menonaktifkan <strong>{{ strtoupper(session('school_name')) }}</strong> ini?</p>
-                        <div class="pt-4">
-                            <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-red-600 rounded hover:bg-red-700">
-                                Lanjut Non-Aktifkan
-                            </button>
-                            {{-- tombol batal --}}
-                            <button type="button" class="w-full px-4 py-2 mt-2 text-white transition bg-gray-600 rounded hover:bg-gray-700" onclick="closeModal('nonAktifModal')">
-                                Batal
-                            </button>
-                        </div>
-                    </form>
-            {{-- </form> --}}
-        </div>
-    </div>
-</div>
 
 @push('scripts')
 <!-- Participant Logs Management -->

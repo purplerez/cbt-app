@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\API\ExamController;
 use App\Http\Controllers\api\ExamlogController;
+use App\Http\Controllers\api\ParticipantController;
 use App\Http\Controllers\API\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
     Route::apiResource('exams', ExamController::class);
@@ -20,8 +22,9 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.
     // logs
     Route::get('/exams/{userId}/Logs', [ExamlogController::class, 'getAllLogs']);
 });
+
 Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function() {
-    // Route::get('/dashboard', [SiswaController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [ParticipantController::class, 'index'])->name('dashboard');
 
 });
 
