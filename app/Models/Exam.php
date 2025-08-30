@@ -12,6 +12,8 @@ class Exam extends Model
         // 'subject_id',
         'title',
         'description',
+        'start_date',
+        'end_date',
         'duration',
         'total_quest',
         'score_minimal',

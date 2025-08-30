@@ -271,6 +271,18 @@
                             <x-input-error :messages="$errors->get('description')" class="mt-1" />
                         </div>
                         <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-700">Tanggal Ujian</label>
+                            <input type="datetime-local" name="start_date" id="start_date" value="{{ old('start_date') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('start_date')" class="mt-1" />
+                        </div>
+                         <div>
+                            <label for="duration" class="block text-sm font-medium text-gray-700">Tanggal Akhir Ujian</label>
+                            <input type="datetime-local" name="end_date" id="end_date" value="{{ old('end_date') }}" required
+                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                            <x-input-error :messages="$errors->get('end_date')" class="mt-1" />
+                        </div>
+                        <div>
                             <label for="duration" class="block text-sm font-medium text-gray-700">Durasi</label>
                             <input type="number" name="duration" id="duration" value="{{ old('duration') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
