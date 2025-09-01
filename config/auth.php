@@ -41,8 +41,8 @@ return [
             'provider' => 'users',
         ],
 
-        'student' => [
-            'driver' => 'session',
+        'api' => [
+            'driver' => 'sanctum',
             'provider' => 'users',
         ],
     ],

@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Controllers\api\AuthController;
 use App\Http\Controllers\API\ExamController;
 use App\Http\Controllers\api\ExamlogController;
 use App\Http\Controllers\api\ParticipantController;
 use App\Http\Controllers\API\StudentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
+Route::post('/login', [AuthController::class, 'login']);
 
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
