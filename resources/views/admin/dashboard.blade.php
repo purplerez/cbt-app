@@ -18,15 +18,29 @@
 
 @push('scripts')
     <script>
-        fetch("/api/admin/exams/1/participants", {
-            headers: {
-                "Authorization": "Bearer " + window.apiToken,
-                "Accept": "application/json"
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            console.log("API Result (Dashboard):", data);
-        });
+        if (!window.apiToken) {
+            console.error("API Token not found");
+        } else {
+            console.log("API Token (Dashboard):", window.apiToken);
+
+            fetch("/api/admin/exams/1/participants", {
+                    headers: {
+                        "Authorization": "Bearer " + window.apiToken,
+                        "Accept": "application/json"
+                    }
+                })
+                .then(res => {
+                    if (!res.ok) {
+                        throw new Error(`HTTP error! status: ${res.status}`);
+                    }
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("API Result (Dashboard):", data);
+                })
+                .catch(error => {
+                    console.error("API Error:", error);
+                });
+        }
     </script>
 @endpush
