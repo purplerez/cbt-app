@@ -31,22 +31,9 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
-        // dd([
-        //     'user_id' => $user->id,
-        //     'user_email' => $user->email,
-        //     'all_roles' => $user->getRoleNames()->toArray(),
-        //     'roles_collection' => $user->roles->pluck('name')->toArray(),
-        //     'has_admin' => $user->hasRole('admin'),
-        //     'has_guru' => $user->hasRole('guru'),
-        //     'has_siswa' => $user->hasRole('siswa'),
-        //     'has_kepala' => $user->hasRole('kepala'),
-        //     'direct_role_check' => [
-        //         'admin' => $user->roles->contains('name', 'admin'),
-        //         'guru' => $user->roles->contains('name', 'guru'),
-        //         'siswa' => $user->roles->contains('name', 'siswa'),
-        //         'kepala' => $user->roles->contains('name', 'kepala'),
-        //     ]
-        // ]);
+        //sanctum token
+        $token = $user->createToken('dashboard-token')->plainTextToken;
+        session(['api-token' => $token]);
 
         if($user->hasRole('admin')){
                return redirect()->route('admin.dashboard');
@@ -67,6 +54,7 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $request->user()->tokens()->delete();
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();

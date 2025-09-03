@@ -35,8 +35,13 @@
             <main>
                 {{ $slot }}
             </main>
+            
         </div>
 
         @stack('scripts')
+        <script>
+            window.apiToken = "{{ session('api_token') }}";
+        </script>
+
     </body>
 </html>
