@@ -12,6 +12,8 @@ class Exam extends Model
         // 'subject_id',
         'title',
         'description',
+        'start_date',
+        'end_date',
         'duration',
         'total_quest',
         'score_minimal',
@@ -37,5 +39,10 @@ class Exam extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function examType()
+    {
+        return $this->belongsTo(Examtype::class);
     }
 }

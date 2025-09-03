@@ -15,3 +15,18 @@
         </div>
     </div>
 </x-app-layout>
+
+@push('scripts')
+    <script>
+        fetch("/api/admin/exams/1/participants", {
+            headers: {
+                "Authorization": "Bearer " + window.apiToken,
+                "Accept": "application/json"
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            console.log("API Result (Dashboard):", data);
+        });
+    </script>
+@endpush

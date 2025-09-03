@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         participants.forEach(participant => {
             const lastActivity = participant.last_activity;
             const row = document.createElement('tr');
-            
+
             row.innerHTML = `
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.nis}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.name}</td>
@@ -82,10 +82,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${lastActivity?.progress ? lastActivity.progress + '%' : '-'}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                    ${lastActivity?.time ? formatDateTime(lastActivity.time) : '-'}
+                   <button type="button" data-tab="detaillog" data-id="${participant.user_id}" class="text-blue-600 hover:text-blue-900"> Lihat Detail</button>
                 </td>
             `;
-            
+
             tbody.appendChild(row);
         });
     }
