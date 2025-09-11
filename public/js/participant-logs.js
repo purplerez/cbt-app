@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const schoolDropdown = document.getElementById('school_filter_logs');
     const examIdElement = document.getElementById('current-exam-id');
 
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetchParticipants();
 
         // Add event listener for school filter
-        schoolDropdown.addEventListener('change', function() {
+        schoolDropdown.addEventListener('change', function () {
             fetchStats();
             fetchParticipants();
         });
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchStats() {
         const schoolId = schoolDropdown.value;
-        fetch(`/api/exams/${examId}/stats${schoolId ? `?school_id=${schoolId}` : ''}`)
+        fetch(`/api/admin/exams/${examId}/stats${schoolId ? `?school_id=${schoolId}` : ''}`)
             .then(response => response.json())
             .then(response => {
                 if (response.success) {
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchParticipants() {
         const schoolId = schoolDropdown.value;
-        fetch(`/api/exams/${examId}/participants${schoolId ? `?school_id=${schoolId}` : ''}`)
+        fetch(`/api/admin/exams/${examId}/participants${schoolId ? `?school_id=${schoolId}` : ''}`)
             .then(response => response.json())
             .then(response => {
                 if (response.success) {
