@@ -38,21 +38,48 @@ class UserSeeder extends Seeder
                 'email_verified_at' => now()
             ]
         );
-        
+
         // Clear and reassign role
         $admin->syncRoles([]); // Clear existing roles
         $admin->assignRole('admin');
 
         // Create users with specific roles
-        foreach (['kepala', 'guru', 'siswa'] as $role) {
-            User::factory(3)->create([
-                'role' => $role,
-                'is_active' => 1,
-                'email_verified_at' => now()
-            ])->each(function ($user) use ($role) {
+        $userData = [
+            'kepala' => [
+                ['name' => 'Kepala Sekolah 1', 'email' => 'kepala1@gmail.com'],
+                ['name' => 'Kepala Sekolah 2', 'email' => 'kepala2@gmail.com'],
+                ['name' => 'Kepala Sekolah 3', 'email' => 'kepala3@gmail.com'],
+            ],
+            'guru' => [
+                ['name' => 'Guru Matematika', 'email' => 'guru1@gmail.com'],
+                ['name' => 'Guru Bahasa Indonesia', 'email' => 'guru2@gmail.com'],
+                ['name' => 'Guru Bahasa Inggris', 'email' => 'guru3@gmail.com'],
+            ],
+            'siswa' => [
+                ['name' => 'Ahmad Rizki', 'email' => 'siswa1@gmail.com'],
+                ['name' => 'Siti Nurhaliza', 'email' => 'siswa2@gmail.com'],
+                ['name' => 'Budi Santoso', 'email' => 'siswa3@gmail.com'],
+                ['name' => 'Dewi Sartika', 'email' => 'siswa4@gmail.com'],
+                ['name' => 'Muhammad Fauzi', 'email' => 'siswa5@gmail.com'],
+            ]
+        ];
+
+        foreach ($userData as $role => $users) {
+            foreach ($users as $userData) {
+                $user = User::firstOrCreate(
+                    ['email' => $userData['email']],
+                    [
+                        'name' => $userData['name'],
+                        'password' => bcrypt('12345678'),
+                        'role' => $role,
+                        'is_active' => 1,
+                        'email_verified_at' => now()
+                    ]
+                );
+
                 $user->syncRoles([]); // Clear any existing roles
                 $user->assignRole($role);
-            });
+            }
         }
 
         /* Verify role assignments
