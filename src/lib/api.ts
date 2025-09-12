@@ -1,16 +1,17 @@
 import axios from 'axios';
 
 const api = axios.create({
-     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000/api',
+     baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
      timeout: 10000,
 });
 
-// Request interceptor
 api.interceptors.request.use(
      (config) => {
-          const token = localStorage.getItem('auth_token');
-          if (token) {
-               config.headers.Authorization = `Bearer ${token}`;
+          if (typeof window !== 'undefined') {
+               const token = localStorage.getItem('api_token');
+               if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+               }
           }
           return config;
      },
@@ -19,13 +20,19 @@ api.interceptors.request.use(
      }
 );
 
-// Response interceptor
 api.interceptors.response.use(
-     (response) => response,
+     (response) => {
+          if (response.data && response.data.data !== undefined) {
+               response.data = response.data.data;
+          }
+          return response;
+     },
      (error) => {
           if (error.response?.status === 401) {
-               localStorage.removeItem('auth_token');
-               window.location.href = '/login';
+               if (typeof window !== 'undefined') {
+                    localStorage.removeItem('api_token');
+                    window.location.href = '/';
+               }
           }
           return Promise.reject(error);
      }
