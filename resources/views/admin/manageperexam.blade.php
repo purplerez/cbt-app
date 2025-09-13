@@ -733,7 +733,7 @@
                 // Global variable to store current answer keys
                 let currentAnswerKeys = {};
                 // Global variable to store current answer keys
-                let currentAnswerKeys = {};
+               // let currentAnswerKeys = {};
 
                 function updateAnswerKey(input, questionId) {
                     if (!currentAnswerKeys[questionId]) {
