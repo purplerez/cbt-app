@@ -22,9 +22,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    function getApiToken(){
+        const tokenMeta = document.querySelector('meta[name="api_token"]');
+        if (tokenMeta) {
+            const token = tokenMeta.getAttribute('content');
+            if (token && token.trim() !== '') {
+                return token;
+            }
+        }
+
+        if(window.apiToken && window.apiToken.trim() !== '') {
+            return window.apiToken;
+        }
+
+        return null;
+    }
+
     function fetchStats() {
         const schoolId = schoolDropdown.value;
-        fetch(`/api/admin/exams/${examId}/stats${schoolId ? `?school_id=${schoolId}` : ''}`)
+        const token = getApiToken();
+
+        if(!token) {
+            console.error('No API token found');
+            alert('Error: No API token found. Please login again.');
+            return;
+        }
+        fetch(`/api/admin/exam/${examId}/stats${schoolId ? `?school_id=${schoolId}` : ''}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
             .then(response => response.json())
             .then(response => {
                 if (response.success) {
@@ -38,7 +69,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function fetchParticipants() {
         const schoolId = schoolDropdown.value;
-        fetch(`/api/admin/exams/${examId}/participants${schoolId ? `?school_id=${schoolId}` : ''}`)
+        const token = getApiToken();
+
+        if(!token) {
+            console.error('No API token found');
+            alert('Error: No API token found. Please login again.');
+            return;
+        }
+
+        fetch(`/api/admin/exam/${examId}/participants${schoolId ? `?school_id=${schoolId}` : ''}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
             .then(response => response.json())
             .then(response => {
                 if (response.success) {
