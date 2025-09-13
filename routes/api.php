@@ -23,7 +23,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.
 
 
     // logs
-    Route::get('/exams/{userId}/Logs', [ExamlogController::class, 'getAllLogs']);
+    Route::get('/admin/exam/{examId}/participant/{userId}/logs', [ExamController::class, 'getParticipantLogs']);
 });
 
 
