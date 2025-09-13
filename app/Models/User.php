@@ -27,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'is_active',
     ];
 
     /**
@@ -65,7 +66,7 @@ class User extends Authenticatable
         return $this->hasMany(Preassigned::class);
     }
 
-    public function student():HasOne
+    public function student(): HasOne
     {
         return $this->hasOne(Student::class);
     }

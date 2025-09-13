@@ -1,8 +1,8 @@
 // Handle school dropdown changes
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const schoolDropdown = document.getElementById('school_filter');
     if (schoolDropdown) {
-        schoolDropdown.addEventListener('change', function() {
+        schoolDropdown.addEventListener('change', function () {
             const schoolId = this.value;
             if (schoolId) {
                 fetchStudents(schoolId);
@@ -12,6 +12,23 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+function getApiToken() {
+    const tokenMeta = document.querySelector('meta[name="api_token"]');
+    if (tokenMeta) {
+        const token = tokenMeta.getAttribute('content');
+        if (token && token.trim() !== '') {
+            return token;
+        }
+    }
+
+    // Fallback to check if token is available globally
+    if (window.apiToken && window.apiToken.trim() !== '') {
+        return window.apiToken;
+    }
+
+    return null;
+}
 
 function getExamId() {
     // Try to get exam ID from session or data attribute
@@ -31,13 +48,48 @@ function fetchStudents(schoolId) {
         return;
     }
 
-    console.log('Fetching students for school:', schoolId, 'exam:', examId);
+    const token = getApiToken();
+    if (!token) {
+        console.error('No API token found');
+        alert('Error: No API token found. Please login again.');
+        return;
+    }
 
-    fetch(`/api/schools/${schoolId}/students?exam_id=${examId}`)
+    console.log('Fetching students for school:', schoolId, 'exam:', examId);
+    console.log('Using token:', token ? 'Token available' : 'No token');
+
+    const url = `/api/admin/schools/${schoolId}/students?exam_id=${examId}`;
+    console.log('Request URL:', url);
+
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        }
+    })
         .then(response => {
+            console.log('Response status:', response.status);
+            console.log('Response content-type:', response.headers.get('content-type'));
+
             if (!response.ok) {
-                throw new Error('Network response was not ok');
+                return response.text().then(text => {
+                    console.log('Error response body:', text);
+                    throw new Error(`HTTP ${response.status}: ${response.statusText} - ${text.substring(0, 200)}`);
+                });
             }
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                return response.text().then(text => {
+                    console.log('Non-JSON response:', text);
+                    throw new Error('Server returned non-JSON response: ' + text.substring(0, 200));
+                });
+            }
+
             return response.json();
         })
         .then(data => {
@@ -55,7 +107,7 @@ function updateStudentList(response) {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    
+
     // Handle the Laravel Resource response structure
     const students = response.data || [];
 
@@ -73,11 +125,11 @@ function updateStudentList(response) {
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.grade?.name || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 ${isAssigned ?
-                    '<span class="text-green-600">Sudah Terdaftar</span>' :
-                    `<button type="button" onclick="addStudentToExam(${student.id})" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                '<span class="text-green-600">Sudah Terdaftar</span>' :
+                `<button type="button" onclick="addStudentToExam(${student.id})" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                         Tambah ke Ujian
                     </button>`
-                }
+            }
             </td>
         `;
         tbody.appendChild(row);
@@ -98,10 +150,19 @@ function addStudentToExam(studentId) {
         return;
     }
 
-    fetch('/api/exams/add-student', {
+    const token = getApiToken();
+    if (!token) {
+        console.error('No API token found');
+        alert('Error: No API token found. Please login again.');
+        return;
+    }
+
+    fetch('/api/admin/exams/add-student', {
         method: 'POST',
         headers: {
+            'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
         body: JSON.stringify({
@@ -109,26 +170,26 @@ function addStudentToExam(studentId) {
             student_id: studentId
         })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            alert('Siswa berhasil ditambahkan ke ujian');
-            // Refresh the student list
-            const schoolId = document.getElementById('school_filter').value;
-            if (schoolId) {
-                fetchStudents(schoolId);
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
-        } else {
-            throw new Error(data.message || 'Gagal menambahkan siswa ke ujian');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message);
-    });
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Siswa berhasil ditambahkan ke ujian');
+                // Refresh the student list
+                const schoolId = document.getElementById('school_filter').value;
+                if (schoolId) {
+                    fetchStudents(schoolId);
+                }
+            } else {
+                throw new Error(data.message || 'Gagal menambahkan siswa ke ujian');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+        });
 }

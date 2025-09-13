@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\API;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
@@ -37,8 +37,8 @@ class StudentController extends Controller
                 ->map(function ($student) use ($examId) {
                     $student->is_assigned = $student->user &&
                         Preassigned::where('user_id', $student->user->id)
-                                  ->where('exam_id', $examId)
-                                  ->exists();
+                        ->where('exam_id', $examId)
+                        ->exists();
                     return $student;
                 })
                 ->sort(function ($a, $b) {
@@ -77,8 +77,9 @@ class StudentController extends Controller
 
             // Check if student is already assigned to exam
             if (Preassigned::where('user_id', $user->id)
-                         ->where('exam_id', $exam->id)
-                         ->exists()) {
+                ->where('exam_id', $exam->id)
+                ->exists()
+            ) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Siswa sudah terdaftar dalam ujian ini'
@@ -95,7 +96,6 @@ class StudentController extends Controller
                 'success' => true,
                 'message' => 'Siswa berhasil ditambahkan ke ujian'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -109,13 +109,13 @@ class StudentController extends Controller
         try {
             $schoolId = request()->query('school_id');
 
-            $query = Student::with(['grade', 'user', 'user.examSessions' => function($query) use ($examId) {
+            $query = Student::with(['grade', 'user', 'user.examSessions' => function ($query) use ($examId) {
                 $query->where('exam_id', $examId)
-                      ->orderBy('updated_at', 'desc');
+                    ->orderBy('updated_at', 'desc');
             }])
-            ->whereHas('user.preassigned', function($query) use ($examId) {
-                $query->where('exam_id', $examId);
-            });
+                ->whereHas('user.preassigned', function ($query) use ($examId) {
+                    $query->where('exam_id', $examId);
+                });
 
             if ($schoolId) {
                 $query->where('school_id', $schoolId);
@@ -149,7 +149,6 @@ class StudentController extends Controller
                 'success' => true,
                 'data' => $participants
             ]);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
