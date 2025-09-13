@@ -6,6 +6,7 @@ use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
+use App\Http\Controllers\super\DashboardController as SuperController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SchoolController;
@@ -137,5 +138,9 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function() {
     Route::get('/dashboard', [SiswaController::class, 'index'])->name('dashboard');
+});
+
+Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->group(function(){
+    Route::get('/dashboard', [SuperController::class, 'index'])->name('dashboard');
 });
 require __DIR__.'/auth.php';

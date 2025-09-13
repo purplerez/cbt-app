@@ -43,6 +43,8 @@ class AuthenticatedSessionController extends Controller
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('kepala')) {
             return redirect()->route('kepala.dashboard');
+        } elseif ($user->hasRole('super')) {
+            return redirect()->route('super.dashboard');
         }
 
         // return redirect()->intended(route('dashboard', absolute: false));

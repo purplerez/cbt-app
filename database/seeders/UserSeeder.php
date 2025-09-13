@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
 
@@ -20,7 +21,7 @@ class UserSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Create roles with explicit guard
-        $roles = ['admin', 'kepala', 'guru', 'siswa'];
+        $roles = ['admin', 'kepala', 'guru', 'siswa', 'super'];
         foreach ($roles as $role) {
             Role::firstOrCreate([
                 'name' => $role,
@@ -32,8 +33,19 @@ class UserSeeder extends Seeder
             ['email' => 'admin@gmail.com'],
             [
                 'name' => 'Administrator',
-                'password' => bcrypt('12345678'),
+                'password' => Hash::make('12345678'),
                 'role' => 'admin',
+                'is_active' => 1,
+                'email_verified_at' => now()
+            ]
+        );
+
+        $super = User::updateOrCreate(
+            ['email' => 'super@gmail.com'],
+            [
+                'name' => 'Super - Administrator',
+                'password' => Hash::make('12345678'),
+                'role' => 'super',
                 'is_active' => 1,
                 'email_verified_at' => now()
             ]
@@ -42,6 +54,9 @@ class UserSeeder extends Seeder
         // Clear and reassign role
         $admin->syncRoles([]); // Clear existing roles
         $admin->assignRole('admin');
+
+        $super->syncRoles([]); // Clear existing roles
+        $super->assignRole('super');
 
         // Create users with specific roles
         $userData = [

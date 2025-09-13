@@ -69,6 +69,8 @@ class RegisteredUserController extends Controller
         return redirect()->route('siswa.dashboard');
     } elseif ($user->hasRole('kepala')) {
         return redirect()->route('kepala.dashboard');
+    } elseif ($user->hasRole('super')) {
+        return redirect()->route('super.dashboard');
     }
 
     return redirect()->route('siswa.dashboard');
