@@ -21,6 +21,10 @@
                         <x-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                             {{ __('Dashboard') }}
                         </x-nav-link>
+                    @elseif(auth()->user()->hasRole('super'))
+                        <x-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
                     @endif
                     {{-- <a href="{{ route('dashboard') }}">
                         <x-application-logo class="block w-auto text-gray-800 fill-current h-9" />
@@ -82,6 +86,13 @@
                     @elseif (auth()->user()->hasRole('siswa'))
                         <x-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                             {{ __('Siswa Dashboard') }}
+                        </x-nav-link>
+                    @elseif (auth()->user()->hasRole('super'))
+                        <x-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
+                            {{ __('Super Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
+                            {{ __('Sekolah') }}
                         </x-nav-link>
                     @endif
                     {{-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
