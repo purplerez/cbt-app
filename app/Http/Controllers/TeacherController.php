@@ -238,6 +238,7 @@ class TeacherController extends Controller
     }
 
     public function updateHeadmaster(Request $request){
+       //dd($request->all());
         DB::beginTransaction();
         try{
             $validated = $request->validate([
@@ -249,6 +250,7 @@ class TeacherController extends Controller
             ]);
 
             $head = Headmaster::findOrFail($request->h_id);
+            //dd($head->all());
             $head->update([
                 'nip' => $validated['h_nip'],
                 'name' => $validated['h_name'],
@@ -284,8 +286,8 @@ class TeacherController extends Controller
         {
             DB::rollBack();
 
-            return redirect()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
-                     ->with('success', 'Data kepala sekolah berhasil diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+            return redirect()->back()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
+                     ->with('success', 'Data kepala sekolah Gagal diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
         }
     }
 }
