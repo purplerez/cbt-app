@@ -65,6 +65,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('headmasters', [TeacherController::class, 'storeHeadmaster'])->name('head.store');
     Route::get('headmasters/{headmaster}/edit', [TeacherController::class, 'editHeadmaster'])->name('head.edit');
     Route::post('headmasters/update', [TeacherController::class, 'updateHeadmaster'])->name('head.update');
+    Route::delete('headmasters/{headmaster}', [TeacherController::class, 'destroyHeadmaster'])->name('head.destroy');
 
 
     // Route::delete('students/{student}', [StudentController::class, 'destroy'])->name('siswa.destroy');
@@ -142,6 +143,21 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 
 Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->group(function(){
     Route::get('/dashboard', [SuperController::class, 'index'])->name('dashboard');
-    // Route::get('/school', )
+
+    // school management
+    Route::get('/school', [SchoolController::class, 'index'])->name('school');
+    Route::get('inputsekolah', function () {
+        return view('admin.inputsekolah');
+    })->name('inputsekolah');
+    Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
+    Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
+    Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
+    Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
+
+
+    Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
+    Route::get('schools/{school}/manage', [SchoolController::class, 'manageView'])->name('schools.manage.view');
+    Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
+    Route::get('schools/{school}/active', [SchoolController::class, 'active'])->name('school.active');
 });
 require __DIR__.'/auth.php';
