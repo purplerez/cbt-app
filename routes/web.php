@@ -142,5 +142,6 @@ Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->grou
 
 Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->group(function(){
     Route::get('/dashboard', [SuperController::class, 'index'])->name('dashboard');
+    // Route::get('/school', )
 });
 require __DIR__.'/auth.php';

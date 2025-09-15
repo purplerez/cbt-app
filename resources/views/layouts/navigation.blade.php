@@ -91,7 +91,7 @@
                         <x-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
                             {{ __('Super Dashboard') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
+                        <x-nav-link :href="route('super.school')" :active="request()->routeIs('super.school')">
                             {{ __('Sekolah') }}
                         </x-nav-link>
                     @endif
