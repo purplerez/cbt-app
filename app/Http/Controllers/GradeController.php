@@ -36,6 +36,16 @@ class GradeController extends Controller
             'name' => 'required'
         ]);
         try {
+            $roleRoute = [
+                'admin' => 'admin.grades',
+                'super' => 'super.grades'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
+            }
+
             $existingGrade = Grade::where('name', $request->name)->first();
             if ($existingGrade) {
                 throw new \Exception('Tingkat sudah ada');
@@ -49,7 +59,8 @@ class GradeController extends Controller
             Grade::create([
                 'name' => $request->name
             ]);
-            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil ditambahkan ');
+
+            return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil ditambahkan ');
 
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
