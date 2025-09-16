@@ -10,7 +10,14 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
+                @role('admin')
                     <form action="{{ route('admin.examsglobal.store') }}" method="post" enctype="multipart/form-data">
+                @endrole
+
+                @role('super')
+                    <form action="{{ route('super.examsglobal.store') }}" method="post" enctype="multipart/form-data">
+                @endrole
+
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
@@ -24,7 +31,7 @@
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
-                        <div>
+                        {{-- <div>
                             <label for="deskripsi" class="block text-sm font-medium text-gray-700">Deskripsi</label>
                             <textarea name="deskripsi" id="deskripsi" rows="3" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ old('deskripsi') }}</textarea>
@@ -47,7 +54,7 @@
                             <input type="number" name="skor" id="skor" value="{{ old('skor') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('skor')" class="mt-1" />
-                        </div>
+                        </div> --}}
                         <div>
                             <label for="start" class="block text-sm font-medium text-gray-700">Tanggal Mulai</label>
                             <input type="date" name="start" id="start" value="{{ old('start') }}" required

@@ -150,14 +150,45 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
         return view('admin.inputsekolah');
     })->name('inputsekolah');
     Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
-    Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
-    Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
-    Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
-
+    // Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
+    // Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
+    // Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
 
     Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
     Route::get('schools/{school}/manage', [SchoolController::class, 'manageView'])->name('schools.manage.view');
     Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
     Route::get('schools/{school}/active', [SchoolController::class, 'active'])->name('school.active');
+
+    // route for grades management
+    Route::get('grades', [GradeController::class, 'index'])->name('grades');
+    Route::get('grades/create', function ()
+    {
+        return view('admin.inputgrades');
+    })->name('input.grades');
+    Route::post('grades/create', [GradeController::class, 'store'])->name('grades.store');
+    Route::get('grades/{grade}/edit', [GradeController::class, 'edit'])->name('grades.edit');
+    Route::put('grades/{grade}', [GradeController::class, 'update'])->name('grades.update');
+    Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
+
+    // Route for exams management
+    Route::get('exams', [ExamController::class, 'index'])->name('exams');
+    Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
+    Route::post('exams/create',[ExamController::class, 'globalstore'])->name('examsglobal.store');
+    Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
+    Route::get('exams/{exam}/manage',[ExamController::class, 'manageView'])->name('exams.manage.view');
+
+    // add subject in an exam
+    Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
+
+
+    // bank soal
+     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
+    Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
+
+    Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
+    Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
+    Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
+    Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
+
 });
 require __DIR__.'/auth.php';

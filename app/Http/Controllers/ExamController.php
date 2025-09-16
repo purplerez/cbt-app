@@ -37,6 +37,17 @@ class ExamController extends Controller
                 'end' => 'required|date|after_or_equal:start',
             ]);
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams',
+                'super' => 'super.exams',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
 
 
             $validated['school_id'] = null;
@@ -53,7 +64,7 @@ class ExamController extends Controller
                 'is_global' => true,
             ])->save();
 
-            return redirect()->route('admin.exams')->with('success', 'Data Ujian Bersama telah dibuat');
+            return redirect()->route($roleRoutes[$role])->with('success', 'Data Ujian Bersama telah dibuat');
         }
         catch(\Exception $e)
         {
@@ -65,6 +76,17 @@ class ExamController extends Controller
         try{
             $ex = Examtype::findOrFail($exam);
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.view',
+                'super' => 'super.exams.manage.view',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
             // set session exam
             session([
                 'examid' => $ex->id,
@@ -72,11 +94,11 @@ class ExamController extends Controller
                 'is_active' => $ex->is_active,
             ]);
 
-            return redirect()->route('admin.exams.manage.view', $ex);
+            return redirect()->route($roleRoutes[$role], $ex);
         }
         catch(\Exception $e)
         {
-            return redirect()->route('admin.exams')->withErrors(['error' => 'Ujian Gagal di Load : '.$e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Ujian Gagal di Load : '.$e->getMessage()]);
         }
     }
 
@@ -90,12 +112,11 @@ class ExamController extends Controller
             $soal = Question::where('exam_id', session('examid'))->get();
             $exam = Exam::where('exam_type_id', session('examid'))->get();
 
-
             return view('admin.manageexams', compact('soal', 'exam'));
         }
         catch(\Exception $e)
         {
-            return redirect()->route('admin.exams')->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
+            return redirect()->back()->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
         }
     }
 
@@ -115,9 +136,20 @@ class ExamController extends Controller
             $validated['created_by'] = auth()->user()->id;
             $validated['is_active'] = true;
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.view',
+                'super' => 'super.exams.manage.view',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
             Exam::create($validated)->save();
 
-            return redirect()->route('admin.exams.manage.view', session('examid'))
+            return redirect()->route($roleRoutes[$role], session('examid'))
                             ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch (\Exception $e){
