@@ -94,6 +94,12 @@
                         <x-nav-link :href="route('super.school')" :active="request()->routeIs('super.school')">
                             {{ __('Sekolah') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('super.grades')" :active="request()->routeIs('super.grades')">
+                            {{ __('Tingkat') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
+                            {{ __('Jenis Ujian') }}
+                        </x-nav-link>
                     @endif
                     {{-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
