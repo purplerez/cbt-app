@@ -28,7 +28,7 @@
                                         </svg>
                                         Mapel Ujian
                                     </button>
-                                    <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa" @if(session('is_active') == '0') disabled @endif >
+                                    {{-- <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa" @if(session('is_active') == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg>
@@ -51,7 +51,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                         </svg>
                                         Data Mata Pelajaran
-                                    </button>
+                                    </button> --}}
                                     @if(session('is_active') == '0')
                                         {{-- button aktifkan --}}
                                         <a href="{{ route('admin.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
@@ -121,7 +121,14 @@
                                                             {{$exam->is_active}}
                                                         </td> --}}
                                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                            @role('admin')
                                                             <form method="post" action="{{ route('admin.exams.question', $exam->id) }}">
+                                                            @endrole
+
+                                                            @role('super')
+                                                            <form method="post" action="{{ route('super.exams.question', $exam->id) }}">
+                                                            @endrole
+
                                                                 @csrf
                                                                 {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
                                                                 <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
@@ -250,7 +257,12 @@
                 </button>
             </div>
             {{-- <form  class="mt-4"> --}}
+            @role('admin')
                 <form id="addUjianForm" class="mt-4" action="{{ route('admin.exam.store') }}" method="post" enctype="multipart/form-data">
+            @endrole
+            @role('super')
+                <form id="addUjianForm" class="mt-4" action="{{ route('super.exam.store') }}" method="post" enctype="multipart/form-data">
+            @endrole
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
