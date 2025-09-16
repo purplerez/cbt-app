@@ -161,12 +161,24 @@ class ExamController extends Controller
         try{
             $exam = Exam::findOrFail($exam);
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.question',
+                'super' => 'super.exams.manage.question',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
+
             session([
                 'perexamid' => $exam->id,
                 'perexamname' => $exam->title,
             ]);
 
-            return redirect()->route('admin.exams.manage.question', $exam);
+            return redirect()->route($roleRoutes[$role], $exam);
         }
         catch(\Exception $e){
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
