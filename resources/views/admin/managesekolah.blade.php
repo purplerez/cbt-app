@@ -57,7 +57,13 @@
                                     </button>
                                     @if($school->status == '0')
                                         {{-- button aktifkan --}}
-                                        <a href="{{ route('admin.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
+                                        @role('admin')
+                                            <a href="{{ route('admin.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
+                                        @endrole
+
+                                        @role('super')
+                                            <a href="{{ route('super.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
+                                        @endrole
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                             </svg>
@@ -963,7 +969,13 @@
                 </button>
             </div>
             {{-- <form  class="mt-4"> --}}
-                <form id="nonAktifForm" class="mt-4" action="{{ route('admin.school.inactive') }}" method="post" enctype="multipart/form-data">
+                @role('admin')
+                    <form id="nonAktifForm" class="mt-4" action="{{ route('admin.school.inactive') }}" method="post" enctype="multipart/form-data">
+                @endrole
+
+                @role('super')
+                    <form id="nonAktifForm" class="mt-4" action="{{ route('super.school.inactive') }}" method="post" enctype="multipart/form-data">
+                @endrole
                         @csrf
 
                         <!-- Tombol Submit -->

@@ -10,7 +10,12 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <a href="{{ route('admin.input.grades')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @role('admin')
+                        <a href="{{ route('admin.input.grades')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @endrole
+                    @role('super')
+                        <a href="{{ route('super.input.grades')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @endrole
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
@@ -25,7 +30,7 @@
                                     <td class="px-4 py-2 border">{{ $grade->id }}</td>
                                     <td class="px-4 py-2 border">{{ $grade->name }}</td>
                                     <td class="px-4 py-2 border">
-                                        <a href="{{ route('admin.grades.edit', $grade->id) }}" class="btn btn-primary">Edit</a>
+                                        <a href="{{ route('admin.grades.edit', $grade->id) }}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
                                         <form action="{{ route('admin.grades.destroy', $grade->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
