@@ -3,6 +3,7 @@
 use App\Models\ActivityLog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Jenssegers\Agent\Agent;
 
 if (! function_exists('logActivity')) {
     /**
@@ -19,7 +20,17 @@ if (! function_exists('logActivity')) {
         $userId = $userId ?? Auth::id();
         $ip = $meta['ip_address'] ?? (request()->ip() ?? null);
         $ua = $meta['user_agent'] ?? (request()->userAgent() ?? null);
-        $device = $meta['device'] ?? null;
+
+        // Jenssegers Agent
+        $agent = new Agent();
+        $device = $mete['device'] ?? (
+            $agent->isMobile() ? 'Mobile' :
+            ($agent->isTablet() ? 'Tablet' :
+            ($agent->isDesktop() ? 'Desktop' : 'Other'))
+        );
+        $os = $mete['os'] ?? $agent->platform();
+        $browser = $meta['browser'] ?? $agent->browser();
+        // $device = $meta['device'] ?? null;
 
         $dbPayload = [
             'user_id'    => $userId,
@@ -39,7 +50,11 @@ if (! function_exists('logActivity')) {
 
         // 2) Write to txt file (storage/logs/activity-YYYY-MM-DD.txt)
         try {
-            $line = json_encode(array_merge(['timestamp' => now()->toDateTimeString(), 'event' => $event], $dbPayload), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+            $line = json_encode(array_merge(
+                ['timestamp' => now()->toDateTimeString(), 'event' => $event],
+                $dbPayload
+            ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+
             $file = storage_path('logs/activity-' . now()->format('Y-m-d') . '.txt');
             file_put_contents($file, $line . PHP_EOL, FILE_APPEND | LOCK_EX);
         } catch (\Throwable $e) {
