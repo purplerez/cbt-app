@@ -71,9 +71,20 @@ class QuestionController extends Controller
             $validated['created_by'] = auth()->user()->id;
             $validated['question_type_id'] = $type;
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.question',
+                'super' => 'super.exams.manage.question',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
             Question::create($validated);
 
-            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil ditambahkan. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil ditambahkan. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
 
         }
         catch (\Exception $e){
@@ -135,12 +146,23 @@ class QuestionController extends Controller
             $validated['created_by'] = auth()->user()->id;
             $validated['question_type_id'] = $type;
 
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.question',
+                'super' => 'super.exams.manage.question',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
             $question = Question::findOrFail($exam);
 
             $question->update($validated);
             DB::commit();
 
-            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
         }
         catch(\Exception $e){
             DB::rollBack();
@@ -153,10 +175,21 @@ class QuestionController extends Controller
             $question = Question::findOrFail($exam);
             $question->delete();
 
-            return redirect()->route('admin.exams.manage.question', session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+            $roleRoutes =  [
+                'admin' => 'admin.exams.manage.question',
+                'super' => 'super.exams.manage.question',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
         }
         catch(\Exception $e){
-            return redirect()->route('admin.exams.manage.question', session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : '.$e->getMessage()]);
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : '.$e->getMessage()]);
         }
     }
 
