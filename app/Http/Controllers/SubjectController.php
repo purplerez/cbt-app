@@ -57,6 +57,11 @@ class SubjectController extends Controller
                 'school_id' => $school_id,
                 'code' => $request->code,
             ]);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Mata Pelajaran'.$request->name.' di Sekolah '.session('school_name'));
+
+
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                     ->with('success', 'Data Mata Pelajaran berhasil ditambahkan <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
@@ -108,6 +113,10 @@ class SubjectController extends Controller
                 'school_id' => session('school_id'),
                 'code' => $request->code,
             ]);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Mata Pelajaran'.$request->name.' di Sekolah '.session('school_name'));
+
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                     ->with('success', 'Data Mata Pelajaran berhasil dirubah <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
@@ -123,7 +132,13 @@ class SubjectController extends Controller
         //
         try {
             $subject = Subject::findOrFail($id);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data Mata Pelajaran'.$subject->name.' di Sekolah '.session('school_name'));
+
             $subject->delete();
+
+
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                     ->with('success', 'Data Mata Pelajaran berhasil Dihapus <script>setTimeout(function(){ showTab(\'subjects\'); }, 100);</script>');
         } catch (\Exception $e) {
