@@ -37,6 +37,10 @@ class ExamController extends Controller
                 'end' => 'required|date|after_or_equal:start',
             ]);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') membuat ujian global : '.$validated['name']);
+
+
             $roleRoutes =  [
                 'admin' => 'admin.exams',
                 'super' => 'super.exams',
@@ -68,6 +72,9 @@ class ExamController extends Controller
         }
         catch(\Exception $e)
         {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal membuat ujian : '.$request->name);
+
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
         }
     }
@@ -149,10 +156,17 @@ class ExamController extends Controller
 
             Exam::create($validated)->save();
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil membuat mata pelajaran ujian : '.$validated['title']);
+
+
             return redirect()->route($roleRoutes[$role], session('examid'))
                             ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch (\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal membuat mata pelajaran ujian : '.$request['title']);
+
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
         }
     }
@@ -178,9 +192,14 @@ class ExamController extends Controller
                 'perexamname' => $exam->title,
             ]);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Membuka Bank Soal  : '.$exam->title);
+
             return redirect()->route($roleRoutes[$role], $exam);
         }
         catch(\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Membuka Bank Soal  : '.$exam->title);
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
         }
     }
