@@ -200,9 +200,25 @@ class ExamController extends Controller
     }
 
     public function exitbanksoal(){
-        session()->forget(['perexamid', 'perexamname']);
+        try{
+            $roleRoute = [
+                'admin' => 'admin.exams.manage.view',
+                'super' => 'super.exams.manage.view',
+            ];
 
-        return redirect()->route('admin.exams.manage.view', session('examid'));
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
+            session()->forget(['perexamid', 'perexamname']);
+
+            return redirect()->route($roleRoute[$role], session('examid'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Keluar dari Bank Soal : '.$e->getMessage()]);
+        }
     }
 
 
