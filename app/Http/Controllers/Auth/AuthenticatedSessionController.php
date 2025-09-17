@@ -35,6 +35,8 @@ class AuthenticatedSessionController extends Controller
         $token = $user->createToken('dashboard-token')->plainTextToken;
         session(['api_token' => $token]);
 
+        logActivity("$user->name (ID: {$user->id}) berhasil login");
+
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('guru')) {
@@ -56,6 +58,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        logActivity("$user->name (ID: {$user->id}) berhasil Logout");
+
         $request->user()->tokens()->delete();
         Auth::guard('web')->logout();
 
