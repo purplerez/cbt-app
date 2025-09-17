@@ -84,6 +84,10 @@ class QuestionController extends Controller
 
             Question::create($validated);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Membuat Soal Baru'.session('perexamname'));
+
+
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil ditambahkan. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
 
         }
@@ -154,12 +158,17 @@ class QuestionController extends Controller
             $role = auth()->user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
-                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+                throw new \Exception ('Anda tidak memiliki akses untuk merubah soal');
             }
 
             $question = Question::findOrFail($exam);
 
             $question->update($validated);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil merubah data soal  ');
+
+
             DB::commit();
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
@@ -183,8 +192,11 @@ class QuestionController extends Controller
             $role = auth()->user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
-                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+                throw new \Exception ('Anda tidak memiliki akses untuk menghapus soal');
             }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil menghapus soal  '.session('perexamname'));
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
         }

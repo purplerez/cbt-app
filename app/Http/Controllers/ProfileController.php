@@ -34,6 +34,10 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
+        $user = auth()->user();
+        logActivity($user->name.' (ID: '.$user->id.') Berhasil Memperbaharui Profil');
+
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -47,6 +51,10 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        $usersesi = auth()->user();
+        logActivity($usersesi->name.' (ID: '.$usersesi->id.') Berhasil menghapus profil');
+
 
         Auth::logout();
 

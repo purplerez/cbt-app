@@ -60,9 +60,15 @@ class GradeController extends Controller
                 'name' => $request->name
             ]);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Membuat Tingkat  : '.$request->name);
+
             return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil ditambahkan ');
 
         } catch (\Exception $e) {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Membuat Tingkat  : '.$request->name);
+
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
@@ -116,9 +122,14 @@ class GradeController extends Controller
             }
 
             $grade->update($validatedData);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah data Tingkat  : '.$request->name);
+
             return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil diperbarui');
         }
         catch (\Exception $e) {
+
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
@@ -142,7 +153,13 @@ class GradeController extends Controller
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
             }
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Tingkat  : '.$grade->name);
+
+
             $grade->delete();
+
+
             return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);

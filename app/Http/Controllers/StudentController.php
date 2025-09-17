@@ -79,6 +79,9 @@ class StudentController extends Controller
                 'photo' => $validated['photo'],
             ]);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Siswa'.$request->name);
+
             DB::commit();
             return redirect()->route('admin.schools.manage.view', session()->get('school_id'))
                  ->with('success', 'Data guru berhasil ditambahkan <script>setTimeout(function(){ showTab(\'siswa\'); }, 100);</script>');
@@ -94,6 +97,10 @@ class StudentController extends Controller
             if (isset($user)) {
                 $user->delete();
             }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Menambahkan Data Siswa'.$request->name);
+
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
         }
@@ -137,9 +144,16 @@ class StudentController extends Controller
                 $student->save();
             }
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Siswa'.$request->name);
+
             return redirect()->route('admin.schools.manage.view', session()->get('school_id'))->with('success', 'Data siswa berhasil diperbarui');
         }
         catch (\Exception $e) {
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Merubah Data Siswa'.$request->name);
+
             return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
         }
     }
@@ -157,11 +171,18 @@ class StudentController extends Controller
             if ($student->photo && $student->photo !== "assets/images/students/default.jpg") {
                 Storage::disk('public')->delete($student->photo);
             }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data Siswa'.$student->name);
+
             $student->delete();
 
             return redirect()->route('admin.schools.manage.view', session()->get('school_id'))
                 ->with('success', 'Data siswa berhasil dihapus');
         } catch (\Exception $e) {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Menghapus Data Siswa'.$student->name);
+
 
             return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
         }
