@@ -395,9 +395,18 @@
                                         <div class="p-4">
                                             <div class="overflow-x-auto">
                                                 <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                                @role('admin')
                                                 <form
                                                     action="{{ route('admin.exams.question.store', session('perexamid')) }}"
                                                     method="post" class="mb-4">
+                                                @endrole
+
+                                                @role('super')
+                                                <form
+                                                    action="{{ route('super.exams.question.store', session('perexamid')) }}"
+                                                    method="post" class="mb-4">
+                                                @endrole
+
                                                     @csrf
                                                     <div class="space-y-4">
                                                         <div>

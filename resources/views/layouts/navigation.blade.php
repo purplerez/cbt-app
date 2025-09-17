@@ -100,6 +100,9 @@
                         <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
+                            {{ __('Log Aktifitas') }}
+                        </x-nav-link>
                     @endif
                     {{-- <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}

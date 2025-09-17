@@ -121,6 +121,7 @@
                                                             {{$exam->is_active}}
                                                         </td> --}}
                                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                              <div class="flex gap-2">
                                                             @role('admin')
                                                             <form method="post" action="{{ route('admin.exams.question', $exam->id) }}">
                                                             @endrole
@@ -141,6 +142,8 @@
                                                                 @method('DELETE')
                                                                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
                                                             </form>
+                                                        </div>
+                                                    </td>
                                                         </tr>
                                                         @empty
                                                         <tr>
