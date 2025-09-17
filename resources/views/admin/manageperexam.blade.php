@@ -73,7 +73,7 @@
                                             title="Non-aktifkan Akun">
                                         @endrole
                                         @role('super')
-                                            <a href="{{ route('admin.exams.question.exit') }}"
+                                            <a href="{{ route('super.exams.question.exit') }}"
                                             class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                                             title="Non-aktifkan Akun">
                                         @endrole
