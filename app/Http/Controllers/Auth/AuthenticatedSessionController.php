@@ -40,10 +40,26 @@ class AuthenticatedSessionController extends Controller
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('guru')) {
+            $school_id = $user->teacher->school_id;
+            $guru_id = $user->teacher->id;
+
+            session([
+                'school_id' => $school_id,
+                'school_name' => $user->teacher->school->name,
+                'guru_id' => $guru_id
+            ]);
             return redirect()->route('guru.dashboard');
         } elseif ($user->hasRole('siswa')) {
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('kepala')) {
+            $school_id = $user->head->school_id;
+            $kepala_id = $user->head->id;
+
+            session([
+                'school_id' => $school_id,
+                'school_name' => $user->head->school->name,
+                'kepala_id' => $kepala_id
+            ]);
             return redirect()->route('kepala.dashboard');
         } elseif ($user->hasRole('super')) {
             return redirect()->route('super.dashboard');
