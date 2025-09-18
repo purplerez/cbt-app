@@ -320,6 +320,7 @@ class SchoolController extends Controller
             ];
 
             $role = auth()->user()->getRoleNames()->first();
+
             if(!isset($roleRoutes[$role])) {
                 throw new \Exception('Role not found');
             }
@@ -327,7 +328,7 @@ class SchoolController extends Controller
             return redirect()->route($roleRoutes[$role])
                 ->with('success', 'Sekolah berhasil diaktifkan <script>setTimeout(function(){ showTab(\'sekolah\'); }, 100);</script>');
         } catch (\Exception $e) {
-            return redirect()->route('admin.schools')
+            return redirect()->back()
                 ->withErrors(['error' => 'Aktifkan Sekolah Failed : ' . $e->getMessage()]);
         }
     }
