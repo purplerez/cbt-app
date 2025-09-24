@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
             $table->enum('role', ['admin', 'kepala', 'guru', 'siswa'])->default('siswa');
             $table->boolean('is_active')->default(true);
         //    $table->foreignId('grade_id')->nullable()->constrained('grades')->nullOnDelete()->default(1);

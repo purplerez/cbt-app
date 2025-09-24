@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExamlogController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\StudentAnswerBackupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -28,7 +29,33 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.
 Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
     Route::get('/dashboard', [ParticipantController::class, 'index'])->name('dashboard');
     Route::post('/exams/{examId}/start', [ParticipantController::class, 'start'])->name('start');
-    // Route::post('/exams/{examId}/submit', [ParticipantController::class, 'submit'])->name('submit');
+    Route::post('/exams/{examId}/submit', [ParticipantController::class, 'submit'])->name('submit');
+    Route::post('/exams/{examId}/status', [ParticipantController::class, 'getSessionStatus'])->name('session-status');
+
+    // Student Answer Backup & Restore Routes
+    Route::prefix('exam-session')->group(function () {
+        Route::post('/save-answers', [StudentAnswerBackupController::class, 'saveAnswers'])
+            ->name('save-answers');
+
+        // Update single answer for real-time auto-save
+        Route::post('/update-answer', [StudentAnswerBackupController::class, 'updateSingleAnswer'])
+            ->name('update-single-answer');
+
+        // Get saved answers for resume functionality
+        Route::get('/{sessionId}/answers', [StudentAnswerBackupController::class, 'getAnswers'])
+            ->name('get-answers');
+
+        Route::get('/{sessionId}/compact-answers', [StudentAnswerBackupController::class, 'getCompactAnswers'])
+            ->name('get-compact-answers');
+
+        // Restore answers from backup (resume exam) - JSON FORMAT
+        Route::post('/restore-answers', [StudentAnswerBackupController::class, 'restoreAnswers'])
+            ->name('restore-answers');
+
+        // Get session progress/stats
+        Route::get('/{sessionId}/progress', [StudentAnswerBackupController::class, 'getSessionProgress'])
+            ->name('session-progress');
+    });
 });
 
 Route::get('/user', function (Request $request) {
