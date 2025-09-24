@@ -36,6 +36,16 @@ class GradeController extends Controller
             'name' => 'required'
         ]);
         try {
+            $roleRoute = [
+                'admin' => 'admin.grades',
+                'super' => 'super.grades'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
+            }
+
             $existingGrade = Grade::where('name', $request->name)->first();
             if ($existingGrade) {
                 throw new \Exception('Tingkat sudah ada');
@@ -49,9 +59,16 @@ class GradeController extends Controller
             Grade::create([
                 'name' => $request->name
             ]);
-            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil ditambahkan ');
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Membuat Tingkat  : '.$request->name);
+
+            return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil ditambahkan ');
 
         } catch (\Exception $e) {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Membuat Tingkat  : '.$request->name);
+
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
@@ -87,6 +104,16 @@ class GradeController extends Controller
         try{
             $grade = Grade::findOrFail($id);
 
+            $roleRoute = [
+                'admin' => 'admin.grades',
+                'super' => 'super.grades'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
+            }
+
             // Check if the grade name already exists
             $existingGrade = Grade::where('name', $request->name)->where('id', '!=', $id)->first();
             if ($existingGrade) {
@@ -95,9 +122,14 @@ class GradeController extends Controller
             }
 
             $grade->update($validatedData);
-            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil diperbarui');
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah data Tingkat  : '.$request->name);
+
+            return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil diperbarui');
         }
         catch (\Exception $e) {
+
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }
     }
@@ -110,8 +142,25 @@ class GradeController extends Controller
         //
         try {
             $grade = Grade::findOrFail($id);
+
+            $roleRoute = [
+                'admin' => 'admin.grades',
+                'super' => 'super.grades'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
+            }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Tingkat  : '.$grade->name);
+
+
             $grade->delete();
-            return redirect()->route('admin.grades')->with('success', 'Tingkat berhasil dihapus');
+
+
+            return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Terjadi kesalahan: ' . $e->getMessage()]);
         }

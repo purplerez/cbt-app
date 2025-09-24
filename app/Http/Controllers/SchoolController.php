@@ -16,6 +16,8 @@ class SchoolController extends Controller
     public function index()
     {
         //
+        // $user = auth()->user();
+        // logActivity($user->name.' (ID: '.$user->id.') mengakses halaman view_sekolah');
 
         $schools = School::all();
         return view('admin.csekolah', compact('schools'));
@@ -35,6 +37,7 @@ class SchoolController extends Controller
  public function store(StoreSchoolRequest $request)
     {
         // dd($request);
+        DB::beginTransaction();
         try {
             $validatedData = $request->validated();
 
@@ -44,16 +47,34 @@ class SchoolController extends Controller
                 $imageName = time().'.'.$logo->extension();
                 $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
                 $validatedData['logo'] = $destinationPath;
-
             }
-            else {
-                throw new \Exception('Logo is required and must be a valid image file');
-            }
+            // else {
+            //     throw new \Exception('Logo is required and must be a valid image file');
+            // }
 
             School::create($validatedData);
+            DB::commit();
 
-            return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil ditambahkan');
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') berhasil menginput data sekolah'.$validatedData['name']);
+
+            $roleRoutes = [
+                'admin' => 'admin.schools',
+                'super' => 'super.school'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah sekolah');
+            }
+
+            return redirect()->route($roleRoutes[$role])->with('success', 'School created successfully');
         } catch (\Exception $e) {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal menginput data sekolah'.$request['name']);
+
+            DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
         }
     }
@@ -129,8 +150,15 @@ class SchoolController extends Controller
             }
             $school->save();
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') berhasil mengubah data sekolah : '.$request['name']);
+
+
             return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil diupdate');
         } catch (\Exception $e) {
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal merubah data sekolah : '.$request['name']);
+
             return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
         }
     }
@@ -148,9 +176,16 @@ class SchoolController extends Controller
         }
         $school->delete();
 
+        $user = auth()->user();
+        logActivity($user->name.' (ID: '.$user->id.') berhasil menghapus data sekolah: '.$school->name);
+
+
         return redirect()->route('admin.schools')->with('success', 'Data sekolah berhasil dihapus');
         }
         catch(\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal menghapus data sekolah'.$school['name']);
+
             return redirect()->route('admin.schools')->withErrors(['error' =>'Delete Failed ', $e->getMessage()]);
         }
 
@@ -167,12 +202,25 @@ class SchoolController extends Controller
                 'school_status' => $school->status,
             ]);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') membuka data sekolah : '.$school->name);
 
-            // Redirect ke halaman manage dengan GET request
-            return redirect()->route('admin.schools.manage.view', $school);
+            // Redirect ke halaman manage dengan GET request according to role
+            $roleRoutes = [
+                'admin' => "admin.schools.manage.view",
+                'super' => "super.schools.manage.view",
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menambah sekolah');
+            }
+
+            return redirect()->route($roleRoutes[$role], $school);
         }
         catch(\Exception $e) {
-            return redirect()->route('admin.schools')
+            return redirect()->back()
                 ->withErrors(['error' => 'Manage School Failed : ' . $e->getMessage()]);
         }
     }
@@ -231,11 +279,22 @@ class SchoolController extends Controller
 
             // set status inactive
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') menonaktifkan data sekolah : '.$school->name);
 
-            // Redirect ke halaman nonaktif dengan GET request
-            return redirect()->route('admin.schools')
-                ->with('success', 'Sekolah berhasil dinonaktifkan <script>setTimeout(function(){ showTab(\'manage\'); }, 100);</script>');
-                // ->with('success', 'Sekolah berhasil dinonaktifkan');
+            $roleRoute = [
+                'admin' => "admin.schools",
+                'super' => "super.school"
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menonaktifkan sekolah');
+            }
+
+            return redirect()->route($roleRoute[$role])
+                ->with('success', 'Sekolah berhasil dinonaktifkan');
         } catch (\Exception $e) {
             return redirect()->route('admin.schools')
                 ->withErrors(['error' => 'Nonaktifkan Sekolah Failed : ' . $e->getMessage()]);
@@ -250,18 +309,26 @@ class SchoolController extends Controller
         try {
             $sekolah = School::findOrFail(session('school_id'));
 
-            if (!$sekolah) {
-                throw new \Exception('Sekolah Tidak ditemukan');
+            $sekolah->update(['status' => '1']);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') mengaktifkan data sekolah : '.$school->name);
+
+            $roleRoutes = [
+                'admin' => 'admin.schools',
+                'super' => 'super.school'
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoutes[$role])) {
+                throw new \Exception('Role not found');
             }
 
-            $sekolah->status = '1';
-            $sekolah->save();
-
-            // Redirect ke halaman aktif dengan GET request
-            return redirect()->route('admin.schools.manage', session()->get('school_id'))
-                ->with('success', 'Sekolah berhasil diaktifkan <script>setTimeout(function(){ showTab(\'sekolah\'); }, 50);</script>');
+            return redirect()->route($roleRoutes[$role])
+                ->with('success', 'Sekolah berhasil diaktifkan <script>setTimeout(function(){ showTab(\'sekolah\'); }, 100);</script>');
         } catch (\Exception $e) {
-            return redirect()->route('admin.schools')
+            return redirect()->back()
                 ->withErrors(['error' => 'Aktifkan Sekolah Failed : ' . $e->getMessage()]);
         }
     }

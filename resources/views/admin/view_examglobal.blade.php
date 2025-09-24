@@ -10,7 +10,14 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
+                    @role('admin')
                     <a href="{{ route('admin.exams.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
+                    @endrole
+
+                    @role('super')
+                    <a href="{{ route('super.exams.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
+                    @endrole
+
                         + Tambah
                     </a>
                     <x-input-error :messages="$errors->get('error')" class="mb-4" />
@@ -37,13 +44,26 @@
                                     </td>
 
                                     <td class="px-4 py-2 border">
+                                    @role('admin')
                                         <form action={{ route('admin.exams.manage',  $exam->id ) }} method="post" class="inline-block">
+                                    @endrole
+
+                                    @role('super')
+                                        <form action={{ route('super.exams.manage',  $exam->id ) }} method="post" class="inline-block">
+                                    @endrole
                                             @csrf
                                             <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                 Manage
                                             </button>
                                         </form>
-                                        <form action="{{ route('admin.grades.destroy', $exam->id) }}" method="POST" class="inline-block">
+
+                                        @role('admin')
+                                            <form action="{{ route('admin.grades.destroy', $exam->id) }}" method="POST" class="inline-block">
+                                        @endrole
+
+                                        @role('super')
+                                            <form action="{{ route('super.grades.destroy', $exam->id) }}" method="POST" class="inline-block">
+                                        @endrole
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>

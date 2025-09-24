@@ -13,15 +13,18 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants']);
+    Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats']);
+
     Route::apiResource('exams', ExamController::class);
+
     Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool']);
     Route::post('/exams/add-student', [StudentController::class, 'addStudentToExam']);
-    Route::get('/exams/{examId}/participants', [StudentController::class, 'getExamParticipants']);
-    Route::get('/exams/{examId}/stats', [StudentController::class, 'getExamStats']);
+
 
     // logs
-    Route::get('/exams/{userId}/Logs', [ExamlogController::class, 'getAllLogs']);
+    Route::get('/admin/exam/{examId}/participant/{userId}/logs', [ExamController::class, 'getParticipantLogs']);
 });
 
 

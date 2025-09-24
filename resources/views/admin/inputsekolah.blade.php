@@ -11,8 +11,13 @@
                 <div class="p-6 text-gray-900">
 
 
+                    @role('admin')
+                        <form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
+                    @endrole
 
-                    <form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
+                    @role('super')
+                        <form action="{{ route('super.sekolahstore') }}" method="post" enctype="multipart/form-data"><form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
+                    @endrole
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">

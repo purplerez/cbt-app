@@ -35,14 +35,34 @@ class AuthenticatedSessionController extends Controller
         $token = $user->createToken('dashboard-token')->plainTextToken;
         session(['api_token' => $token]);
 
+        logActivity("$user->name (ID: {$user->id}) berhasil login");
+
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('guru')) {
+            $school_id = $user->teacher->school_id;
+            $guru_id = $user->teacher->id;
+
+            session([
+                'school_id' => $school_id,
+                'school_name' => $user->teacher->school->name,
+                'guru_id' => $guru_id
+            ]);
             return redirect()->route('guru.dashboard');
         } elseif ($user->hasRole('siswa')) {
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('kepala')) {
+            $school_id = $user->head->school_id;
+            $kepala_id = $user->head->id;
+
+            session([
+                'school_id' => $school_id,
+                'school_name' => $user->head->school->name,
+                'kepala_id' => $kepala_id
+            ]);
             return redirect()->route('kepala.dashboard');
+        } elseif ($user->hasRole('super')) {
+            return redirect()->route('super.dashboard');
         }
 
         // return redirect()->intended(route('dashboard', absolute: false));
@@ -54,6 +74,10 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = $request->user();
+
+        logActivity("$user->name (ID: {$user->id}) berhasil Logout");
+
         $request->user()->tokens()->delete();
         Auth::guard('web')->logout();
 

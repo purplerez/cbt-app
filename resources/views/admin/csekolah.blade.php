@@ -9,17 +9,20 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-
-                    <a href="{{ route('admin.inputsekolah')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @if (auth()->user()->hasRole('admin'))
+                        <a href="{{ route('admin.inputsekolah')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @elseif(auth()->user()->hasRole('super'))
+                        <a href="{{ route('super.inputsekolah')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @endif
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
-                                <th class="px-4 py-2 border">No</th>
-                                <th class="px-4 py-2 border">Nama Sekolah</th>
-                                <th class="px-4 py-2 border">Alamat</th>
-                                <th class="px-4 py-2 border">Status</th>
-                                <th class="px-4 py-2 border">Kode Sekolah</th>
-                                <th class="px-4 py-2 border">Action</th>
+                                <th class="px-4 py-2 border w-2">No</th>
+                                <th class="px-4 py-2 border w-30">Nama Sekolah</th>
+                                <th class="px-4 py-2 border w-40">Alamat</th>
+                                <th class="px-4 py-2 border w-3">Status</th>
+                                <th class="px-4 py-2 border w-10">Kode Sekolah</th>
+                                <th class="px-4 py-2 border w-10">Action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -37,14 +40,27 @@
                                     </td>
                                     <td class="px-4 py-2 border">{{ $school->code }}</td>
                                     <td class="px-4 py-2 border">
-                                        <form action="{{ route('admin.schools.manage', $school->id) }}" method="post">
+                                         <div class="flex gap-2">
+                                        @role('admin')
+                                            <form action="{{ route('admin.schools.manage', $school->id) }}" method="post">
+                                        @endrole
+                                        @role('super')
+                                            <form action="{{ route('super.schools.manage', $school->id) }}" method="post">
+                                        @endrole
+
                                             @csrf
                                             <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                 Manage
                                             </button>
                                         </form>
                                         {{-- <a href={{ route('admin.schools.manage', $school->id) }} class="btn px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Manage</a> --}}
-                                        <a href="{{ route('admin.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a>
+                                        @role('admin')
+                                            <a href="{{ route('admin.schools.edit', $school->id) }}" class="px-3 py-1.5 bg-orange-600 text-white text-sm font-medium rounded hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 transition">Edit</a>
+                                        {{-- @elseif(auth()->user()->hasRole('super'))
+                                            <a href="{{ route('super.schools.edit', $school->id) }}" class="btn btn-primary">Edit</a> --}}
+                                        @endrole
+                                    </div>
+
                                         {{-- <form action="{{ route('admin.schools.destroy', $school->id) }}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')

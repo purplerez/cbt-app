@@ -10,7 +10,13 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <form action="{{ route('admin.grades.update', $grade->id) }}" method="post">
+                    @role('admin')
+                        <form action="{{ route('admin.grades.update', $grade->id) }}" method="post">
+                    @endrole
+
+                    @role('super')
+                        <form action="{{ route('super.grades.update', $grade->id) }}" method="post">
+                    @endrole
                         @csrf
                         @method('PUT')
 

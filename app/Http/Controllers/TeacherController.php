@@ -56,6 +56,9 @@ class TeacherController extends Controller
 
             Teacher::create($teacherData);
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Guru'. $request->name.' Sekolah '.session('school_name'));
+
             DB::commit();
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                    ->with('success', 'Data guru berhasil ditambahkan <script>setTimeout(function(){ showTab(\'guru\'); }, 100);</script>');
@@ -114,6 +117,9 @@ class TeacherController extends Controller
             $user->password = Hash::make($validated['nip']);
             $user->save();
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Guru'. $request->name.' Sekolah '.session('school_name'));
+
             DB::commit();
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                    ->with('success', 'Data guru berhasil diubah <script>setTimeout(function(){ showTab(\'guru\'); }, 100);</script>');
@@ -138,6 +144,9 @@ class TeacherController extends Controller
             if ($teacher->photo && file_exists(public_path($teacher->photo))) {
                 unlink(public_path($teacher->photo));
             }
+
+            $userlog = auth()->user();
+            logActivity($userlog->name.' (ID: '.$userlog->id.') Berhasil Menghapus Data Guru'. $teacher->name.' Sekolah '.session('school_name'));
 
             // delete user associated with teacher
             $user->delete();
@@ -214,6 +223,10 @@ class TeacherController extends Controller
                     'school_id' => $teacherData['school_id'],
                 ]
             );
+
+            $userLog = auth()->user();
+            logActivity($userLog->name.' (ID: '.$userLog->id.') Berhasil Menambah Data Kepala Sekolah'. $head->name.' Sekolah '.session('school_name'));
+
             // dd($head);
             DB::commit();
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
@@ -238,6 +251,7 @@ class TeacherController extends Controller
     }
 
     public function updateHeadmaster(Request $request){
+       //dd($request->all());
         DB::beginTransaction();
         try{
             $validated = $request->validate([
@@ -249,6 +263,7 @@ class TeacherController extends Controller
             ]);
 
             $head = Headmaster::findOrFail($request->h_id);
+            //dd($head->all());
             $head->update([
                 'nip' => $validated['h_nip'],
                 'name' => $validated['h_name'],
@@ -276,6 +291,9 @@ class TeacherController extends Controller
             $user->email = $validated['h_nip']."@headmaster.test";
             $user->save();
 
+            $userlog = auth()->user();
+            logActivity($userlog->name.' (ID: '.$userlog->id.') Berhasil Mengubah Data Kepala Sekolah'. $head->name.' Sekolah '.session('school_name'));
+
             DB::commit();
             return redirect()->route('admin.schools.manage', session()->get('school_id'))
                    ->with('success', 'Data kepala sekolah berhasil diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
@@ -284,8 +302,8 @@ class TeacherController extends Controller
         {
             DB::rollBack();
 
-            return redirect()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
-                     ->with('success', 'Data kepala sekolah berhasil diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+            return redirect()->back()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
+                     ->with('success', 'Data kepala sekolah Gagal diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
         }
     }
 }
