@@ -22,6 +22,12 @@ api.interceptors.request.use(
 
 api.interceptors.response.use(
      (response) => {
+          // For submit exam endpoint, preserve the full response structure
+          if (response.config.url?.includes('/submit')) {
+               return response;
+          }
+
+          // For other endpoints, extract data as before
           if (response.data && response.data.data !== undefined) {
                response.data = response.data.data;
           }

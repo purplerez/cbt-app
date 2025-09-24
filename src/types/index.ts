@@ -112,3 +112,87 @@ export interface ApiResponse<T> {
      data: T;
      message?: string;
 }
+
+export interface ExamSubmitResult {
+     success: boolean;
+     message: string;
+     data: {
+          session_id: number;
+          exam_title: string;
+          grade: {
+               description: string;
+               letter: string;
+          };
+          percentage: number;
+          max_score: number;
+          total_score: number;
+          total_questions: number;
+          answered_questions: number;
+          unanswered_questions: number;
+          submission_time: string;
+          score_breakdown: {
+               multiple_choice: {
+                    correct: number;
+                    total: number;
+                    score: number;
+                    max_score: number;
+               };
+               essay: {
+                    answered: number;
+                    max_score: number;
+                    score: number;
+                    total: number;
+               };
+               true_false: {
+                    correct: number;
+                    total: number;
+                    score: number;
+                    max_score: number;
+               };
+               complex_multiple: {
+                    correct: number;
+                    total: number;
+                    score: number;
+                    max_score: number;
+               };
+          };
+          detailed_results: Array<{
+               question_id: number;
+               question_type: number;
+               question_type_label: string;
+               student_answer: string | string[];
+               correct_answer: string | string[];
+               is_correct: boolean;
+               is_answered: boolean;
+               earned_points: number;
+               points: number;
+          }>;
+     };
+}
+
+export interface SessionStatus {
+     success: boolean;
+     data: {
+          session_id: number;
+          status: 'progress' | 'completed' | 'expired' | 'auto_submitted';
+          time_remaining: number;
+          started_at: string;
+          end_time: string;
+          is_expired: boolean;
+     };
+     message?: string;
+}
+
+export interface ExamSubmitOptions {
+     forceSubmit?: boolean;
+     finalSubmit?: boolean;
+}
+
+export interface AutoSaveResponse {
+     success: boolean;
+     message: string;
+     data?: {
+          saved_answers: number;
+          last_saved_at: string;
+     };
+}

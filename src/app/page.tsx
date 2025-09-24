@@ -37,7 +37,7 @@ export default function LoginPage() {
     mutationFn: (data: LoginFormData) => authService.login(data.email, data.password),
     onSuccess: () => {
       setLoginError(null)
-      router.push('/exam')
+      router.push('/dashboard')
     },
     onError: (error: Error & { response?: { data?: { message?: string } } }) => {
       console.error('Login error:', error)
@@ -100,7 +100,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isSubmitting || loginMutation.isPending}
-              className="w-full font-heading text-white bg-blue-500 hover:bg-blue-600 px-8 text-sm font-medium rounded-md"
+              className="w-full font-heading text-white bg-primary/80 hover:bg-primary px-8 text-base  font-medium rounded-md"
             >
               {isSubmitting || loginMutation.isPending ? 'Loading...' : 'Login'}
             </Button>

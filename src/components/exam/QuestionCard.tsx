@@ -27,13 +27,18 @@ export default function QuestionCard({
      const [essayAnswer, setEssayAnswer] = useState<string>('');
      const [isFlagged, setIsFlagged] = useState<boolean>(false);
 
-     // Initialize state from current answer
      useEffect(() => {
+          // Reset state ketika question berubah
+          setSelectedAnswers([]);
+          setEssayAnswer('');
+          setIsFlagged(false);
+
+          // Set jawaban sesuai dengan currentAnswer yang ada
           if (currentAnswer) {
                if (Array.isArray(currentAnswer.answer)) {
                     setSelectedAnswers(currentAnswer.answer);
                } else {
-                    if (question.question_type_id === '2') { // Essay
+                    if (question.question_type_id === '2') {
                          setEssayAnswer(currentAnswer.answer);
                     } else {
                          setSelectedAnswers([currentAnswer.answer]);
@@ -41,10 +46,11 @@ export default function QuestionCard({
                }
                setIsFlagged(currentAnswer.is_flagged || false);
           }
-     }, [currentAnswer, question.question_type_id]);
+     }, [currentAnswer, question.id, question.question_type_id]); // Tambahkan question.id sebagai dependency
 
      const handleSingleChoice = (optionKey: string) => {
-          setSelectedAnswers([optionKey]);
+          const newSelectedAnswers = [optionKey];
+          setSelectedAnswers(newSelectedAnswers);
           onAnswerChange(question.id, optionKey);
      };
 
@@ -70,7 +76,7 @@ export default function QuestionCard({
 
      const renderQuestionType = () => {
           switch (question.question_type_id) {
-               case '0': // Multiple Choice Complex (multiple answers)
+               case '0':
                     return (
                          <div className="space-y-3">
                               <p className="text-sm text-gray-600 mb-4">
@@ -80,8 +86,8 @@ export default function QuestionCard({
                                    <label
                                         key={key}
                                         className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedAnswers.includes(key)
-                                                  ? 'border-blue-500 bg-blue-50'
-                                                  : 'border-gray-200 hover:border-gray-300'
+                                             ? 'border-blue-500 bg-blue-50'
+                                             : 'border-gray-200 hover:border-gray-300'
                                              }`}
                                    >
                                         <input
@@ -99,7 +105,7 @@ export default function QuestionCard({
                          </div>
                     );
 
-               case '1': // Multiple Choice Single
+               case '1':
                     return (
                          <div className="space-y-3">
                               <p className="text-sm text-gray-600 mb-4">
@@ -109,13 +115,14 @@ export default function QuestionCard({
                                    <label
                                         key={key}
                                         className={`flex items-start gap-3 p-4 border rounded-lg cursor-pointer transition-colors ${selectedAnswers.includes(key)
-                                                  ? 'border-blue-500 bg-blue-50'
-                                                  : 'border-gray-200 hover:border-gray-300'
+                                             ? 'border-blue-500 bg-blue-50'
+                                             : 'border-gray-200 hover:border-gray-300'
                                              }`}
                                    >
                                         <input
                                              type="radio"
-                                             name={`question-${question.id}`}
+                                             name={`question-${question.id}-single`}
+                                             value={key}
                                              checked={selectedAnswers.includes(key)}
                                              onChange={() => handleSingleChoice(key)}
                                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
@@ -129,7 +136,7 @@ export default function QuestionCard({
                          </div>
                     );
 
-               case '2': // Essay
+               case '2':
                     return (
                          <div className="space-y-3">
                               <p className="text-sm text-gray-600 mb-4">

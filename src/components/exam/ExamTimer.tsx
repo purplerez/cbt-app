@@ -5,7 +5,7 @@ import { Card } from '@/components/ui/card';
 import { Clock, AlertTriangle } from 'lucide-react';
 
 interface ExamTimerProps {
-     initialTime: number; // in seconds
+     initialTime: number;
      onTimeUp: () => void;
      onTimeUpdate?: (timeLeft: number) => void;
      autoSubmit?: boolean;
