@@ -2,19 +2,25 @@
 
 import { authService } from '@/services/auth'
 import { useQuery } from '@tanstack/react-query'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { User, GraduationCap, MapPin, Calendar, School, IdCard } from 'lucide-react'
+import { User, GraduationCap, MapPin, Calendar, School, IdCard, ArrowRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { useExamFlow } from '@/hooks/useExamFlow'
+import { createExamSlug } from '@/lib/examUtils'
 
 const DashboardPage = () => {
   const router = useRouter()
+  const [isCheckingNextExam, setIsCheckingNextExam] = useState(false)
+  const [nextExamFound, setNextExamFound] = useState(false)
 
   const { data: userData, isLoading, error } = useQuery({
     queryKey: ['currentUser'],
     queryFn: () => authService.getCurrentUser()
   })
+
+  const { findNextExam, areAllExamsCompleted } = useExamFlow()
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('id-ID', {
@@ -27,6 +33,55 @@ const DashboardPage = () => {
   const formatGender = (gender: string) => {
     return gender === 'L' ? 'Laki-laki' : 'Perempuan'
   }
+
+  // Check for next exam when component mounts or data changes
+  useEffect(() => {
+    if (userData?.assigned && userData.assigned.length > 0) {
+      console.log('Checking for next exam after dashboard load...')
+      setIsCheckingNextExam(true)
+
+      // Small delay to let any state updates settle
+      setTimeout(() => {
+        const allExams = userData.assigned
+        const allCompleted = areAllExamsCompleted(allExams)
+        
+        if (!allCompleted) {
+          // Find next exam to continue
+          const nextExam = findNextExam(allExams)
+          
+          console.log('Next exam check result:', {
+            nextExam: nextExam ? { id: nextExam.exam_id, title: nextExam.title } : null,
+            allCompleted
+          })
+          
+          if (nextExam) {
+            setNextExamFound(true)
+            const nextExamSlug = createExamSlug(nextExam.title)
+            
+            console.log('Auto-redirecting to next exam:', {
+              examId: nextExam.exam_id,
+              title: nextExam.title,
+              slug: nextExamSlug
+            })
+            
+            // Set exam data in localStorage
+            localStorage.setItem('exam_id', nextExam.exam_id.toString())
+            localStorage.setItem('exam_duration', nextExam.duration.toString())
+            localStorage.setItem('current_exam_slug', nextExamSlug)
+            
+            // Auto redirect to next exam after short delay
+            setTimeout(() => {
+              router.push(`/exam/${nextExamSlug}`)
+            }, 1500) // 1.5 second delay to show transition
+          }
+        } else {
+          console.log('All exams completed - staying on dashboard')
+        }
+        
+        setIsCheckingNextExam(false)
+      }, 1000)
+    }
+  }, [userData, findNextExam, areAllExamsCompleted, router])
 
   const handleContinue = () => {
     router.push('/exam')
@@ -127,10 +182,27 @@ const DashboardPage = () => {
         </Card>
       )}
 
-      <div className="mt-6 max-w-40 w-full">
-        <Button variant="default" onClick={handleContinue} className='w-full text-base font-semibold'>
-          Lanjutkan
-        </Button>
+      <div className="mt-6 max-w-md w-full">
+        {isCheckingNextExam ? (
+          <Card className="p-4 text-center bg-blue-50 border-blue-200">
+            <div className="flex items-center justify-center gap-3 mb-2">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <span className="text-blue-700 font-medium">Memeriksa ujian berikutnya...</span>
+            </div>
+          </Card>
+        ) : nextExamFound ? (
+          <Card className="p-4 text-center bg-green-50 border-green-200">
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <ArrowRight className="w-5 h-5 text-green-600" />
+              <span className="text-green-700 font-medium">Mengarahkan ke ujian berikutnya...</span>
+            </div>
+            <p className="text-sm text-green-600">Silakan tunggu sebentar</p>
+          </Card>
+        ) : (
+          <Button variant="default" onClick={handleContinue} className='w-full text-base font-semibold'>
+            Lanjutkan ke Ujian
+          </Button>
+        )}
       </div>
     </div>
   )

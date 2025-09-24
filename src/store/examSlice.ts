@@ -195,10 +195,13 @@ const examSlice = createSlice({
                               submission_time: examData.submission_time,
                          };
 
-                         // Store detailed results in localStorage for complete page
-                         if (typeof window !== 'undefined') {
-                              localStorage.setItem('exam_result', JSON.stringify(examData));
-                         }
+                         // Note: We're skipping localStorage storage of exam_result 
+                         // since we're not showing complete page anymore
+                         console.log('Exam submitted successfully:', {
+                              examTitle: examData.exam_title,
+                              score: examData.total_score,
+                              percentage: examData.percentage
+                         });
                     }
 
                     // Update localStorage exam status
