@@ -27,7 +27,7 @@ class QuestionSeeder extends Seeder
 
      private function createQuestionsForExam($exam)
      {
-          $questionsCount = $exam->total_quest ?? 10; // Use exam's total_quest or default to 10
+          $questionsCount = 3; // Batasi hanya 3 soal untuk uji coba
 
           for ($i = 1; $i <= $questionsCount; $i++) {
                // Create different types of questions

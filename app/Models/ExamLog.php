@@ -6,8 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExamLog extends Model
 {
-    //
     protected $table = 'exam_logs';
+
+    // Disable updated_at since migration only has created_at
+    public $timestamps = false;
+
+    protected $dates = ['created_at'];
 
     protected $fillable = [
         'session_id',
@@ -15,10 +19,17 @@ class ExamLog extends Model
         'details',
         'ip_address',
         'user_agent',
-        'device'
+        'device',
+        'created_at'
     ];
 
-    public function sessionExam(){
+    protected $casts = [
+        'details' => 'array',
+        'created_at' => 'datetime'
+    ];
+
+    public function sessionExam()
+    {
         return $this->belongsTo(ExamSession::class, 'session_id');
     }
 }
