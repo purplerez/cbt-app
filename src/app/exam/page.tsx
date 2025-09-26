@@ -25,15 +25,8 @@ const ExamPage = () => {
                localStorage.setItem('exam_duration', firstExam.duration.toString());
                localStorage.setItem('current_exam_slug', examSlug);
 
-               console.log('Auto-redirecting to exam:', {
-                    examId: firstExam.exam_id,
-                    title: firstExam.title,
-                    slug: examSlug
-               });
-
                router.push(`/exam/${examSlug}`);
           } else if (!isLoading && userData && (!userData.assigned || userData.assigned.length === 0)) {
-               console.log('No exams assigned, redirecting to dashboard');
                router.push('/dashboard');
           }
      }, [userData, isLoading, router]);

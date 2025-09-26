@@ -64,14 +64,14 @@ export const useExamLogic = () => {
      useEffect(() => {
           if (isExamEnded && !isSubmitting) {
                console.log('Exam ended, navigating to dashboard to continue with next exam');
-               
+
                // Add small delay to ensure state is properly updated
                setTimeout(() => {
                     // Clear current exam data
                     localStorage.removeItem('session_token');
                     localStorage.removeItem('exam_result');
                     localStorage.removeItem('current_exam_slug');
-                    
+
                     // Navigate to dashboard
                     router.push('/dashboard');
                }, 500);

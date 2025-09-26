@@ -44,31 +44,31 @@ const DashboardPage = () => {
       setTimeout(() => {
         const allExams = userData.assigned
         const allCompleted = areAllExamsCompleted(allExams)
-        
+
         if (!allCompleted) {
           // Find next exam to continue
           const nextExam = findNextExam(allExams)
-          
+
           console.log('Next exam check result:', {
             nextExam: nextExam ? { id: nextExam.exam_id, title: nextExam.title } : null,
             allCompleted
           })
-          
+
           if (nextExam) {
             setNextExamFound(true)
             const nextExamSlug = createExamSlug(nextExam.title)
-            
+
             console.log('Auto-redirecting to next exam:', {
               examId: nextExam.exam_id,
               title: nextExam.title,
               slug: nextExamSlug
             })
-            
+
             // Set exam data in localStorage
             localStorage.setItem('exam_id', nextExam.exam_id.toString())
             localStorage.setItem('exam_duration', nextExam.duration.toString())
             localStorage.setItem('current_exam_slug', nextExamSlug)
-            
+
             // Auto redirect to next exam after short delay
             setTimeout(() => {
               router.push(`/exam/${nextExamSlug}`)
@@ -77,7 +77,7 @@ const DashboardPage = () => {
         } else {
           console.log('All exams completed - staying on dashboard')
         }
-        
+
         setIsCheckingNextExam(false)
       }, 1000)
     }

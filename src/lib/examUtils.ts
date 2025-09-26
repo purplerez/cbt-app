@@ -252,7 +252,6 @@ export const validateAnswers = (answers: Record<number, StudentAnswer>, question
      return validation;
 };
 
-// Slug utility functions for exam routing
 export const createExamSlug = (examTitle: string): string => {
      return examTitle
           .toLowerCase()
