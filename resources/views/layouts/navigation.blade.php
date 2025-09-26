@@ -49,39 +49,28 @@
                         <x-nav-link :href="route('admin.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
-                         {{--
-                        <x-nav-link :href="route('admin.subjects')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Mata Pelajaran') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.students')" :active="request()->routeIs('admin.students')">
-                            {{ __('Siswa') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.teachers')" :active="request()->routeIs('admin.teachers')">
-                            {{ __('Guru') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.headmasters')" :active="request()->routeIs('admin.headmasters')">
-                            {{ __('Kepala Sekolah') }}
-                        </x-nav-link>
-                        --}}
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Log Aktifitas') }}
                         </x-nav-link>
-                        {{-- <x-nav-link :href="route('admin.questions')" :active="request()->routeIs('admin.questions')">
-                            {{ __('Soal') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('admin.results')" :active="request()->routeIs('admin.results')">
-                            {{ __('Hasil Ujian') }}
-                        </x-nav-link> --}}
-                        {{-- <x-nav-link :href="route('admin.settings')" :active="request()->routeIs('admin.dashboard')">
-                            {{ __('Pengaturan') }}
-                        </x-nav-link> --}}
                     @elseif (auth()->user()->hasRole('guru'))
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
                             {{ __('Guru Dashboard') }}
-                        </x-nav-link>
+                        </x-nav-link>''
                     @elseif (auth()->user()->hasRole('kepala'))
                         <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('kepala.dashboard')">
                             {{ __('Kepala Dashboard') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kepala.students')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Data Siswa') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Data Operator') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Data Mata Pelajaran') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Data Ujian') }}
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('siswa'))
                         <x-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
