@@ -929,11 +929,11 @@
                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                         <x-input-error :messages="$errors->get('h_address')" class="mt-1" />
                     </div>
-                    <div>
+                    {{-- <div>
                         <label for="kepsek_email" class="block text-sm font-medium text-gray-700">Email</label>
                         <input type="email" id="kepsek_email" name="h_email" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <x-input-error :messages="$errors->get('h_email')" class="mt-1" />
-                    </div>
+                    </div> --}}
                     <div>
                         <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
                         <input type="file" id="photo" name="h_photo"
