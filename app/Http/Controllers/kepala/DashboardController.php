@@ -10,6 +10,7 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class DashboardController extends Controller
 {
@@ -103,7 +104,7 @@ class DashboardController extends Controller
             ]);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Siswa'.$request->name);
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Siswa : '.$request->name);
 
             DB::commit();
 
