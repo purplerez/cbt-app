@@ -12,7 +12,7 @@
                         <a href="{{route('kepala.teacher.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
                             + Tambah
                         </a>
-                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                        <x-input-error :messages="$errors->get('error')" class="mb-4 mt-4" />
                     <table class="min-w-full mt-4 divide-y divide-gray-200">
                                                 <thead class="bg-gray-50">
                                                     <tr>
@@ -28,15 +28,15 @@
                                                             <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->nip }}</td>
                                                             <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->name }}</td>
                                                             <td class="px-6 py-4 whitespace-nowrap">
-                                                                <form action="{{route('kepala.teacher.edit', $teacher->id)}}" method="POST" class="inline-block">
-                                                                        @csrf
-                                                                    <button class="px-4 py-2 text-sm font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+
+                                                                    <a href="{{ route('kepala.teacher.edit', $teacher->id) }}" class="px-4 py-2 text-sm font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                                                                         Edit
-                                                                    </button>
-                                                                </form>
-                                                                    <form action="{{route('kepala.teacher.destroy', $teacher->id)}}" method="POST" class="inline-block">
+                                                                    </a>
+
+                                                                    <form action="{{route('kepala.teacher.destroy')}}" method="POST" class="inline-block">
                                                                         @csrf
                                                                         @method('DELETE')
+                                                                        <input type="hidden" name="id" value="{{$teacher->id}}">
                                                                         <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus data Guru ini?')">Hapus</button>
                                                                     </form>
                                                                 </td>

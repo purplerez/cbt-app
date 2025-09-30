@@ -142,6 +142,9 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::get('/teachers', [KepalaController::class, 'teacherAll'])->name('teachers');
     Route::get('/teachers/create', [KepalaController::class, 'createTeacher'])->name('teacher.create');
     Route::post('/teachers/create', [KepalaController::class, 'storeTeacher'])->name('teacher.store');
+    Route::get('/teacher/{teacher}/edit', [KepalaController::class, 'editTeacher'])->name('teacher.edit');
+    Route::post('/teacher/destroy', [KepalaController::class, 'destroyTeacher'])->name('teacher.destroy');
+    Route::put('/teacher/update', [KepalaController::class, 'updateTeacher'])->name('teacher.update');
 
 });
 

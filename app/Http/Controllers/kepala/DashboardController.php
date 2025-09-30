@@ -143,6 +143,7 @@ class DashboardController extends Controller
             ]);
             // dd($validatedData);
             $student = Student::findOrFail($id);
+
             $student->update([
                 'nis' => $validatedData['nis'],
                 'name' => $validatedData['name'],
@@ -281,6 +282,74 @@ class DashboardController extends Controller
                 Storage::disk('public')->delete($photoPath);
             }
             return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function editTeacher($id){
+        try{
+            $teacher = Teacher::findOrFail($id);
+
+            return view('kepala.edit_guru', compact('teacher'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function updateTeacher(Request $request){
+        // dd($request->all());
+        DB::beginTransaction();
+        try{
+            // Validate and store teacher data
+            $validated = $request->validate([
+                'nip' => 'required|unique:teachers,nip,'.$request->id.',id',
+                'name' => 'required|string|max:255',
+                'gender' => 'required|in:L,P',
+                'address' => 'required|string',
+                'photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB
+            ]);
+
+            $teacher = Teacher::findOrFail($request->id);
+            $teacher->update([
+                'nip' => $validated['nip'],
+                'name' => $validated['name'],
+                'gender' => $validated['gender'],
+                'address' => $validated['address'],
+            ]);
+
+            if ($request->hasFile('photo')) {
+                $oldPhoto = $request->input('old_photo');
+                // Delete old photo if it exists and is not the default photo
+                if ($oldPhoto && $oldPhoto !== "assets/images/students/default.jpg") {
+                    Storage::disk('public')->delete($oldPhoto);
+                }
+                // Store the new photo
+                $imageName = $request->nip.'.'.$request->file('photo')->extension();
+                $photoPath = $request->file('photo')->storeAs('assets/images/students', $imageName, 'public');
+                $teacher->photo = $photoPath;
+                $teacher->save();
+            }
+
+            $user = User::findOrFail($teacher->user_id);
+            $user->name = $validated['name'];
+            $user->email = $validated['nip'] . '@teacher.test';
+            $user->password = Hash::make($validated['nip']);
+            $user->save();
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Guru '. $request->name.' Sekolah '.session('school_name'));
+
+            DB::commit();
+
+            return redirect()->route('kepala.teachers')->with('success', 'Data guru berhasil diubah');
+        }
+        catch(\Exception $e)
+        {
+            DB::rollBack();
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Merubah Data Guru '. $request->name.' Sekolah '.session('school_name'));
+
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
