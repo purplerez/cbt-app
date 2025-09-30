@@ -31,7 +31,7 @@
 
 
 
-                                        <form action="{{--   --}}" method="POST" class="inline-block">
+                                        <form action="{{route('kepala.student.destroy', $student->id)}}" method="POST" class="inline-block">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>

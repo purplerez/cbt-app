@@ -193,9 +193,15 @@ class DashboardController extends Controller
             }
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data Siswa'.$student->name);
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data '.$student->name);
 
             $student->delete();
+
+            return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil dihapus');
+        }
+        catch(\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Menghapus Data Siswa'.$student->name);
         }
 
     }
