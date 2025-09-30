@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class DashboardController extends Controller
 {
@@ -113,5 +114,89 @@ class DashboardController extends Controller
         catch(\Exception $e){
             return redirect()->back()->with('error', $e->getMessage());
         }
+    }
+
+    public function editStudent($id){
+        try{
+            $student = Student::findOrFail($id);
+            $grade = Grade::all();
+            return view('kepala.edit_siswa', compact('student', 'grade'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+
+    public function updateStudent(Request $request, $id){
+        try{
+            $validatedData = $request->validate([
+                'nis' => 'required',
+                'name' => 'required|string|max:255',
+                'grade_id' => 'required|exists:grades,id',
+                'gender' => 'required|in:L,P',
+                'p_birth' => 'required|string|max:255', // Place of birth
+                'd_birth' => 'required|date', // Date of birth
+                'address' => 'required|string',
+                'photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB and only JPEG, JPG, and GIF files
+            ]);
+            // dd($validatedData);
+            $student = Student::findOrFail($id);
+            $student->update([
+                'nis' => $validatedData['nis'],
+                'name' => $validatedData['name'],
+                'grade_id' => $validatedData['grade_id'],
+                'gender' => $validatedData['gender'],
+                'p_birth' => $validatedData['p_birth'],
+                'd_birth' => $validatedData['d_birth'],
+                'address' => $validatedData['address'],
+            ]);
+
+            if ($request->hasFile('photo')) {
+                $oldPhoto = $request->input('old_photo');
+                // Delete old photo if it exists and is not the default photo
+                if ($oldPhoto && $oldPhoto !== "assets/images/students/default.jpg") {
+                    Storage::disk('public')->delete($oldPhoto);
+                }
+                // Store the new photo
+                $imageName = $request->nis.'.'.$request->file('photo')->extension();
+                $photoPath = $request->file('photo')->storeAs('assets/images/students', $imageName, 'public');
+                $student->photo = $photoPath;
+                $student->save();
+            }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Siswa: ID-'.$id);
+
+            return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil diperbarui');
+        }
+        catch (\Exception $e) {
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Merubah Data Siswa'.$request->name);
+
+            return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function destroyStudent($id){
+        try{
+            $student = Student::findOrFail($id);
+
+            // Delete the associated user
+            if ($student->user) {
+                $student->user->delete();
+            }
+            // Delete the photo if it exists and is not the default photo
+            if ($student->photo && $student->photo !== "assets/images/students/default.jpg") {
+                Storage::disk('public')->delete($student->photo);
+            }
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data Siswa'.$student->name);
+
+            $student->delete();
+        }
+
     }
 }

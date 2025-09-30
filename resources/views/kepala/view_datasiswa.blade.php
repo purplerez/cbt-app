@@ -16,8 +16,8 @@
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
-                                <th class="px-4 py-2 border w-5">No</th>
-                                <th class="px-4 py-2 border w-40">Nama Grade</th>
+                                <th class="w-5 px-4 py-2 border">No</th>
+                                <th class="w-40 px-4 py-2 border">Nama Grade</th>
                                 <th class="px-4 py-2 border w-11">Action</th>
                             </tr>
                         </thead>
@@ -27,7 +27,7 @@
                                     <td class="px-4 py-2 border">{{ $student->id }}</td>
                                     <td class="px-4 py-2 border">{{ $student->name }}</td>
                                     <td class="px-4 py-2 border">
-                                        <a href="{{--  --}}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
+                                        <a href="{{ route('kepala.student.edit', $student->id)}}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
 
 
 
