@@ -5,6 +5,7 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
+use App\Http\Controllers\kepala\KepalaExamController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\super\DashboardController as SuperController;
 use App\Http\Controllers\ProfileController;
@@ -146,6 +147,10 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::delete('/teacher/{teacher}/destroy', [KepalaController::class, 'destroyTeacher'])->name('teacher.destroy');
     Route::put('/teacher/update', [KepalaController::class, 'updateTeacher'])->name('teacher.update');
 
+    //routing for exams in kepala dashboard
+    Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
+    Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
+    Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
 });
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function() {
