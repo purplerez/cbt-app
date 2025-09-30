@@ -5,6 +5,7 @@ namespace App\Http\Controllers\kepala;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\Examtype;
+use App\Models\ExamSession;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -41,13 +42,53 @@ class KepalaExamController extends Controller
                 throw new \Exception('Ujian Tidak ditemukan');
             }
 
-            $mapels = Exam::where('exam_id', session('exam_id'))->get();
+            $mapels = Exam::where('exam_type_id', session('exam_id'))->get();
 
-            return view('kepala.manageexam', compact('mapel'));
+            return view('kepala.manageexam', compact('mapels'));
         }
         catch(\Exception $e)
         {
             return redirect()->back()->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
+        }
+    }
+
+    /**
+     * Return JSON list of exam sessions (scores) for a given exam filtered by current school in session
+     */
+    public function scores(Exam $exam)
+    {
+        try {
+            $schoolId = session('school_id');
+
+            if (!$schoolId) {
+                return response()->json(['error' => 'School not found in session'], 400);
+            }
+
+            $sessions = ExamSession::with(['user.student'])
+                ->where('exam_id', $exam->id)
+                ->whereHas('user.student', function ($q) use ($schoolId) {
+                    $q->where('school_id', $schoolId);
+                })
+                ->get();
+
+            $data = $sessions->map(function ($s) {
+                return [
+                    'id' => $s->id,
+                    'student_name' => $s->user?->name ?? ($s->user?->student?->name ?? 'N/A'),
+                    'nis' => $s->user?->student?->nis ?? '-',
+                    'total_score' => $s->total_score,
+                    'status' => $s->status,
+                    'started_at' => $s->started_at?->toDateTimeString(),
+                    'submited_at' => $s->submited_at?->toDateTimeString(),
+                ];
+            });
+
+            return response()->json([
+                'exam' => $exam->title,
+                'sessions' => $data,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
     }
 

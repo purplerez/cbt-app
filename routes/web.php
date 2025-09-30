@@ -151,6 +151,8 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
     Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
+    // JSON endpoint to fetch scores for a given exam (subject)
+    Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
 });
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function() {
