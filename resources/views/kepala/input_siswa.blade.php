@@ -10,6 +10,7 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <x-input-error :messages="$errors->get('error')" class="mb-4" />
                     <form id="addSiswaForm" class="mt-4" action="{{ route('kepala.student.store') }}" method="post" enctype="multipart/form-data">
                         @csrf
                         {{-- @if (session('error'))
