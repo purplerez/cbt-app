@@ -138,6 +138,11 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
 
 
+    // routing for teachers in kepala dashboard
+    Route::get('/teachers', [KepalaController::class, 'teacherAll'])->name('teachers');
+    Route::get('/teachers/create', [KepalaController::class, 'createTeacher'])->name('teacher.create');
+    Route::post('/teachers/create', [KepalaController::class, 'storeTeacher'])->name('teacher.store');
+
 });
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function() {

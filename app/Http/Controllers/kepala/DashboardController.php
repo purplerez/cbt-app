@@ -7,6 +7,7 @@ use App\Http\Requests\StoreSchoolRequest;
 use App\Models\Grade;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -203,6 +204,36 @@ class DashboardController extends Controller
             $user = auth()->user();
             logActivity($user->name.' (ID: '.$user->id.') Gagal Menghapus Data Siswa'.$student->name);
         }
+    }
+
+    public function teacherAll(){
+        try{
+            $teachers = Teacher::all();
+            return view('kepala.view_dataguru', compact('teachers'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function createTeacher(){
+        try{
+            return view('kepala.input_guru');
+        }
+        catch(\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function storeTeacher(Request $request){
+        $validated = $request->validate([
+            'nip' => 'required|unique:teachers',
+            't_name' => 'required|string|max:255',
+            't_gender' => 'required|in:L,P',
+            't_address' => 'required|string',
+            't_photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB and only JPEG, JPG, and GIF files
+        ])
 
     }
+
 }

@@ -63,7 +63,7 @@
                         <x-nav-link :href="route('kepala.students')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Data Siswa') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
+                        <x-nav-link :href="route('kepala.teachers')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Data Operator') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
