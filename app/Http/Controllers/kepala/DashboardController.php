@@ -208,7 +208,8 @@ class DashboardController extends Controller
 
     public function teacherAll(){
         try{
-            $teachers = Teacher::all();
+            // $students = Student::where('school_id', session('school_id'))->get();
+            $teachers = Teacher::where('school_id', session('school_id'))->get();
             return view('kepala.view_dataguru', compact('teachers'));
         }
         catch(\Exception $e){
@@ -226,14 +227,61 @@ class DashboardController extends Controller
     }
 
     public function storeTeacher(Request $request){
-        $validated = $request->validate([
-            'nip' => 'required|unique:teachers',
-            't_name' => 'required|string|max:255',
-            't_gender' => 'required|in:L,P',
-            't_address' => 'required|string',
-            't_photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB and only JPEG, JPG, and GIF files
-        ])
+        // dd($request->all());
+        DB::beginTransaction();
+        try{
+            // Validate and store teacher data
+            $validated = $request->validate([
+                'nip' => 'required|unique:teachers',
+                'name' => 'required|string|max:255',
+                'gender' => 'required|in:L,P',
+                'address' => 'required|string',
+                'photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB
+            ]);
+            // Handle photo upload
+            if ($request->hasFile('photo')) {
+                $imageName = $request->nip . '.' . $request->file('photo')->extension();
+                $photoPath = $request->file('photo')->storeAs('assets/images/teachers', $imageName, 'public');
+                $validated['photo'] = $photoPath;
+            } else {
+                $validated['photo'] = "assets/images/teachers/default.jpg"; // or set a default photo path
+            }
+            // add as user
 
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->nip . '@teacher.test',
+                'password' => Hash::make($request->nip),
+                'role' => 'guru', // Let the seeder explicitly set this to match Spatie role
+                'email_verified_at' => now(),
+            ]);
+
+            // Assign teacher role using Spatie
+            $user->assignRole('guru');
+
+            // Create teacher record with all required fields
+            $teacherData = array_merge($validated, [
+                'user_id' => $user->id,
+                'school_id' => session()->get('school_id')
+            ]);
+
+            Teacher::create($teacherData);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Guru'. $request->name.' Sekolah '.session('school_name'));
+
+            DB::commit();
+            return redirect()->route('kepala.teachers')
+                   ->with('success', 'Data guru berhasil ditambahkan');
+        }
+        catch (\Exception $e) {
+            DB::rollBack();
+            // delete the uploaded photo if it exist and the transaction fails
+            if (isset($photoPath) && Storage::disk('public')->exists($photoPath)) {
+                Storage::disk('public')->delete($photoPath);
+            }
+            return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
+        }
     }
 
 }

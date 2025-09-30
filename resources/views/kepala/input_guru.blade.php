@@ -2,7 +2,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Master Data Siswa'.session('schoolname')) }}
+            {{ __('Master Data Guru '.session('school_name')) }}
         </h2>
     </x-slot>
 
@@ -10,7 +10,7 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                    <form id="addGuruForm" class="mt-4" action="{{ route('kepala.teachers.store') }}" method="post" enctype="multipart/form-data">
+                    <form id="addGuruForm" class="mt-4" action="{{ route('kepala.teacher.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
                     <div>
