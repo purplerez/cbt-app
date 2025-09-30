@@ -353,4 +353,35 @@ class DashboardController extends Controller
         }
     }
 
+    public function destroyTeacher($id){
+       DB::beginTransaction();
+        try{
+            $teacher = Teacher::findOrFail($id);
+            $user = User::findOrFail($teacher->user_id);
+
+            // delete existing photo
+            if ($teacher->photo && file_exists(public_path($teacher->photo) && $teacher->photo !== "assets/images/students/default.jpg")) {
+                unlink(public_path($teacher->photo));
+            }
+
+            $userlog = auth()->user();
+            logActivity($userlog->name.' (ID: '.$userlog->id.') Berhasil Menghapus Data Guru'. $teacher->name.' Sekolah '.session('school_name'));
+
+            // delete user associated with teacher
+            $user->delete();
+
+            // delete teacher record
+            $teacher->delete();
+
+            DB::commit();
+            return redirect()->route('kepala.teachers')
+                   ->with('success', 'Data guru berhasil dihapus');
+        }
+        catch(\Exception $e){
+            DB::rollBack();
+            return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
+        }
+
+    }
+
 }

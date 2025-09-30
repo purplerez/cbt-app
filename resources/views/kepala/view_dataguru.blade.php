@@ -33,10 +33,10 @@
                                                                         Edit
                                                                     </a>
 
-                                                                    <form action="{{route('kepala.teacher.destroy')}}" method="POST" class="inline-block">
+                                                                    <form action="{{route('kepala.teacher.destroy', $teacher->id)}}" method="POST" class="inline-block">
                                                                         @csrf
                                                                         @method('DELETE')
-                                                                        <input type="hidden" name="id" value="{{$teacher->id}}">
+                                                                        {{-- <input type="hidden" name="id" value="{{$teacher->id}}"> --}}
                                                                         <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus data Guru ini?')">Hapus</button>
                                                                     </form>
                                                                 </td>
