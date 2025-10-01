@@ -5,9 +5,9 @@ use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
 use App\Http\Controllers\Kepala\DashboardController as KepalaController;
-use App\Http\Controllers\kepala\KepalaExamController;
+use App\Http\Controllers\Kepala\KepalaExamController;
 use App\Http\Controllers\Siswa\DashboardController as SiswaController;
-use App\Http\Controllers\super\DashboardController as SuperController;
+use App\Http\Controllers\Super\DashboardController as SuperController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
 use App\Http\Controllers\SchoolController;
@@ -15,7 +15,6 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
 use App\Models\School;
-// use App\Http\Controllers\siswa\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -34,7 +33,7 @@ Route::middleware('auth')->group(function () {
 });
 
 // super admin page
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function() {
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
 
     // Routing for schools management
@@ -75,8 +74,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Routing for grade management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
-    Route::get('grades/create', function ()
-    {
+    Route::get('grades/create', function () {
         return view('admin.inputgrades');
     })->name('input.grades');
     Route::post('grades/create', [GradeController::class, 'store'])->name('grades.store');
@@ -94,7 +92,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Routing for question types management
     Route::get('question/type', [QuestionController::class, 'typeindex'])->name('questions.types');
-    Route::get('question/type/create', function() {
+    Route::get('question/type/create', function () {
         return view('admin.inputquestiontype');
     })->name('question.type.create');
     Route::post('question/type/create', [QuestionController::class, 'typestore'])->name('question.type.store');
@@ -104,9 +102,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('exams', [ExamController::class, 'index'])->name('exams');
     Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
-    Route::post('exams/create',[ExamController::class, 'globalstore'])->name('examsglobal.store');
+    Route::post('exams/create', [ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
-    Route::get('exams/{exam}/manage',[ExamController::class, 'manageView'])->name('exams.manage.view');
+    Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
 
 
@@ -129,7 +127,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('settings', [SchoolController::class, 'settings'])->name('settings');
 });
 
-Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->group(function(){
+Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->group(function () {
     Route::get('/dashboard', [KepalaController::class, 'index'])->name('dashboard');
     Route::get('/students', [KepalaController::class, 'studentAll'])->name('students');
     Route::get('/students/create', [KepalaController::class, 'createStudent'])->name('student.create');
@@ -155,16 +153,16 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
 });
 
-Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function() {
+Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'index'])->name('dashboard');
     // Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function() {
+Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
     Route::get('/dashboard', [SiswaController::class, 'index'])->name('dashboard');
 });
 
-Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->group(function(){
+Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->group(function () {
     Route::get('/dashboard', [SuperController::class, 'index'])->name('dashboard');
 
     // school management
@@ -184,8 +182,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
 
     // route for grades management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
-    Route::get('grades/create', function ()
-    {
+    Route::get('grades/create', function () {
         return view('admin.inputgrades');
     })->name('input.grades');
     Route::post('grades/create', [GradeController::class, 'store'])->name('grades.store');
@@ -196,22 +193,21 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     // Route for exams management
     Route::get('exams', [ExamController::class, 'index'])->name('exams');
     Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
-    Route::post('exams/create',[ExamController::class, 'globalstore'])->name('examsglobal.store');
+    Route::post('exams/create', [ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
-    Route::get('exams/{exam}/manage',[ExamController::class, 'manageView'])->name('exams.manage.view');
+    Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
 
     // add subject in an exam
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
 
 
     // bank soal
-     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
+    Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
     Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
 
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
-
 });
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
