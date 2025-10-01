@@ -104,8 +104,8 @@ class ParticipantController extends Controller
             $sessionToken = bin2hex(random_bytes(16));
             $startTime = Carbon::now();
             
-            // Use explicit integer casting and add method for safety
-            $endTime = Carbon::parse($startTime)->add('minutes', (int)$duration);
+            // Use explicit integer casting and addMinutes method for safety
+            $endTime = Carbon::parse($startTime)->addMinutes(intval($duration));
 
             $user->examSessions()->create([
                 'user_id' => $user->id,
@@ -113,7 +113,7 @@ class ParticipantController extends Controller
                 'session_token' => $sessionToken,
                 'started_at' => $startTime,
                 'submited_at' => $endTime,
-                'time_remaining' => (int)($duration * 60),
+                'time_remaining' => intval($duration * 60),
                 'total_score' => 0,
                 'status' => 'progress',
                 'attempt_number' => 1,
