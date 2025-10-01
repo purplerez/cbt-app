@@ -103,7 +103,7 @@ class ParticipantController extends Controller
 
             $sessionToken = bin2hex(random_bytes(16));
             $startTime = Carbon::now();
-            
+
             // Use explicit integer casting and addMinutes method for safety
             $endTime = Carbon::parse($startTime)->addMinutes(intval($duration));
 
