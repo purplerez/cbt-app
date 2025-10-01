@@ -31,10 +31,18 @@ class DashboardController extends Controller
         return view('kepala.dashboard');
     }
 
-    public function studentAll(){
-        $students = Student::where('school_id', session('school_id'))->get();
+    public function studentAll(Request $request){
+        $query = Student::where('school_id', session('school_id'));
 
-        return view('kepala.view_datasiswa', compact('students'));
+        $selectedGrade = null;
+        if ($request->has('grade_id') && $request->grade_id) {
+            $selectedGrade = $request->grade_id;
+            $query->where('grade_id', $request->grade_id);
+        }
+
+        $students = $query->get();
+        $grade = Grade::all();
+        return view('kepala.view_datasiswa', compact('students', 'grade', 'selectedGrade'));
     }
 
     public function createStudent(){
