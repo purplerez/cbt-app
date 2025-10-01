@@ -59,7 +59,7 @@ class ParticipantController extends Controller
     {
         try {
             $user = $request->user();
-            
+
             // Get exam data first and validate
             $exam = Exam::find($examId);
             if (!$exam) {
@@ -69,15 +69,22 @@ class ParticipantController extends Controller
                 ], 404);
             }
 
-            // Ensure duration and total_quest are integers
-            $duration = (int) $exam->duration;
-            $totalQuest = (int) $exam->total_quest;
-            
-            // Validate duration
-            if ($duration <= 0) {
+            // Ensure duration and total_quest are strictly integers with validation
+            $duration = filter_var($exam->duration, FILTER_VALIDATE_INT);
+            $totalQuest = filter_var($exam->total_quest, FILTER_VALIDATE_INT);
+
+            // Validate that we got valid integers
+            if ($duration === false || $duration <= 0) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Durasi ujian tidak valid'
+                ], 422);
+            }
+
+            if ($totalQuest === false || $totalQuest <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Jumlah soal ujian tidak valid'
                 ], 422);
             }
 
@@ -96,7 +103,9 @@ class ParticipantController extends Controller
 
             $sessionToken = bin2hex(random_bytes(16));
             $startTime = Carbon::now();
-            $endTime = $startTime->copy()->addMinutes($duration);
+            
+            // Use explicit integer casting and add method for safety
+            $endTime = Carbon::parse($startTime)->add('minutes', (int)$duration);
 
             $user->examSessions()->create([
                 'user_id' => $user->id,
@@ -104,7 +113,7 @@ class ParticipantController extends Controller
                 'session_token' => $sessionToken,
                 'started_at' => $startTime,
                 'submited_at' => $endTime,
-                'time_remaining' => $duration * 60,
+                'time_remaining' => (int)($duration * 60),
                 'total_score' => 0,
                 'status' => 'progress',
                 'attempt_number' => 1,
