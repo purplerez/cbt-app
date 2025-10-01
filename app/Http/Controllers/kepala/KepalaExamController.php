@@ -13,7 +13,7 @@ class KepalaExamController extends Controller
 {
     //
     public function indexAll(){
-        $exams = Examtype::all();
+        $exams = Examtype::where('is_global', true)->get();
 
         return view('kepala.view_examglobal', compact('exams'));
     }
