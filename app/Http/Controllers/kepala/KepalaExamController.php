@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\kepala;
+namespace App\Http\Controllers\Kepala;
 
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
@@ -12,14 +12,16 @@ use Illuminate\Support\Facades\Session;
 class KepalaExamController extends Controller
 {
     //
-    public function indexAll(){
+    public function indexAll()
+    {
         $exams = Examtype::all();
 
         return view('kepala.view_examglobal', compact('exams'));
     }
 
-    public function manage(Request $request, $id){
-        try{
+    public function manage(Request $request, $id)
+    {
+        try {
             $exams = Examtype::findOrFail($id);
 
             session([
@@ -29,26 +31,23 @@ class KepalaExamController extends Controller
 
             return redirect()->route('kepala.exams.manage.view', $exams->id);
             // return view('kepala.view_exam', compact('exams'));
-        }
-        catch(\Exception $e)
-        {
-            return redirect()->back()->withErrors(['error' => 'Ujian Gagal di Load : '.$e->getMessage()]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Ujian Gagal di Load : ' . $e->getMessage()]);
         }
     }
 
-    public function manageView(Examtype $examtype){
-        try{
-            if(!session('exam_id')){
+    public function manageView(Examtype $examtype)
+    {
+        try {
+            if (!session('exam_id')) {
                 throw new \Exception('Ujian Tidak ditemukan');
             }
 
             $mapels = Exam::where('exam_type_id', session('exam_id'))->get();
 
             return view('kepala.manageexam', compact('mapels'));
-        }
-        catch(\Exception $e)
-        {
-            return redirect()->back()->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :'.$e->getMessage()]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :' . $e->getMessage()]);
         }
     }
 
@@ -91,6 +90,4 @@ class KepalaExamController extends Controller
             return response()->json(['error' => $e->getMessage()], 500);
         }
     }
-
-
 }

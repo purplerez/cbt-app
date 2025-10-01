@@ -24,9 +24,7 @@ if (! function_exists('logActivity')) {
         // Jenssegers Agent
         $agent = new Agent();
         $device = $mete['device'] ?? (
-            $agent->isMobile() ? 'Mobile' :
-            ($agent->isTablet() ? 'Tablet' :
-            ($agent->isDesktop() ? 'Desktop' : 'Other'))
+            $agent->isMobile() ? 'Mobile' : ($agent->isTablet() ? 'Tablet' : ($agent->isDesktop() ? 'Desktop' : 'Other'))
         );
         $os = $mete['os'] ?? $agent->platform();
         $browser = $meta['browser'] ?? $agent->browser();
