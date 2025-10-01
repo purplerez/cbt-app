@@ -146,6 +146,7 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::put('/teacher/update', [KepalaController::class, 'updateTeacher'])->name('teacher.update');
 
     //routing for exams in kepala dashboard
+    Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
     Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');

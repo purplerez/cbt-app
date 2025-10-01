@@ -36,6 +36,12 @@
                                     </td>
 
                                     <td class="px-4 py-2 border">
+                                        <form action={{ route('kepala.exams.participant',  $exam->id ) }} method="post" class="inline-block">
+                                            @csrf
+                                            <button type="submit" class="px-3 py-1.5 bg-white border border-green-600 text-green-600 text-sm font-medium rounded hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                Daftarkan siswa
+                                            </button>
+                                        </form>
 
                                         <form action={{ route('kepala.exams.manage',  $exam->id ) }} method="post" class="inline-block">
                                             @csrf
@@ -44,15 +50,7 @@
                                             </button>
                                         </form>
 
-                                        @role('admin')
-                                            <form action="{{ route('admin.grades.destroy', $exam->id) }}" method="POST" class="inline-block">
-                                        @endrole
-
-
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>
-                                        </form>
+                                    </td>
 
                                 </tr>
                             @empty
