@@ -24,7 +24,9 @@ class ExamSession extends Model
     protected $casts = [
         'started_at' => 'datetime',
         'submited_at' => 'datetime',
-        'total_score' => 'decimal:2'
+        'total_score' => 'decimal:2',
+        'time_remaining' => 'integer',
+        'attempt_number' => 'integer'
     ];
 
     /**

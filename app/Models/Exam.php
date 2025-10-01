@@ -21,6 +21,15 @@ class Exam extends Model
         'is_active',
     ];
 
+    protected $casts = [
+        'duration' => 'integer',
+        'total_quest' => 'integer',
+        'score_minimal' => 'integer',
+        'is_active' => 'boolean',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
+    ];
+
     public function subject()
     {
         return $this->belongsTo(Subject::class);

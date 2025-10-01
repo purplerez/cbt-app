@@ -59,15 +59,52 @@ class ParticipantController extends Controller
     {
         try {
             $user = $request->user();
+            
+            // Get exam data first and validate
+            $exam = Exam::find($examId);
+            if (!$exam) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ujian tidak ditemukan'
+                ], 404);
+            }
+
+            // Ensure duration and total_quest are integers
+            $duration = (int) $exam->duration;
+            $totalQuest = (int) $exam->total_quest;
+            
+            // Validate duration
+            if ($duration <= 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Durasi ujian tidak valid'
+                ], 422);
+            }
+
+            // Check if user already has an active session for this exam
+            $existingSession = $user->examSessions()
+                ->where('exam_id', $examId)
+                ->where('status', 'progress')
+                ->first();
+
+            if ($existingSession) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda sudah memiliki sesi ujian yang aktif untuk ujian ini'
+                ], 422);
+            }
+
             $sessionToken = bin2hex(random_bytes(16));
+            $startTime = Carbon::now();
+            $endTime = $startTime->copy()->addMinutes($duration);
 
             $user->examSessions()->create([
                 'user_id' => $user->id,
                 'exam_id' => $examId,
                 'session_token' => $sessionToken,
-                'started_at' => Carbon::now(),
-                'submited_at' => Carbon::now()->addMinutes(Exam::find($examId)->duration),
-                'time_remaining' => Exam::find($examId)->duration * 60,
+                'started_at' => $startTime,
+                'submited_at' => $endTime,
+                'time_remaining' => $duration * 60,
                 'total_score' => 0,
                 'status' => 'progress',
                 'attempt_number' => 1,
@@ -75,20 +112,34 @@ class ParticipantController extends Controller
                 'user_agent' => $request->header('User-Agent'),
             ]);
 
-            $question = Question::where('exam_id', $examId)
-                ->limit(Exam::find($examId)->total_quest)
+            $questions = Question::where('exam_id', $examId)
+                ->limit($totalQuest)
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'exam' => $question,
-                'session_token' => $sessionToken
+                'exam' => $questions,
+                'session_token' => $sessionToken,
+                'exam_info' => [
+                    'title' => $exam->title,
+                    'duration' => $duration,
+                    'total_questions' => $totalQuest,
+                    'start_time' => $startTime->toISOString(),
+                    'end_time' => $endTime->toISOString()
+                ]
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to start exam', [
+                'user_id' => $request->user()->id ?? null,
+                'exam_id' => $examId,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
-                'message' => "Gagal Load Soal" . $e->getMessage()
-            ]);
+                'message' => 'Gagal memulai ujian. Silakan coba lagi.'
+            ], 500);
         }
     }
 
