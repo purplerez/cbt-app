@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\Examtype;
 use App\Models\ExamSession;
+use App\Models\Grade;
+use App\Models\Student;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 
@@ -88,5 +91,17 @@ class KepalaExamController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    public function participants($id)
+    {
+        $students = User::with(['preassigned' => function ($q) use ($id) {
+                                                    $q->where('exam_id', $id);
+                                                }])
+                                                ->get();
+        $grade = Grade::all();
+
+
+        return view('kepala.view_participant', compact('students', 'grade'));
     }
 }
