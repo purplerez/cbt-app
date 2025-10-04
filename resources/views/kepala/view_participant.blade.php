@@ -10,10 +10,6 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                         <div class="flex items-center justify-between space-x-4">
-                            <a href="{{route('kepala.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
-                                + Tambah
-                            </a>
-
                             <form action="{{ route('kepala.students') }}" method="get" class="flex items-center space-x-2">
                                 <label for="grade_id" class="sr-only">Kelas</label>
                                 <select name="grade_id" id="grade_id" class="block w-48 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
@@ -52,7 +48,7 @@
                                         @if ($student->preassigned->isNotEmpty())
                                             <span class="font-semibold text-green-600">Sudah terdaftar</span>
                                         @else
-                                            <button type="button" data-student-id="{{$student->id}}" class="single-register-btn px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Daftarkan</button>
+                                            <button type="button" data-student-id="{{$student->id}}" class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">Daftarkan</button>
                                         @endif
                                 </tr>
                             @empty
