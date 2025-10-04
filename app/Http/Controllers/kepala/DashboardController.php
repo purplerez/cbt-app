@@ -175,6 +175,12 @@ class DashboardController extends Controller
                 $student->save();
             }
 
+            $updateUser = User::where('id', $student->user_id)->first();
+            $updateUser->name = $validatedData['name'];
+            $updateUser->email = $validatedData['nis'] . '@student.test';
+            $updateUser->password = Hash::make($validatedData['nis']);
+            $updateUser->save();
+
             $user = auth()->user();
             logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Siswa: ID-'.$id);
 
