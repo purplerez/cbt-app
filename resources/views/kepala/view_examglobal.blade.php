@@ -17,7 +17,7 @@
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
                                 <th class="px-4 py-2 border">No</th>
-                                <th class="px-4 py-2 border">Nama Sekolah</th>
+                                <th class="px-4 py-2 border">Nama Ujian</th>
                                 <th class="px-4 py-2 border">Status</th>
                                 <th class="px-4 py-2 border">Action</th>
                             </tr>

@@ -27,6 +27,7 @@
                             </form>
                         </div>
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
+
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>

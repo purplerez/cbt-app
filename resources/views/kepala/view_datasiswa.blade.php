@@ -31,7 +31,7 @@
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
                                 <th class="w-5 px-4 py-2 border">No</th>
-                                <th class="w-40 px-4 py-2 border">Nama Grade</th>
+                                <th class="w-40 px-4 py-2 border">Nama Siswa</th>
                                 <th class="px-4 py-2 border w-11">Action</th>
                             </tr>
                         </thead>
