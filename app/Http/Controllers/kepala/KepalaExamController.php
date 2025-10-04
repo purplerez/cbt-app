@@ -7,6 +7,7 @@ use App\Models\Exam;
 use App\Models\Examtype;
 use App\Models\ExamSession;
 use App\Models\Grade;
+use App\Models\Preassigned;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -95,13 +96,75 @@ class KepalaExamController extends Controller
 
     public function participants($id)
     {
+        // Fetch users (students) who belong to the currently selected school
+        $schoolId = session('school_id');
+
         $students = User::with(['preassigned' => function ($q) use ($id) {
-                                                    $q->where('exam_id', $id);
-                                                }])
-                                                ->get();
+            $q->where('exam_id', $id);
+        }, 'student'])
+        ->whereHas('student', function ($q) use ($schoolId) {
+            $q->where('school_id', $schoolId);
+        })
+        ->get();
+
         $grade = Grade::all();
 
+        return view('kepala.view_participant', compact('students', 'grade'))->with('examId', $id);
+    }
 
-        return view('kepala.view_participant', compact('students', 'grade'));
+    public function storeParticipants(Request $request, $exam)
+    {
+        $data = $request->validate([
+            'student_ids' => 'sometimes|array',
+            'student_ids.*' => 'integer|exists:users,id',
+            'student_id' => 'sometimes|integer|exists:users,id',
+        ]);
+
+        $added = 0;
+        $examId = $exam;
+
+        $ids = [];
+        if (!empty($data['student_ids'])) {
+            $ids = $data['student_ids'];
+        } elseif (!empty($data['student_id'])) {
+            $ids = [$data['student_id']];
+        }
+
+        foreach ($ids as $userId) {
+            // prevent duplicates
+            $exists = Preassigned::where('user_id', $userId)->where('exam_id', $examId)->exists();
+            if (!$exists) {
+                Preassigned::create([
+                    'user_id' => $userId,
+                    'exam_id' => $examId,
+                ]);
+                $added++;
+            }
+        }
+
+        if ($added > 0) {
+            return redirect()->back()->with('success', "Berhasil menambahkan $added peserta.");
+        }
+
+        return redirect()->back()->with('error', 'Tidak ada peserta baru yang ditambahkan.');
+    }
+
+    public function storeOneParticipant(Request $request, $exam)
+    {
+        try{
+            $data = $request->validate([
+                'student_id' => 'required|integer|exists:users,id',
+            ]);
+
+            Preassigned::create([
+                'user_id' => $data['student_id'],
+                'exam_id' => $exam,
+            ]);
+
+            return redirect()->back()->with('success', 'Berhasil menambahkan peserta.');
+        }
+        catch(\Exception $e){
+            return redirect()->back()->with('error', 'Tidak ada peserta baru yang ditambahkan.');
+        }
     }
 }
