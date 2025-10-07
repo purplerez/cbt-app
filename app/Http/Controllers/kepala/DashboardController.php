@@ -31,6 +31,19 @@ class DashboardController extends Controller
         return view('kepala.dashboard');
     }
 
+    public function school(){
+        try{
+            $school_id = session('school_id');
+
+            $school = School::findOrFail($school_id);
+
+            return view('kepala.view_school', compact('school'));
+        }
+        catch (\Exception $e) {
+
+        }
+    }
+
     public function studentAll(Request $request){
         $query = Student::where('school_id', session('school_id'));
 

@@ -60,6 +60,9 @@
                         <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('kepala.dashboard')">
                             {{ __('Kepala Dashboard') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('kepala.school')" :active="request()->routeIs('kepala.school')">
+                            {{ __('Data Sekolah') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('kepala.students')" :active="request()->routeIs('kepala.students')">
                             {{ __('Data Siswa') }}
                         </x-nav-link>

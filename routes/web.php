@@ -129,6 +129,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->group(function () {
     Route::get('/dashboard', [KepalaController::class, 'index'])->name('dashboard');
+
+    // school data
+    Route::get('/school', [KepalaController::class, 'school'])->name('school');
+
+
     Route::get('/students', [KepalaController::class, 'studentAll'])->name('students');
     Route::get('/students/create', [KepalaController::class, 'createStudent'])->name('student.create');
     Route::post('/students/create', [KepalaController::class, 'storeStudent'])->name('student.store');
