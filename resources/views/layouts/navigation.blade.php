@@ -38,7 +38,7 @@
                             {{ __('Admin Dashboard') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.schools')">
-                            {{ __('Sekolah') }}
+                            {{ __('Madrasah') }}
                         </x-nav-link>
                         <x-nav-link :href="route('admin.grades')" :active="request()->routeIs('admin.grades')">
                             {{ __('Tingkat') }}
@@ -61,7 +61,7 @@
                             {{ __('Kepala Dashboard') }}
                         </x-nav-link>
                         <x-nav-link :href="route('kepala.school')" :active="request()->routeIs('kepala.school')">
-                            {{ __('Data Sekolah') }}
+                            {{ __('Data Madrasah') }}
                         </x-nav-link>
                         <x-nav-link :href="route('kepala.students')" :active="request()->routeIs('kepala.students')">
                             {{ __('Data Siswa') }}
@@ -87,7 +87,7 @@
                             {{ __('Super Dashboard') }}
                         </x-nav-link>
                         <x-nav-link :href="route('super.school')" :active="request()->routeIs('super.school')">
-                            {{ __('Sekolah') }}
+                            {{ __('Data Madrasah') }}
                         </x-nav-link>
                         <x-nav-link :href="route('super.grades')" :active="request()->routeIs('super.grades')">
                             {{ __('Tingkat') }}

@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Tambah Data Sekolah') }}
+            Data Madrasah
         </h2>
     </x-slot>
 
@@ -9,87 +9,70 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-
-
-                    @role('admin')
-                        <form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
-                    @endrole
-
-                    @role('super')
-                        <form action="{{ route('super.sekolahstore') }}" method="post" enctype="multipart/form-data"><form action="{{ route('admin.sekolahstore') }}" method="post" enctype="multipart/form-data">
-                    @endrole
-                        @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
                                 {{ session('error') }}
                             </div>
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Sekolah</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
-                        </div>
-
-                        <!-- NPSN -->
-                        <div>
-                            <label for="npsn" class="block text-sm font-medium text-gray-700">NPSN</label>
-                            <input type="text" name="npsn" id="npsn" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('npsn')" class="mb-4" />
-
-                        </div>
-
-                        <!-- Alamat -->
-                        <div>
-                            <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                            <textarea name="address" id="address" rows="3"
-                                    class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
-                                    <x-input-error :messages="$errors->get('address')" class="mb-4" />
-                        </div>
-
-                        <!-- Telepon -->
-                        <div>
-                            <label for="phone" class="block text-sm font-medium text-gray-700">Telepon</label>
-                            <input type="text" name="phone" id="phone"
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                        </div>
-
-                        <!-- Email -->
-                        <div>
-                            <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
-                            <input type="email" name="email" id="email"
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('email')" class="mb-4" />
-                        </div>
-
-                        <!-- Kode Sekolah -->
-                        <div>
-                            <label for="code" class="block text-sm font-medium text-gray-700">Kode Sekolah</label>
-                            <input type="text" name="code" id="code" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('code')" class="mb-4" />
-                        </div>
 
                         <!-- Logo -->
-                        <div>
-                            <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label>
-                            <input type="file" name="logo" id="logo"
-                                class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                            <x-input-error :messages="$errors->get('logo')" class="mb-4" />
+                        <div class="flex items-center justify-center mb-4">
+
+                                <img src="{{ Storage::url($school->logo) }}" alt="School Logo" class="object-cover w-24 h-24 rounded-full">
+
                         </div>
 
+                        <div class="grid grid-cols-1 gap-4">
+                            <div class="flex items-start py-3 space-x-4 transition-colors border-b border-gray-100 rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Nama Madrasah</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block text-gray-800">{{ $school->name }}</span>
+                                </div>
+                            </div>
 
-                        <!-- Tombol Submit -->
-                        <div class="pt-4">
-                            <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Simpan Data
-                            </button>
+                            <div class="flex items-start py-3 space-x-4 transition-colors border-b border-gray-100 rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">NPSN</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block text-gray-800">{{ $school->npsn }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start py-3 space-x-4 transition-colors border-b border-gray-100 rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Alamat Madrasah</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block text-gray-800">{{ $school->address }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start py-3 space-x-4 transition-colors border-b border-gray-100 rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Telp. Madrasah</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block text-gray-800">{{ $school->phone }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start py-3 space-x-4 border-b border-gray-100">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Email</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block text-gray-800">{{ $school->email }}</span>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start py-3 space-x-4 transition-colors rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Kode Sekolah</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block">{{ $school->code }}</span>
+                                </div>
+                            </div>
+
                         </div>
-                    </form>
-                </div>
+
+                    <div class="flex justify-end pt-4 mt-6 border-t border-gray-100">
+                        <a href="{{ route('kepala.school.edit', $school->id) }}" class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
+                            Rubah Data Madrasah
+                        </a>
+                    </div>
             </div>
         </div>
     </div>

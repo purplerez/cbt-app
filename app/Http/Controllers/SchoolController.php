@@ -48,6 +48,9 @@ class SchoolController extends Controller
                 $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
                 $validatedData['logo'] = $destinationPath;
             }
+            else {
+                $validatedData['logo'] = "assets/images/school/default.png";
+            }
             // else {
             //     throw new \Exception('Logo is required and must be a valid image file');
             // }

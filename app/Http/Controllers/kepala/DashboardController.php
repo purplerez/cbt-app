@@ -40,7 +40,63 @@ class DashboardController extends Controller
             return view('kepala.view_school', compact('school'));
         }
         catch (\Exception $e) {
+            return redirect()->route('kepala.dashboard')->with('error', $e->getMessage());
+        }
+    }
 
+    public function editSchool($id){
+        try{
+            $school = School::findOrFail($id);
+
+            return view('kepala.edit_school', compact('school'));
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->with('error', $e->getMessage());
+        }
+    }
+
+    public function updateSchool(Request $request){
+        try{
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'npsn' => 'required|string|max:255',
+            'address' => 'required|string',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|string|email|max:255',
+            'code' => 'required|string|max:50',
+            'logo' => 'nullable|image|max:2048' // max 2MB
+        ]);
+
+
+            $school = School::findOrFail($request->id);
+
+            $school->name = $validated['name'];
+            $school->npsn = $validated['npsn'];
+            $school->address = $validated['address'];
+            $school->phone = $validated['phone'];
+            $school->email = $validated['email'];
+            $school->code = $validated['code'];
+
+            if ($request->hasFile('logo')) {
+                $logo = $request->file('logo');
+
+                // delete old logo if exists
+                if ($school->logo && $school->logo !== "assets/images/school/default.png") {
+                    Storage::disk('public')->delete($school->logo);
+                }
+
+                $imageName = time().'.'.$logo->extension();
+                $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
+                $school->logo = $destinationPath;
+            }
+
+            $school->save();
+
+            return redirect()->route('kepala.school')->with('success', 'Data sekolah berhasil diperbarui');
+        }
+        catch(\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
