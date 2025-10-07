@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Perbarui Data Sekolah'.$dataSchool->name) }}
+            {{ __('Perbarui Data '.$dataSchool->name) }}
         </h2>
     </x-slot>
 
@@ -22,7 +22,7 @@
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Sekolah</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Madrasah</label>
                             <input type="text" name="name" id="name" value="{{ $dataSchool->name }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
@@ -34,7 +34,6 @@
                             <input type="text" name="npsn" id="npsn" required value="{{ $dataSchool->npsn }}"
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('npsn')" class="mb-4" />
-
                         </div>
 
                         <!-- Alamat -->
@@ -42,7 +41,7 @@
                             <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
                             <textarea name="address" id="address" rows="3"
                                     class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ $dataSchool->address }}</textarea>
-                                    <x-input-error :messages="$errors->get('address')" class="mb-4" />
+                            <x-input-error :messages="$errors->get('address')" class="mb-4" />
                         </div>
 
                         <!-- Telepon -->
@@ -62,7 +61,7 @@
 
                         <!-- Kode Sekolah -->
                         <div>
-                            <label for="code" class="block text-sm font-medium text-gray-700">Kode Sekolah</label>
+                            <label for="code" class="block text-sm font-medium text-gray-700">Kode Madrasah</label>
                             <input type="text" name="code" id="code" required value="{{ $dataSchool->code }}"
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('code')" class="mb-4" />
@@ -86,7 +85,7 @@
                             {{-- <input type="hidden" name="id" value="{{ $dataSchool->id }}"> --}}
                             <button type="submit"
                                     class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Perbarui Data Sekolah
+                                Perbarui Data Madrasah
                             </button>
                         </div>
                     </form>

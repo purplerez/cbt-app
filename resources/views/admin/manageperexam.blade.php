@@ -497,10 +497,10 @@
                                             <div class="mb-6">
                                                 <label for="school_filter"
                                                     class="block text-sm font-medium text-gray-700">Pilih
-                                                    Sekolah</label>
+                                                    Madrasah</label>
                                                 <select id="school_filter"
                                                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                                    <option value="">Pilih Sekolah</option>
+                                                    <option value="">Pilih Madrasah</option>
                                                     @foreach ($schools as $school)
                                                         <option value="{{ $school->id }}">{{ $school->name }}
                                                         </option>
@@ -581,10 +581,10 @@
                                                 <div class="w-64">
                                                     <label for="school_filter_logs"
                                                         class="block text-sm font-medium text-gray-700">Filter
-                                                        Sekolah</label>
+                                                        Madrasah</label>
                                                     <select id="school_filter_logs"
                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-                                                        <option value="">Semua Sekolah</option>
+                                                        <option value="">Semua Madrasah</option>
                                                         @foreach ($schools as $school)
                                                             <option value="{{ $school->id }}">{{ $school->name }}
                                                             </option>

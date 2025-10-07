@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Master Data Sekolah') }}
+            {{ __('Master Data Madrasah') }}
         </h2>
     </x-slot>
 
@@ -17,12 +17,12 @@
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
-                                <th class="px-4 py-2 border w-2">No</th>
-                                <th class="px-4 py-2 border w-30">Nama Sekolah</th>
-                                <th class="px-4 py-2 border w-40">Alamat</th>
-                                <th class="px-4 py-2 border w-3">Status</th>
-                                <th class="px-4 py-2 border w-10">Kode Sekolah</th>
-                                <th class="px-4 py-2 border w-10">Action</th>
+                                <th class="w-2 px-4 py-2 border">No</th>
+                                <th class="px-4 py-2 border w-30">Nama Madrasah</th>
+                                <th class="px-4 py-2 border w-30">Alamat</th>
+                                <th class="w-3 px-4 py-2 border">Status</th>
+                                <th class="px-4 py-2 border w-15">Kode Madrasah</th>
+                                <th class="w-10 px-4 py-2 border">Menu</th>
                             </tr>
                         </thead>
                         <tbody>

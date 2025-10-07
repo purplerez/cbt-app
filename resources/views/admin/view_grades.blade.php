@@ -19,8 +19,8 @@
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
-                                <th class="px-4 py-2 border w-5">No</th>
-                                <th class="px-4 py-2 border w-40">Nama Grade</th>
+                                <th class="w-5 px-4 py-2 border">No</th>
+                                <th class="w-40 px-4 py-2 border">Nama Tingkat</th>
                                 <th class="px-4 py-2 border w-11">Action</th>
                             </tr>
                         </thead>

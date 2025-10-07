@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Tambah Data Sekolah') }}
+            {{ __('Tambah Data Madrasah') }}
         </h2>
     </x-slot>
 
@@ -26,7 +26,7 @@
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                         <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Sekolah</label>
+                            <label for="name" class="block text-sm font-medium text-gray-700">Nama Madrasah</label>
                             <input type="text" name="name" id="name" value="{{ old('name') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
@@ -66,7 +66,7 @@
 
                         <!-- Kode Sekolah -->
                         <div>
-                            <label for="code" class="block text-sm font-medium text-gray-700">Kode Sekolah</label>
+                            <label for="code" class="block text-sm font-medium text-gray-700">Kode Madrasah</label>
                             <input type="text" name="code" id="code" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('code')" class="mb-4" />
@@ -74,7 +74,7 @@
 
                         <!-- Logo -->
                         <div>
-                            <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label>
+                            <label for="logo" class="block text-sm font-medium text-gray-700">Logo Madrasah</label>
                             <input type="file" name="logo" id="logo"
                                 class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                             <x-input-error :messages="$errors->get('logo')" class="mb-4" />

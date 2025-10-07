@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Manajemen Sekolah - ') . $school->name }}
+            {{ __('Manajemen Madrasah - ') . $school->name }}
         </h2>
     </x-slot>
 
@@ -29,7 +29,7 @@
                                         {{-- <svg class="w-5 h-5 mr-2" stroke-width="1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                                         </svg> --}}
-                                        Data Sekolah
+                                        Data Madrasah
                                     </button>
                                     <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition bg-gray-100 rounded-md hover:bg-gray-200" data-tab="siswa" @if($school->status == '0') disabled @endif >
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -47,7 +47,7 @@
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
-                                        Data Kepala Sekolah
+                                        Data Kepala Madrasah
                                     </button>
                                     <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="subjects" @if($school->status == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,7 +75,7 @@
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                             </svg>
-                                            Non-Aktifkan Akun
+                                            Non-Aktifkan Madrasah
                                         {{-- </a> --}}
                                         </button>
                                     @endif
@@ -92,7 +92,7 @@
                                 <div class="bg-white rounded-lg shadow">
 
                                     <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Sekolah</h3>
+                                        <h3 class="text-lg font-medium">Data Madrasah</h3>
                                     </div>
                                     <div class="p-4">
                                         <div class="overflow-x-auto">
@@ -100,8 +100,8 @@
                                             <div class="flex items-center pb-4 mb-4 space-x-4 border-b">
                                                 <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full place-items-center">
                                             </div>
-                                            <h2 class="mt-2 text-lg font-semibold">Nama Sekolah: {{ $school->name }}</h2>
-                                            <h4 class="mt-2 text-lg font-semibold">Kepala Sekolah: {{ $school->headmasters->name ?? 'Belum ada' }}</h4>
+                                            <h2 class="mt-2 text-lg font-semibold">Nama Madrasah : {{ $school->name }}</h2>
+                                            <h4 class="mt-2 text-lg font-semibold">Kepala Madrasah : {{ $school->headmasters->name ?? 'Belum ada' }}</h4>
                                             <p class="text-gray-600">NPSN: {{ $school->npsn }}</p>
                                             <p class="text-gray-600">Alamat: {{ $school->address }}</p>
                                             <p class="text-gray-600">Telepon: {{ $school->phone }}</p>
@@ -454,7 +454,7 @@
                                         <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
                                     @endif
                                     <div class="p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Kepala Sekolah</h3>
+                                        <h3 class="text-lg font-medium">Data Kepala Madrasah</h3>
                                     </div>
                                     <div class="p-4">
                                         @forelse($head as $headmaster)
@@ -503,7 +503,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="mt-6 flex gap-2">
+                                            <div class="flex gap-2 mt-6">
                                                 @if(session('edit'))
                                                     <input type="hidden" name="h_id" value="{{ $headmaster->id }}" />
                                                     @role('admin')
@@ -536,11 +536,11 @@
                                         @endrole
 
                                     @empty
-                                        <p class="text-gray-500 text-center">
+                                        <p class="text-center text-gray-500">
                                         @role('admin')
                                             <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 onclick="openModal('addKepalaModal')">
-                                                + Tambah Kepala Sekolah
+                                                + Tambah Data Kepala Madrasah
                                             </button>
                                         @endrole
                                         </p>
@@ -893,7 +893,7 @@
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Data Kepala Sekolah</h3>
+                <h3 class="text-lg font-medium text-gray-900">Tambah Data Kepala Madrasah</h3>
                 <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
                     <span class="sr-only">Close</span>
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -960,7 +960,7 @@
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Sekolah</h3>
+                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Madrasah</h3>
                 <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('nonAktifModal')">
                     <span class="sr-only">Close</span>
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
