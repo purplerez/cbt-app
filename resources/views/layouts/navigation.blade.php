@@ -69,12 +69,12 @@
                         <x-nav-link :href="route('kepala.teachers')" :active="request()->routeIs('kepala.teachers')">
                             {{ __('Data Operator') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
+                        <!-- x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Data Mata Pelajaran') }}
-                        </x-nav-link>
-                        <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
+                        </-x-nav-link-->
+                        <!-- x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Ujian Sekolah ') }}
-                        </x-nav-link>
+                        </!-->
                         <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Ujian Bersama ') }}
                         </x-nav-link>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExamlogController;
+use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
@@ -64,3 +65,8 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('siswa.
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
+
+// Kepala API: exam participants
+Route::middleware(['auth:sanctum', 'role:kepala'])->prefix('kepala')->group(function () {
+    Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants']);
+});

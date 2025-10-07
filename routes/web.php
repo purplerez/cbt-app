@@ -156,6 +156,10 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
     Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    // new route for registering selected students into a chosen exam
+    Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
+    // ajax: return students + registration status for selected exam_id
+    Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
     Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
     Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');

@@ -109,7 +109,88 @@ class KepalaExamController extends Controller
 
         $grade = Grade::all();
 
-        return view('kepala.view_participant', compact('students', 'grade'))->with('examId', $id);
+        // also fetch exams for the given exam_type_id (passed via URL)
+        $examsList = Exam::where('exam_type_id', $id)->get();
+
+        return view('kepala.view_participant', compact('students', 'grade', 'examsList'))->with('examId', $id);
+    }
+
+    /**
+     * Register one or multiple students into a selected exam (preassigned)
+     */
+    public function registerParticipants(Request $request)
+    {
+        $data = $request->validate([
+            'exam_id' => 'required|integer|exists:exams,id',
+            'student_ids' => 'sometimes|array',
+            'student_ids.*' => 'integer|exists:users,id',
+            'student_id' => 'sometimes|integer|exists:users,id',
+        ]);
+
+        $examId = $data['exam_id'];
+
+        $ids = [];
+        if (!empty($data['student_ids'])) {
+            $ids = $data['student_ids'];
+        } elseif (!empty($data['student_id'])) {
+            $ids = [$data['student_id']];
+        }
+
+        $added = 0;
+        foreach ($ids as $userId) {
+            $exists = Preassigned::where('user_id', $userId)->where('exam_id', $examId)->exists();
+            if (!$exists) {
+                Preassigned::create([
+                    'user_id' => $userId,
+                    'exam_id' => $examId,
+                ]);
+                $added++;
+            }
+        }
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json(['added' => $added], 200);
+        }
+
+        if ($added > 0) {
+            return redirect()->back()->with('success', "Berhasil menambahkan $added peserta.");
+        }
+
+        return redirect()->back()->with('error', 'Tidak ada peserta baru yang ditambahkan.');
+    }
+
+    /**
+     * Return students for current school with a flag whether they are preassigned for given exam_id
+     */
+    public function studentsByExam($examTypeId, Request $request)
+    {
+        $examId = $request->query('exam_id');
+
+        if (!$examId) {
+            return response()->json(['error' => 'exam_id is required'], 400);
+        }
+
+        $schoolId = session('school_id');
+        if (!$schoolId) {
+            return response()->json(['error' => 'school not found in session'], 400);
+        }
+
+        $users = User::with('student')
+            ->whereHas('student', function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId);
+            })
+            ->get();
+
+        $data = $users->map(function ($u) use ($examId) {
+            $registered = Preassigned::where('user_id', $u->id)->where('exam_id', $examId)->exists();
+            return [
+                'id' => $u->id,
+                'name' => $u->student->name ?? $u->name,
+                'registered' => $registered,
+            ];
+        });
+
+        return response()->json(['students' => $data]);
     }
 
     public function storeParticipants(Request $request, $exam)
