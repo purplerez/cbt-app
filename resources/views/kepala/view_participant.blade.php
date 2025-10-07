@@ -23,28 +23,27 @@
                                     <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Filter</button>
                                 </form>
 
-                                <!-- Exam select aligned next to grade -->
-                                <div class="flex items-center space-x-2">
-                                    <label for="exam_select" class="sr-only">Ujian</label>
-                                    <select id="exam_select" class="block border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="">-- Pilih Ujian --</option>
-                                        @foreach($examsList as $ex)
-                                            <option value="{{ $ex->id }}">{{ $ex->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+                                <!-- Form start - wraps both exam select and student table -->
+                                <form id="bulkRegisterForm" action="{{ route('kepala.exams.participants.register') }}" method="POST">
+                                    @csrf
+                                    <div class="flex items-center ml-auto space-x-2">
+                                        <input type="hidden" name="exam_id" id="bulk_exam_id" value="">
+                                        <label for="exam_select" class="sr-only">Ujian</label>
+                                        <select id="exam_select" onchange="document.getElementById('bulk_exam_id').value=this.value" class="block border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                            <option value="">-- Pilih Ujian --</option>
+                                            @foreach($examsList as $ex)
+                                                <option value="{{ $ex->id }}">{{ $ex->title }}</option>
+                                            @endforeach
+                                        </select>
+                                        <div class="ml-2">
+                                            <button id="bulkRegisterBtn" type="submit" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">Daftarkan yang dipilih</button>
+                                        </div>
+                                    </div>
                             </div>
                         </div>
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
 
-                        {{-- Bulk register form --}}
-                        <form id="bulkRegisterForm" action="{{ route('kepala.exams.participants.register') }}" method="POST">
-                            @csrf
-                            <input type="hidden" name="exam_id" id="bulk_exam_id" value="">
-                            <div class="flex items-center mb-3 space-x-3">
-                                <button id="bulkRegisterBtn" type="submit" class="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">Daftarkan yang dipilih</button>
-                            </div>
-
+                        {{-- Student table (inside the bulk register form) --}}
                             <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
@@ -64,6 +63,7 @@
                                         @else
                                             <button type="button" data-student-id="{{$student->id}}" class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">Daftarkan</button>
                                         @endif
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>
@@ -73,25 +73,29 @@
 
                         </tbody>
                     </table>
-                        </form>
+                </form>
 
-                        <script>
+                <script>
                             document.addEventListener('DOMContentLoaded', function() {
                                 const bulkForm = document.getElementById('bulkRegisterForm');
                                 const selectAll = document.getElementById('selectAll');
                                 const examSelect = document.getElementById('exam_select');
                                 const bulkExamInput = document.getElementById('bulk_exam_id');
                                 const tableBody = document.querySelector('table tbody');
+                                const bulkBtn = document.getElementById('bulkRegisterBtn');
 
                                 // Bulk form submit validation (keeps synchronous post behavior)
                                 if (bulkForm) {
                                     bulkForm.addEventListener('submit', function(e) {
+                                        e.preventDefault(); // always prevent default as we're handling submit via fetch
+
                                         // ensure hidden exam_id is set from examSelect before validate
-                                        if (bulkExamInput && examSelect && !bulkExamInput.value) {
+                                        if (bulkExamInput && examSelect) {
                                             bulkExamInput.value = examSelect.value || '';
                                         }
-                                        const checked = bulkForm.querySelectorAll('input[name="student_ids[]"]:checked');
-                                        const examVal = (bulkExamInput && bulkExamInput.value) || (examSelect && examSelect.value);
+
+                                        const checked = document.querySelectorAll('input[name="student_ids[]"]:checked');
+                                        const examVal = bulkExamInput ? bulkExamInput.value : '';
                                         if (!examVal) {
                                             e.preventDefault();
                                             alert('Pilih ujian terlebih dahulu');
@@ -102,8 +106,36 @@
                                             alert('Pilih minimal satu siswa untuk didaftarkan');
                                             return;
                                         }
-                                        if (!confirm('Konfirmasi: daftarkan ' + checked.length + ' siswa ke ujian ini?')) {
-                                            e.preventDefault();
+                                        if (confirm('Konfirmasi: daftarkan ' + checked.length + ' siswa ke ujian ini?')) {
+                                            const formData = new FormData();
+                                            formData.append('exam_id', examVal);
+                                            checked.forEach(cb => formData.append('student_ids[]', cb.value));
+                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                                            formData.append('_token', token);
+
+                                            // Submit form data
+                                            fetch(bulkForm.action, {
+                                                method: 'POST',
+                                                body: formData,
+                                                headers: {
+                                                    'Accept': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest'
+                                                }
+                                            })
+                                            .then(response => response.json())
+                                            .then(data => {
+                                                if (data.added > 0) {
+                                                    alert('Berhasil menambahkan ' + data.added + ' peserta.');
+                                                    // Reload student list to show updated status
+                                                    loadStudentsForExam(examVal);
+                                                } else {
+                                                    alert('Tidak ada peserta baru yang ditambahkan.');
+                                                }
+                                            })
+                                            .catch(error => {
+                                                console.error('Error:', error);
+                                                alert('Terjadi kesalahan saat mendaftarkan siswa.');
+                                            });
                                         }
                                     });
                                 }
@@ -176,6 +208,7 @@
                                     }
 
                                     if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat...</td></tr>';
+                                    if (bulkBtn) bulkBtn.disabled = true; // prevent submit while loading
                                     const base = '{{ url("/api/kepala/exams") }}';
                                     const url = base + '/' + examId + '/participants';
                                     try {
@@ -228,9 +261,15 @@
                                             });
                                         }
 
-                                        // set hidden bulk input and reset selectAll
+                                        // set hidden bulk input and set selectAll to checked (auto-select rows for bulk)
                                         if (bulkExamInput) bulkExamInput.value = examId;
-                                        if (selectAll) selectAll.checked = false;
+                                        if (selectAll) {
+                                            selectAll.checked = true;
+                                            // trigger change so checkboxes reflect the selectAll state
+                                            selectAll.dispatchEvent(new Event('change'));
+                                        }
+                                        // enable bulk button only if there are student rows
+                                        if (bulkBtn) bulkBtn.disabled = !(json.students && json.students.length);
                                         // reattach handlers for dynamic buttons
                                         attachSingleHandlers();
                                     } catch (err) {

@@ -120,43 +120,55 @@ class KepalaExamController extends Controller
      */
     public function registerParticipants(Request $request)
     {
-        $data = $request->validate([
-            'exam_id' => 'required|integer|exists:exams,id',
-            'student_ids' => 'sometimes|array',
-            'student_ids.*' => 'integer|exists:users,id',
-            'student_id' => 'sometimes|integer|exists:users,id',
-        ]);
+        try {
+            $data = $request->validate([
+                'exam_id' => 'required|integer',
+                'student_ids' => 'sometimes|array',
+                'student_ids.*' => 'integer|exists:users,id',
+                'student_id' => 'sometimes|integer',
+            ]);
 
-        $examId = $data['exam_id'];
+            $examId = $data['exam_id'];
 
-        $ids = [];
-        if (!empty($data['student_ids'])) {
-            $ids = $data['student_ids'];
-        } elseif (!empty($data['student_id'])) {
-            $ids = [$data['student_id']];
-        }
+            $ids = [];
+            if (!empty($data['student_ids'])) {
+                $ids = $data['student_ids'];
+            } elseif (!empty($data['student_id'])) {
+                $ids = [$data['student_id']];
+            }
 
-        $added = 0;
-        foreach ($ids as $userId) {
-            $exists = Preassigned::where('user_id', $userId)->where('exam_id', $examId)->exists();
-            if (!$exists) {
-                Preassigned::create([
-                    'user_id' => $userId,
-                    'exam_id' => $examId,
-                ]);
-                $added++;
+            $added = 0;
+
+            if (empty($ids)) {
+                throw new \Exception('Pilih minimal satu siswa untuk didaftarkan');
+            }
+
+            foreach ($ids as $userId) {
+                $exists = Preassigned::where('user_id', $userId)->where('exam_id', $examId)->exists();
+
+                if (!$exists) {
+                    Preassigned::create([
+                        'user_id' => $userId,
+                        'exam_id' => $examId,
+                    ]);
+                    $added++;
+                }
+            }
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['added' => $added], 200);
+            }
+
+            if ($added > 0) {
+                return redirect()->back()->with('success', "Berhasil menambahkan $added peserta.");
+            }
+            else {
+                throw new \Exception('Tidak ada peserta baru yang ditambahkan.');
             }
         }
-
-        if ($request->wantsJson() || $request->ajax()) {
-            return response()->json(['added' => $added], 200);
+        catch(\Exception $e){
+            return redirect()->back()->with('error', $e->getMessage());
         }
-
-        if ($added > 0) {
-            return redirect()->back()->with('success', "Berhasil menambahkan $added peserta.");
-        }
-
-        return redirect()->back()->with('error', 'Tidak ada peserta baru yang ditambahkan.');
     }
 
     /**
