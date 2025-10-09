@@ -39,7 +39,7 @@ class ExamTypeSeeder extends Seeder
                     'start_time' => now()->addDays(rand(1, 30)),
                     'end_time' => now()->addDays(rand(31, 60)),
                     'is_active' => '1',
-                    'is_global' => '0'
+                    'is_global' => '1'
                ]);
           }
      }
