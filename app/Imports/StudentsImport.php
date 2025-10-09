@@ -79,12 +79,12 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
         // ];
 
         return [
-            '*.nis' => ['required', 'unique:students,nis'],
+            '*.nis' => ['required','string', 'unique:students,nis'],
             '*.nama' => ['required', 'string'],
             '*.kelas_id' => ['required', 'exists:grades,id'],
             '*.jenis_kelamin' => ['required', 'in:L,P'],
             '*.tempat_lahir' => ['required', 'string'],
-            '*.tanggal_lahir' => ['required', 'date'],
+            '*.tanggal_lahir' => ['required', 'date_format:Y-m-d'],
             '*.alamat' => ['required', 'string'],
         ];
     }
