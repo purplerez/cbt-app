@@ -10,31 +10,31 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                         <div class="flex items-center justify-between space-x-4">
-                            <a href="{{route('kepala.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
-                                + Tambah
-                            </a>
+                            <div class="flex items-center space-x-3">
+                                <a href="{{route('kepala.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition">
+                                    + Tambah
+                                </a>
 
-                            {{-- import button --}}
-                                <div class="flex items-center justify-between mb-6">
-                                    <h3 class="text-lg font-semibold">Input Data Siswa</h3>
-                                    <div class="flex space-x-4">
-                                        <!-- Excel Upload Button and Form -->
-                                        <form action="{{ route('kepala.student.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
-                                            @csrf
-                                            <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
-                                            <button type="button" onclick="document.getElementById('excel_file').click()"
-                                                class="flex items-center px-4 py-2 text-white transition bg-green-600 rounded hover:bg-green-700">
-                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                                                </svg>
-                                                Import Excel
-                                            </button>
-                                            <a href="{{ route('kepala.student.template') }}" class="text-blue-600 transition hover:text-blue-800">
-                                                Download Template
-                                            </a>
-                                        </form>
-                                    </div>
-                                </div>
+                                <!-- Excel Upload Button and Form -->
+                                <form action="{{ route('kepala.student.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                    @csrf
+                                    <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
+                                    <button type="button" onclick="document.getElementById('excel_file').click()"
+                                        class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                        </svg>
+                                        Import Excel
+                                    </button>
+                                    <a href="{{ route('kepala.student.template') }}"
+                                        class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                        </svg>
+                                        Download Template
+                                    </a>
+                                </form>
+                            </div>
 
                     {{-- end of import button --}}
 
