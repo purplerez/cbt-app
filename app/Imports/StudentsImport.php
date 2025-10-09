@@ -48,35 +48,35 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation
 
     public function rules(): array
     {
-        return [
-            'nis' => [
-                'required',
-                'string',
-                'min:4',
-                'max:20',
-                'unique:students,nis'
-            ],
-            'nama' => 'required|string|min:3|max:255',
-            'kelas_id' => [
-                'required',
-                'numeric',
-                'exists:grades,id'
-            ],
-            'jenis_kelamin' => [
-                'required',
-                'string',
-                'in:L,P'
-            ],
-            'tempat_lahir' => 'required|string|min:3|max:100',
-            'tanggal_lahir' => [
-                'required',
-                'date',
-                'date_format:Y-m-d',
-                'after:1990-01-01',
-                'before:2020-12-31'
-            ],
-            'alamat' => 'required|string|min:5|max:500'
-        ];
+        // return [
+        //     'nis' => [
+        //         'required',
+        //         'string',
+        //         'min:4',
+        //         'max:20',
+        //         'unique:students,nis'
+        //     ],
+        //     'nama' => 'required|string|min:3|max:255',
+        //     'kelas_id' => [
+        //         'required',
+        //         'numeric',
+        //         'exists:grades,id'
+        //     ],
+        //     'jenis_kelamin' => [
+        //         'required',
+        //         'string',
+        //         'in:L,P'
+        //     ],
+        //     'tempat_lahir' => 'required|string|min:3|max:100',
+        //     'tanggal_lahir' => [
+        //         'required',
+        //         'date',
+        //         'date_format:Y-m-d',
+        //         'after:1990-01-01',
+        //         'before:2020-12-31'
+        //     ],
+        //     'alamat' => 'required|string|min:5|max:500'
+        // ];
 
         return [
             '*.nis' => ['required', 'unique:students,nis'],

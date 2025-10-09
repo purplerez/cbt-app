@@ -150,16 +150,16 @@ class StudentsTemplateExport implements FromArray, WithHeadings, WithStyles, Sho
         }
 
         // Add alternate row colors
-        for ($i = 2; $i <= 100; $i++) {
-            if ($i % 2 == 0) {
-                $sheet->getStyle("A{$i}:G{$i}")->applyFromArray([
-                    'fill' => [
-                        'fillType' => Fill::FILL_SOLID,
-                        'startColor' => ['rgb' => 'F2F2F2']
-                    ]
-                ]);
-            }
-        }
+        // for ($i = 2; $i <= 100; $i++) {
+        //     if ($i % 2 == 0) {
+        //         $sheet->getStyle("A{$i}:G{$i}")->applyFromArray([
+        //             'fill' => [
+        //                 'fillType' => Fill::FILL_SOLID,
+        //                 'startColor' => ['rgb' => 'F2F2F2']
+        //             ]
+        //         ]);
+        //     }
+        // }
 
         // Freeze the header row
         $sheet->freezePane('A2');
