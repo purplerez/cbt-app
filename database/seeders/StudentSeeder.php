@@ -46,7 +46,7 @@ class StudentSeeder extends Seeder
                          'p_birth' => collect(['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang'])->random(),
                          'd_birth' => fake()->dateTimeBetween('-18 years', '-15 years')->format('Y-m-d'),
                          'address' => fake()->address(),
-                         'photo' => null,
+                         'photo' => 'assets/images/students/default.jpg',
                     ]);
                }
           }
