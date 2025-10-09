@@ -17,4 +17,9 @@ class Examtype extends Model
         'is_active',
         'is_global',
     ];
+
+    public function rooms()
+    {
+        return $this->hasMany(Rooms::class);
+    }
 }
