@@ -15,8 +15,8 @@ class SchoolSeeder extends Seeder
     public function run(): void
     {
         //
-        School::firstOrCreate(['name' => 'Sekolah Dasar 1', 'address' => 'Jl. Contoh No. 1', 'code' => 'SD001']);
-        School::firstOrCreate(['name' => 'Sekolah Menengah Pertama 1', 'address' => 'Jl. Contoh No. 2', 'code' => 'SMP001']);
-        School::firstOrCreate(['name' => 'Sekolah Menengah At   as 1', 'address' => 'Jl. Contoh No. 3', 'code' => 'SMA001']);
+        School::firstOrCreate(['name' => 'Sekolah Dasar 1', 'address' => 'Jl. Contoh No. 1', 'code' => 'SD001', 'logo' => 'assets/images/school/default.png']);
+        School::firstOrCreate(['name' => 'Sekolah Menengah Pertama 1', 'address' => 'Jl. Contoh No. 2', 'code' => 'SMP001', 'logo' => 'assets/images/school/default.png']);
+        School::firstOrCreate(['name' => 'Sekolah Menengah At   as 1', 'address' => 'Jl. Contoh No. 3', 'code' => 'SMA001', 'logo' => 'assets/images/school/default.png']);
     }
 }
