@@ -14,6 +14,30 @@
                                 + Tambah
                             </a>
 
+                            {{-- import button --}}
+                                <div class="flex items-center justify-between mb-6">
+                                    <h3 class="text-lg font-semibold">Input Data Siswa</h3>
+                                    <div class="flex space-x-4">
+                                        <!-- Excel Upload Button and Form -->
+                                        <form action="{{ route('kepala.student.import') }}" method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                            @csrf
+                                            <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
+                                            <button type="button" onclick="document.getElementById('excel_file').click()"
+                                                class="flex items-center px-4 py-2 text-white transition bg-green-600 rounded hover:bg-green-700">
+                                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                </svg>
+                                                Import Excel
+                                            </button>
+                                            <a href="{{ route('kepala.student.template') }}" class="text-blue-600 transition hover:text-blue-800">
+                                                Download Template
+                                            </a>
+                                        </form>
+                                    </div>
+                                </div>
+
+                    {{-- end of import button --}}
+
                             <form action="{{ route('kepala.students') }}" method="get" class="flex items-center space-x-2">
                                 <label for="grade_id" class="sr-only">Kelas</label>
                                 <select name="grade_id" id="grade_id" class="block w-48 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">

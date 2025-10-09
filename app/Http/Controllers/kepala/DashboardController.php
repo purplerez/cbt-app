@@ -13,9 +13,46 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\StudentsImport;
+use App\Exports\StudentsTemplateExport;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DashboardController extends Controller
 {
+    /**
+     * Download Excel template for student import
+     */
+    public function downloadTemplate()
+    {
+        return Excel::download(new StudentsTemplateExport, 'template_import_siswa.xlsx');
+    }
+
+    /**
+     * Import students from Excel file
+     */
+    public function importStudents(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|mimes:xlsx,xls',
+        ]);
+
+        try {
+            Excel::import(new StudentsImport, $request->file('excel_file'));
+            return redirect()->back()->with('success', 'Data siswa berhasil diimport');
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+             $failures = $e->failures();
+             $errors = collect($failures)->map(function ($failure) {
+                return "Baris {$failure->row()}: {$failure->errors()[0]}";
+             })->join(', ');
+
+             return redirect()->back()->withErrors(['error' => 'Import gagal: ' . $errors]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Import gagal: ' . $e->getMessage()]);
+        }
+    }
     //
     // private $school;
 

@@ -143,6 +143,10 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::put('/students/{student}/edit', [KepalaController::class, 'updateStudent'])->name('student.update');
     Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
 
+    // Excel import routes
+    Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');
+    Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
+
 
     // routing for teachers in kepala dashboard
     Route::get('/teachers', [KepalaController::class, 'teacherAll'])->name('teachers');
