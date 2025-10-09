@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsTemplateExport;
+use App\Models\Rooms;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -41,6 +42,11 @@ class DashboardController extends Controller
 
         try {
             Excel::import(new StudentsImport, $request->file('excel_file'));
+
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Mengimport Data Siswa');
+
             return redirect()->back()->with('success', 'Data siswa berhasil diimport');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
              $failures = $e->failures();
@@ -66,6 +72,47 @@ class DashboardController extends Controller
         // dd(session()->all());
 
         return view('kepala.dashboard');
+    }
+
+    public function roomAll($id){
+
+        session(['exam_type_id' => $id]);
+
+        $rooms = Rooms::where('school_id', session('school_id'))
+                        ->where('exam_type_id', $id)
+                        ->get();
+
+        return view('kepala.view_rooms', compact('rooms'));
+    }
+
+    public function roomCreate(){
+
+        return view('kepala.input_rooms');
+    }
+
+    public function roomStore(Request $request){
+        try{
+            $validated = $request->validate([
+                'name' => 'required',
+            ]);
+
+            $rooms = Rooms::create([
+                'name' => $validated['name'],
+                'school_id' => session('school_id'),
+                'exam_type_id' => session('exam_type_id'),
+            ]);
+
+            $rooms->save();
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan data ruang : '.$validated['name']);
+
+            return redirect()->route('kepala.room.create')->with('success', 'Data ruang berhasil ditambahkan');
+        }
+        catch(\Exception $e)
+        {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
     }
 
     public function school(){
@@ -130,9 +177,14 @@ class DashboardController extends Controller
 
             $school->save();
 
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Sekolah : '.$validated['name']);
+
+
             return redirect()->route('kepala.school')->with('success', 'Data sekolah berhasil diperbarui');
         }
         catch(\Exception $e){
+
             return redirect()->back()->with('error', $e->getMessage());
         }
     }

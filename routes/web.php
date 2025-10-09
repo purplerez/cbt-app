@@ -147,6 +147,11 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');
     Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
 
+    // route for input rooms
+    Route::get('/rooms/{examtype}/view', [KepalaController::class, 'roomAll'])->name('rooms');
+    Route::get('/rooms/create', [KepalaController::class, 'roomCreate'])->name('room.create');
+    Route::post('/rooms/create', [KepalaController::class, 'roomStore'])->name('room.store');
+
 
     // routing for teachers in kepala dashboard
     Route::get('/teachers', [KepalaController::class, 'teacherAll'])->name('teachers');
