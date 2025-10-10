@@ -49,13 +49,19 @@
                         <x-nav-link :href="route('admin.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.berita-acara.index')" :active="request()->routeIs('admin.berita-acara.*')">
+                            {{ __('Berita Acara') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Log Aktifitas') }}
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('guru'))
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
                             {{ __('Guru Dashboard') }}
-                        </x-nav-link>''
+                        </x-nav-link>
+                        <x-nav-link :href="route('guru.room-assignment.index')" :active="request()->routeIs('guru.room-assignment.*')">
+                            {{ __('Penempatan Siswa') }}
+                        </x-nav-link>
                     @elseif (auth()->user()->hasRole('kepala'))
                         <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('kepala.dashboard')">
                             {{ __('Kepala Dashboard') }}
@@ -69,14 +75,14 @@
                         <x-nav-link :href="route('kepala.teachers')" :active="request()->routeIs('kepala.teachers')">
                             {{ __('Data Operator') }}
                         </x-nav-link>
-                        <!-- x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Data Mata Pelajaran') }}
-                        </-x-nav-link-->
-                        <!-- x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Ujian Sekolah ') }}
-                        </!-->
-                        <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Ujian Bersama ') }}
+                        <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('kepala.indexall')">
+                            {{ __('Ujian Bersama') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-assignment.*')">
+                            {{ __('Penempatan Siswa') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kepala.berita-acara.index')" :active="request()->routeIs('kepala.berita-acara.*')">
+                            {{ __('Berita Acara') }}
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('siswa'))
                         <x-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
@@ -92,8 +98,11 @@
                         <x-nav-link :href="route('super.grades')" :active="request()->routeIs('super.grades')">
                             {{ __('Tingkat') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
+                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('super.exams')">
                             {{ __('Jenis Ujian') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('super.berita-acara.index')" :active="request()->routeIs('super.berita-acara.*')">
+                            {{ __('Berita Acara') }}
                         </x-nav-link>
                         <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Log Aktifitas') }}
@@ -158,17 +167,36 @@
                 <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.berita-acara.index')" :active="request()->routeIs('admin.berita-acara.*')">
+                    {{ __('Berita Acara') }}
+                </x-responsive-nav-link>
             @elseif (auth()->user()->hasRole('guru'))
                 <x-responsive-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
                     {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('guru.room-assignment.index')" :active="request()->routeIs('guru.room-assignment.*')">
+                    {{ __('Penempatan Siswa') }}
                 </x-responsive-nav-link>
             @elseif (auth()->user()->hasRole('kepala'))
                 <x-responsive-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('kepala.dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-assignment.*')">
+                    {{ __('Penempatan Siswa') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('kepala.berita-acara.index')" :active="request()->routeIs('kepala.berita-acara.*')">
+                    {{ __('Berita Acara') }}
+                </x-responsive-nav-link>
             @elseif (auth()->user()->hasRole('siswa'))
                 <x-responsive-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                     {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+            @elseif (auth()->user()->hasRole('super'))
+                <x-responsive-nav-link :href="route('super.dashboard')" :active="request()->routeIs('super.dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('super.berita-acara.index')" :active="request()->routeIs('super.berita-acara.*')">
+                    {{ __('Berita Acara') }}
                 </x-responsive-nav-link>
             @endif
             {{-- <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
