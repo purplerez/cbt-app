@@ -15,6 +15,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\BeritaAcaraController;
+use App\Http\Controllers\RoomAssignmentController;
 use App\Models\School;
 use Illuminate\Support\Facades\Route;
 
@@ -182,6 +183,13 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     // JSON endpoint to fetch scores for a given exam (subject)
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
 
+    // Room Assignment routes (Assign students to rooms for exams)
+    Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
+    Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
+    Route::post('/room-assignment/auto-assign', [RoomAssignmentController::class, 'autoAssign'])->name('room-assignment.auto-assign');
+    Route::delete('/room-assignment/remove', [RoomAssignmentController::class, 'removeStudent'])->name('room-assignment.remove');
+    Route::get('/room-assignment/room/{room}', [RoomAssignmentController::class, 'getRoomDetails'])->name('room-assignment.room-details');
+
     // Berita Acara routes
     Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
     Route::get('berita-acara/create', [BeritaAcaraController::class, 'create'])->name('berita-acara.create');
@@ -199,7 +207,13 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'index'])->name('dashboard');
-    // Route::get('/guru/dashboard', [GuruController::class, 'index'])->name('dashboard');
+    
+    // Room Assignment routes (Teachers can help assign students)
+    Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
+    Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
+    Route::post('/room-assignment/auto-assign', [RoomAssignmentController::class, 'autoAssign'])->name('room-assignment.auto-assign');
+    Route::delete('/room-assignment/remove', [RoomAssignmentController::class, 'removeStudent'])->name('room-assignment.remove');
+    Route::get('/room-assignment/room/{room}', [RoomAssignmentController::class, 'getRoomDetails'])->name('room-assignment.room-details');
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
