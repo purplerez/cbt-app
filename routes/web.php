@@ -10,6 +10,7 @@ use App\Http\Controllers\Siswa\DashboardController as SiswaController;
 use App\Http\Controllers\Super\DashboardController as SuperController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\QuestionController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TeacherController;
@@ -148,9 +149,16 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
 
     // route for input rooms
-    Route::get('/rooms/{examtype}/view', [KepalaController::class, 'roomAll'])->name('rooms');
-    Route::get('/rooms/create', [KepalaController::class, 'roomCreate'])->name('room.create');
-    Route::post('/rooms/create', [KepalaController::class, 'roomStore'])->name('room.store');
+    Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
+    Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
+    Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
+
+    //route for room and students
+    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+
+    // Route::delete('/room/{room}/participants/{participant}', [KepalaController::class, 'roomParticipantsDestroy'])->name('room.participants.destroy');
+
 
 
     // routing for teachers in kepala dashboard

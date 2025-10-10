@@ -32,7 +32,8 @@
                                         <a href="{{--  --}}" class="px-3 py-1.5 mr-2 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
                                             Cetak
                                         </a>
-                                        <a href="{{--  --}}" class="px-3 py-1.5 mr-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+
+                                        <a href="{{route('kepala.room.participants', $room->id)}}" class="px-3 py-1.5 mr-2 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                             Peserta
                                         </a>
 
@@ -42,7 +43,9 @@
 
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="px-3 py-1.5 bg-white-600 text-red-700 border border-red-700 text-sm font-medium rounded hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>
+                                            <button type="submit" class="px-3 py-1.5 bg-white-600 text-red-700 border border-red-700 text-sm font-medium rounded hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+                                                Delete
+                                            </button>
                                         </form>
                                 </tr>
                             @empty

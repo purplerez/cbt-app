@@ -1,0 +1,64 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Rooms;
+use App\Models\User;
+use App\Models\Student;
+use Illuminate\Http\Request;
+use App\Models\Grade;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+
+
+class RoomController extends Controller
+{
+    //
+    public function index($id){
+
+        session(['exam_type_id' => $id]);
+
+        $rooms = Rooms::where('school_id', session('school_id'))
+                        ->where('exam_type_id', $id)
+                        ->get();
+
+        return view('kepala.view_rooms', compact('rooms'));
+    }
+
+    public function roomCreate(){
+
+        return view('kepala.input_rooms');
+    }
+
+    public function roomStore(Request $request){
+        try{
+            $validated = $request->validate([
+                'name' => 'required',
+            ]);
+
+            $rooms = Rooms::create([
+                'name' => $validated['name'],
+                'school_id' => session('school_id'),
+                'exam_type_id' => session('exam_type_id'),
+            ]);
+
+            $rooms->save();
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan data ruang : '.$validated['name']);
+
+            return redirect()->route('kepala.room.create')->with('success', 'Data ruang berhasil ditambahkan');
+        }
+        catch(\Exception $e)
+        {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function roomParticipants(Request $request, $id){
+        $room = Rooms::where('id', $id)->first();
+        $participants = Student::where('room_id', $id)->get();
+        return view('kepala.room_participants', compact('room', 'participants'));
+    }
+}

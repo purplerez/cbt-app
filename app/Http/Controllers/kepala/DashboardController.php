@@ -74,46 +74,7 @@ class DashboardController extends Controller
         return view('kepala.dashboard');
     }
 
-    public function roomAll($id){
 
-        session(['exam_type_id' => $id]);
-
-        $rooms = Rooms::where('school_id', session('school_id'))
-                        ->where('exam_type_id', $id)
-                        ->get();
-
-        return view('kepala.view_rooms', compact('rooms'));
-    }
-
-    public function roomCreate(){
-
-        return view('kepala.input_rooms');
-    }
-
-    public function roomStore(Request $request){
-        try{
-            $validated = $request->validate([
-                'name' => 'required',
-            ]);
-
-            $rooms = Rooms::create([
-                'name' => $validated['name'],
-                'school_id' => session('school_id'),
-                'exam_type_id' => session('exam_type_id'),
-            ]);
-
-            $rooms->save();
-
-            $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan data ruang : '.$validated['name']);
-
-            return redirect()->route('kepala.room.create')->with('success', 'Data ruang berhasil ditambahkan');
-        }
-        catch(\Exception $e)
-        {
-            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
-        }
-    }
 
     public function school(){
         try{
