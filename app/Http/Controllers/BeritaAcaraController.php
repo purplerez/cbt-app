@@ -399,6 +399,70 @@ class BeritaAcaraController extends Controller
     }
 
     /**
+     * Print student attendance list by room and grade
+     */
+    public function printStudentList(BeritaAcara $beritaAcara)
+    {
+        $beritaAcara->load(['examType', 'exam', 'school', 'room']);
+
+        // Get students from the room, grouped by grade
+        $studentsByGrade = [];
+        
+        if ($beritaAcara->room_id) {
+            // Get students assigned to this specific room
+            $students = DB::table('student_rooms')
+                ->join('students', 'student_rooms.student_id', '=', 'students.id')
+                ->join('grades', 'students.grade_id', '=', 'grades.id')
+                ->where('student_rooms.room_id', $beritaAcara->room_id)
+                ->select(
+                    'students.id',
+                    'students.nis',
+                    'students.name',
+                    'students.grade_id',
+                    'grades.name as grade_name'
+                )
+                ->orderBy('grades.name')
+                ->orderBy('students.name')
+                ->get();
+
+            // Group by grade
+            $studentsByGrade = $students->groupBy('grade_name');
+        } else {
+            // If no room specified, get all students registered for this exam
+            $students = DB::table('preassigned')
+                ->join('students', 'preassigned.student_id', '=', 'students.id')
+                ->join('grades', 'students.grade_id', '=', 'grades.id')
+                ->where('preassigned.exam_id', $beritaAcara->exam_id)
+                ->where('preassigned.school_id', $beritaAcara->school_id)
+                ->select(
+                    'students.id',
+                    'students.nis',
+                    'students.name',
+                    'students.grade_id',
+                    'grades.name as grade_name'
+                )
+                ->orderBy('grades.name')
+                ->orderBy('students.name')
+                ->get();
+
+            $studentsByGrade = $students->groupBy('grade_name');
+        }
+
+        $pdf = Pdf::loadView('berita-acara.student-list', compact('beritaAcara', 'studentsByGrade'))
+            ->setPaper('a4', 'portrait');
+
+        $filename = 'Daftar_Hadir_' . str_replace('/', '_', $beritaAcara->nomor_ba) . '.pdf';
+
+        logActivity(
+            'berita_acara_student_list_printed',
+            "Daftar hadir siswa untuk BA {$beritaAcara->nomor_ba} dicetak",
+            auth()->id()
+        );
+
+        return $pdf->download($filename);
+    }
+
+    /**
      * Get route prefix based on user role
      */
     private function getRoutePrefix()
