@@ -4,13 +4,15 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 {{ __('Berita Acara Ujian') }}
             </h2>
-            <a href="{{ route(request()->route()->getPrefix() . '.berita-acara.create') }}" 
-               class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                Buat Berita Acara Baru
-            </a>
+            @if(auth()->user()->hasRole('kepala'))
+                <a href="{{ route(request()->route()->getPrefix() . '.berita-acara.create') }}" 
+                   class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Buat Berita Acara Baru
+                </a>
+            @endif
         </div>
     </x-slot>
 
@@ -140,7 +142,7 @@
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
                                                     </svg>
                                                 </a>
-                                                @if($ba->canBeEdited())
+                                                @if($ba->canBeEdited() && auth()->user()->hasRole('kepala'))
                                                     <a href="{{ route(request()->route()->getPrefix() . '.berita-acara.edit', $ba) }}" 
                                                        class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -152,6 +154,12 @@
                                                    class="text-red-600 hover:text-red-900" title="Download PDF">
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                                    </svg>
+                                                </a>
+                                                <a href="{{ route(request()->route()->getPrefix() . '.berita-acara.student-list', $ba) }}" 
+                                                   class="text-green-600 hover:text-green-900" title="Daftar Hadir">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                                                     </svg>
                                                 </a>
                                             </div>
