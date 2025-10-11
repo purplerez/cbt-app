@@ -78,6 +78,12 @@
                         <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Ujian Bersama ') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-asignment.*')">
+                            {{ __('Penempatan Siswa') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kepala.berita-acara.index')" :active="request()->routeIs('kepala.berita-acara.*')">
+                            {{ __('Berita Acara') }}
+                        </x-nav-link>
                     @elseif (auth()->user()->hasRole('siswa'))
                         <x-nav-link :href="route('siswa.dashboard')" :active="request()->routeIs('siswa.dashboard')">
                             {{ __('Siswa Dashboard') }}

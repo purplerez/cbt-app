@@ -7,7 +7,7 @@
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            
+
             <!-- Success/Error Messages -->
             @if (session('success'))
                 <div class="mb-4 rounded-md bg-green-50 p-4">
@@ -39,7 +39,7 @@
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h3 class="mb-4 text-lg font-semibold text-gray-900">Pilih Ujian</h3>
-                    <form method="GET" action="{{ route(request()->route()->getPrefix() . '.room-assignment.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    <form method="GET" action="{{ route('kepala.room-assignment.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
                             <label for="exam_type_id" class="block text-sm font-medium text-gray-700">Tipe Ujian</label>
                             <select name="exam_type_id" id="exam_type_id" required onchange="this.form.submit()"
@@ -82,12 +82,12 @@
                                     Distribusikan {{ $studentsAvailable->count() }} siswa secara merata ke {{ $rooms->count() }} ruangan yang tersedia
                                 </p>
                             </div>
-                            <form method="POST" action="{{ route(request()->route()->getPrefix() . '.room-assignment.auto-assign') }}" 
+                            <form method="POST" action="{{ route('kepala.room-assignment.auto-assign') }}"
                                   onsubmit="return confirm('Yakin ingin mendistribusikan siswa secara otomatis? Penugasan sebelumnya akan dihapus.')">
                                 @csrf
                                 <input type="hidden" name="exam_type_id" value="{{ request('exam_type_id') }}">
                                 <input type="hidden" name="exam_id" value="{{ request('exam_id') }}">
-                                <input type="hidden" name="school_id" value="{{ auth()->user()->hasRole('kepala') ? auth()->user()->headmaster->school_id : request('school_id') }}">
+                                <input type="hidden" name="school_id" value="{{ session('school_id') }}">
                                 <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
@@ -103,8 +103,8 @@
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="mb-4 text-lg font-semibold text-gray-900">Penugasan Manual</h3>
-                        
-                        <form method="POST" action="{{ route(request()->route()->getPrefix() . '.room-assignment.assign') }}" id="assignmentForm">
+
+                        <form method="POST" action="{{ route('kepala.room-assignment.assign') }}" id="assignmentForm">
                             @csrf
                             <input type="hidden" name="exam_type_id" value="{{ request('exam_type_id') }}">
 
@@ -115,7 +115,7 @@
                                     <option value="">Pilih Ruangan</option>
                                     @foreach($rooms as $room)
                                         <option value="{{ $room->id }}">
-                                            {{ $room->nama_ruangan }} (Kapasitas: {{ $room->kapasitas ?? 'Tidak terbatas' }})
+                                            {{ $room->name }} (Kapasitas: {{ $room->capacity ?? 'Tidak terbatas' }})
                                         </option>
                                     @endforeach
                                 </select>
@@ -172,7 +172,7 @@
                             </div>
 
                             <div class="flex items-center justify-end mt-6">
-                                <button type="submit" 
+                                <button type="submit"
                                         class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-green-600 border border-transparent rounded-md hover:bg-green-700">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>

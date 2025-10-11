@@ -119,10 +119,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
 
-
-
-
-
     // Route::get('students', [SchoolController::class, 'students'])->name('students');
 
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
@@ -211,11 +207,21 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     Route::post('berita-acara/{beritaAcara}/archive', [BeritaAcaraController::class, 'archive'])->name('berita-acara.archive');
     Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
     Route::post('berita-acara/auto-fill', [BeritaAcaraController::class, 'autoFill'])->name('berita-acara.autofill');
+
+
+    // Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+    // Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+    Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
+    Route::get('berita-acara/{beritaAcara}/student-list', [BeritaAcaraController::class, 'printStudentList'])->name('berita-acara.student-list');
+
+
+
+
 });
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'index'])->name('dashboard');
-    
+
     // Room Assignment routes (Teachers can help assign students)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
