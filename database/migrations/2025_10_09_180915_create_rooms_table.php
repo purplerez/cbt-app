@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('exam_type_id')->consrtrained('exam_types');
             $table->foreignId('school_id')->constrained('schools');
             $table->string('name');
+            $table->integer('capacity');
             $table->timestamps();
         });
     }

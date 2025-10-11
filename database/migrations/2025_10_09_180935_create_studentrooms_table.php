@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('studentrooms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('room_id')->constrained('rooms');
-            $table->foreignId('student_id')->consrtrained('students');
+            $table->foreignId('student_id')->constrained('students')->cascadeOnDelete();
+            $table->foreignId('exam_type_id')->constrained('exam_types');
             $table->timestamps();
         });
     }
