@@ -21,14 +21,15 @@ class BeritaAcaraController extends Controller
      */
     public function index(Request $request)
     {
-        $query = BeritaAcara::with(['examType', 'exam', 'school', 'room', 'creator'])
+       // dd($request->all());
+        $query = BeritaAcara::with(['examType', 'exam', 'school', 'room'])
             ->orderBy('created_at', 'desc');
 
         // Filter by school (for kepala sekolah)
         if (auth()->user()->hasRole('kepala')) {
             $headmaster = auth()->user()->headmaster;
             if ($headmaster) {
-                $query->where('school_id', $headmaster->school_id);
+                $query->where('school_id', session('school_id'));
             }
         }
 
@@ -48,7 +49,7 @@ class BeritaAcaraController extends Controller
         if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->dateRange($request->start_date, $request->end_date);
         }
-
+        // dd($query);
         $beritaAcaras = $query->paginate(15);
 
         // For filter dropdowns
@@ -64,12 +65,12 @@ class BeritaAcaraController extends Controller
     public function create()
     {
         $user = auth()->user();
-        
+
         // Get schools based on role
         if ($user->hasRole('kepala')) {
             $headmaster = $user->headmaster;
-            $schools = School::where('id', $headmaster->school_id)->get();
-            $defaultSchoolId = $headmaster->school_id;
+            $schools = School::where('id', session('school_id'))->get();
+            $defaultSchoolId = session('school_id');
         } else {
             $schools = School::where('status', '1')->get();
             $defaultSchoolId = null;
@@ -78,7 +79,7 @@ class BeritaAcaraController extends Controller
         $examTypes = Examtype::all();
         $exams = Exam::all();
         $rooms = Rooms::all();
-        
+
         // Get teachers for pengawas
         $teachers = User::role(['guru', 'kepala'])->get();
 
@@ -139,7 +140,7 @@ class BeritaAcaraController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             logActivity(
                 'berita_acara_create_failed',
                 "Gagal membuat Berita Acara: " . $e->getMessage(),
@@ -176,7 +177,7 @@ class BeritaAcaraController extends Controller
         }
 
         $user = auth()->user();
-        
+
         // Get schools based on role
         if ($user->hasRole('kepala')) {
             $headmaster = $user->headmaster;
@@ -381,9 +382,12 @@ class BeritaAcaraController extends Controller
             ->count();
 
         // Get total registered students
-        $terdaftar = DB::table('preassigned')
-            ->where('exam_id', $validated['exam_id'])
-            ->where('school_id', $validated['school_id'])
+        $terdaftar = DB::table('preassigneds')
+            ->join('users', 'preassigneds.user_id', '=', 'users.id')
+            ->join('students', 'users.id', '=', 'students.user_id')
+            ->where('preassigneds.exam_id', $validated['exam_id'])
+            ->where('students.school_id', $validated['school_id'])  // ✅ Now from students table
+            // ->where('school_id', $validated['school_id'])
             ->count();
 
         $tidakHadir = $terdaftar - $hadir;
@@ -407,7 +411,7 @@ class BeritaAcaraController extends Controller
 
         // Get students from the room, grouped by grade
         $studentsByGrade = [];
-        
+
         if ($beritaAcara->room_id) {
             // Get students assigned to this specific room
             $students = DB::table('student_rooms')
@@ -468,7 +472,7 @@ class BeritaAcaraController extends Controller
     private function getRoutePrefix()
     {
         $user = auth()->user();
-        
+
         if ($user->hasRole('super')) {
             return 'super';
         } elseif ($user->hasRole('admin')) {
@@ -476,7 +480,7 @@ class BeritaAcaraController extends Controller
         } elseif ($user->hasRole('kepala')) {
             return 'kepala';
         }
-        
+
         return 'admin';
     }
 }

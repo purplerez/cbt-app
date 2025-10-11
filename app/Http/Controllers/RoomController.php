@@ -35,10 +35,12 @@ class RoomController extends Controller
         try{
             $validated = $request->validate([
                 'name' => 'required',
+                'capacity' => 'required', 'integer',
             ]);
 
             $rooms = Rooms::create([
                 'name' => $validated['name'],
+                'capacity' => $validated['capacity'],
                 'school_id' => session('school_id'),
                 'exam_type_id' => session('exam_type_id'),
             ]);

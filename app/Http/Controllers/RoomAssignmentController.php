@@ -49,27 +49,29 @@ class RoomAssignmentController extends Controller
 
             // Get students registered for these exams (from preassigned)
             if ($request->filled('exam_id')) {
-                $studentsAvailable = DB::table('preassigned')
-                    ->join('users', 'preassigned.user_id', '=', 'users.id')
-                    ->join('students', 'users.id', '=', 'students.user_id')
-                    ->join('grades', 'students.grade_id', '=', 'grades.id')
-                    ->leftJoin('student_rooms', function($join) use ($request) {
-                        $join->on('students.id', '=', 'studentrooms.student_id')
-                             ->where('student_rooms.exam_type_id', '=', $request->exam_type_id);
-                    })
-                    ->where('preassigned.exam_id', $request->exam_id)
-                    ->where('preassigned.school_id', $schoolId)
-                    ->select(
-                        'students.id',
-                        'students.nis',
-                        'students.name',
-                        'students.gender',
-                        'grades.name as grade_name',
-                        'student_rooms.room_id as assigned_room_id'
-                    )
-                    ->orderBy('grades.name')
-                    ->orderBy('students.name')
-                    ->get();
+                $studentsAvailable = DB::table('preassigneds')
+                                    ->join('users', 'preassigneds.user_id', '=', 'users.id')
+                                    ->join('students', 'users.id', '=', 'students.user_id')
+                                    ->join('grades', 'students.grade_id', '=', 'grades.id')
+                                    ->leftJoin('studentrooms', 'students.id', '=', 'studentrooms.student_id')
+                                    ->leftJoin('rooms', function($join) use ($request) {
+                                        $join->on('studentrooms.room_id', '=', 'rooms.id')
+                                            ->where('rooms.exam_type_id', '=', $request->exam_type_id);
+                                    })
+                                    ->where('preassigneds.exam_id', $request->exam_id)
+                                    ->where('students.school_id', $schoolId)
+                                    ->select(
+                                        'students.id',
+                                        'students.nis',
+                                        'students.name',
+                                        'students.gender',
+                                        'grades.name as grade_name',
+                                        'studentrooms.room_id as assigned_room_id',
+                                        'rooms.name as room_name'  // Optional: if you want room name
+                                    )
+                                    ->orderBy('grades.name')
+                                    ->orderBy('students.name')
+                                    ->get();
             }
         }
 
