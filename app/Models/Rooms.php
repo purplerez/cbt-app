@@ -10,14 +10,14 @@ class Rooms extends Model
     protected $table = 'rooms';
 
     protected $fillable = [
-        'nama_ruangan', 
-        'kapasitas',
-        'school_id', 
+        'name',
+        'capacity',
+        'school_id',
         'exam_type_id'
     ];
 
     protected $casts = [
-        'kapasitas' => 'integer',
+        'capacity' => 'integer',
     ];
 
     public function school()
