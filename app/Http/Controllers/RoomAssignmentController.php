@@ -19,20 +19,20 @@ class RoomAssignmentController extends Controller
     public function index(Request $request)
     {
         $user = auth()->user();
-        
+
         // Get school_id based on role
         if ($user->hasRole('kepala')) {
-            $schoolId = $user->headmaster->school_id;
+            $schoolId = session('school_id');
         } else {
             $schoolId = $request->school_id;
         }
 
         // Get exam types
         $examTypes = Examtype::all();
-        
+
         // Get rooms for the school
         $rooms = Rooms::where('school_id', $schoolId)->get();
-        
+
         // Get grades
         $grades = Grade::all();
 
@@ -40,20 +40,21 @@ class RoomAssignmentController extends Controller
         $selectedExamType = null;
         $exams = collect();
         $studentsAvailable = collect();
-        
+
         if ($request->filled('exam_type_id')) {
             $selectedExamType = Examtype::find($request->exam_type_id);
-            
+
             // Get exams under this exam type
             $exams = Exam::where('exam_type_id', $request->exam_type_id)->get();
-            
+
             // Get students registered for these exams (from preassigned)
             if ($request->filled('exam_id')) {
                 $studentsAvailable = DB::table('preassigned')
-                    ->join('students', 'preassigned.student_id', '=', 'students.id')
+                    ->join('users', 'preassigned.user_id', '=', 'users.id')
+                    ->join('students', 'users.id', '=', 'students.user_id')
                     ->join('grades', 'students.grade_id', '=', 'grades.id')
                     ->leftJoin('student_rooms', function($join) use ($request) {
-                        $join->on('students.id', '=', 'student_rooms.student_id')
+                        $join->on('students.id', '=', 'studentrooms.student_id')
                              ->where('student_rooms.exam_type_id', '=', $request->exam_type_id);
                     })
                     ->where('preassigned.exam_id', $request->exam_id)
@@ -128,7 +129,7 @@ class RoomAssignmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             logActivity(
                 'students_room_assignment_failed',
                 "Gagal menugaskan siswa ke ruangan: " . $e->getMessage(),
@@ -214,7 +215,7 @@ class RoomAssignmentController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            
+
             return redirect()->back()->withErrors(['error' => 'Gagal auto-assign: ' . $e->getMessage()]);
         }
     }
