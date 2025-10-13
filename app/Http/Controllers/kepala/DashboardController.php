@@ -181,7 +181,8 @@ class DashboardController extends Controller
     }
 
     public function studentAll(Request $request){
-        $query = Student::where('school_id', session('school_id'));
+        $school_id = $this->getSchoolId();
+        $query = Student::where('school_id', $school_id);
 
         $selectedGrade = null;
         if ($request->has('grade_id') && $request->grade_id) {
@@ -258,7 +259,7 @@ class DashboardController extends Controller
                 'p_birth' => $request->p_birth,
                 'd_birth' => $request->d_birth,
                 'address' => $request->address,
-                'school_id' => session()->get('school_id'),
+                'school_id' => $this->getSchoolId(),
                 'photo' => $validated['photo'],
             ]);
 
@@ -372,8 +373,8 @@ class DashboardController extends Controller
 
     public function teacherAll(){
         try{
-            // $students = Student::where('school_id', session('school_id'))->get();
-            $teachers = Teacher::where('school_id', session('school_id'))->get();
+            $school_id = $this->getSchoolId();
+            $teachers = Teacher::where('school_id', $school_id)->get();
             return view('kepala.view_dataguru', compact('teachers'));
         }
         catch(\Exception $e){
@@ -426,7 +427,7 @@ class DashboardController extends Controller
             // Create teacher record with all required fields
             $teacherData = array_merge($validated, [
                 'user_id' => $user->id,
-                'school_id' => session()->get('school_id')
+                'school_id' => $this->getSchoolId()
             ]);
 
             Teacher::create($teacherData);
