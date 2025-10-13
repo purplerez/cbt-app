@@ -54,11 +54,23 @@
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('guru'))
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
-                            {{ __('Guru Dashboard') }}
-                        </x-nav-link>''
+                            {{ __('Guru Dashboard') }} {{ $prefix }}
+                        </x-nav-link>
+                         <x-nav-link :href="route('guru.students')" :active="request()->routeIs('kepala.students')">
+                            {{ __('Data Siswa') }}
+                        </x-nav-link>
+                         <!--x-nav-link :href="route('guru.examglobal')" :active="request()->routeIs('admin.subjects')">
+                            {{ __('Ujian Bersama ') }}
+                        </!x-nav-link-->
+                        <x-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-asignment.*')">
+                            {{ __('Penempatan Siswa') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('kepala.berita-acara.index')" :active="request()->routeIs('kepala.berita-acara.*')">
+                            {{ __('Berita Acara') }}
+                        </x-nav-link>
                     @elseif (auth()->user()->hasRole('kepala'))
                         <x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('kepala.dashboard')">
-                            {{ __('Kepala Dashboard') }}
+                            {{ __('Kepala Dashboard') }} {{-- $prefix --}}
                         </x-nav-link>
                         <x-nav-link :href="route('kepala.school')" :active="request()->routeIs('kepala.school')">
                             {{ __('Data Madrasah') }}
