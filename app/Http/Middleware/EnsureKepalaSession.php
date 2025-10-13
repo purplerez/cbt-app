@@ -20,19 +20,19 @@ class EnsureKepalaSession
         // Cek apakah user adalah kepala sekolah
         if (Auth::check() && Auth::user()->hasRole('kepala')) {
             $school_id = session('school_id');
-            
+
             // Jika session school_id tidak ada, coba ambil dari database
             if (!$school_id) {
                 $user = Auth::user();
                 $headmaster = $user->head;
-                
+
                 if ($headmaster && $headmaster->school_id) {
                     session([
                         'school_id' => $headmaster->school_id,
                         'school_name' => $headmaster->school->name,
                         'kepala_id' => $headmaster->id
                     ]);
-                    
+
                     Log::info('EnsureKepalaSession: Session school_id restored for user ' . $user->id);
                 } else {
                     Log::error('EnsureKepalaSession: Cannot find headmaster data for user ' . $user->id);
@@ -40,7 +40,7 @@ class EnsureKepalaSession
                 }
             }
         }
-        
+
         return $next($request);
     }
 }
