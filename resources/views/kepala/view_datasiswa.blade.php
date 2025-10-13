@@ -2,6 +2,7 @@
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
             {{ __('Master Data Siswa'.session('schoolname')) }}
+
         </h2>
     </x-slot>
 
@@ -39,7 +40,7 @@
                     {{-- end of import button --}}
 
                             <form action="{{ route('kepala.students') }}" method="get" class="flex items-center space-x-2">
-                                <label for="grade_id" class="sr-only">Kelas</label>
+                                <label for="grade_id" class="sr-only">Kelas </label>
                                 <select name="grade_id" id="grade_id" class="block w-48 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Pilih Kelas</option>
                                     @foreach ($grade as $g)
