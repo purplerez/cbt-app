@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsTemplateExport;
@@ -79,12 +81,40 @@ class DashboardController extends Controller
     public function school(){
         try{
             $school_id = session('school_id');
+            
+            // Debug logging
+            Log::info('Kepala School Method - School ID from session: ' . $school_id);
+            Log::info('Kepala School Method - User ID: ' . Auth::user()->id);
+
+            if (!$school_id) {
+                // Coba ambil school_id dari relasi headmaster
+                $user = Auth::user();
+                $headmaster = $user->head;
+                
+                if (!$headmaster) {
+                    throw new \Exception('Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
+                }
+                
+                $school_id = $headmaster->school_id;
+                
+                // Set session untuk penggunaan selanjutnya
+                session([
+                    'school_id' => $school_id,
+                    'school_name' => $headmaster->school->name,
+                    'kepala_id' => $headmaster->id
+                ]);
+                
+                Log::info('Kepala School Method - School ID retrieved from headmaster: ' . $school_id);
+            }
 
             $school = School::findOrFail($school_id);
+            
+            Log::info('Kepala School Method - School found: ' . $school->name);
 
             return view('kepala.view_school', compact('school'));
         }
         catch (\Exception $e) {
+            Log::error('Kepala School Method Error: ' . $e->getMessage());
             return redirect()->route('kepala.dashboard')->with('error', $e->getMessage());
         }
     }

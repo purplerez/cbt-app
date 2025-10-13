@@ -213,10 +213,6 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
     // Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
     // Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
     Route::get('berita-acara/{beritaAcara}/student-list', [BeritaAcaraController::class, 'printStudentList'])->name('berita-acara.student-list');
-
-
-
-
 });
 
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
