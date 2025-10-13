@@ -80,36 +80,8 @@ class DashboardController extends Controller
 
     public function school(){
         try{
-            $school_id = session('school_id');
-            
-            // Debug logging
-            Log::info('Kepala School Method - School ID from session: ' . $school_id);
-            Log::info('Kepala School Method - User ID: ' . Auth::user()->id);
-
-            if (!$school_id) {
-                // Coba ambil school_id dari relasi headmaster
-                $user = Auth::user();
-                $headmaster = $user->head;
-                
-                if (!$headmaster) {
-                    throw new \Exception('Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
-                }
-                
-                $school_id = $headmaster->school_id;
-                
-                // Set session untuk penggunaan selanjutnya
-                session([
-                    'school_id' => $school_id,
-                    'school_name' => $headmaster->school->name,
-                    'kepala_id' => $headmaster->id
-                ]);
-                
-                Log::info('Kepala School Method - School ID retrieved from headmaster: ' . $school_id);
-            }
-
+            $school_id = $this->getSchoolId();
             $school = School::findOrFail($school_id);
-            
-            Log::info('Kepala School Method - School found: ' . $school->name);
 
             return view('kepala.view_school', compact('school'));
         }
@@ -117,6 +89,34 @@ class DashboardController extends Controller
             Log::error('Kepala School Method Error: ' . $e->getMessage());
             return redirect()->route('kepala.dashboard')->with('error', $e->getMessage());
         }
+    }
+
+    /**
+     * Get school ID from session or database
+     */
+    private function getSchoolId()
+    {
+        $school_id = session('school_id');
+        
+        if (!$school_id) {
+            $user = Auth::user();
+            $headmaster = $user->head;
+            
+            if (!$headmaster) {
+                throw new \Exception('Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
+            }
+            
+            $school_id = $headmaster->school_id;
+            
+            // Set session untuk penggunaan selanjutnya
+            session([
+                'school_id' => $school_id,
+                'school_name' => $headmaster->school->name,
+                'kepala_id' => $headmaster->id
+            ]);
+        }
+        
+        return $school_id;
     }
 
     public function editSchool($id){
