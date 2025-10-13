@@ -221,7 +221,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // routing for dashboard
     Route::get('/students', [GuruController::class, 'studentAll'])->name('students');
     Route::get('/students/create', [GuruController::class, 'createStudent'])->name('student.create');
-    Route::post('/students/create', [GuruController::class, 'storeStudent'])->name('student.store');
+    Route::post('/students/create', [KepalaController::class, 'storeStudent'])->name('student.store');
     Route::get('/students/{student}/edit', [GuruController::class, 'editStudent'])->name('student.edit');
     Route::put('/students/{student}/edit', [GuruController::class, 'updateStudent'])->name('student.update');
     Route::delete('/students/{student}', [GuruController::class, 'destroyStudent'])->name('student.destroy');

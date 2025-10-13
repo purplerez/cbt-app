@@ -11,7 +11,13 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @role('kepala')
                     <form id="addSiswaForm" class="mt-4" action="{{ route('kepala.student.store') }}" method="post" enctype="multipart/form-data">
+                    @endrole
+
+                    @role('guru')
+                    <form id="addSiswaForm" class="mt-4" action="{{ route('guru.student.store') }}" method="post" enctype="multipart/form-data">
+                    @endrole
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
