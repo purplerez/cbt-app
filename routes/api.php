@@ -14,51 +14,55 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
-Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('admin.')->group(function () {
-    Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants']);
-    Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats']);
+Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('api.admin.')->group(function () {
+    Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
+        ->name('exam.participants');
+    Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats'])
+        ->name('exam.stats');
 
     Route::apiResource('exams', ExamController::class);
 
-    Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool']);
-    Route::post('/exams/add-student', [StudentController::class, 'addStudentToExam']);
-
+    Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool'])
+        ->name('school.students');
+    Route::post('/exams/add-student', [StudentController::class, 'addStudentToExam'])
+        ->name('exam.add-student');
 
     // logs
-    Route::get('/admin/exam/{examId}/participant/{userId}/logs', [ExamController::class, 'getParticipantLogs']);
+    Route::get('/exam/{examId}/participant/{userId}/logs', [ExamController::class, 'getParticipantLogs'])
+        ->name('exam.participant.logs');
 });
 
 
-// peserta routes
-Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {
+// peserta routes - API endpoints
+Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.siswa.')->group(function () {
     Route::get('/dashboard', [ParticipantController::class, 'index'])->name('dashboard');
-    Route::post('/exams/{examId}/start', [ParticipantController::class, 'start'])->name('start');
-    Route::post('/exams/{examId}/submit', [ParticipantController::class, 'submit'])->name('submit');
-    Route::post('/exams/{examId}/status', [ParticipantController::class, 'getSessionStatus'])->name('session-status');
+    Route::post('/exams/{examId}/start', [ParticipantController::class, 'start'])->name('exam.start');
+    Route::post('/exams/{examId}/submit', [ParticipantController::class, 'submit'])->name('exam.submit');
+    Route::post('/exams/{examId}/status', [ParticipantController::class, 'getSessionStatus'])->name('exam.status');
 
     // Student Answer Backup & Restore Routes
     Route::prefix('exam-session')->group(function () {
         Route::post('/save-answers', [StudentAnswerBackupController::class, 'saveAnswers'])
-            ->name('save-answers');
+            ->name('answers.save');
 
         // Update single answer for real-time auto-save
         Route::post('/update-answer', [StudentAnswerBackupController::class, 'updateSingleAnswer'])
-            ->name('update-single-answer');
+            ->name('answer.update');
 
         // Get saved answers for resume functionality
         Route::get('/{sessionId}/answers', [StudentAnswerBackupController::class, 'getAnswers'])
-            ->name('get-answers');
+            ->name('answers.get');
 
         Route::get('/{sessionId}/compact-answers', [StudentAnswerBackupController::class, 'getCompactAnswers'])
-            ->name('get-compact-answers');
+            ->name('answers.compact');
 
         // Restore answers from backup (resume exam) - JSON FORMAT
         Route::post('/restore-answers', [StudentAnswerBackupController::class, 'restoreAnswers'])
-            ->name('restore-answers');
+            ->name('answers.restore');
 
         // Get session progress/stats
         Route::get('/{sessionId}/progress', [StudentAnswerBackupController::class, 'getSessionProgress'])
-            ->name('session-progress');
+            ->name('session.progress');
     });
 });
 
@@ -67,6 +71,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Kepala API: exam participants
-Route::middleware(['auth:sanctum', 'role:kepala'])->prefix('kepala')->group(function () {
-    Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants']);
+Route::middleware(['auth:sanctum', 'role:kepala'])->prefix('kepala')->name('api.kepala.')->group(function () {
+    Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants'])
+        ->name('exam.participants');
 });
