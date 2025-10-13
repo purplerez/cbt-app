@@ -129,8 +129,8 @@
     <!-- Opening Statement -->
     <div class="content">
         <p>
-            Pada hari ini, {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('l') }}, 
-            tanggal {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}, 
+            Pada hari ini, {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('l') }},
+            tanggal {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }},
             telah dilaksanakan ujian dengan keterangan sebagai berikut:
         </p>
     </div>
@@ -221,14 +221,14 @@
             <td>Kondisi Pelaksanaan Ujian</td>
             <td>: <strong style="text-transform: capitalize;">{{ str_replace('_', ' ', $beritaAcara->kondisi_pelaksanaan) }}</strong></td>
         </tr>
-        <tr>
+        {{-- <tr>
             <td>Kondisi Ruangan</td>
             <td>: <strong style="text-transform: capitalize;">{{ $beritaAcara->kondisi_ruangan }}</strong></td>
         </tr>
         <tr>
             <td>Kondisi Peralatan</td>
             <td>: <strong style="text-transform: capitalize;">{{ $beritaAcara->kondisi_peralatan }}</strong></td>
-        </tr>
+        </tr> --}}
     </table>
 
     @if($beritaAcara->kendala)
@@ -271,18 +271,20 @@
                 </td>
                 <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
                     <div style="margin-bottom: 10px;">
-                        {{ $beritaAcara->school->city ?? 'Kota' }}, 
+                        {{ 'Banyuwangi' }},
                         {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}
                     </div>
                     <div style="margin-bottom: 10px;">Kepala Sekolah</div>
                     <div class="signature-space"></div>
                     <div>
                         <span class="signature-name">
-                            @if($beritaAcara->approver)
-                                {{ $beritaAcara->approver->name }}
+
+                            {{ $head ? '(' . $head->name . ')' : '' }}
+                            {{-- @if($head)
+                                {{ $head->name }}
                             @else
                                 (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
-                            @endif
+                            @endif --}}
                         </span>
                     </div>
                 </td>

@@ -196,7 +196,7 @@
                 <div class="grade-title">
                     KELAS: {{ strtoupper($gradeName) }} ({{ $students->count() }} Siswa)
                 </div>
-                
+
                 <table class="student-table">
                     <thead>
                         <tr>
@@ -295,12 +295,13 @@
 
         <div style="margin-top: 30px; text-align: right;">
             <div style="display: inline-block; text-align: center;">
-                <div>{{ $beritaAcara->school->city ?? 'Kota' }}, {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</div>
+                <div> Banyuwangi , {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</div>
                 <div style="margin-top: 5px;">Kepala Sekolah,</div>
                 <div class="signature-space"></div>
                 <div>
                     <span class="signature-name">
-                        (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+                        {{ $head ? '(' . $head->name . ')' : '' }}
+
                     </span>
                 </div>
             </div>

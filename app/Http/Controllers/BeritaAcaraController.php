@@ -6,6 +6,7 @@ use App\Models\BeritaAcara;
 use App\Models\Exam;
 use App\Models\Examtype;
 use App\Models\ExamSession;
+use App\Models\Headmaster;
 use App\Models\Rooms;
 use App\Models\School;
 use App\Models\Teacher;
@@ -122,7 +123,7 @@ class BeritaAcaraController extends Controller
             DB::beginTransaction();
 
             $validated['created_by'] = auth()->id();
-            $validated['status'] = 'draft';
+            $validated['status'] = 'approved';
 
             $beritaAcara = BeritaAcara::create($validated);
 
@@ -348,7 +349,9 @@ class BeritaAcaraController extends Controller
     {
         $beritaAcara->load(['examType', 'exam', 'school', 'room', 'creator', 'approver']);
 
-        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara'))
+        $head = Headmaster::where('school_id', session('school_id'))->first();
+
+        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara', 'head'))
             ->setPaper('a4', 'portrait');
 
         $filename = 'Berita_Acara_' . str_replace('/', '_', $beritaAcara->nomor_ba) . '.pdf';
@@ -414,10 +417,11 @@ class BeritaAcaraController extends Controller
 
         if ($beritaAcara->room_id) {
             // Get students assigned to this specific room
-            $students = DB::table('student_rooms')
-                ->join('students', 'student_rooms.student_id', '=', 'students.id')
+            $students = DB::table('rooms')
+                ->join('studentrooms', 'studentrooms.room_id', '=', 'rooms.id')
+                ->join('students', 'studentrooms.student_id', '=', 'students.id')
                 ->join('grades', 'students.grade_id', '=', 'grades.id')
-                ->where('student_rooms.room_id', $beritaAcara->room_id)
+                ->where('studentrooms.room_id', $beritaAcara->room_id)
                 ->select(
                     'students.id',
                     'students.nis',
@@ -452,7 +456,9 @@ class BeritaAcaraController extends Controller
             $studentsByGrade = $students->groupBy('grade_name');
         }
 
-        $pdf = Pdf::loadView('berita-acara.student-list', compact('beritaAcara', 'studentsByGrade'))
+        $head = Headmaster::where('school_id','=', session('school_id'))->first();
+
+        $pdf = Pdf::loadView('berita-acara.student-list', compact('beritaAcara', 'studentsByGrade', 'head'))
             ->setPaper('a4', 'portrait');
 
         $filename = 'Daftar_Hadir_' . str_replace('/', '_', $beritaAcara->nomor_ba) . '.pdf';
