@@ -42,7 +42,7 @@
 
 
                                             <a href="{{ route('kepala.rooms',  $exam->id ) }}" class="px-3 py-1.5 mr-1 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                Berita Acara
+                                                Ruang
                                             </a>
 
                                         <form action={{ route('kepala.exams.manage',  $exam->id ) }} method="post" class="inline-block">
