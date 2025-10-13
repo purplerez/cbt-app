@@ -20,8 +20,14 @@
 </head>
 
 <body class="font-sans antialiased">
+    @php
+        $prefix = request()->route()?->getPrefix();
+        $prefix = $prefix ? ltrim($prefix, '/') : '';
+    @endphp
+
 
     <div class="min-h-screen bg-gray-100">
+
         @include('layouts.navigation')
 
         <!-- Page Heading -->
