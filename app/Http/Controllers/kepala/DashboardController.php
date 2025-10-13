@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\StudentsImport;
 use App\Exports\StudentsTemplateExport;
@@ -45,16 +47,16 @@ class DashboardController extends Controller
 
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Mengimport Data Siswa');
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Mengimport Data Siswa');
 
             return redirect()->back()->with('success', 'Data siswa berhasil diimport');
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
-             $failures = $e->failures();
-             $errors = collect($failures)->map(function ($failure) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function ($failure) {
                 return "Baris {$failure->row()}: {$failure->errors()[0]}";
-             })->join(', ');
+            })->join(', ');
 
-             return redirect()->back()->withErrors(['error' => 'Import gagal: ' . $errors]);
+            return redirect()->back()->withErrors(['error' => 'Import gagal: ' . $errors]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Import gagal: ' . $e->getMessage()]);
         }
@@ -76,42 +78,71 @@ class DashboardController extends Controller
 
 
 
-    public function school(){
-        try{
-            $school_id = session('school_id');
-
+    public function school()
+    {
+        try {
+            $school_id = $this->getSchoolId();
             $school = School::findOrFail($school_id);
 
             return view('kepala.view_school', compact('school'));
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
+            Log::error('Kepala School Method Error: ' . $e->getMessage());
             return redirect()->route('kepala.dashboard')->with('error', $e->getMessage());
         }
     }
 
-    public function editSchool($id){
-        try{
+    /**
+     * Get school ID from session or database
+     */
+    private function getSchoolId()
+    {
+        $school_id = session('school_id');
+
+        if (!$school_id) {
+            $user = Auth::user();
+            $headmaster = $user->head;
+
+            if (!$headmaster) {
+                throw new \Exception('Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
+            }
+
+            $school_id = $headmaster->school_id;
+
+            // Set session untuk penggunaan selanjutnya
+            session([
+                'school_id' => $school_id,
+                'school_name' => $headmaster->school->name,
+                'kepala_id' => $headmaster->id
+            ]);
+        }
+
+        return $school_id;
+    }
+
+    public function editSchool($id)
+    {
+        try {
             $school = School::findOrFail($id);
 
             return view('kepala.edit_school', compact('school'));
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function updateSchool(Request $request){
-        try{
+    public function updateSchool(Request $request)
+    {
+        try {
 
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'npsn' => 'required|string|max:255',
-            'address' => 'required|string',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|string|email|max:255',
-            'code' => 'required|string|max:50',
-            'logo' => 'nullable|image|max:2048' // max 2MB
-        ]);
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'npsn' => 'required|string|max:255',
+                'address' => 'required|string',
+                'phone' => 'required|string|max:20',
+                'email' => 'required|string|email|max:255',
+                'code' => 'required|string|max:50',
+                'logo' => 'nullable|image|max:2048' // max 2MB
+            ]);
 
 
             $school = School::findOrFail($request->id);
@@ -131,7 +162,7 @@ class DashboardController extends Controller
                     Storage::disk('public')->delete($school->logo);
                 }
 
-                $imageName = time().'.'.$logo->extension();
+                $imageName = time() . '.' . $logo->extension();
                 $destinationPath = $logo->storeAs('assets/images/school', $imageName, 'public');
                 $school->logo = $destinationPath;
             }
@@ -139,19 +170,20 @@ class DashboardController extends Controller
             $school->save();
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Sekolah : '.$validated['name']);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Sekolah : ' . $validated['name']);
 
 
             return redirect()->route('kepala.school')->with('success', 'Data sekolah berhasil diperbarui');
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
 
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function studentAll(Request $request){
-        $query = Student::where('school_id', session('school_id'));
+    public function studentAll(Request $request)
+    {
+        $school_id = $this->getSchoolId();
+        $query = Student::where('school_id', $school_id);
 
         $selectedGrade = null;
         if ($request->has('grade_id') && $request->grade_id) {
@@ -161,25 +193,38 @@ class DashboardController extends Controller
 
         $students = $query->get();
         $grade = Grade::all();
-        return view('kepala.view_datasiswa', compact('students', 'grade', 'selectedGrade'));
+        return view(
+            'kepala.view_datasiswa',
+            [
+                'students' => $students,
+                'grade' => $grade,
+                'selectedGrade' => $selectedGrade
+            ],
+            compact('students', 'grade', 'selectedGrade')
+        );
     }
 
-    public function createStudent(){
+    public function createStudent()
+    {
         $grade = Grade::all();
         return view('kepala.input_siswa', compact('grade'));
     }
 
-    public function storeStudent(Request $request){
-         $validated = $request->validate([
-                'nis' => 'required|unique:students',
-                'name' => 'required|string|max:255',
-                'grade_id' => 'required|exists:grades,id',
-                'gender' => 'required|in:L,P',
-                'p_birth' => 'required|string|max:255',
-                'd_birth' => 'required|date',
-                'address' => 'required|string',
-                'photo' => 'nullable', 'image', 'max:2048', 'mimes:jpeg,jpg,gif', // max 2MB
-            ]);
+    public function storeStudent(Request $request)
+    {
+        $validated = $request->validate([
+            'nis' => 'required|unique:students',
+            'name' => 'required|string|max:255',
+            'grade_id' => 'required|exists:grades,id',
+            'gender' => 'required|in:L,P',
+            'p_birth' => 'required|string|max:255',
+            'd_birth' => 'required|date',
+            'address' => 'required|string',
+            'photo' => 'nullable',
+            'image',
+            'max:2048',
+            'mimes:jpeg,jpg,gif', // max 2MB
+        ]);
 
         DB::beginTransaction();
         try {
@@ -198,7 +243,7 @@ class DashboardController extends Controller
 
             // upload the photo
             if ($request->hasFile('photo')) {
-                $imageName = $request->nis.'.'.$request->file('photo')->extension();
+                $imageName = $request->nis . '.' . $request->file('photo')->extension();
                 $photoPath = $request->file('photo')->storeAs('assets/images/students', $imageName, 'public');
                 $validated['photo'] = $photoPath;
             } else {
@@ -228,36 +273,36 @@ class DashboardController extends Controller
                 'p_birth' => $request->p_birth,
                 'd_birth' => $request->d_birth,
                 'address' => $request->address,
-                'school_id' => session()->get('school_id'),
+                'school_id' => $this->getSchoolId(),
                 'photo' => $validated['photo'],
             ]);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Siswa : '.$request->name);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menambahkan Data Siswa : ' . $request->name);
 
             DB::commit();
 
             return redirect()->route('kepala.students')->with('success', 'Data Siswa Berhasil Ditambahkan');
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function editStudent($id){
-        try{
+    public function editStudent($id)
+    {
+        try {
             $student = Student::findOrFail($id);
             $grade = Grade::all();
             return view('kepala.edit_siswa', compact('student', 'grade'));
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
 
-    public function updateStudent(Request $request, $id){
-        try{
+    public function updateStudent(Request $request, $id)
+    {
+        try {
             $validatedData = $request->validate([
                 'nis' => 'required',
                 'name' => 'required|string|max:255',
@@ -288,7 +333,7 @@ class DashboardController extends Controller
                     Storage::disk('public')->delete($oldPhoto);
                 }
                 // Store the new photo
-                $imageName = $request->nis.'.'.$request->file('photo')->extension();
+                $imageName = $request->nis . '.' . $request->file('photo')->extension();
                 $photoPath = $request->file('photo')->storeAs('assets/images/students', $imageName, 'public');
                 $student->photo = $photoPath;
                 $student->save();
@@ -301,21 +346,21 @@ class DashboardController extends Controller
             $updateUser->save();
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Siswa: ID-'.$id);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Siswa: ID-' . $id);
 
             return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil diperbarui');
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Gagal Merubah Data Siswa'.$request->name);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Merubah Data Siswa' . $request->name);
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
         }
     }
 
-    public function destroyStudent($id){
-        try{
+    public function destroyStudent($id)
+    {
+        try {
             $student = Student::findOrFail($id);
 
             // Delete the associated user
@@ -328,42 +373,42 @@ class DashboardController extends Controller
             }
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Data '.$student->name);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menghapus Data ' . $student->name);
 
             $student->delete();
 
             return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil dihapus');
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Gagal Menghapus Data Siswa'.$student->name);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Menghapus Data Siswa' . $student->name);
         }
     }
 
-    public function teacherAll(){
-        try{
-            // $students = Student::where('school_id', session('school_id'))->get();
-            $teachers = Teacher::where('school_id', session('school_id'))->get();
+    public function teacherAll()
+    {
+        try {
+            $school_id = $this->getSchoolId();
+            $teachers = Teacher::where('school_id', $school_id)->get();
             return view('kepala.view_dataguru', compact('teachers'));
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function createTeacher(){
-        try{
+    public function createTeacher()
+    {
+        try {
             return view('kepala.input_guru');
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
-    public function storeTeacher(Request $request){
+    public function storeTeacher(Request $request)
+    {
         // dd($request->all());
         DB::beginTransaction();
-        try{
+        try {
             // Validate and store teacher data
             $validated = $request->validate([
                 'nip' => 'required|unique:teachers',
@@ -396,19 +441,18 @@ class DashboardController extends Controller
             // Create teacher record with all required fields
             $teacherData = array_merge($validated, [
                 'user_id' => $user->id,
-                'school_id' => session()->get('school_id')
+                'school_id' => $this->getSchoolId()
             ]);
 
             Teacher::create($teacherData);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan Data Guru'. $request->name.' Sekolah '.session('school_name'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menambahkan Data Guru' . $request->name . ' Sekolah ' . session('school_name'));
 
             DB::commit();
             return redirect()->route('kepala.teachers')
-                   ->with('success', 'Data guru berhasil ditambahkan');
-        }
-        catch (\Exception $e) {
+                ->with('success', 'Data guru berhasil ditambahkan');
+        } catch (\Exception $e) {
             DB::rollBack();
             // delete the uploaded photo if it exist and the transaction fails
             if (isset($photoPath) && Storage::disk('public')->exists($photoPath)) {
@@ -418,24 +462,25 @@ class DashboardController extends Controller
         }
     }
 
-    public function editTeacher($id){
-        try{
+    public function editTeacher($id)
+    {
+        try {
             $teacher = Teacher::findOrFail($id);
 
             return view('kepala.edit_guru', compact('teacher'));
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
-    public function updateTeacher(Request $request){
+    public function updateTeacher(Request $request)
+    {
         // dd($request->all());
         DB::beginTransaction();
-        try{
+        try {
             // Validate and store teacher data
             $validated = $request->validate([
-                'nip' => 'required|unique:teachers,nip,'.$request->id.',id',
+                'nip' => 'required|unique:teachers,nip,' . $request->id . ',id',
                 'name' => 'required|string|max:255',
                 'gender' => 'required|in:L,P',
                 'address' => 'required|string',
@@ -457,7 +502,7 @@ class DashboardController extends Controller
                     Storage::disk('public')->delete($oldPhoto);
                 }
                 // Store the new photo
-                $imageName = $request->nip.'.'.$request->file('photo')->extension();
+                $imageName = $request->nip . '.' . $request->file('photo')->extension();
                 $photoPath = $request->file('photo')->storeAs('assets/images/students', $imageName, 'public');
                 $teacher->photo = $photoPath;
                 $teacher->save();
@@ -470,25 +515,24 @@ class DashboardController extends Controller
             $user->save();
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Merubah Data Guru '. $request->name.' Sekolah '.session('school_name'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Guru ' . $request->name . ' Sekolah ' . session('school_name'));
 
             DB::commit();
 
             return redirect()->route('kepala.teachers')->with('success', 'Data guru berhasil diubah');
-        }
-        catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             DB::rollBack();
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Gagal Merubah Data Guru '. $request->name.' Sekolah '.session('school_name'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Merubah Data Guru ' . $request->name . ' Sekolah ' . session('school_name'));
 
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
         }
     }
 
-    public function destroyTeacher($id){
-       DB::beginTransaction();
-        try{
+    public function destroyTeacher($id)
+    {
+        DB::beginTransaction();
+        try {
             $teacher = Teacher::findOrFail($id);
             $user = User::findOrFail($teacher->user_id);
 
@@ -498,7 +542,7 @@ class DashboardController extends Controller
             }
 
             $userlog = auth()->user();
-            logActivity($userlog->name.' (ID: '.$userlog->id.') Berhasil Menghapus Data Guru'. $teacher->name.' Sekolah '.session('school_name'));
+            logActivity($userlog->name . ' (ID: ' . $userlog->id . ') Berhasil Menghapus Data Guru' . $teacher->name . ' Sekolah ' . session('school_name'));
 
             // delete user associated with teacher
             $user->delete();
@@ -508,13 +552,10 @@ class DashboardController extends Controller
 
             DB::commit();
             return redirect()->route('kepala.teachers')
-                   ->with('success', 'Data guru berhasil dihapus');
-        }
-        catch(\Exception $e){
+                ->with('success', 'Data guru berhasil dihapus');
+        } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
         }
-
     }
-
 }
