@@ -222,6 +222,19 @@ Route::middleware(['auth', 'role:kepala'])->prefix('kepala')->name('kepala.')->g
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'index'])->name('dashboard');
 
+    // routing for dashboard
+    Route::get('/students', [GuruController::class, 'studentAll'])->name('students');
+    Route::get('/students/create', [GuruController::class, 'createStudent'])->name('student.create');
+    Route::post('/students/create', [GuruController::class, 'storeStudent'])->name('student.store');
+    Route::get('/students/{student}/edit', [GuruController::class, 'editStudent'])->name('student.edit');
+    Route::put('/students/{student}/edit', [GuruController::class, 'updateStudent'])->name('student.update');
+    Route::delete('/students/{student}', [GuruController::class, 'destroyStudent'])->name('student.destroy');
+
+    // Excel import routes
+    Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');
+    Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
+
+
     // Room Assignment routes (Teachers can help assign students)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');

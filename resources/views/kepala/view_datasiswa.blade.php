@@ -12,7 +12,13 @@
                 <div class="p-6 text-gray-900">
                         <div class="flex items-center justify-between space-x-4">
                             <div class="flex items-center space-x-3">
-                                <a href="{{route('kepala.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition">
+                                @role('kepala')
+                                    <a href="{{route('kepala.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition">
+                                @endrole
+
+                                @role('guru')
+                                    <a href="{{route('guru.student.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition">
+                                @endrole
                                     + Tambah
                                 </a>
 
