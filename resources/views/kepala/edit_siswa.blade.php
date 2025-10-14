@@ -10,7 +10,14 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    @role('kepala')
                     <form id="addSiswaForm" class="mt-4" action="{{ route('kepala.student.update', $student->id) }}" method="post" enctype="multipart/form-data">
+                    @endrole
+
+                    @role('guru')
+                    <form id="addSiswaForm" class="mt-4" action="{{ route('guru.student.update', $student->id) }}" method="post" enctype="multipart/form-data">
+                    @endrole
+
                         @csrf
                         @method('PUT')
                         {{-- @if (session('error'))

@@ -222,9 +222,9 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/students', [GuruController::class, 'studentAll'])->name('students');
     Route::get('/students/create', [GuruController::class, 'createStudent'])->name('student.create');
     Route::post('/students/create', [KepalaController::class, 'storeStudent'])->name('student.store');
-    Route::get('/students/{student}/edit', [GuruController::class, 'editStudent'])->name('student.edit');
-    Route::put('/students/{student}/edit', [GuruController::class, 'updateStudent'])->name('student.update');
-    Route::delete('/students/{student}', [GuruController::class, 'destroyStudent'])->name('student.destroy');
+    Route::get('/students/{student}/edit', [KepalaController::class, 'editStudent'])->name('student.edit');
+    Route::put('/students/{student}/edit', [KepalaController::class, 'updateStudent'])->name('student.update');
+    Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
 
     // Excel import routes
     Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');

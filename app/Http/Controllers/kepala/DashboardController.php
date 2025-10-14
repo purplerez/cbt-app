@@ -84,7 +84,7 @@ class DashboardController extends Controller
             $school_id = $this->getSchoolId();
             $school = School::findOrFail($school_id);
 
-            return view($this->getRoutePrefix() . '.view_school', compact('school'));
+            return view('kepala.view_school', compact('school'));
         } catch (\Exception $e) {
             Log::error('Kepala School Method Error: ' . $e->getMessage());
             return redirect()->route('kepala.dashboard')->with('error', $e->getMessage());
@@ -194,7 +194,7 @@ class DashboardController extends Controller
         $students = $query->get();
         $grade = Grade::all();
         return view(
-            $this->getRoutePrefix() . '.view_datasiswa',
+            'kepala.view_datasiswa',
             [
                 'students' => $students,
                 'grade' => $grade,
@@ -207,7 +207,7 @@ class DashboardController extends Controller
     public function createStudent()
     {
         $grade = Grade::all();
-        return view($this->getRoutePrefix() . '.input_siswa', compact('grade'));
+        return view('kepala.input_siswa', compact('grade'));
     }
 
     public function storeStudent(Request $request)
@@ -297,7 +297,8 @@ class DashboardController extends Controller
         try {
             $student = Student::findOrFail($id);
             $grade = Grade::all();
-            return view($this->getRoutePrefix() . '.edit_siswa', compact('student', 'grade'));
+
+            return view('kepala.edit_siswa', compact('student', 'grade'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -381,10 +382,12 @@ class DashboardController extends Controller
 
             $student->delete();
 
-            return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil dihapus');
+            return redirect()->route($this->getRoutePrefix() . '.students')->with('success', 'Data siswa berhasil dihapus');
         } catch (\Exception $e) {
             $user = auth()->user();
             logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Menghapus Data Siswa' . $student->name);
+
+            return redirect()->back()->with('error', 'Delete Failed : ' . $e->getMessage());
         }
     }
 
