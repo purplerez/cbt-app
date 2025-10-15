@@ -54,7 +54,7 @@
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('guru'))
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
-                            {{ __('Guru Dashboard') }} {{ $prefix }}
+                            {{ __('Guru Dashboard') }} {{-- $prefix --}}
                         </x-nav-link>
                          <x-nav-link :href="route('guru.students')" :active="request()->routeIs('guru.students')">
                             {{ __('Data Siswa') }}
