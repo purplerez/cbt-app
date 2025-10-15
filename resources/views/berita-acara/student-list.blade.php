@@ -8,7 +8,7 @@
             margin: 1.5cm;
         }
         body {
-            font-family: Arial, sans-serif;
+            font-family: Arial, Arial, Helvetica, sans-serif;
             font-size: 11pt;
             line-height: 1.4;
             color: #000;
@@ -19,19 +19,19 @@
             border-bottom: 2px solid #000;
             padding-bottom: 15px;
         }
-        .header h1 {
+        /* .header h1 {
             font-size: 16pt;
             font-weight: bold;
             margin: 5px 0;
             text-transform: uppercase;
-        }
-        .header h2 {
+        } */
+        /* .header h2 {
             font-size: 14pt;
             font-weight: bold;
             margin: 5px 0;
-        }
+        } */
         .header p {
-            margin: 3px 0;
+            /* margin: 3px 0; */
             font-size: 10pt;
         }
         .info-section {
@@ -144,20 +144,42 @@
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <h1>{{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }}</h1>
-        <p>{{ $beritaAcara->school->address ?? '' }}</p>
-        <h2 style="margin-top: 15px;">DAFTAR HADIR PESERTA UJIAN</h2>
-    </div>
+
 
     <!-- Exam Info -->
+    @if($studentsByGrade->isEmpty())
+
+    <!-- Header -->
+    <div class="header">
+        {{-- <h1>{{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }}</h1>
+        <p>{{ $beritaAcara->school->address ?? '' }}</p> --}}
+        <h2 style="margin : 0">DAFTAR HADIR PESERTA </h2>
+        <h2 style="margin : 0"> {{ strtoupper($beritaAcara->examType->title ?? '-') }}</h2>
+        <h3 style="margin : 0">TAHUN {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('Y') }}</h3>
+    </div>
+
+        <div class="grade-section">
+            <p style="text-align: center; padding: 20px; border: 1px solid #ccc;">
+                Tidak ada data siswa untuk ruangan ini.
+            </p>
+        </div>
+    @else
+    @foreach($studentsByGrade as $gradeName => $students)
+    <!-- Header -->
+    <div class="header">
+        {{-- <h1>{{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }}</h1>
+        <p>{{ $beritaAcara->school->address ?? '' }}</p> --}}
+        <h2 style="margin : 0">DAFTAR HADIR PESERTA </h2>
+        <h2 style="margin : 0"> {{ strtoupper($beritaAcara->examType->title ?? '-') }}</h2>
+        <h3 style="margin : 0">TAHUN {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('Y') }}</h3>
+    </div>
+
     <div class="info-section">
         <table>
-            <tr>
+            {{-- <tr>
                 <td>Jenis Ujian</td>
                 <td>: {{ $beritaAcara->examType->title ?? '-' }}</td>
-            </tr>
+            </tr> --}}
             @if($beritaAcara->exam)
             <tr>
                 <td>Mata Pelajaran</td>
@@ -174,28 +196,26 @@
             </tr>
             <tr>
                 <td>Ruangan</td>
-                <td>: {{ $beritaAcara->room->nama_ruangan ?? 'Berbagai Ruangan' }}</td>
+                <td>: {{ $beritaAcara->room->name ?? '-' }}</td>
             </tr>
             <tr>
+                <td>Kelas</td>
+                <td>: {{ strtoupper($gradeName) }}</td>
+            </tr>
+            {{-- <tr>
                 <td>Nomor Berita Acara</td>
                 <td>: {{ $beritaAcara->nomor_ba }}</td>
-            </tr>
+            </tr> --}}
         </table>
     </div>
 
     <!-- Student Lists by Grade -->
-    @if($studentsByGrade->isEmpty())
-        <div class="grade-section">
-            <p style="text-align: center; padding: 20px; border: 1px solid #ccc;">
-                Tidak ada data siswa untuk ruangan ini.
-            </p>
-        </div>
-    @else
-        @foreach($studentsByGrade as $gradeName => $students)
+
+
             <div class="grade-section">
-                <div class="grade-title">
-                    KELAS: {{ strtoupper($gradeName) }} ({{ $students->count() }} Siswa)
-                </div>
+                {{-- <div class="grade-title">
+                    KELAS:  ({{ $students->count() }} Siswa)
+                </div> --}}
 
                 <table class="student-table">
                     <thead>
@@ -203,25 +223,36 @@
                             <th>No</th>
                             <th>NIS</th>
                             <th>Nama Lengkap</th>
-                            <th>Tanda Tangan</th>
+                            <th colspan="2">Tanda Tangan</th>
                         </tr>
                     </thead>
                     <tbody>
+                        @php
+                            $no = 1;
+                         @endphp
                         @foreach($students as $index => $student)
                             <tr>
                                 <td class="no">{{ $index + 1 }}</td>
                                 <td class="nis">{{ $student->nis }}</td>
                                 <td class="name">{{ $student->name }}</td>
                                 <td class="signature">
+
+                                    <!-- Space for manual signature -->
+                                    @if($no % 2 == 1) {{ $no }} @endif &nbsp;
+                                </td>
+                                <td class="signature">
+                                     @if($no % 2 == 0) {{ $no }} @endif &nbsp;
                                     <!-- Space for manual signature -->
                                 </td>
                             </tr>
+                            @php
+                                $no++;
+                            @endphp
                         @endforeach
                     </tbody>
                 </table>
             </div>
-        @endforeach
-    @endif
+
 
     <!-- Summary -->
     <div class="summary">
@@ -239,10 +270,10 @@
                 <td>Jumlah Siswa Tidak Hadir</td>
                 <td>: ____________ siswa</td>
             </tr>
-            <tr>
+            {{-- <tr>
                 <td>Persentase Kehadiran</td>
                 <td>: ____________ %</td>
-            </tr>
+            </tr> --}}
         </table>
     </div>
 
@@ -291,14 +322,14 @@
                     </div>
                 </td>
             </tr>
-        </table>
-
-        <div style="margin-top: 30px; text-align: right;">
-            <div style="display: inline-block; text-align: center;">
-                <div> Banyuwangi , {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</div>
-                <div style="margin-top: 5px;">Kepala Sekolah,</div>
-                <div class="signature-space"></div>
-                <div>
+            <tr>
+                <td colspan=2 style="text-align: center">
+                    <div style="text-align: center; margin-top : 3rem;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div> Banyuwangi , {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</div>
+                            <div style="margin-top: 5px;">Kepala Sekolah,</div>
+                            <div class="signature-space"></div>
+                        <div>
                     <span class="signature-name">
                         {{ $head ? '(' . $head->name . ')' : '' }}
 
@@ -306,11 +337,19 @@
                 </div>
             </div>
         </div>
+                </td>
+            </tr>
+        </table>
+
+
     </div>
 
     <!-- Print Info -->
-    <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt; color: #666;">
+    <div style="margin-top: 20px; padding-top: 10px; border-top: 1px solid #ccc; text-align: center; font-size: 9pt; color: #666; ">
         Dicetak pada: {{ now()->translatedFormat('d F Y H:i') }} WIB | Dokumen resmi dari {{ config('app.name') }}
     </div>
+    <div style="page-break-before: always;"></div>
+          @endforeach
+    @endif
 </body>
 </html>
