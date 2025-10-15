@@ -10,9 +10,9 @@
 
             <!-- Success/Error Messages -->
             @if (session('success'))
-                <div class="mb-4 rounded-md bg-green-50 p-4">
+                <div class="p-4 mb-4 rounded-md bg-green-50">
                     <div class="flex">
-                        <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                         </svg>
                         <p class="ml-3 text-sm font-medium text-green-800">{{ session('success') }}</p>
@@ -21,9 +21,9 @@
             @endif
 
             @if ($errors->any())
-                <div class="mb-4 rounded-md bg-red-50 p-4">
+                <div class="p-4 mb-4 rounded-md bg-red-50">
                     <div class="flex">
-                        <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                         </svg>
                         <div class="ml-3">
@@ -39,7 +39,12 @@
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <h3 class="mb-4 text-lg font-semibold text-gray-900">Pilih Ujian</h3>
-                    <form method="GET" action="{{ route('kepala.room-assignment.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @role('kepala')
+                        <form method="GET" action="{{ route('kepala.room-assignment.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @endrole
+                    @role('guru')
+                        <form method="GET" action="{{ route('guru.room-assignment.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-3">
+                    @endrole
                         <div>
                             <label for="exam_type_id" class="block text-sm font-medium text-gray-700">Tipe Ujian</label>
                             <select name="exam_type_id" id="exam_type_id" required onchange="this.form.submit()"
@@ -73,7 +78,7 @@
 
             @if(request()->filled('exam_id') && $studentsAvailable->isNotEmpty())
                 <!-- Auto Assign Button -->
-                <div class="mb-6 overflow-hidden bg-blue-50 shadow-sm sm:rounded-lg border-2 border-blue-200">
+                <div class="mb-6 overflow-hidden border-2 border-blue-200 shadow-sm bg-blue-50 sm:rounded-lg">
                     <div class="p-6">
                         <div class="flex items-center justify-between">
                             <div>
@@ -82,8 +87,16 @@
                                     Distribusikan {{ $studentsAvailable->count() }} siswa secara merata ke {{ $rooms->count() }} ruangan yang tersedia
                                 </p>
                             </div>
+                            @role('kepala')
                             <form method="POST" action="{{ route('kepala.room-assignment.auto-assign') }}"
                                   onsubmit="return confirm('Yakin ingin mendistribusikan siswa secara otomatis? Penugasan sebelumnya akan dihapus.')">
+                            @endrole
+
+                            @role('guru')
+                            <form method="POST" action="{{ route('guru.room-assignment.auto-assign') }}"
+                                  onsubmit="return confirm('Yakin ingin mendistribusikan siswa secara otomatis? Penugasan sebelumnya akan dihapus.')">
+                            @endrole
+
                                 @csrf
                                 <input type="hidden" name="exam_type_id" value="{{ request('exam_type_id') }}">
                                 <input type="hidden" name="exam_id" value="{{ request('exam_id') }}">
@@ -103,8 +116,13 @@
                 <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                     <div class="p-6">
                         <h3 class="mb-4 text-lg font-semibold text-gray-900">Penugasan Manual</h3>
+                        @role('kepala')
+                            <form method="POST" action="{{ route('kepala.room-assignment.assign') }}" id="assignmentForm">
+                        @endrole
 
-                        <form method="POST" action="{{ route('kepala.room-assignment.assign') }}" id="assignmentForm">
+                        @role('guru')
+                            <form method="POST" action="{{ route('guru.room-assignment.assign') }}" id="assignmentForm">
+                        @endrole
                             @csrf
                             <input type="hidden" name="exam_type_id" value="{{ request('exam_type_id') }}">
 
@@ -215,7 +233,7 @@
                     </div>
                 </div>
             @elseif(request()->filled('exam_id'))
-                <div class="overflow-hidden bg-yellow-50 shadow-sm sm:rounded-lg">
+                <div class="overflow-hidden shadow-sm bg-yellow-50 sm:rounded-lg">
                     <div class="p-6 text-center">
                         <p class="text-yellow-800">Tidak ada siswa yang terdaftar untuk ujian ini.</p>
                     </div>
