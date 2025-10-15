@@ -11,8 +11,17 @@
                 <div class="p-6 text-gray-900">
 
 
-
-                    <a href="{{ route('kepala.room.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >+ Tambah</a>    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                    @role('kepala')
+                    <a href="{{ route('kepala.room.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
+                        + Tambah
+                    </a>
+                    @endrole
+                    @role('guru')
+                    <a href="{{ route('guru.room.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
+                        + Tambah
+                    </a>
+                    @endrole
+                    <x-input-error :messages="$errors->get('error')" class="mb-4" />
 
                     <table class="min-w-full mt-4 text-sm text-left bg-white border border-gray-300 table-auto">
                         <thead class="text-gray-700 bg-gray-200">

@@ -4,7 +4,7 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 {{ __('Berita Acara Ujian') }}
             </h2>
-            @if(auth()->user()->hasRole('kepala'))
+            @role('kepala')
                 <a href="{{ route('kepala.berita-acara.create') }}"
                    class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -12,7 +12,20 @@
                     </svg>
                     Buat Berita Acara Baru
                 </a>
-            @endif
+            @endrole
+
+            @role('guru')
+                <a href="{{ route('guru.berita-acara.create') }}"
+                   class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Buat Berita Acara Baru
+                </a>
+            @endrole
+
+
+
         </div>
     </x-slot>
 
@@ -20,10 +33,10 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Success Message -->
             @if (session('success'))
-                <div class="mb-4 rounded-md bg-green-50 p-4">
+                <div class="p-4 mb-4 rounded-md bg-green-50">
                     <div class="flex">
                         <div class="flex-shrink-0">
-                            <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                                 <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                             </svg>
                         </div>
@@ -37,7 +50,13 @@
             <!-- Filters -->
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    @role('kepala')
                     <form method="GET" action="{{ route('kepala.berita-acara.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                    @endrole
+
+                    @role('guru')
+                    <form method="GET" action="{{ route('guru.berita-acara.index') }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                    @endrole
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                             <select name="status" id="status" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
@@ -79,9 +98,16 @@
                             <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-gray-800 border border-transparent rounded-md hover:bg-gray-700">
                                 Filter
                             </button>
+                            @role('kepala')
                             <a href="{{ route('kepala.berita-acara.index') }}" class="inline-flex items-center px-4 py-2 ml-2 text-xs font-semibold tracking-widest text-gray-700 uppercase transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:bg-gray-50">
                                 Reset
                             </a>
+                            @endrole
+                            @role('guru')
+                            <a href="{{ route('guru.berita-acara.index') }}" class="inline-flex items-center px-4 py-2 ml-2 text-xs font-semibold tracking-widest text-gray-700 uppercase transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                Reset
+                            </a>
+                            @endrole
                         </div>
                     </form>
                 </div>

@@ -34,16 +34,32 @@
                                     </td>
 
                                     <td class="px-4 py-2 border">
-
+                                        @role('kepala')
                                             <a href="{{ route('kepala.exams.participant',  $exam->id ) }}" class="px-3 py-1.5 mr-1 bg-white border border-green-600 text-green-600 text-sm font-medium rounded hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition">
                                                 Daftarkan siswa
                                             </a>
+                                        @endrole
+
+                                        @role('guru')
+                                            <a href="{{ route('guru.exams.participant',  $exam->id ) }}" class="px-3 py-1.5 mr-1 bg-white border border-green-600 text-green-600 text-sm font-medium rounded hover:bg-green-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                Daftarkan siswa
+                                            </a>
+                                        @endrole
 
 
-
+                                        @role('kepala')
                                             <a href="{{ route('kepala.rooms',  $exam->id ) }}" class="px-3 py-1.5 mr-1 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                 Ruang
                                             </a>
+                                        @endrole
+
+                                        @role('guru')
+                                            <a href="{{ route('guru.rooms',  $exam->id ) }}" class="px-3 py-1.5 mr-1 bg-white border border-blue-600 text-blue-600 text-sm font-medium rounded hover:bg-blue-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                Ruang
+                                            </a>
+                                        @endrole
+
+
 
                                         <form action={{ route('kepala.exams.manage',  $exam->id ) }} method="post" class="inline-block">
                                             @csrf
