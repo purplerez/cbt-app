@@ -64,7 +64,7 @@ class QuestionSeeder extends Seeder
                'question_type_id' => '1', // Use string value for ENUM
                'question_text' => "Soal pilihan ganda nomor {$number} untuk ujian {$exam->title}. Manakah dari pernyataan berikut yang paling tepat?",
                'choices' => json_encode($choices),
-               'answer_key' => 'A', // Store as simple string
+               'answer_key' => 'A,B', // Store as simple string
                'points' => 10,
                'created_by' => 1, // Assuming admin user ID is 1
           ]);

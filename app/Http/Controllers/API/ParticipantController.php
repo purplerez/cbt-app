@@ -95,10 +95,43 @@ class ParticipantController extends Controller
                 ->first();
 
             if ($existingSession) {
+                // Return existing session so user can continue their exam
+                $now = Carbon::now();
+                $endTime = Carbon::parse($existingSession->submited_at);
+
+                // Check if session has expired (now is AFTER end time)
+                if ($now->greaterThan($endTime)) {
+                    // Auto-submit expired session
+                    $this->autoSubmitExpiredExam($existingSession);
+
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Sesi ujian Anda telah berakhir dan otomatis diselesaikan'
+                    ], 422);
+                }
+
+                // Calculate remaining time in seconds
+                $timeRemaining = $now->diffInSeconds($endTime, false);
+
+                $questions = Question::where('exam_id', $examId)
+                    ->limit($totalQuest)
+                    ->get();
+
                 return response()->json([
-                    'success' => false,
-                    'message' => 'Anda sudah memiliki sesi ujian yang aktif untuk ujian ini'
-                ], 422);
+                    'success' => true,
+                    'exam' => $questions,
+                    'session_token' => $existingSession->session_token,
+                    'exam_info' => [
+                        'title' => $exam->title,
+                        'duration' => $duration,
+                        'total_questions' => $totalQuest,
+                        'start_time' => $existingSession->started_at->toISOString(),
+                        'end_time' => $existingSession->submited_at->toISOString(),
+                        'time_remaining' => abs($timeRemaining), // Ensure positive value
+                        'is_continuing' => true
+                    ],
+                    'message' => 'Melanjutkan sesi ujian yang sudah ada'
+                ]);
             }
 
             $sessionToken = bin2hex(random_bytes(16));
