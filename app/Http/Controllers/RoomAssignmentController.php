@@ -23,7 +23,12 @@ class RoomAssignmentController extends Controller
         // Get school_id based on role
         if ($user->hasRole('kepala')) {
             $schoolId = session('school_id');
-        } else {
+        }
+        else if ($user->hasRole('guru'))
+        {
+            $schoolId = $user->teacher->school_id;
+        }
+        else {
             $schoolId = $request->school_id;
         }
 
@@ -31,7 +36,9 @@ class RoomAssignmentController extends Controller
         $examTypes = Examtype::all();
 
         // Get rooms for the school
-        $rooms = Rooms::where('school_id', $schoolId)->get();
+        $rooms = Rooms::where('school_id', $schoolId)
+                        ->where('exam_type_id', $request->exam_type_id)
+                        ->get();
 
         // Get grades
         $grades = Grade::all();
