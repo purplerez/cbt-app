@@ -218,12 +218,69 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
 Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(function () {
     Route::get('/dashboard', [GuruController::class, 'index'])->name('dashboard');
 
-    // Room Assignment routes (Teachers can help assign students)
+    // routing for dashboard
+    Route::get('/students', [GuruController::class, 'studentAll'])->name('students');
+    Route::get('/students/create', [GuruController::class, 'createStudent'])->name('student.create');
+    Route::post('/students/create', [KepalaController::class, 'storeStudent'])->name('student.store');
+    Route::get('/students/{student}/edit', [KepalaController::class, 'editStudent'])->name('student.edit');
+    Route::put('/students/{student}/edit', [KepalaController::class, 'updateStudent'])->name('student.update');
+    Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
+
+    // Excel import routes
+    Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');
+    Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
+
+    // route for input rooms
+    Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
+    Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
+    Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
+
+    //route for room and students
+    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+
+
+     //routing for exams in kepala dashboard
+    Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
+    Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
+    Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    // new route for registering selected students into a chosen exam
+    Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
+    // ajax: return students + registration status for selected exam_id
+    Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
+    Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
+    Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
+    Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
+    // JSON endpoint to fetch scores for a given exam (subject)
+    Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
+
+    // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
     Route::post('/room-assignment/auto-assign', [RoomAssignmentController::class, 'autoAssign'])->name('room-assignment.auto-assign');
     Route::delete('/room-assignment/remove', [RoomAssignmentController::class, 'removeStudent'])->name('room-assignment.remove');
     Route::get('/room-assignment/room/{room}', [RoomAssignmentController::class, 'getRoomDetails'])->name('room-assignment.room-details');
+
+    // Berita Acara routes
+    Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+    Route::get('berita-acara/create', [BeritaAcaraController::class, 'create'])->name('berita-acara.create');
+    Route::post('berita-acara', [BeritaAcaraController::class, 'store'])->name('berita-acara.store');
+    Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+    Route::get('berita-acara/{beritaAcara}/edit', [BeritaAcaraController::class, 'edit'])->name('berita-acara.edit');
+    Route::put('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'update'])->name('berita-acara.update');
+    Route::delete('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'destroy'])->name('berita-acara.destroy');
+    Route::post('berita-acara/{beritaAcara}/finalize', [BeritaAcaraController::class, 'finalize'])->name('berita-acara.finalize');
+    Route::post('berita-acara/{beritaAcara}/approve', [BeritaAcaraController::class, 'approve'])->name('berita-acara.approve');
+    Route::post('berita-acara/{beritaAcara}/archive', [BeritaAcaraController::class, 'archive'])->name('berita-acara.archive');
+    Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
+    Route::post('berita-acara/auto-fill', [BeritaAcaraController::class, 'autoFill'])->name('berita-acara.autofill');
+
+
+    // Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
+    // Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
+    // Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
+    Route::get('berita-acara/{beritaAcara}/student-list', [BeritaAcaraController::class, 'printStudentList'])->name('berita-acara.student-list');
+
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {

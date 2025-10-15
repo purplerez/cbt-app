@@ -71,7 +71,7 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:sanctum');
 
 // Kepala API: exam participants
-Route::middleware(['auth:sanctum', 'role:kepala'])->prefix('kepala')->name('api.kepala.')->group(function () {
+Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name('api.kepala.')->group(function () {
     Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants'])
         ->name('exam.participants');
 });

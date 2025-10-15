@@ -56,16 +56,16 @@
                         <x-nav-link :href="route('guru.dashboard')" :active="request()->routeIs('guru.dashboard')">
                             {{ __('Guru Dashboard') }} {{ $prefix }}
                         </x-nav-link>
-                         <x-nav-link :href="route('guru.students')" :active="request()->routeIs('kepala.students')">
+                         <x-nav-link :href="route('guru.students')" :active="request()->routeIs('guru.students')">
                             {{ __('Data Siswa') }}
                         </x-nav-link>
-                         <!--x-nav-link :href="route('guru.examglobal')" :active="request()->routeIs('admin.subjects')">
-                            {{ __('Ujian Bersama ') }}
-                        </!x-nav-link-->
-                        <x-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-asignment.*')">
+                        <x-nav-link :href="route('guru.indexall')" :active="request()->routeIs('guru.indexall')">
+                            {{ __('Ujian Bersama') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('guru.room-assignment.index')" :active="request()->routeIs('guru.room-assignment.*')">
                             {{ __('Penempatan Siswa') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('kepala.berita-acara.index')" :active="request()->routeIs('kepala.berita-acara.*')">
+                        <x-nav-link :href="route('guru.berita-acara.index')" :active="request()->routeIs('guru.berita-acara.*')">
                             {{ __('Berita Acara') }}
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('kepala'))

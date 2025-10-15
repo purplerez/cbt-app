@@ -212,6 +212,8 @@ class DashboardController extends Controller
 
     public function storeStudent(Request $request)
     {
+        //dd(auth()->user()->getRoleNames()->first());
+
         $validated = $request->validate([
             'nis' => 'required|unique:students',
             'name' => 'required|string|max:255',
@@ -277,12 +279,14 @@ class DashboardController extends Controller
                 'photo' => $validated['photo'],
             ]);
 
+            // dd($this->getRoutePrefix());
+
             $user = auth()->user();
             logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menambahkan Data Siswa : ' . $request->name);
 
             DB::commit();
 
-            return redirect()->route('kepala.students')->with('success', 'Data Siswa Berhasil Ditambahkan');
+            return redirect()->route($this->getRoutePrefix() . '.students')->with('success', 'Data Siswa Berhasil Ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -293,6 +297,7 @@ class DashboardController extends Controller
         try {
             $student = Student::findOrFail($id);
             $grade = Grade::all();
+
             return view('kepala.edit_siswa', compact('student', 'grade'));
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
@@ -348,7 +353,7 @@ class DashboardController extends Controller
             $user = auth()->user();
             logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Siswa: ID-' . $id);
 
-            return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil diperbarui');
+            return redirect()->route($this->getRoutePrefix() . '.students')->with('success', 'Data siswa berhasil diperbarui');
         } catch (\Exception $e) {
 
             $user = auth()->user();
@@ -377,10 +382,12 @@ class DashboardController extends Controller
 
             $student->delete();
 
-            return redirect()->route('kepala.students')->with('success', 'Data siswa berhasil dihapus');
+            return redirect()->route($this->getRoutePrefix() . '.students')->with('success', 'Data siswa berhasil dihapus');
         } catch (\Exception $e) {
             $user = auth()->user();
             logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Menghapus Data Siswa' . $student->name);
+
+            return redirect()->back()->with('error', 'Delete Failed : ' . $e->getMessage());
         }
     }
 
@@ -551,11 +558,27 @@ class DashboardController extends Controller
             $teacher->delete();
 
             DB::commit();
-            return redirect()->route('kepala.teachers')
+            return redirect()
+                ->route('kepala.teachers')
                 ->with('success', 'Data guru berhasil dihapus');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
         }
+    }
+    //->route($this->getRoutePrefix() . '.berita-acara.index')
+
+    private function getRoutePrefix()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('kepala')) {
+            return 'kepala';
+        }
+        elseif ($user->hasRole('guru')) {
+            return 'guru';
+        }
+
+        return 'admin';
     }
 }

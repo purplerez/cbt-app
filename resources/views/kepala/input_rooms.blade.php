@@ -12,7 +12,12 @@
                     @if(session('success'))
                         <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
                     @endif
+                    @role('kepala')
                     <form method="POST" action="{{ route('kepala.room.store') }}">
+                    @endrole
+                    @role('guru')
+                    <form method="POST" action="{{ route('guru.room.store') }}">
+                    @endrole
                         @csrf
                         {{-- @if (session('error'))
                             <div class="mb-4 text-red-600">
@@ -37,7 +42,7 @@
                         <!-- Tombol Submit -->
                         <div class="flex items-center justify-start pt-4 space-x-3">
                             <a href="{{ route('kepala.rooms',  session('exam_type_id') ) }}"
-                               class="px-4 py-2 text-sm font-medium text-red-600 bg-white border border-red-600 rounded hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+                               class="px-4 py-2 text-sm font-medium text-red-600 transition bg-white border border-red-600 rounded hover:bg-red-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-500">
                                 Kembali
                             </a>
                             <button type="submit"

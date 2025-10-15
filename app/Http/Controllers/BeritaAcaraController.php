@@ -486,6 +486,9 @@ class BeritaAcaraController extends Controller
         } elseif ($user->hasRole('kepala')) {
             return 'kepala';
         }
+        elseif ($user->hasRole('guru')) {
+            return 'guru';
+        }
 
         return 'admin';
     }

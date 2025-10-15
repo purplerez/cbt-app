@@ -11,7 +11,12 @@
                 <div class="p-6 text-gray-900">
                         <div class="flex items-center justify-between space-x-4">
                             <div class="flex items-center space-x-4">
+                                @role('kepala')
                                 <form action="{{ route('kepala.students') }}" method="get" class="flex items-center space-x-2">
+                                @endrole
+                                @role('guru')
+                                <form action="{{ route('guru.students') }}" method="get" class="flex items-center space-x-2">
+                                @endrole
                                     <label for="grade_id" class="sr-only">Kelas</label>
                                     <select name="grade_id" id="grade_id" class="block w-48 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Pilih Kelas</option>
@@ -24,7 +29,12 @@
                                 </form>
 
                                 <!-- Form start - wraps both exam select and student table -->
-                                <form id="bulkRegisterForm" action="{{ route('kepala.exams.participants.register') }}" method="POST">
+                                @role('kepala')
+                                    <form id="bulkRegisterForm" action="{{ route('kepala.exams.participants.register') }}" method="POST">
+                                @endrole
+                                @role('guru')
+                                    <form id="bulkRegisterForm" action="{{ route('guru.exams.participants.register') }}" method="POST">
+                                @endrole
                                     @csrf
                                     <div class="flex items-center ml-auto space-x-2">
                                         <input type="hidden" name="exam_id" id="bulk_exam_id" value="">
@@ -167,7 +177,12 @@
                                                 alert('Pilih ujian terlebih dahulu');
                                                 return;
                                             }
-                                            const url = '{{ route("kepala.exams.participants.register") }}';
+                                            @role('kepala')
+                                                const url = '{{ route("kepala.exams.participants.register") }}';
+                                            @endrole
+                                            @role('guru')
+                                                const url = '{{ route("guru.exams.participants.register") }}';
+                                            @endrole
 
                                             fetch(url, {
                                                 method: 'POST',
@@ -231,7 +246,12 @@
                                             try {
                                                 // use the examType id (passed to the view as $examId) for the route segment
                                                 // and include the selected exam_id as a query param so the controller receives it
-                                                const webUrl = '{{ url('/kepala/exams') }}' + '/' + '{{ $examId ?? '' }}' + '/students-by-exam?exam_id=' + examId;
+                                                @role('kepala')
+                                                    const webUrl = '{{ url('/kepala/exams') }}' + '/' + '{{ $examId ?? '' }}' + '/students-by-exam?exam_id=' + examId;
+                                                @endrole
+                                                @role('guru')
+                                                    const webUrl = '{{ url('/guru/exams') }}' + '/' + '{{ $examId ?? '' }}' + '/students-by-exam?exam_id=' + examId;
+                                                @endrole
                                                 const fres = await fetch(webUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'include' });
                                                 if (fres.ok) {
                                                     json = await fres.json();

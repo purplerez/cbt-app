@@ -50,7 +50,7 @@ class RoomController extends Controller
             $user = auth()->user();
             logActivity($user->name.' (ID: '.$user->id.') Berhasil Menambahkan data ruang : '.$validated['name']);
 
-            return redirect()->route('kepala.room.create')->with('success', 'Data ruang berhasil ditambahkan');
+            return redirect()->route($this->getRoutePrefix() . '.room.create')->with('success', 'Data ruang berhasil ditambahkan');
         }
         catch(\Exception $e)
         {
@@ -62,5 +62,19 @@ class RoomController extends Controller
         $room = Rooms::where('id', $id)->first();
         $participants = Student::where('room_id', $id)->get();
         return view('kepala.room_participants', compact('room', 'participants'));
+    }
+
+    private function getRoutePrefix()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('kepala')) {
+            return 'kepala';
+        }
+        elseif ($user->hasRole('guru')) {
+            return 'guru';
+        }
+
+        return 'admin';
     }
 }
