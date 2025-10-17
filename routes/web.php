@@ -109,6 +109,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
+    Route::post('exams/inactive', [ExamController::class, 'inactiveExam'])->name('exam.inactive');
+    Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
 
 
     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');

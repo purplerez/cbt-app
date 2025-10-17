@@ -87,7 +87,7 @@
                         <!-- x-nav-link :href="route('kepala.dashboard')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Ujian Sekolah ') }}
                         </!-->
-                        <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('admin.subjects')">
+                        <x-nav-link :href="route('kepala.indexall')" :active="request()->routeIs('kepala.indexall')">
                             {{ __('Ujian Bersama ') }}
                         </x-nav-link>
                         <x-nav-link :href="route('kepala.room-assignment.index')" :active="request()->routeIs('kepala.room-asignment.*')">
@@ -110,7 +110,7 @@
                         <x-nav-link :href="route('super.grades')" :active="request()->routeIs('super.grades')">
                             {{ __('Tingkat') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
+                        <x-nav-link :href="route('super.exams')" :active="request()->routeIs('super.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
                         <x-nav-link :href="route('super.exams')" :active="request()->routeIs('admin.exams')">
