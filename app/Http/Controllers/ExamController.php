@@ -259,6 +259,10 @@ class ExamController extends Controller
             $exam->is_active = '0';
             $exam->save();
 
+            session([
+                'is_active' => $exam->is_active
+            ]);
+
             // dd($exam);
 
             $user = auth()->user();
@@ -288,6 +292,10 @@ class ExamController extends Controller
             $exam = Examtype::findOrFail($id);
             $exam->is_active = '1';
             $exam->save();
+
+            session([
+                'is_active' => $exam->is_active
+            ]);
 
             $user = auth()->user();
             logActivity($user->name.' (ID: '.$user->id.') Mengaktifkan Mata Pelajaran Ujian : '.$exam->title);
