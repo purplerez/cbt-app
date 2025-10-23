@@ -323,6 +323,7 @@ class ParticipantController extends Controller
             $user = $request->user();
             $sessionToken = $request->input('session_token');
 
+            // Cari session berdasarkan token yang EXACT
             $examSession = ExamSession::where('session_token', $sessionToken)
                 ->where('user_id', $user->id)
                 ->where('exam_id', $examId)
@@ -335,16 +336,38 @@ class ParticipantController extends Controller
                 ], 404);
             }
 
+            // Jika session sudah submited, return status tersebut
+            if ($examSession->status === 'submited') {
+                return response()->json([
+                    'success' => true,
+                    'data' => [
+                        'session_id' => $examSession->id,
+                        'status' => 'submited',
+                        'time_remaining' => 0,
+                        'started_at' => $examSession->started_at->toISOString(),
+                        'end_time' => $examSession->submited_at->toISOString(),
+                        'is_expired' => true,
+                        'total_score' => $examSession->total_score
+                    ]
+                ]);
+            }
+
+            // Hitung waktu tersisa dengan benar
             $now = Carbon::now();
             $endTime = Carbon::parse($examSession->submited_at);
-            $timeRemaining = $endTime->diffInSeconds($now, false);
 
-            if ($timeRemaining < 0) {
+            // diffInSeconds dengan parameter false = bisa negatif jika now > endTime
+            // Jika positif = masih ada waktu, jika negatif = sudah lewat
+            $diffSeconds = $now->diffInSeconds($endTime, false);
+
+            // Jika now sudah melewati endTime, diff akan negatif
+            // Kita perlu membalik tanda karena diffInSeconds(false) memberikan nilai absolut dengan tanda berdasarkan urutan
+            if ($now->greaterThan($endTime)) {
                 $timeRemaining = 0;
-
-                if ($examSession->status === 'progress') {
-                    $this->autoSubmitExpiredExam($examSession);
-                }
+                $isExpired = true;
+            } else {
+                $timeRemaining = abs($diffSeconds);
+                $isExpired = false;
             }
 
             return response()->json([
@@ -355,10 +378,17 @@ class ParticipantController extends Controller
                     'time_remaining' => $timeRemaining,
                     'started_at' => $examSession->started_at->toISOString(),
                     'end_time' => $examSession->submited_at->toISOString(),
-                    'is_expired' => $timeRemaining <= 0
+                    'is_expired' => $isExpired
                 ]
             ]);
         } catch (\Exception $e) {
+            Log::error('Failed to get session status', [
+                'user_id' => $request->user()->id ?? null,
+                'exam_id' => $examId,
+                'session_token' => $sessionToken ?? null,
+                'error' => $e->getMessage()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengambil status session'

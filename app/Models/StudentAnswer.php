@@ -40,7 +40,7 @@ class StudentAnswer extends Model
       * Save or update student answers efficiently
       * 
       * @param int $sessionId
-      * @param array $newAnswers Format: ['question_id' => 'answer', ...]
+      * @param array $newAnswers Format: ['question_id' => 'answer', ...] or [question_id => 'answer', ...]
       * @param array $essayAnswers Format: ['question_id' => 'long_text', ...]
       * @return bool
       */
@@ -49,18 +49,24 @@ class StudentAnswer extends Model
           try {
                $studentAnswer = self::firstOrNew(['session_id' => $sessionId]);
 
-               // Get existing answers or initialize empty array
-               $existingAnswers = $studentAnswer->answers ?? [];
-               $existingEssays = $studentAnswer->essay_answers ?? [];
+               // Get existing answers or initialize empty object (not array)
+               $existingAnswers = (array)($studentAnswer->answers ?? []);
+               $existingEssays = (array)($studentAnswer->essay_answers ?? []);
 
-               // Merge new answers with existing ones
-               $updatedAnswers = array_merge($existingAnswers, $newAnswers);
-               $updatedEssays = array_merge($existingEssays, $essayAnswers);
+               // Force conversion to associative array with string keys
+               // This prevents PHP from creating indexed arrays
+               foreach ($newAnswers as $qId => $ans) {
+                    $existingAnswers[(string)$qId] = $ans;
+               }
 
-               // Update the record
-               $studentAnswer->answers = $updatedAnswers;
-               $studentAnswer->essay_answers = $updatedEssays;
-               $studentAnswer->total_answered = count($updatedAnswers) + count($updatedEssays);
+               foreach ($essayAnswers as $qId => $ans) {
+                    $existingEssays[(string)$qId] = $ans;
+               }
+
+               // Force cast to object to ensure JSON stores as object, not array
+               $studentAnswer->answers = empty($existingAnswers) ? new \stdClass() : (object)$existingAnswers;
+               $studentAnswer->essay_answers = empty($existingEssays) ? new \stdClass() : (object)$existingEssays;
+               $studentAnswer->total_answered = count($existingAnswers) + count($existingEssays);
                $studentAnswer->last_answered_at = now();
                $studentAnswer->last_backup_at = now();
 
@@ -68,7 +74,8 @@ class StudentAnswer extends Model
           } catch (\Exception $e) {
                Log::error('Failed to save student answers', [
                     'session_id' => $sessionId,
-                    'error' => $e->getMessage()
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
                ]);
                return false;
           }
@@ -86,8 +93,8 @@ class StudentAnswer extends Model
 
           if (!$studentAnswer) {
                return [
-                    'answers' => [],
-                    'essay_answers' => [],
+                    'answers' => new \stdClass(), // Empty object
+                    'essay_answers' => new \stdClass(), // Empty object
                     'total_answered' => 0,
                     'last_answered_at' => null,
                     'is_empty' => true
@@ -95,8 +102,8 @@ class StudentAnswer extends Model
           }
 
           return [
-               'answers' => $studentAnswer->answers ?? [], // {"1":"A","2":"B","3":"C"}
-               'essay_answers' => $studentAnswer->essay_answers ?? [], // {"5":"Long essay text..."}
+               'answers' => (object)($studentAnswer->answers ?? []), // {"1":"A","2":"B","3":"C"}
+               'essay_answers' => (object)($studentAnswer->essay_answers ?? []), // {"5":"Long essay text..."}
                'total_answered' => $studentAnswer->total_answered,
                'last_answered_at' => $studentAnswer->last_answered_at?->toISOString(),
                'last_backup_at' => $studentAnswer->last_backup_at?->toISOString(),
@@ -162,10 +169,39 @@ class StudentAnswer extends Model
       */
      public static function updateSingleAnswer(int $sessionId, int $questionId, string $answer, bool $isEssay = false): bool
      {
-          if ($isEssay) {
-               return self::saveAnswers($sessionId, [], [$questionId => $answer]);
-          } else {
-               return self::saveAnswers($sessionId, [$questionId => $answer], []);
+          try {
+               $studentAnswer = self::firstOrNew(['session_id' => $sessionId]);
+
+               // Get existing answers or initialize empty array
+               $existingAnswers = (array)($studentAnswer->answers ?? []);
+               $existingEssays = (array)($studentAnswer->essay_answers ?? []);
+
+               if ($isEssay) {
+                    // Update or add essay answer with question_id as string key
+                    $existingEssays[(string)$questionId] = $answer;
+               } else {
+                    // Update or add multiple choice answer with question_id as string key
+                    $existingAnswers[(string)$questionId] = $answer;
+               }
+
+               // Always update both fields to prevent null issues
+               $studentAnswer->answers = empty($existingAnswers) ? new \stdClass() : (object)$existingAnswers;
+               $studentAnswer->essay_answers = empty($existingEssays) ? new \stdClass() : (object)$existingEssays;
+
+               // Recalculate total answered (count unique question IDs)
+               $studentAnswer->total_answered = count($existingAnswers) + count($existingEssays);
+               $studentAnswer->last_answered_at = now();
+               $studentAnswer->last_backup_at = now();
+
+               return $studentAnswer->save();
+          } catch (\Exception $e) {
+               Log::error('Failed to update single answer', [
+                    'session_id' => $sessionId,
+                    'question_id' => $questionId,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+               ]);
+               return false;
           }
      }
 
@@ -181,8 +217,8 @@ class StudentAnswer extends Model
                $studentAnswer = self::where('session_id', $sessionId)->first();
 
                if ($studentAnswer) {
-                    $studentAnswer->answers = [];
-                    $studentAnswer->essay_answers = [];
+                    $studentAnswer->answers = new \stdClass(); // Empty object
+                    $studentAnswer->essay_answers = new \stdClass(); // Empty object
                     $studentAnswer->total_answered = 0;
                     $studentAnswer->last_answered_at = null;
                     $studentAnswer->last_backup_at = now();
@@ -219,8 +255,11 @@ class StudentAnswer extends Model
                ];
           }
 
-          $multipleChoiceCount = count($studentAnswer->answers ?? []);
-          $essayCount = count($studentAnswer->essay_answers ?? []);
+          $answers = (array)($studentAnswer->answers ?? []);
+          $essays = (array)($studentAnswer->essay_answers ?? []);
+
+          $multipleChoiceCount = count($answers);
+          $essayCount = count($essays);
 
           return [
                'total_answered' => $studentAnswer->total_answered,
