@@ -27,5 +27,7 @@ class AppServiceProvider extends ServiceProvider
             ExamSubmitted::class,
             HandleExamSubmission::class
         );
+
+        \Carbon\Carbon::setLocale('id');
     }
 }

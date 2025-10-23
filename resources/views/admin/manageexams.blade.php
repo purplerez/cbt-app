@@ -54,11 +54,11 @@
                                     </button> --}}
                                     @if(session('is_active') == '0')
                                         {{-- button aktifkan --}}
-                                        <a href="{{ route('admin.school.active', $school->id) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
+                                        <a href="{{ route('admin.exam.active', session('examid')) }}" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" data-modal-target="aktifkanModal">
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
                                             </svg>
-                                            Aktifkan Akun
+                                            Aktifkan Ujian
                                         </a>
                                     @else
                                         <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2" data-modal-target="nonAktifModal">
@@ -66,7 +66,7 @@
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                             </svg>
-                                            Non-Aktifkan Akun
+                                            Non-Aktifkan Ujian
                                         {{-- </a> --}}
                                         </button>
                                     @endif
@@ -514,7 +514,7 @@
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
         <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
             <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Sekolah</h3>
+                <h3 class="text-lg font-medium text-gray-900">Non-Aktifkan Ujian</h3>
                 <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('nonAktifModal')">
                     <span class="sr-only">Close</span>
                     <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -523,12 +523,13 @@
                 </button>
             </div>
             {{-- <form  class="mt-4"> --}}
-                <form id="nonAktifForm" class="mt-4" action="{{ route('admin.school.inactive') }}" method="post" enctype="multipart/form-data">
+                <form id="nonAktifForm" class="mt-4" action="{{ route('admin.exam.inactive') }}" method="post" enctype="multipart/form-data">
                         @csrf
 
                         <!-- Tombol Submit -->
-                        <p class="text-sm text-gray-700">Apakah Anda yakin ingin menonaktifkan <strong>{{ strtoupper(session('school_name')) }}</strong> ini?</p>
+                        <p class="text-sm text-gray-700">Apakah Anda yakin ingin menonaktifkan <strong>{{ strtoupper(session('examname')) }}</strong> ini?</p>
                         <div class="pt-4">
+                            <input type="hidden" name="examid" value="{{ session('examid') }}">
                             <button type="submit"
                                     class="w-full px-4 py-2 text-white transition bg-red-600 rounded hover:bg-red-700">
                                 Lanjut Non-Aktifkan

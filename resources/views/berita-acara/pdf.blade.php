@@ -8,9 +8,9 @@
             margin: 2cm;
         }
         body {
-            font-family: 'Times New Roman', Times, serif;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 12pt;
-            line-height: 1.6;
+            line-height: 1.5;
             color: #000;
         }
         .header {
@@ -38,18 +38,19 @@
             text-align: center;
             font-weight: bold;
             margin: 20px 0;
-            font-size: 13pt;
+            font-size: 14pt;
         }
         .content {
             margin: 20px 0;
         }
         table {
+            font-size : 12pt;
             width: 100%;
             border-collapse: collapse;
             margin: 15px 0;
         }
         table.info-table td {
-            padding: 8px;
+            padding: 2px;
             vertical-align: top;
         }
         table.info-table td:first-child {
@@ -110,37 +111,54 @@
             text-align: justify;
             margin: 10px 0;
         }
+
+        .title {
+            font-weight: bold;
+            font-size: 14pt;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
     <!-- Header -->
-    <div class="header">
+    <!--div class="header">
         <h1>{{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }}</h1>
         <p>{{ $beritaAcara->school->address ?? '' }}</p>
         <p>Telp: {{ $beritaAcara->school->contact ?? '-' }} | Email: {{ $beritaAcara->school->email ?? '-' }}</p>
-    </div>
+    </!div-->
 
     <!-- Nomor BA -->
-    <div class="nomor-ba">
-        BERITA ACARA PELAKSANAAN UJIAN<br>
-        Nomor: {{ $beritaAcara->nomor_ba }}
-    </div>
+    <table>
+        <tr>
+            <td style="width : 20%;"><img src="data:image/png;base64,{{ $logo }}"  alt="Logo Sekolah" style="width: 100px; height: auto;"></td>
+            <td style="text-align: center;">
+                <div class="title">
+                    BERITA ACARA PELAKSANAAN <br>
+                    {{ strtoupper($beritaAcara->examType->title) ?? '-' }}<br/>
+                    TAHUN {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('Y') }}
+                    {{-- Nomor: {{ $beritaAcara->nomor_ba }} --}}
+                </div>
+            </td>
+        </tr>
+    </table>
+
 
     <!-- Opening Statement -->
     <div class="content">
         <p>
             Pada hari ini, {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('l') }},
-            tanggal {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }},
-            telah dilaksanakan ujian dengan keterangan sebagai berikut:
+            tanggal {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}, di {{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }} Kab. Banyuwangi
+            telah dilaksanakan {{ $beritaAcara->examType->title ?? '-' }}, dari pukul {{ $beritaAcara->waktu_mulai }} sampai dengan {{ $beritaAcara->waktu_selesai }}.
         </p>
     </div>
 
     <!-- Exam Info -->
-    <div class="section-title">I. INFORMASI UJIAN</div>
+    <div class="section-title"></div>
     <table class="info-table">
         <tr>
-            <td>Jenis Ujian</td>
-            <td>: {{ $beritaAcara->examType->title ?? '-' }}</td>
+            <td>Madrasah </td>
+            <td>: {{ $beritaAcara->school->name ?? 'NAMA SEKOLAH' }}</td>
         </tr>
         @if($beritaAcara->exam)
         <tr>
@@ -149,21 +167,25 @@
         </tr>
         @endif
         <tr>
-            <td>Tanggal Pelaksanaan</td>
-            <td>: {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</td>
+            <td>Ruang</td>
+            <td>: {{ $beritaAcara->room->name }}</td>
         </tr>
         <tr>
-            <td>Waktu Pelaksanaan</td>
-            <td>: {{ $beritaAcara->waktu_mulai }} - {{ $beritaAcara->waktu_selesai }} WIB</td>
+            <td>Jumlah Peserta Seharusnya</td>
+            <td>: {{ $beritaAcara->jumlah_peserta_terdaftar }}</td>
         </tr>
         <tr>
-            <td>Tempat/Ruangan</td>
-            <td>: {{ $beritaAcara->room->nama_ruangan ?? 'Berbagai Ruangan' }}</td>
+            <td>Jumlah Hadir (Ikut Ujian)</td>
+            <td>: {{ $beritaAcara->jumlah_peserta_hadir }}</td>
+        </tr>
+        <tr>
+            <td>Jumlah Tidak Hadir</td>
+            <td>: {{ $beritaAcara->jumlah_peserta_tidak_hadir }}</td>
         </tr>
     </table>
 
     <!-- Attendance Data -->
-    <div class="section-title">II. DATA PESERTA UJIAN</div>
+    {{-- <div class="section-title">II. DATA PESERTA UJIAN</div>
     <table class="data-table">
         <thead>
             <tr>
@@ -175,7 +197,7 @@
         <tbody>
             <tr>
                 <td>Jumlah Peserta Terdaftar</td>
-                <td style="text-align: center;">{{ $beritaAcara->jumlah_peserta_terdaftar }}</td>
+                <td style="text-align: center;"></td>
                 <td style="text-align: center;">100%</td>
             </tr>
             <tr>
@@ -189,38 +211,18 @@
                 <td style="text-align: center;">{{ $beritaAcara->jumlah_peserta_terdaftar > 0 ? round(($beritaAcara->jumlah_peserta_tidak_hadir / $beritaAcara->jumlah_peserta_terdaftar) * 100, 2) : 0 }}%</td>
             </tr>
         </tbody>
-    </table>
-
-    <!-- Proctors -->
-    @if($beritaAcara->pengawas_users->isNotEmpty())
-    <div class="section-title">III. PENGAWAS UJIAN</div>
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th style="width: 10%; text-align: center;">No</th>
-                <th>Nama Pengawas</th>
-                <th style="width: 30%;">Email/Kontak</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($beritaAcara->pengawas_users as $index => $pengawas)
-            <tr>
-                <td style="text-align: center;">{{ $index + 1 }}</td>
-                <td>{{ $pengawas->name }}</td>
-                <td>{{ $pengawas->email }}</td>
-            </tr>
-            @endforeach
-        </tbody>
-    </table>
-    @endif
+    </table> --}}
 
     <!-- Conditions -->
-    <div class="section-title">{{ $beritaAcara->pengawas_users->isNotEmpty() ? 'IV' : 'III' }}. KONDISI PELAKSANAAN</div>
-    <table class="info-table">
+    <div class="section-title">Catatan Selama Pelaksanaan : </div>
+    <div class="content" style="padding : 1em; border : solid 1px black;">
+        {{ str_replace('_', ' ', $beritaAcara->kondisi_pelaksanaan) }}
+    </div>
+    {{-- <table class="info-table">
         <tr>
             <td>Kondisi Pelaksanaan Ujian</td>
             <td>: <strong style="text-transform: capitalize;">{{ str_replace('_', ' ', $beritaAcara->kondisi_pelaksanaan) }}</strong></td>
-        </tr>
+        </tr> --}}
         {{-- <tr>
             <td>Kondisi Ruangan</td>
             <td>: <strong style="text-transform: capitalize;">{{ $beritaAcara->kondisi_ruangan }}</strong></td>
@@ -229,24 +231,50 @@
             <td>Kondisi Peralatan</td>
             <td>: <strong style="text-transform: capitalize;">{{ $beritaAcara->kondisi_peralatan }}</strong></td>
         </tr> --}}
-    </table>
+    {{-- </table> --}}
 
-    @if($beritaAcara->kendala)
+    {{-- @if($beritaAcara->kendala)
     <div style="margin-top: 15px;">
         <strong>Kendala/Masalah yang Terjadi:</strong>
         <p style="margin-left: 20px;">{{ $beritaAcara->kendala }}</p>
     </div>
-    @endif
+    @endif --}}
 
-    @if($beritaAcara->catatan_khusus)
+    {{-- @if($beritaAcara->catatan_khusus)
     <div style="margin-top: 15px;">
         <strong>Catatan Khusus:</strong>
         <p style="margin-left: 20px;">{{ $beritaAcara->catatan_khusus }}</p>
     </div>
+    @endif --}}
+
+
+    <!-- Proctors -->
+    @if($beritaAcara->pengawas_users->isNotEmpty())
+    <div class="section-title">Yang membuat berita acara : </div>
+
+    <table class="data-table" style="border: none; border-collapse: collapse;">
+        {{-- <thead>
+            <tr>
+                <th style="width: 10%; text-align: center;">No</th>
+                <th>Nama Pengawas</th>
+                <th style="width: 30%;">Email/Kontak</th>
+            </tr>
+        </thead> --}}
+        <tbody>
+            @foreach($beritaAcara->pengawas_users as $index => $pengawas)
+            <tr>
+                <td style="text-align: center; border: none; " width="25%">Pengawas {{ $index + 1 }} :</td>
+                <td style=" border: none; ">{{ $pengawas->name }}</td>
+                <td style="border: none; border-bottom : solid 1px black;" width="20%"></td>
+            </tr>
+            @endforeach
+        </tbody>
+    </table>
     @endif
 
+
     <!-- Closing Statement -->
-    <div class="content" style="margin-top: 30px;">
+    {{-- <div class="content" style="margin-top: 30px;">
         <p>
             Demikian berita acara ini dibuat dengan sebenar-benarnya untuk dapat digunakan sebagaimana mestinya.
         </p>
@@ -285,12 +313,12 @@
                             @else
                                 (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
                             @endif --}}
-                        </span>
+                      {{-- </span>
                     </div>
                 </td>
             </tr>
         </table>
-    </div>
+    </div> --}}
 
     <!-- Footer -->
     <div class="footer">

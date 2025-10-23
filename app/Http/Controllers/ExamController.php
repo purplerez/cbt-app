@@ -241,6 +241,71 @@ class ExamController extends Controller
     }
 
 
+    public function inactiveExam(Request $request){
+        // dd($request->all());
+        try{
+            $roleRoute = [
+                'admin' => 'admin.exams.manage.view',
+                'super' => 'super.exams.manage.view',
+            ];
 
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
+            $exam = Examtype::findOrFail($request->examid);
+            $exam->is_active = '0';
+            $exam->save();
+
+            session([
+                'is_active' => $exam->is_active
+            ]);
+
+            // dd($exam);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Menonaktifkan Mata Pelajaran Ujian : '.$exam->title);
+
+            return redirect()->route($roleRoute[$role], session('examid'))
+                            ->with('success', 'Data Mapel Ujian berhasil dinonaktifkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
+        }
+        catch (\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Menonaktifkan Ujian : '.$e->getMessage()]);
+        }
+    }
+
+    public function activeExam($id){
+        try{
+            $roleRoute = [
+                'admin' => 'admin.exams.manage.view',
+                'super' => 'super.exams.manage.view',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if(!isset($roleRoute[$role])) {
+                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            }
+
+            $exam = Examtype::findOrFail($id);
+            $exam->is_active = '1';
+            $exam->save();
+
+            session([
+                'is_active' => $exam->is_active
+            ]);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Mengaktifkan Mata Pelajaran Ujian : '.$exam->title);
+
+            return redirect()->route($roleRoute[$role], session('examid'))
+                            ->with('success', 'Data Mapel Ujian berhasil diaktifkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
+        }
+        catch (\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Mengaktifkan Ujian : '.$e->getMessage()]);
+        }
+    }
 
 }

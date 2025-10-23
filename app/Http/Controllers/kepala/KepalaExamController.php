@@ -32,7 +32,7 @@ class KepalaExamController extends Controller
                 'exam_name' => $exams->title
             ]);
 
-            return redirect()->route('kepala.exams.manage.view', $exams->id);
+            return redirect()->route($this->getRoutePrefix() . '.exams.manage.view', $exams->id);
             // return view('kepala.view_exam', compact('exams'));
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Ujian Gagal di Load : ' . $e->getMessage()]);
@@ -260,4 +260,19 @@ class KepalaExamController extends Controller
             return redirect()->back()->with('error', 'Tidak ada peserta baru yang ditambahkan.');
         }
     }
+
+    private function getRoutePrefix()
+    {
+        $user = auth()->user();
+
+        if ($user->hasRole('kepala')) {
+            return 'kepala';
+        }
+        elseif ($user->hasRole('guru')) {
+            return 'guru';
+        }
+
+        return 'admin';
+    }
+
 }

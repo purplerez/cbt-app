@@ -72,22 +72,22 @@ class BeritaAcara extends Model
     {
         $school = School::find($beritaAcara->school_id);
         $examType = Examtype::find($beritaAcara->exam_type_id);
-        
-        $schoolCode = $school->code ?? 'SCH';
+
+        $schoolCode = $school->code ?? 'MAD';
         $examCode = strtoupper(substr($examType->title ?? 'EXAM', 0, 3));
         $year = now()->format('Y');
         $month = now()->format('m');
-        
+
         // Get last number for this month
         $lastBA = static::whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->where('school_id', $beritaAcara->school_id)
             ->orderBy('id', 'desc')
             ->first();
-        
+
         $nextNumber = $lastBA ? (int)substr($lastBA->nomor_ba, -4) + 1 : 1;
         $formattedNumber = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-        
+
         return "BA/{$schoolCode}/{$examCode}/{$year}/{$month}/{$formattedNumber}";
     }
 
@@ -147,7 +147,7 @@ class BeritaAcara extends Model
         if (empty($this->pengawas)) {
             return collect();
         }
-        
+
         return User::whereIn('id', $this->pengawas)->get();
     }
 
@@ -224,7 +224,7 @@ class BeritaAcara extends Model
     {
         if ($this->status === 'draft') {
             $this->update(['status' => 'finalized']);
-            
+
             logActivity(
                 'berita_acara_finalized',
                 "Berita Acara {$this->nomor_ba} diselesaikan",
@@ -239,7 +239,7 @@ class BeritaAcara extends Model
     public function archive()
     {
         $this->update(['status' => 'archived']);
-        
+
         logActivity(
             'berita_acara_archived',
             "Berita Acara {$this->nomor_ba} diarsipkan",
@@ -283,7 +283,7 @@ class BeritaAcara extends Model
         if ($this->jumlah_peserta_terdaftar == 0) {
             return 0;
         }
-        
+
         return round(($this->jumlah_peserta_hadir / $this->jumlah_peserta_terdaftar) * 100, 2);
     }
 }

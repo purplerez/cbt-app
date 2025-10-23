@@ -351,7 +351,14 @@ class BeritaAcaraController extends Controller
 
         $head = Headmaster::where('school_id', session('school_id'))->first();
 
-        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara', 'head'))
+        $logoPath = storage_path('app/public/' . $beritaAcara->school->logo);
+
+        $logo = null;
+        if (file_exists($logoPath)) {
+            $logo = base64_encode(file_get_contents($logoPath));
+        }
+
+        $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara', 'head', 'logo'))
             ->setPaper('a4', 'portrait');
 
         $filename = 'Berita_Acara_' . str_replace('/', '_', $beritaAcara->nomor_ba) . '.pdf';
@@ -415,6 +422,13 @@ class BeritaAcaraController extends Controller
         // Get students from the room, grouped by grade
         $studentsByGrade = [];
 
+        $logoPath = storage_path('app/public/' . $beritaAcara->school->logo);
+
+        $logo = null;
+        if (file_exists($logoPath)) {
+            $logo = base64_encode(file_get_contents($logoPath));
+        }
+
         if ($beritaAcara->room_id) {
             // Get students assigned to this specific room
             $students = DB::table('rooms')
@@ -458,7 +472,7 @@ class BeritaAcaraController extends Controller
 
         $head = Headmaster::where('school_id','=', session('school_id'))->first();
 
-        $pdf = Pdf::loadView('berita-acara.student-list', compact('beritaAcara', 'studentsByGrade', 'head'))
+        $pdf = Pdf::loadView('berita-acara.student-list', compact('beritaAcara', 'studentsByGrade', 'head', 'logo'))
             ->setPaper('a4', 'portrait');
 
         $filename = 'Daftar_Hadir_' . str_replace('/', '_', $beritaAcara->nomor_ba) . '.pdf';
