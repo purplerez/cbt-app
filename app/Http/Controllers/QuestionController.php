@@ -6,6 +6,7 @@ use App\Models\Question;
 use App\Models\QuestionTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
@@ -49,8 +50,10 @@ class QuestionController extends Controller
             if($type != 3) {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'choices' => 'required|array|min:2',
                     'choices.*' => 'required|string|max:255',
+                    'choice_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
                     'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
                     'points' => 'required|numeric|min:1'
@@ -61,10 +64,33 @@ class QuestionController extends Controller
             else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
                     'points' => 'required|numeric|min:1'
                 ]);
                 $validated['choices'] = null;
+            }
+
+            // Handle question image upload
+            if ($request->hasFile('question_image')) {
+                $questionImage = $request->file('question_image');
+                $questionImagePath = $questionImage->store('question_images', 'public');
+                $validated['question_image'] = $questionImagePath;
+            }
+
+            // Handle choice images upload
+            $choicesImages = [];
+            if ($request->hasFile('choice_images')) {
+                foreach ($request->file('choice_images') as $choiceId => $image) {
+                    if ($image) {
+                        $choiceImagePath = $image->store('choice_images', 'public');
+                        $choicesImages[$choiceId] = $choiceImagePath;
+                    }
+                }
+            }
+            
+            if (!empty($choicesImages)) {
+                $validated['choices_images'] = json_encode($choicesImages);
             }
 
             $validated['exam_id'] = session('perexamid');
@@ -128,8 +154,10 @@ class QuestionController extends Controller
             if($type != '3') {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'choices' => 'required|array|min:2',
                     'choices.*' => 'required|string|max:255',
+                    'choice_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
                     'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
                     'points' => 'required|numeric|min:1'
@@ -140,6 +168,7 @@ class QuestionController extends Controller
             else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
                     'points' => 'required|numeric|min:1'
                 ]);
@@ -163,6 +192,53 @@ class QuestionController extends Controller
 
             $question = Question::findOrFail($exam);
 
+            // Handle question image upload
+            if ($request->hasFile('question_image')) {
+                // Delete old image if exists
+                if ($question->question_image) {
+                    Storage::disk('public')->delete($question->question_image);
+                }
+                $questionImage = $request->file('question_image');
+                $questionImagePath = $questionImage->store('question_images', 'public');
+                $validated['question_image'] = $questionImagePath;
+            } elseif ($request->input('remove_question_image') == '1') {
+                // Handle removal of question image
+                if ($question->question_image) {
+                    Storage::disk('public')->delete($question->question_image);
+                }
+                $validated['question_image'] = null;
+            }
+
+            // Handle choice images upload
+            $existingChoicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            $choicesImages = $existingChoicesImages;
+            
+            // Handle removal of choice images
+            if ($request->has('remove_choice_images')) {
+                foreach ($request->input('remove_choice_images') as $choiceId) {
+                    if (isset($choicesImages[$choiceId])) {
+                        Storage::disk('public')->delete($choicesImages[$choiceId]);
+                        unset($choicesImages[$choiceId]);
+                    }
+                }
+            }
+            
+            // Handle new choice images
+            if ($request->hasFile('choice_images')) {
+                foreach ($request->file('choice_images') as $choiceId => $image) {
+                    if ($image) {
+                        // Delete old image if exists
+                        if (isset($choicesImages[$choiceId])) {
+                            Storage::disk('public')->delete($choicesImages[$choiceId]);
+                        }
+                        $choiceImagePath = $image->store('choice_images', 'public');
+                        $choicesImages[$choiceId] = $choiceImagePath;
+                    }
+                }
+            }
+            
+            $validated['choices_images'] = !empty($choicesImages) ? json_encode($choicesImages) : null;
+
             $question->update($validated);
 
             $user = auth()->user();
@@ -182,6 +258,22 @@ class QuestionController extends Controller
     public function destroy($exam){
         try{
             $question = Question::findOrFail($exam);
+            
+            // Delete question image if exists
+            if ($question->question_image) {
+                Storage::disk('public')->delete($question->question_image);
+            }
+            
+            // Delete choice images if exist
+            if ($question->choices_images) {
+                $choicesImages = json_decode($question->choices_images, true);
+                if (is_array($choicesImages)) {
+                    foreach ($choicesImages as $imagePath) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
+                }
+            }
+            
             $question->delete();
 
             $roleRoutes =  [
