@@ -257,7 +257,7 @@
                                                                             {{-- <form  class="mt-4"> --}}
                                                                             <form
                                                                                 action="{{ route('admin.exams.question.update', $q->id) }}"
-                                                                                method="post" class="mb-4">
+                                                                                method="post" class="mb-4" enctype="multipart/form-data">
                                                                                 @csrf
                                                                                 @method('PUT')
                                                                                 <div class="space-y-4">
@@ -268,6 +268,14 @@
                                                                                         <textarea id="edit_question_text" name="question_text" rows="3"
                                                                                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
                                                                                     </div>
+                                                                                    <div>
+                                                                                        <label class="block text-sm font-medium text-gray-700">Gambar Pertanyaan (opsional)</label>
+                                                                                        <input type="file" name="question_image" accept="image/*"
+                                                                                               class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                                                        @if($q->question_image)
+                                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="mt-2 max-h-40">
+                                                                                        @endif
+                                                                                    </div>
 
                                                                                     @if ($q->question_type_id != 3)
                                                                                         <!-- Choices (for multiple-choice questions) -->
@@ -277,25 +285,20 @@
                                                                                                 Jawaban</label>
                                                                                             <div id="edit-choices-container-{{ $q->id }}"
                                                                                                 class="space-y-2">
+                                                                                                @php($existingChoiceImages = $q->choice_images ? json_decode($q->choice_images, true) : [])
                                                                                                 @if ($q->choices)
                                                                                                     @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                                        <div class="flex items-start gap-2 edit-choice-item"
-                                                                                                            data-choice-id="{{ $key }}">
-                                                                                                            <textarea name="choices[{{ $key }}]" rows="3"
-                                                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
-                                                                                                            <button
-                                                                                                                type="button"
-                                                                                                                class="text-red-500 hover:text-red-700"
-                                                                                                                onclick="this.parentElement.remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
-                                                                                                                <svg class="w-4 h-4"
-                                                                                                                    fill="none"
-                                                                                                                    viewBox="0 0 24 24"
-                                                                                                                    stroke="currentColor">
-                                                                                                                    <path
-                                                                                                                        stroke-linecap="round"
-                                                                                                                        stroke-linejoin="round"
-                                                                                                                        stroke-width="2"
-                                                                                                                        d="M6 18L18 6M6 6l12 12" />
+                                                                                                        <div class="flex items-start gap-2 edit-choice-item" data-choice-id="{{ $key }}">
+                                                                                                            <div class="flex-1 space-y-1">
+                                                                                                                <textarea name="choices[{{ $key }}]" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
+                                                                                                                <input type="file" name="choice_images[{{ $key }}]" accept="image/*" class="block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+                                                                                                                @if(isset($existingChoiceImages[(string)$key]))
+                                                                                                                    <img src="{{ Storage::url($existingChoiceImages[(string)$key]) }}" alt="Choice Image {{ $key }}" class="mt-1 max-h-24">
+                                                                                                                @endif
+                                                                                                            </div>
+                                                                                                            <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
+                                                                                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                                                                                 </svg>
                                                                                                             </button>
                                                                                                         </div>
@@ -405,13 +408,13 @@
                                                 @role('admin')
                                                 <form
                                                     action="{{ route('admin.exams.question.store', session('perexamid')) }}"
-                                                    method="post" class="mb-4">
+                                                    method="post" class="mb-4" enctype="multipart/form-data">
                                                 @endrole
 
                                                 @role('super')
                                                 <form
                                                     action="{{ route('super.exams.question.store', session('perexamid')) }}"
-                                                    method="post" class="mb-4">
+                                                    method="post" class="mb-4" enctype="multipart/form-data">
                                                 @endrole
 
                                                     @csrf
@@ -423,14 +426,23 @@
                                                                 class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                         </div>
                                                         <div>
+                                                            <label for="question_image" class="block text-sm font-medium text-gray-700">Gambar Pertanyaan (opsional)</label>
+                                                            <input type="file" id="question_image" name="question_image" accept="image/*"
+                                                                   class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                        </div>
+                                                        <div>
                                                             <label for="options"
                                                                 class="block text-sm font-medium text-gray-700">Pilihan
                                                                 Jawaban</label>
                                                             <div id="choices-container" class="space-y-2">
                                                                 <div class="flex items-start gap-2 choice-item"
                                                                     data-choice-id="1">
-                                                                    <textarea name="choices[1]" rows="3"
-                                                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                    <div class="flex-1 space-y-1">
+                                                                        <textarea name="choices[1]" rows="3"
+                                                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                        <input type="file" name="choice_images[1]" accept="image/*"
+                                                                               class="block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" />
+                                                                    </div>
                                                                     <button type="button"
                                                                         class="text-red-500 remove-choice hover:text-red-700"
                                                                         onclick="removeChoice(this)">
@@ -871,8 +883,10 @@
                             div.classList.add('flex', 'items-start', 'gap-2', 'edit-choice-item');
                             div.dataset.choiceId = editChoiceCounter.toString();
                             div.innerHTML = `
-                <textarea name="choices[${editChoiceCounter}]" rows="3"
-                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                <div class="flex-1 space-y-1">
+                    <textarea name="choices[${editChoiceCounter}]" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                    <input type="file" name="choice_images[${editChoiceCounter}]" accept="image/*" class="block w-full border-gray-300 rounded-md shadow-sm" />
+                </div>
                 <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove(); initEditForm(${questionId}, null, ${JSON.stringify(answerKey)})">
                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -943,9 +957,13 @@
                     let div = document.createElement('div');
                     div.classList.add('flex', 'items-start', 'gap-2', 'choice-item');
                     div.dataset.choiceId = choiceCounter;
-                    div.innerHTML = `
-            <textarea name="choices[${choiceCounter}]" rows="3"
-                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                            div.innerHTML = `
+            <div class="flex-1 space-y-1">
+                <textarea name="choices[${choiceCounter}]" rows="3"
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                <input type="file" name="choice_images[${choiceCounter}]" accept="image/*"
+                       class="block w-full border-gray-300 rounded-md shadow-sm" />
+            </div>
             <button type="button" class="text-red-500 remove-choice hover:text-red-700" onclick="removeChoice(this)">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
