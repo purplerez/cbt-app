@@ -6,6 +6,7 @@ use App\Models\Question;
 use App\Models\QuestionTypes;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
@@ -67,9 +68,35 @@ class QuestionController extends Controller
                 $validated['choices'] = null;
             }
 
+            // Validate optional images
+            $request->validate([
+                'question_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+                'choice_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            ]);
+
             $validated['exam_id'] = session('perexamid');
             $validated['created_by'] = auth()->user()->id;
             $validated['question_type_id'] = $type;
+
+            // Handle uploads
+            if ($request->hasFile('question_image')) {
+                $validated['question_image'] = $request->file('question_image')->store('exam-questions', 'public');
+            }
+
+            if ($type != '3') {
+                $choiceImagePaths = [];
+                $choiceImageFiles = $request->file('choice_images', []);
+                if (is_array($choiceImageFiles)) {
+                    foreach ($choiceImageFiles as $choiceId => $imageFile) {
+                        if ($imageFile) {
+                            $choiceImagePaths[(string)$choiceId] = $imageFile->store('exam-questions', 'public');
+                        }
+                    }
+                }
+                $validated['choice_images'] = !empty($choiceImagePaths) ? json_encode($choiceImagePaths) : null;
+            } else {
+                $validated['choice_images'] = null;
+            }
 
             $roleRoutes =  [
                 'admin' => 'admin.exams.manage.question',
@@ -150,6 +177,12 @@ class QuestionController extends Controller
             $validated['created_by'] = auth()->user()->id;
             $validated['question_type_id'] = $type;
 
+            // Validate optional images
+            $request->validate([
+                'question_image' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+                'choice_images.*' => 'nullable|image|mimes:jpg,jpeg,png,webp,gif|max:2048',
+            ]);
+
             $roleRoutes =  [
                 'admin' => 'admin.exams.manage.question',
                 'super' => 'super.exams.manage.question',
@@ -162,6 +195,34 @@ class QuestionController extends Controller
             }
 
             $question = Question::findOrFail($exam);
+
+            // Handle uploads: question image
+            if ($request->hasFile('question_image')) {
+                $validated['question_image'] = $request->file('question_image')->store('exam-questions', 'public');
+            }
+
+            // Handle uploads: choice images
+            if ($type != '3') {
+                $existingChoiceImages = [];
+                if ($question->choice_images) {
+                    $decoded = json_decode($question->choice_images, true);
+                    if (is_array($decoded)) {
+                        $existingChoiceImages = $decoded;
+                    }
+                }
+
+                $choiceImageFiles = $request->file('choice_images', []);
+                if (is_array($choiceImageFiles)) {
+                    foreach ($choiceImageFiles as $choiceId => $imageFile) {
+                        if ($imageFile) {
+                            $existingChoiceImages[(string)$choiceId] = $imageFile->store('exam-questions', 'public');
+                        }
+                    }
+                }
+                $validated['choice_images'] = !empty($existingChoiceImages) ? json_encode($existingChoiceImages) : null;
+            } else {
+                $validated['choice_images'] = null;
+            }
 
             $question->update($validated);
 
