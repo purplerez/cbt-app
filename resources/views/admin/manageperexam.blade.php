@@ -163,8 +163,11 @@
                                                                         {{ $q->id }}
                                                                     </td>
                                                                     <td
-                                                                        class="px-6 py-4 text-sm text-gray-800 whitespace-wrap">
-                                                                        {{ $q->question_text }}
+                                                                        class="px-6 py-4 text-sm text-gray-800">
+                                                                        <div class="whitespace-wrap">{{ $q->question_text }}</div>
+                                                                        @if($q->question_image)
+                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="mt-2 max-w-xs max-h-32 rounded-md">
+                                                                        @endif
                                                                     </td>
                                                                     <td
                                                                         class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
@@ -257,7 +260,7 @@
                                                                             {{-- <form  class="mt-4"> --}}
                                                                             <form
                                                                                 action="{{ route('admin.exams.question.update', $q->id) }}"
-                                                                                method="post" class="mb-4">
+                                                                                method="post" enctype="multipart/form-data" class="mb-4">
                                                                                 @csrf
                                                                                 @method('PUT')
                                                                                 <div class="space-y-4">
@@ -269,6 +272,27 @@
                                                                                             class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
                                                                                     </div>
 
+                                                                                    <!-- Question Image -->
+                                                                                    <div>
+                                                                                        <label for="edit_question_image_{{ $q->id }}"
+                                                                                            class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
+                                                                                        @if($q->question_image)
+                                                                                            <div class="mb-2">
+                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs max-h-48 rounded-md">
+                                                                                                <label class="flex items-center mt-1">
+                                                                                                    <input type="checkbox" name="remove_question_image" value="1" class="mr-2">
+                                                                                                    <span class="text-sm text-red-600">Hapus gambar</span>
+                                                                                                </label>
+                                                                                            </div>
+                                                                                        @endif
+                                                                                        <input type="file" id="edit_question_image_{{ $q->id }}" name="question_image" accept="image/*"
+                                                                                            class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                                                            onchange="previewEditQuestionImage(this, {{ $q->id }})">
+                                                                                        <div id="edit_question_image_preview_{{ $q->id }}" class="hidden mt-2">
+                                                                                            <img src="" alt="Preview" class="max-w-xs max-h-48 rounded-md">
+                                                                                        </div>
+                                                                                    </div>
+
                                                                                     @if ($q->question_type_id != 3)
                                                                                         <!-- Choices (for multiple-choice questions) -->
                                                                                         <div>
@@ -278,26 +302,51 @@
                                                                                             <div id="edit-choices-container-{{ $q->id }}"
                                                                                                 class="space-y-2">
                                                                                                 @if ($q->choices)
+                                                                                                    @php
+                                                                                                        $choicesImages = $q->choices_images ? json_decode($q->choices_images, true) : [];
+                                                                                                    @endphp
                                                                                                     @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                                        <div class="flex items-start gap-2 edit-choice-item"
-                                                                                                            data-choice-id="{{ $key }}">
-                                                                                                            <textarea name="choices[{{ $key }}]" rows="3"
-                                                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
-                                                                                                            <button
-                                                                                                                type="button"
-                                                                                                                class="text-red-500 hover:text-red-700"
-                                                                                                                onclick="this.parentElement.remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
-                                                                                                                <svg class="w-4 h-4"
-                                                                                                                    fill="none"
-                                                                                                                    viewBox="0 0 24 24"
-                                                                                                                    stroke="currentColor">
-                                                                                                                    <path
-                                                                                                                        stroke-linecap="round"
-                                                                                                                        stroke-linejoin="round"
-                                                                                                                        stroke-width="2"
-                                                                                                                        d="M6 18L18 6M6 6l12 12" />
-                                                                                                                </svg>
-                                                                                                            </button>
+                                                                                                        <div class="edit-choice-item" data-choice-id="{{ $key }}">
+                                                                                                            <div class="flex items-start gap-2">
+                                                                                                                <div class="flex-1">
+                                                                                                                    <textarea name="choices[{{ $key }}]" rows="3"
+                                                                                                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
+                                                                                                                    
+                                                                                                                    <div class="mt-2">
+                                                                                                                        <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                                                        @if(isset($choicesImages[$key]))
+                                                                                                                            <div class="mb-1">
+                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice Image" class="max-w-xs max-h-32 rounded-md">
+                                                                                                                                <label class="flex items-center mt-1">
+                                                                                                                                    <input type="checkbox" name="remove_choice_images[]" value="{{ $key }}" class="mr-2">
+                                                                                                                                    <span class="text-xs text-red-600">Hapus gambar</span>
+                                                                                                                                </label>
+                                                                                                                            </div>
+                                                                                                                        @endif
+                                                                                                                        <input type="file" name="choice_images[{{ $key }}]" accept="image/*"
+                                                                                                                            class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                                                                                            onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
+                                                                                                                        <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}" class="hidden mt-1">
+                                                                                                                            <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                                                                                                                        </div>
+                                                                                                                    </div>
+                                                                                                                </div>
+                                                                                                                <button
+                                                                                                                    type="button"
+                                                                                                                    class="mt-1 text-red-500 hover:text-red-700"
+                                                                                                                    onclick="this.closest('.edit-choice-item').remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
+                                                                                                                    <svg class="w-4 h-4"
+                                                                                                                        fill="none"
+                                                                                                                        viewBox="0 0 24 24"
+                                                                                                                        stroke="currentColor">
+                                                                                                                        <path
+                                                                                                                            stroke-linecap="round"
+                                                                                                                            stroke-linejoin="round"
+                                                                                                                            stroke-width="2"
+                                                                                                                            d="M6 18L18 6M6 6l12 12" />
+                                                                                                                    </svg>
+                                                                                                                </button>
+                                                                                                            </div>
                                                                                                         </div>
                                                                                                     @endforeach
                                                                                                 @endif
@@ -405,13 +454,13 @@
                                                 @role('admin')
                                                 <form
                                                     action="{{ route('admin.exams.question.store', session('perexamid')) }}"
-                                                    method="post" class="mb-4">
+                                                    method="post" enctype="multipart/form-data" class="mb-4">
                                                 @endrole
 
                                                 @role('super')
                                                 <form
                                                     action="{{ route('super.exams.question.store', session('perexamid')) }}"
-                                                    method="post" class="mb-4">
+                                                    method="post" enctype="multipart/form-data" class="mb-4">
                                                 @endrole
 
                                                     @csrf
@@ -423,25 +472,47 @@
                                                                 class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                         </div>
                                                         <div>
+                                                            <label for="question_image"
+                                                                class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
+                                                            <input type="file" id="question_image" name="question_image" accept="image/*"
+                                                                class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                                onchange="previewQuestionImage(this)">
+                                                            <div id="question_image_preview" class="hidden mt-2">
+                                                                <img src="" alt="Preview" class="max-w-xs max-h-48 rounded-md">
+                                                            </div>
+                                                        </div>
+                                                        <div>
                                                             <label for="options"
                                                                 class="block text-sm font-medium text-gray-700">Pilihan
                                                                 Jawaban</label>
                                                             <div id="choices-container" class="space-y-2">
-                                                                <div class="flex items-start gap-2 choice-item"
-                                                                    data-choice-id="1">
-                                                                    <textarea name="choices[1]" rows="3"
-                                                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                                    <button type="button"
-                                                                        class="text-red-500 remove-choice hover:text-red-700"
-                                                                        onclick="removeChoice(this)">
-                                                                        <svg class="w-4 h-4" fill="none"
-                                                                            viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path stroke-linecap="round"
-                                                                                stroke-linejoin="round"
-                                                                                stroke-width="2"
-                                                                                d="M6 18L18 6M6 6l12 12" />
-                                                                        </svg>
-                                                                    </button>
+                                                                <div class="choice-item" data-choice-id="1">
+                                                                    <div class="flex items-start gap-2">
+                                                                        <div class="flex-1">
+                                                                            <textarea name="choices[1]" rows="3"
+                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                            <div class="mt-2">
+                                                                                <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                <input type="file" name="choice_images[1]" accept="image/*"
+                                                                                    class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                                                    onchange="previewChoiceImage(this, 1)">
+                                                                                <div id="choice_image_preview_1" class="hidden mt-1">
+                                                                                    <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <button type="button"
+                                                                            class="mt-1 text-red-500 remove-choice hover:text-red-700"
+                                                                            onclick="removeChoice(this)">
+                                                                            <svg class="w-4 h-4" fill="none"
+                                                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <button type="button" id="add-choice"
@@ -746,6 +817,39 @@
             <script src="{{ asset('js/student-list.js') }}"></script>
             <!-- edit js -->
             <script>
+                // Preview functions for edit modals
+                function previewEditQuestionImage(input, questionId) {
+                    const preview = document.getElementById('edit_question_image_preview_' + questionId);
+                    const img = preview.querySelector('img');
+                    
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            img.src = e.target.result;
+                            preview.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        preview.classList.add('hidden');
+                    }
+                }
+
+                function previewEditChoiceImage(input, questionId, choiceId) {
+                    const preview = document.getElementById('edit_choice_image_preview_' + questionId + '_' + choiceId);
+                    const img = preview.querySelector('img');
+                    
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            img.src = e.target.result;
+                            preview.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        preview.classList.add('hidden');
+                    }
+                }
+
                 // Global variable to store current answer keys
                 let currentAnswerKeys = {};
                 // Global variable to store current answer keys
@@ -868,16 +972,29 @@
                         addChoiceButton.addEventListener('click', function() {
                             editChoiceCounter++;
                             let div = document.createElement('div');
-                            div.classList.add('flex', 'items-start', 'gap-2', 'edit-choice-item');
+                            div.classList.add('edit-choice-item');
                             div.dataset.choiceId = editChoiceCounter.toString();
                             div.innerHTML = `
-                <textarea name="choices[${editChoiceCounter}]" rows="3"
-                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
-                <button type="button" class="text-red-500 hover:text-red-700" onclick="this.parentElement.remove(); initEditForm(${questionId}, null, ${JSON.stringify(answerKey)})">
-                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+                <div class="flex items-start gap-2">
+                    <div class="flex-1">
+                        <textarea name="choices[${editChoiceCounter}]" rows="3"
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                        <div class="mt-2">
+                            <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                            <input type="file" name="choice_images[${editChoiceCounter}]" accept="image/*"
+                                class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                onchange="previewEditChoiceImage(this, ${questionId}, ${editChoiceCounter})">
+                            <div id="edit_choice_image_preview_${questionId}_${editChoiceCounter}" class="hidden mt-1">
+                                <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button" class="mt-1 text-red-500 hover:text-red-700" onclick="this.closest('.edit-choice-item').remove(); initEditForm(${questionId}, null, ${JSON.stringify(answerKey)})">
+                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
             `;
                             editContainer.appendChild(div);
                             renderEditAnswerKey();
@@ -933,6 +1050,39 @@
             <!-- end edit js -->
 
             <script>
+                // Image preview functions
+                function previewQuestionImage(input) {
+                    const preview = document.getElementById('question_image_preview');
+                    const img = preview.querySelector('img');
+                    
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            img.src = e.target.result;
+                            preview.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        preview.classList.add('hidden');
+                    }
+                }
+
+                function previewChoiceImage(input, choiceId) {
+                    const preview = document.getElementById('choice_image_preview_' + choiceId);
+                    const img = preview.querySelector('img');
+                    
+                    if (input.files && input.files[0]) {
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            img.src = e.target.result;
+                            preview.classList.remove('hidden');
+                        }
+                        reader.readAsDataURL(input.files[0]);
+                    } else {
+                        preview.classList.add('hidden');
+                    }
+                }
+
                 let choiceCounter = 1;
                 const container = document.getElementById('choices-container');
                 const answerKeyContainer = document.getElementById('answer-key-container');
@@ -941,17 +1091,30 @@
                 document.getElementById('add-choice').addEventListener('click', function() {
                     choiceCounter++;
                     let div = document.createElement('div');
-                    div.classList.add('flex', 'items-start', 'gap-2', 'choice-item');
+                    div.classList.add('choice-item');
                     div.dataset.choiceId = choiceCounter;
                     div.innerHTML = `
-            <textarea name="choices[${choiceCounter}]" rows="3"
-                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
-            <button type="button" class="text-red-500 remove-choice hover:text-red-700" onclick="removeChoice(this)">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                          d="M6 18L18 6M6 6l12 12" />
-                </svg>
-            </button>
+            <div class="flex items-start gap-2">
+                <div class="flex-1">
+                    <textarea name="choices[${choiceCounter}]" rows="3"
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                    <div class="mt-2">
+                        <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                        <input type="file" name="choice_images[${choiceCounter}]" accept="image/*"
+                            class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                            onchange="previewChoiceImage(this, ${choiceCounter})">
+                        <div id="choice_image_preview_${choiceCounter}" class="hidden mt-1">
+                            <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                        </div>
+                    </div>
+                </div>
+                <button type="button" class="mt-1 text-red-500 remove-choice hover:text-red-700" onclick="removeChoice(this)">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
         `;
                     container.appendChild(div);
                     renderAnswerKey();
