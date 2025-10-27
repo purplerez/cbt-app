@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\Admin\DashboardStatisticsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExamlogController;
@@ -7,6 +8,7 @@ use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -19,6 +21,13 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
         ->name('exam.participants');
     Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats'])
         ->name('exam.stats');
+
+    // Dashboard Statistics Routes
+    Route::get('/dashboard/stats', [DashboardStatisticsController::class, 'getOverviewStats'])
+        ->name('dashboard.stats');
+    Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
+        ->name('dashboard.active-exams');
+        // ->name('exam.stats');
 
     Route::apiResource('exams', ExamController::class);
 

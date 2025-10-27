@@ -166,7 +166,7 @@
                                                                         class="px-6 py-4 text-sm text-gray-800">
                                                                         <div class="whitespace-wrap">{{ $q->question_text }}</div>
                                                                         @if($q->question_image)
-                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="mt-2 max-w-xs max-h-32 rounded-md">
+                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs mt-2 rounded-md max-h-32">
                                                                         @endif
                                                                     </td>
                                                                     <td
@@ -278,7 +278,7 @@
                                                                                             class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
                                                                                         @if($q->question_image)
                                                                                             <div class="mb-2">
-                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs max-h-48 rounded-md">
+                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs rounded-md max-h-48">
                                                                                                 <label class="flex items-center mt-1">
                                                                                                     <input type="checkbox" name="remove_question_image" value="1" class="mr-2">
                                                                                                     <span class="text-sm text-red-600">Hapus gambar</span>
@@ -289,7 +289,7 @@
                                                                                             class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                                                                             onchange="previewEditQuestionImage(this, {{ $q->id }})">
                                                                                         <div id="edit_question_image_preview_{{ $q->id }}" class="hidden mt-2">
-                                                                                            <img src="" alt="Preview" class="max-w-xs max-h-48 rounded-md">
+                                                                                            <img src="" alt="Preview" class="max-w-xs rounded-md max-h-48">
                                                                                         </div>
                                                                                     </div>
 
@@ -311,12 +311,12 @@
                                                                                                                 <div class="flex-1">
                                                                                                                     <textarea name="choices[{{ $key }}]" rows="3"
                                                                                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
-                                                                                                                    
+
                                                                                                                     <div class="mt-2">
                                                                                                                         <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
                                                                                                                         @if(isset($choicesImages[$key]))
                                                                                                                             <div class="mb-1">
-                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice Image" class="max-w-xs max-h-32 rounded-md">
+                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice Image" class="max-w-xs rounded-md max-h-32">
                                                                                                                                 <label class="flex items-center mt-1">
                                                                                                                                     <input type="checkbox" name="remove_choice_images[]" value="{{ $key }}" class="mr-2">
                                                                                                                                     <span class="text-xs text-red-600">Hapus gambar</span>
@@ -327,7 +327,7 @@
                                                                                                                             class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                                                                                                             onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
                                                                                                                         <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}" class="hidden mt-1">
-                                                                                                                            <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                                                                                                                            <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
                                                                                                                         </div>
                                                                                                                     </div>
                                                                                                                 </div>
@@ -478,7 +478,7 @@
                                                                 class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                                                 onchange="previewQuestionImage(this)">
                                                             <div id="question_image_preview" class="hidden mt-2">
-                                                                <img src="" alt="Preview" class="max-w-xs max-h-48 rounded-md">
+                                                                <img src="" alt="Preview" class="max-w-xs rounded-md max-h-48">
                                                             </div>
                                                         </div>
                                                         <div>
@@ -497,7 +497,7 @@
                                                                                     class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                                                                     onchange="previewChoiceImage(this, 1)">
                                                                                 <div id="choice_image_preview_1" class="hidden mt-1">
-                                                                                    <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                                                                                    <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
                                                                                 </div>
                                                                             </div>
                                                                         </div>
@@ -821,7 +821,7 @@
                 function previewEditQuestionImage(input, questionId) {
                     const preview = document.getElementById('edit_question_image_preview_' + questionId);
                     const img = preview.querySelector('img');
-                    
+
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
@@ -837,7 +837,7 @@
                 function previewEditChoiceImage(input, questionId, choiceId) {
                     const preview = document.getElementById('edit_choice_image_preview_' + questionId + '_' + choiceId);
                     const img = preview.querySelector('img');
-                    
+
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
@@ -985,7 +985,7 @@
                                 class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                 onchange="previewEditChoiceImage(this, ${questionId}, ${editChoiceCounter})">
                             <div id="edit_choice_image_preview_${questionId}_${editChoiceCounter}" class="hidden mt-1">
-                                <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                                <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
                             </div>
                         </div>
                     </div>
@@ -1054,7 +1054,7 @@
                 function previewQuestionImage(input) {
                     const preview = document.getElementById('question_image_preview');
                     const img = preview.querySelector('img');
-                    
+
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
@@ -1070,7 +1070,7 @@
                 function previewChoiceImage(input, choiceId) {
                     const preview = document.getElementById('choice_image_preview_' + choiceId);
                     const img = preview.querySelector('img');
-                    
+
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
                         reader.onload = function(e) {
@@ -1104,7 +1104,7 @@
                             class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                             onchange="previewChoiceImage(this, ${choiceCounter})">
                         <div id="choice_image_preview_${choiceCounter}" class="hidden mt-1">
-                            <img src="" alt="Preview" class="max-w-xs max-h-32 rounded-md">
+                            <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
                         </div>
                     </div>
                 </div>
@@ -1120,9 +1120,14 @@
                     renderAnswerKey();
                 });
 
+                // Keep track of selected answer keys
+                let selectedAnswerKeys = [];
+
                 // Remove choice
                 function removeChoice(button) {
-                    button.parentElement.remove();
+                    // Save current selections before removing
+                    selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    button.closest('.choice-item').remove();
                     renderAnswerKey();
                 }
 
@@ -1144,16 +1149,25 @@
                     let checkboxes = '';
                     choices.forEach((choice, index) => {
                         let id = choice.dataset.choiceId || index + 1;
-                        // corespond the text I input in textarea in answer options
-                        let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`
+                        // correspond the text I input in textarea in answer options
+                        let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
+                        let isChecked = selectedAnswerKeys.includes(id.toString()) ? 'checked' : '';
+
                         checkboxes += `
                 <label class="flex items-center gap-2">
-                    <input type="checkbox" name="answer_key[]" value="${id}">
+                    <input type="checkbox" name="answer_key[]" value="${id}" ${isChecked}>
                     ${text}
                 </label>
             `;
                     });
                     answerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxes}</div>`;
+
+                    // Update selected keys when checkboxes change
+                    answerKeyContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                        cb.addEventListener('change', function() {
+                            selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                        });
+                    });
                 }
 
                 // Initial render
