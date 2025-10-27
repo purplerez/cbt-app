@@ -48,16 +48,26 @@ class QuestionController extends Controller
             }
 
             if($type != 3) {
-                $validated = $request->validate([
-                    'question_text' => 'required|string',
-                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                $rules = [
+                    'question_text' => 'required_without:question_image|string|nullable',
+                    'question_image' => 'required_without:question_text|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'choices' => 'required|array|min:2',
-                    'choices.*' => 'required|string|max:255',
-                    'choice_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                    'choices.*' => 'required_without:choice_images.*|string|nullable|max:255',
+                    'choice_images.*' => 'required_without:choices.*|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
                     'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
                     'points' => 'required|numeric|min:1'
-                ]);
+                ];
+
+                // Custom validation messages
+                $messages = [
+                    'question_text.required_without' => 'Soal harus memiliki teks atau gambar',
+                    'question_image.required_without' => 'Soal harus memiliki teks atau gambar',
+                    'choices.*.required_without' => 'Setiap pilihan harus memiliki teks atau gambar',
+                    'choice_images.*.required_without' => 'Setiap pilihan harus memiliki teks atau gambar',
+                ];
+
+                $validated = $request->validate($rules, $messages);
                 $validated['choices'] = json_encode($validated['choices']);
                 $validated['answer_key'] = json_encode($validated['answer_key']);
             }
@@ -88,7 +98,7 @@ class QuestionController extends Controller
                     }
                 }
             }
-            
+
             if (!empty($choicesImages)) {
                 $validated['choices_images'] = json_encode($choicesImages);
             }
@@ -212,7 +222,7 @@ class QuestionController extends Controller
             // Handle choice images upload
             $existingChoicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
             $choicesImages = $existingChoicesImages;
-            
+
             // Handle removal of choice images
             if ($request->has('remove_choice_images')) {
                 foreach ($request->input('remove_choice_images') as $choiceId) {
@@ -222,7 +232,7 @@ class QuestionController extends Controller
                     }
                 }
             }
-            
+
             // Handle new choice images
             if ($request->hasFile('choice_images')) {
                 foreach ($request->file('choice_images') as $choiceId => $image) {
@@ -236,7 +246,7 @@ class QuestionController extends Controller
                     }
                 }
             }
-            
+
             $validated['choices_images'] = !empty($choicesImages) ? json_encode($choicesImages) : null;
 
             $question->update($validated);
@@ -258,12 +268,12 @@ class QuestionController extends Controller
     public function destroy($exam){
         try{
             $question = Question::findOrFail($exam);
-            
+
             // Delete question image if exists
             if ($question->question_image) {
                 Storage::disk('public')->delete($question->question_image);
             }
-            
+
             // Delete choice images if exist
             if ($question->choices_images) {
                 $choicesImages = json_decode($question->choices_images, true);
@@ -273,7 +283,7 @@ class QuestionController extends Controller
                     }
                 }
             }
-            
+
             $question->delete();
 
             $roleRoutes =  [
