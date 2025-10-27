@@ -7,23 +7,65 @@
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-            <!-- Statistik Overview -->
+                        <!-- Statistik Overview -->
             <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
                 <div class="p-6 bg-white rounded-lg shadow-sm">
                     <h3 class="text-sm font-medium text-gray-500">Total Siswa</h3>
                     <p class="text-2xl font-semibold text-gray-900" id="totalStudents">-</p>
-                </div>
-                <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Ujian Aktif</h3>
-                    <p class="text-2xl font-semibold text-gray-900" id="activeExams">-</p>
+                    <div class="flex items-center mt-2 text-sm">
+                        <span class="text-gray-600" id="activeSchoolCount">- Sekolah</span>
+                    </div>
                 </div>
                 <div class="p-6 bg-white rounded-lg shadow-sm">
                     <h3 class="text-sm font-medium text-gray-500">Siswa Online</h3>
                     <p class="text-2xl font-semibold text-gray-900" id="onlineStudents">-</p>
+                    <div class="flex items-center mt-2 text-sm">
+                        <span class="text-gray-600" id="onlinePercentage">-%</span>
+                        <span class="ml-2 text-xs text-gray-500">dari total siswa</span>
+                    </div>
                 </div>
                 <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Total Ujian Hari Ini</h3>
-                    <p class="text-2xl font-semibold text-gray-900" id="todayExams">-</p>
+                    <h3 class="text-sm font-medium text-gray-500">Ujian Aktif</h3>
+                    <div class="flex items-center justify-between">
+                        <p class="text-2xl font-semibold text-gray-900" id="activeExams">-</p>
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full" id="examStatus">-</span>
+                    </div>
+                    <div class="flex items-center mt-2 text-sm">
+                        <span class="text-gray-600" id="participantCount">- peserta</span>
+                    </div>
+                </div>
+                <div class="p-6 bg-white rounded-lg shadow-sm">
+                    <h3 class="text-sm font-medium text-gray-500">Beban Server</h3>
+                    <p class="text-2xl font-semibold text-gray-900" id="serverLoad">-</p>
+                    <div class="flex items-center mt-2 text-sm">
+                        <span class="text-gray-600" id="avgResponseTime">- ms</span>
+                        <span class="ml-2 text-xs text-gray-500">rata-rata respons</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistik per Sekolah -->
+            <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                <div class="p-6">
+                    <h2 class="mb-4 text-lg font-semibold text-gray-900">Statistik per Sekolah</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sekolah</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Siswa</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Siswa Online</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Progress</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200" id="schoolStats">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">Memuat data...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -83,10 +125,20 @@
             })
             .then(res => res.json())
             .then(data => {
-                document.getElementById('totalStudents').textContent = data.total_students;
+                // Update statistics
+                document.getElementById('totalStudents').textContent = data.total_students.toLocaleString();
+                document.getElementById('activeSchoolCount').textContent = `${data.active_school_count} Sekolah`;
+                document.getElementById('onlineStudents').textContent = data.online_students.toLocaleString();
+                document.getElementById('onlinePercentage').textContent = `${data.online_percentage}%`;
                 document.getElementById('activeExams').textContent = data.active_exams;
-                document.getElementById('onlineStudents').textContent = data.online_students;
-                document.getElementById('todayExams').textContent = data.today_exams;
+                document.getElementById('participantCount').textContent = `${data.participant_count.toLocaleString()} peserta`;
+                document.getElementById('serverLoad').textContent = `${data.server_load}%`;
+                document.getElementById('avgResponseTime').textContent = `${data.avg_response_time} ms`;
+
+                // Update exam status indicator
+                const examStatus = document.getElementById('examStatus');
+                examStatus.textContent = data.exam_status.text;
+                examStatus.className = `px-2 py-1 text-xs font-semibold rounded-full ${data.exam_status.color}`;
             })
             .catch(error => {
                 console.error("Stats API Error:", error);
@@ -125,16 +177,16 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">${exam.remaining_time} menit</td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                    ${exam.status === 'in_progress' ? 'bg-green-100 text-green-800' : 
-                                      exam.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' : 
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                    ${exam.status === 'in_progress' ? 'bg-green-100 text-green-800' :
+                                      exam.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
                                       'bg-gray-100 text-gray-800'}">
                                     ${exam.status === 'in_progress' ? 'Sedang Berlangsung' :
                                       exam.status === 'waiting' ? 'Menunggu' : 'Selesai'}
                                 </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <button onclick="stopExam(${exam.exam_id})" 
+                                <button onclick="stopExam(${exam.exam_id})"
                                         class="text-red-600 hover:text-red-900">
                                     Stop Ujian
                                 </button>
