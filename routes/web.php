@@ -121,6 +121,11 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
 
+    // Import/Export Questions routes
+    Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
+    Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
+    Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
+
     // Route::get('students', [SchoolController::class, 'students'])->name('students');
 
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
@@ -336,6 +341,16 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
+
+    // Import/Export routes for bank soal
+    Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.manage.question.template');
+    Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.manage.question.import');
+    Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.manage.question.export');
+
+    // Import/Export Questions routes
+    Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
+    Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
+    Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
 
     // Berita Acara routes (View and Export only for Super)
     Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');

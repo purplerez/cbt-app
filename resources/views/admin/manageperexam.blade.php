@@ -124,11 +124,42 @@
                                         <div class="flex items-center justify-between p-4 border-b">
                                             <h3 class="text-lg font-medium">Data Materi Ujian
                                                 {{ session('perexamname') }}</h3>
-                                            <button type="button"
-                                                class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                data-tab="soal">
-                                                + Tambah Soal
-                                            </button>
+                                            <div class="flex items-center space-x-2">
+                                                <!-- Excel Upload Button and Form -->
+                                                <form action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                    method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                                    @csrf
+                                                    <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
+                                                    <button type="button" onclick="document.getElementById('excel_file').click()"
+                                                        class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                        </svg>
+                                                        Import Excel
+                                                    </button>
+                                                    <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
+                                                        class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                        </svg>
+                                                        Download Template
+                                                    </a>
+                                                </form>
+
+                                                <!-- Export Button -->
+                                                <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                   class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
+                                                          hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                    Export
+                                                </a>
+
+                                                <!-- Add Question Button -->
+                                                <button type="button"
+                                                    class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                    data-tab="soal">
+                                                    + Tambah Soal
+                                                </button>
+                                            </div>
                                         </div>
                                         <div class="p-4">
                                             <div class="overflow-x-auto">
@@ -451,6 +482,63 @@
                                         <div class="p-4">
                                             <div class="overflow-x-auto">
                                                 <x-input-error :messages="$errors->get('error')" class="mb-4" />
+
+                                                <!-- Import/Export Buttons -->
+                                                <div class="flex gap-2 mb-4">
+                                                    @role('admin')
+                                                        <form action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                            method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                                            @csrf
+                                                            <input type="file" name="excel_file" id="excel_file_admin" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
+                                                            <button type="button" onclick="document.getElementById('excel_file_admin').click()"
+                                                                class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                                </svg>
+                                                                Import Excel
+                                                            </button>
+                                                            <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
+                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                </svg>
+                                                                Download Template
+                                                            </a>
+                                                        </form>
+                                                        <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
+                                                                  hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            Export Soal
+                                                        </a>
+                                                    @endrole
+                                                    @role('super')
+                                                        <form action="{{ route('super.exams.questions.import', session('perexamid')) }}"
+                                                            method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                                            @csrf
+                                                            <input type="file" name="excel_file" id="excel_file_super" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
+                                                            <button type="button" onclick="document.getElementById('excel_file_super').click()"
+                                                                class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                                </svg>
+                                                                Import Excel
+                                                            </button>
+                                                            <a href="{{ route('super.exams.questions.template', session('perexamid')) }}"
+                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                </svg>
+                                                                Download Template
+                                                            </a>
+                                                        </form>
+                                                        <a href="{{ route('super.exams.questions.export', session('perexamid')) }}"
+                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
+                                                                  hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            Export Soal
+                                                        </a>
+                                                    @endrole
+                                                </div>
+
                                                 @role('admin')
                                                 <form
                                                     action="{{ route('admin.exams.question.store', session('perexamid')) }}"

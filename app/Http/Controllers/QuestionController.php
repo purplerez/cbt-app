@@ -4,9 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Question;
 use App\Models\QuestionTypes;
+use App\Exports\QuestionTemplateExport;
+use App\Imports\QuestionsImport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
@@ -316,6 +321,60 @@ class QuestionController extends Controller
     }
 
     /**
+     * Download template Excel untuk import soal
+     */
+    // public function downloadTemplate()
+    // {
+    //     return Excel::download(new QuestionTemplateExport, 'template_soal.xlsx');
+    // }
+
+    /**
+     * Import soal dari file Excel
+     */
+    // public function import(Request $request)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'file' => 'required|mimes:xlsx,xls',
+    //         ], [
+    //             'file.required' => 'File Excel wajib diupload',
+    //             'file.mimes' => 'File harus berformat Excel (.xlsx atau .xls)',
+    //         ]);
+
+    //         DB::beginTransaction();
+
+    //         Excel::import(
+    //             new QuestionsImport(
+    //                 session('perexamid'),
+    //                 auth()->user()->id
+    //             ),
+    //             $request->file('file')
+    //         );
+
+    //         DB::commit();
+
+    //         $user = auth()->user();
+    //         logActivity($user->name.' (ID: '.$user->id.') Berhasil mengimport soal untuk ujian '.session('perexamname'));
+
+    //         return redirect()
+    //             ->route('admin.exams.manage.question', session('perexamid'))
+    //             ->with('success', 'Soal berhasil diimport. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+
+    //     } catch (ValidationException $e) {
+    //         DB::rollBack();
+    //         return redirect()
+    //             ->back()
+    //             ->withErrors(['error' => 'Error validasi: ' . implode(', ', $e->errors())]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return redirect()
+    //             ->back()
+    //             ->withErrors(['error' => 'Gagal mengimport soal: ' . $e->getMessage()]);
+    //     }
+    // }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function typestore(Request $request)
@@ -397,8 +456,61 @@ class QuestionController extends Controller
         }
         catch(\Exception $e)
         {
-
             return redirect()->route('admin.question.types')->withErrors(['error' => 'Gagal menghapus jenis soal :'.$e->getMessage()]);
         }
     }
+
+    /**
+     * Download the template for question import
+     */
+    public function downloadTemplate($exam)
+    {
+        try {
+            return Excel::download(new QuestionTemplateExport(), 'template-soal.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal mengunduh template: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Import questions from Excel file
+     */
+    public function import(Request $request, $exam)
+    {
+        try {
+            $request->validate([
+                'excel_file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $userId = Auth::id();
+            Excel::import(new QuestionsImport($exam, $userId), $request->file('excel_file'));
+
+            $roleRoute = auth()->user()->hasRole('super') ? 'super.exams.manage.question' : 'admin.exams.manage.question';
+            return redirect()->route($roleRoute, $exam)->with('success', 'Soal berhasil diimport');
+
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function($failure) {
+                return "Baris {$failure->row()}: {$failure->errors()[0]}";
+            })->join('<br>');
+
+            return redirect()->back()->withErrors(['error' => 'Error saat import: <br>' . $errors]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal import soal: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Export questions to Excel file
+     */
+    public function export($exam)
+    {
+        try {
+            $filename = 'soal-' . date('Y-m-d-His') . '.xlsx';
+            return Excel::download(new QuestionTemplateExport($exam), $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal export soal: ' . $e->getMessage()]);
+        }
+    }
+
 }
