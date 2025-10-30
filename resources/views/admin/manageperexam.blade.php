@@ -774,13 +774,16 @@
                                                             <th
                                                                 class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                                                 Aktifitas Terakhir</th>
+                                                            <th
+                                                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                                Aksi</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody id="participant-logs-body"
                                                         class="bg-white divide-y divide-gray-200">
                                                         <!-- Data will be populated by JavaScript -->
                                                         <tr>
-                                                            <td colspan="5"
+                                                            <td colspan="6"
                                                                 class="px-6 py-4 text-center text-gray-500">
                                                                 Memuat data...
                                                             </td>
