@@ -4,8 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Question;
 use App\Models\QuestionTypes;
+use App\Exports\QuestionTemplateExport;
+use App\Imports\QuestionsImport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\ValidationException;
 
 class QuestionController extends Controller
 {
@@ -47,24 +53,59 @@ class QuestionController extends Controller
             }
 
             if($type != 3) {
-                $validated = $request->validate([
-                    'question_text' => 'required|string',
+                $rules = [
+                    'question_text' => 'required_without:question_image|string|nullable',
+                    'question_image' => 'required_without:question_text|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'choices' => 'required|array|min:2',
-                    'choices.*' => 'required|string|max:255',
+                    'choices.*' => 'required_without:choice_images.*|string|nullable|max:255',
+                    'choice_images.*' => 'required_without:choices.*|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
                     'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
                     'points' => 'required|numeric|min:1'
-                ]);
+                ];
+
+                // Custom validation messages
+                $messages = [
+                    'question_text.required_without' => 'Soal harus memiliki teks atau gambar',
+                    'question_image.required_without' => 'Soal harus memiliki teks atau gambar',
+                    'choices.*.required_without' => 'Setiap pilihan harus memiliki teks atau gambar',
+                    'choice_images.*.required_without' => 'Setiap pilihan harus memiliki teks atau gambar',
+                ];
+
+                $validated = $request->validate($rules, $messages);
                 $validated['choices'] = json_encode($validated['choices']);
                 $validated['answer_key'] = json_encode($validated['answer_key']);
             }
             else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
                     'points' => 'required|numeric|min:1'
                 ]);
                 $validated['choices'] = null;
+            }
+
+            // Handle question image upload
+            if ($request->hasFile('question_image')) {
+                $questionImage = $request->file('question_image');
+                $questionImagePath = $questionImage->store('question_images', 'public');
+                $validated['question_image'] = $questionImagePath;
+            }
+
+            // Handle choice images upload
+            $choicesImages = [];
+            if ($request->hasFile('choice_images')) {
+                foreach ($request->file('choice_images') as $choiceId => $image) {
+                    if ($image) {
+                        $choiceImagePath = $image->store('choice_images', 'public');
+                        $choicesImages[$choiceId] = $choiceImagePath;
+                    }
+                }
+            }
+
+            if (!empty($choicesImages)) {
+                $validated['choices_images'] = json_encode($choicesImages);
             }
 
             $validated['exam_id'] = session('perexamid');
@@ -128,8 +169,10 @@ class QuestionController extends Controller
             if($type != '3') {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'choices' => 'required|array|min:2',
                     'choices.*' => 'required|string|max:255',
+                    'choice_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
                     'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
                     'points' => 'required|numeric|min:1'
@@ -140,6 +183,7 @@ class QuestionController extends Controller
             else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
+                    'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
                     'points' => 'required|numeric|min:1'
                 ]);
@@ -163,6 +207,53 @@ class QuestionController extends Controller
 
             $question = Question::findOrFail($exam);
 
+            // Handle question image upload
+            if ($request->hasFile('question_image')) {
+                // Delete old image if exists
+                if ($question->question_image) {
+                    Storage::disk('public')->delete($question->question_image);
+                }
+                $questionImage = $request->file('question_image');
+                $questionImagePath = $questionImage->store('question_images', 'public');
+                $validated['question_image'] = $questionImagePath;
+            } elseif ($request->input('remove_question_image') == '1') {
+                // Handle removal of question image
+                if ($question->question_image) {
+                    Storage::disk('public')->delete($question->question_image);
+                }
+                $validated['question_image'] = null;
+            }
+
+            // Handle choice images upload
+            $existingChoicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            $choicesImages = $existingChoicesImages;
+
+            // Handle removal of choice images
+            if ($request->has('remove_choice_images')) {
+                foreach ($request->input('remove_choice_images') as $choiceId) {
+                    if (isset($choicesImages[$choiceId])) {
+                        Storage::disk('public')->delete($choicesImages[$choiceId]);
+                        unset($choicesImages[$choiceId]);
+                    }
+                }
+            }
+
+            // Handle new choice images
+            if ($request->hasFile('choice_images')) {
+                foreach ($request->file('choice_images') as $choiceId => $image) {
+                    if ($image) {
+                        // Delete old image if exists
+                        if (isset($choicesImages[$choiceId])) {
+                            Storage::disk('public')->delete($choicesImages[$choiceId]);
+                        }
+                        $choiceImagePath = $image->store('choice_images', 'public');
+                        $choicesImages[$choiceId] = $choiceImagePath;
+                    }
+                }
+            }
+
+            $validated['choices_images'] = !empty($choicesImages) ? json_encode($choicesImages) : null;
+
             $question->update($validated);
 
             $user = auth()->user();
@@ -182,6 +273,22 @@ class QuestionController extends Controller
     public function destroy($exam){
         try{
             $question = Question::findOrFail($exam);
+
+            // Delete question image if exists
+            if ($question->question_image) {
+                Storage::disk('public')->delete($question->question_image);
+            }
+
+            // Delete choice images if exist
+            if ($question->choices_images) {
+                $choicesImages = json_decode($question->choices_images, true);
+                if (is_array($choicesImages)) {
+                    foreach ($choicesImages as $imagePath) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
+                }
+            }
+
             $question->delete();
 
             $roleRoutes =  [
@@ -212,6 +319,60 @@ class QuestionController extends Controller
     {
         //
     }
+
+    /**
+     * Download template Excel untuk import soal
+     */
+    // public function downloadTemplate()
+    // {
+    //     return Excel::download(new QuestionTemplateExport, 'template_soal.xlsx');
+    // }
+
+    /**
+     * Import soal dari file Excel
+     */
+    // public function import(Request $request)
+    // {
+    //     try {
+    //         $request->validate([
+    //             'file' => 'required|mimes:xlsx,xls',
+    //         ], [
+    //             'file.required' => 'File Excel wajib diupload',
+    //             'file.mimes' => 'File harus berformat Excel (.xlsx atau .xls)',
+    //         ]);
+
+    //         DB::beginTransaction();
+
+    //         Excel::import(
+    //             new QuestionsImport(
+    //                 session('perexamid'),
+    //                 auth()->user()->id
+    //             ),
+    //             $request->file('file')
+    //         );
+
+    //         DB::commit();
+
+    //         $user = auth()->user();
+    //         logActivity($user->name.' (ID: '.$user->id.') Berhasil mengimport soal untuk ujian '.session('perexamname'));
+
+    //         return redirect()
+    //             ->route('admin.exams.manage.question', session('perexamid'))
+    //             ->with('success', 'Soal berhasil diimport. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+
+    //     } catch (ValidationException $e) {
+    //         DB::rollBack();
+    //         return redirect()
+    //             ->back()
+    //             ->withErrors(['error' => 'Error validasi: ' . implode(', ', $e->errors())]);
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return redirect()
+    //             ->back()
+    //             ->withErrors(['error' => 'Gagal mengimport soal: ' . $e->getMessage()]);
+    //     }
+    // }
 
     /**
      * Store a newly created resource in storage.
@@ -295,8 +456,61 @@ class QuestionController extends Controller
         }
         catch(\Exception $e)
         {
-
             return redirect()->route('admin.question.types')->withErrors(['error' => 'Gagal menghapus jenis soal :'.$e->getMessage()]);
         }
     }
+
+    /**
+     * Download the template for question import
+     */
+    public function downloadTemplate($exam)
+    {
+        try {
+            return Excel::download(new QuestionTemplateExport(), 'template-soal.xlsx');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal mengunduh template: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Import questions from Excel file
+     */
+    public function import(Request $request, $exam)
+    {
+        try {
+            $request->validate([
+                'excel_file' => 'required|mimes:xlsx,xls',
+            ]);
+
+            $userId = Auth::id();
+            Excel::import(new QuestionsImport($exam, $userId), $request->file('excel_file'));
+
+            $roleRoute = auth()->user()->hasRole('super') ? 'super.exams.manage.question' : 'admin.exams.manage.question';
+            return redirect()->route($roleRoute, $exam)->with('success', 'Soal berhasil diimport');
+
+        } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
+            $failures = $e->failures();
+            $errors = collect($failures)->map(function($failure) {
+                return "Baris {$failure->row()}: {$failure->errors()[0]}";
+            })->join('<br>');
+
+            return redirect()->back()->withErrors(['error' => 'Error saat import: <br>' . $errors]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal import soal: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Export questions to Excel file
+     */
+    public function export($exam)
+    {
+        try {
+            $filename = 'soal-' . date('Y-m-d-His') . '.xlsx';
+            return Excel::download(new QuestionTemplateExport($exam), $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal export soal: ' . $e->getMessage()]);
+        }
+    }
+
 }

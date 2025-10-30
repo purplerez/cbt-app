@@ -22,6 +22,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Add event listener for detail buttons
+    document.addEventListener('click', function(event) {
+        if (event.target.matches('button[data-tab="detaillog"]')) {
+            const sessionId = event.target.getAttribute('data-id');
+            window.location.href = `/admin/exam-sessions/${sessionId}/detail`;
+        }
+    });
+
     function getApiToken(){
         const tokenMeta = document.querySelector('meta[name="api_token"]');
         if (tokenMeta) {
@@ -129,7 +137,10 @@ document.addEventListener('DOMContentLoaded', function () {
                     ${lastActivity?.progress ? lastActivity.progress + '%' : '-'}
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                   <button type="button" data-tab="detaillog" data-id="${participant.user_id}" class="text-blue-600 hover:text-blue-900"> Lihat Detail</button>
+                    <button type="button" data-tab="detaillog" data-id="${participant.exam_session_id}"
+                        class="px-3 py-1 text-sm text-blue-600 hover:text-blue-900 hover:underline focus:outline-none">
+                        Lihat Detail
+                    </button>
                 </td>
             `;
 
