@@ -704,6 +704,10 @@
                                         <!-- Hidden exam ID field -->
                                         <input type="hidden" id="current-exam-id"
                                             value="{{ session('perexamid') }}">
+                                        <!-- Add route URL for exam session detail -->
+                                        <script>
+                                            window.examSessionDetailUrl = "{{ route('admin.exam-sessions.detail', ['examSession' => ':id']) }}";
+                                        </script>
 
                                         @if (session('success'))
                                             <div id="successMessage"
