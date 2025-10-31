@@ -19,9 +19,9 @@
                                 <p><span class="font-medium">Kelas:</span> {{ $session->student->grade->name }}</p>
                             </div>
                             <div>
-                                <p><span class="font-medium">Waktu Mulai:</span> {{ $session->start_time->format('d M Y H:i:s') }}</p>
-                                <p><span class="font-medium">Waktu Selesai:</span> {{ $session->end_time ? $session->end_time->format('d M Y H:i:s') : 'Belum selesai' }}</p>
-                                <p><span class="font-medium">Status:</span> 
+                                <p><span class="font-medium">Waktu Mulai:</span> {{ $session->started_at ?  $session->started_at->format('d M Y H:i:s') : '-'}}</p>
+                                <p><span class="font-medium">Waktu Selesai:</span> {{ $session->submited_at ? $session->submited_at->format('d M Y H:i:s') : 'Belum selesai' }}</p>
+                                <p><span class="font-medium">Status:</span>
                                     @if($session->is_completed)
                                         <span class="text-green-600">Selesai</span>
                                     @else

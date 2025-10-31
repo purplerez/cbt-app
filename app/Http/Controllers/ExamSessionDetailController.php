@@ -22,7 +22,6 @@ class ExamSessionDetailController extends Controller
 
             // Get all questions for this exam with their types
             $questions = Question::where('exam_id', $examSession->exam_id)
-                ->with('qtype') // Eager load question type
                 ->orderBy('id')
                 ->get();
 

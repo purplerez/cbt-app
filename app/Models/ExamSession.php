@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTime;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -64,5 +65,10 @@ class ExamSession extends Model
     public function ExamLogs()
     {
         return $this->hasMany(ExamLog::class);
+    }
+
+    public function format(DateTime $date)
+    {
+        return $date->format('Y-m-d H:i:s');
     }
 }
