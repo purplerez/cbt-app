@@ -17,6 +17,7 @@ use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\RoomAssignmentController;
+use App\Http\Controllers\ExamSessionDetailController;
 use App\Models\School;
 use Illuminate\Support\Facades\Route;
 

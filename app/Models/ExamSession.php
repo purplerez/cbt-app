@@ -38,11 +38,27 @@ class ExamSession extends Model
     }
 
     /**
+     * Get the student for this exam session
+     */
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'user_id', 'user_id');
+    }
+
+    /**
      * Get the exam that owns the session.
      */
     public function exam(): BelongsTo
     {
         return $this->belongsTo(Exam::class);
+    }
+
+    /**
+     * Get the student answers for this session
+     */
+    public function studentAnswer()
+    {
+        return $this->hasOne(StudentAnswer::class, 'session_id');
     }
 
     public function ExamLogs()
