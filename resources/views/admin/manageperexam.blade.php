@@ -825,6 +825,9 @@
         </div>
 
         @push('scripts')
+            <script>
+                window.examSessionDetailUrl = "{{ route('admin.exam-sessions.detail', ['examSession' => ':id']) }}";
+            </script>
             <!-- Participant Logs Management -->
             <script src="{{ asset('js/participant-logs.js') }}"></script>
             <script>

@@ -139,8 +139,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
     Route::get('berita-acara/{beritaAcara}/student-list', [BeritaAcaraController::class, 'printStudentList'])->name('berita-acara.student-list');
 
-    // Route for exam session details (moved inside admin group)
-    Route::get('exam-session/{examSession}', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
+    // Route for exam session details
+    Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
 });
 
 Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kepala')->name('kepala.')->group(function () {
