@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
     document.addEventListener('click', function(event) {
         if (event.target.matches('button[data-tab="detaillog"]')) {
             const sessionId = event.target.getAttribute('data-id');
-            window.location.href = `/admin/exam-sessions/${sessionId}/detail`;
+            window.location.href = `/admin/exam-session/${sessionId}`;
         }
     });
 
