@@ -11,6 +11,7 @@ use App\Models\ExamSession;
 use App\Models\Question;
 use App\Models\StudentAnswer;
 use App\Models\ExamLog;
+use App\Models\Preassigned;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -35,8 +36,13 @@ class ParticipantController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
-        // take exam
-        $assigned = $user->preassigned()
+        // Refresh user to clear any cached relationships
+        // This ensures we get fresh data from database
+        $user->refresh();
+
+        // Get fresh preassigned data directly from database
+        // Using direct query instead of relationship to avoid caching issues
+        $assigned = Preassigned::where('user_id', $user->id)
             ->with(['exam.examType'])
             ->get()
             ->map(function ($preassigned) {
@@ -268,6 +274,24 @@ class ParticipantController extends Controller
                 'submission_method' => $forceSubmit ? 'force' : 'normal'
             ]));
 
+            // Delete preassigned record after successful submission
+            // This helps to save database space and indicates exam completion
+            $deletedCount = Preassigned::where('user_id', $user->id)
+                ->where('exam_id', $examId)
+                ->delete();
+
+            // Log the deletion for debugging
+            Log::info('Preassigned deleted after exam submission', [
+                'user_id' => $user->id,
+                'exam_id' => $examId,
+                'deleted_count' => $deletedCount,
+                'session_id' => $examSession->id
+            ]);
+
+            // Clear any cached relationships on the user model
+            // to ensure fresh data on next request
+            $user->unsetRelation('preassigned');
+
             DB::commit();
 
             return response()->json([
@@ -428,6 +452,20 @@ class ParticipantController extends Controller
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->header('User-Agent'),
                 'created_at' => Carbon::now()
+            ]);
+
+            // Delete preassigned record after auto-submission
+            // This helps to save database space and indicates exam completion
+            $deletedCount = Preassigned::where('user_id', $examSession->user_id)
+                ->where('exam_id', $examSession->exam_id)
+                ->delete();
+
+            // Log the deletion for debugging
+            Log::info('Preassigned deleted after auto-submit', [
+                'user_id' => $examSession->user_id,
+                'exam_id' => $examSession->exam_id,
+                'deleted_count' => $deletedCount,
+                'session_id' => $examSession->id
             ]);
 
             DB::commit();
