@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <td class="px-6 py-4 text-sm text-gray-900">
                     ${lastActivity?.progress ? lastActivity.progress + '%' : '-'}
                 </td>
-                <td class="px-6 py-4 text-sm text-gray-900">TESTER
+                <td class="px-6 py-4 text-sm text-gray-900">
                     <button type="button" data-tab="detaillog" data-id="${participant.exam_session_id}"
                         class="px-3 py-1 text-sm text-blue-600 hover:text-blue-900 hover:underline focus:outline-none">
                         Lihat Detail

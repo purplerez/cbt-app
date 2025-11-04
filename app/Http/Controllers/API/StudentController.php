@@ -133,6 +133,7 @@ class StudentController extends Controller
                         'nis' => $student->nis,
                         'name' => $student->name,
                         'grade' => $student->grade->name,
+                        'exam_session_id' => $lastSession ? $lastSession->id : null,
                         'last_activity' => $lastSession ? [
                             'status' => $lastSession->status,
                             'start_time' => $lastSession->started_at,
