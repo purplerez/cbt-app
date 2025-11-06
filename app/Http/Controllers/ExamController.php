@@ -212,6 +212,27 @@ class ExamController extends Controller
 
     }
 
+    public function archive(Request $request){
+        try{
+            $exam = Exam::findOrFail($request->examid);
+            $exam->is_active = !$exam->is_active;
+            $exam->save();
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Mengarsipkan mata pelajaran ujian : '.$exam->title);
+
+            return redirect()->route('admin.exams.manage.view', session('examid'))
+                            ->with('success', 'Data Mapel Ujian berhasil diarsipkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
+        }
+        catch(\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Mengarsipkan mata pelajaran ujian : '.$exam->title);
+
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Mengarsipkan Ujian : '.$e->getMessage()]);
+        }
+
+    }
+
     public function examquestion(Request $request, $exam){
         try{
             $exam = Exam::findOrFail($exam);

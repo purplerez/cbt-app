@@ -139,7 +139,12 @@
 
                                                                 <button type=button class="px-4 py-2 text-sm font-medium text-blue-500 transition bg-white rounded-md ring-2 ring-blue-500 hover:ring-white hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-modal-target="editUjianModal{{ $exam->id }}">Ubah</button>
 
-                                                            <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
+                                                                @if($exam->is_active == 1)
+                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
+                                                                @else
+                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Aktifkan</button>
+                                                                @endif
+
                                                             {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
                                                             <!--form action="{{route('admin.siswa.destroy', $exam->id)}}" method="POST" class="inline-block">
                                                                 @csrf
@@ -147,8 +152,7 @@
                                                                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
                                                             </form-->
                                                         </div>
-                                                    </td>
-                                                        </tr>
+
                                                         {{-- start edit modal --}}
                                                             <div id="editUjianModal{{ $exam->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
                                                                 <div class="min-h-screen px-4 text-center">
@@ -238,8 +242,64 @@
                                                         {{-- end edit modal --}}
 
                                                         {{-- start arsipkan feature --}}
+                                                            <div id="arsipkanUjian{{ $exam->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+                                                                <div class="min-h-screen px-4 text-center">
+                                                                    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+                                                                    <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                                        <div class="flex items-center justify-between pb-3 border-b">
+                                                                            @if ($exam->is_active == 1)
+                                                                                <h3 class="text-lg font-medium text-gray-900">Arsipkan Ujian</h3>
+                                                                            @else
+                                                                                <h3 class="text-lg font-medium text-gray-900">Aktifkan Ujian</h3>
+                                                                            @endif
 
-                                                        {{--  --}}
+                                                                            <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('arsipkanUjian{{ $exam->id }}')">
+                                                                                <span class="sr-only">Close</span>
+                                                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                        {{-- <form  class="mt-4"> --}}
+                                                                        @role('admin')
+                                                                            <form id="arsipkanUjianForm" class="mt-4" action="{{ route('admin.exams.archive') }}" method="post" enctype="multipart/form-data">
+                                                                        @endrole
+                                                                        @role('super')
+                                                                            <form id="arsipkanUjianForm" class="mt-4" action="{{ route('super.exams.archive') }}" method="post" enctype="multipart/form-data">
+                                                                        @endrole
+
+                                                                                    @csrf
+                                                                                    {{-- @if (session('error'))
+                                                                                        <div class="mb-4 text-red-600">
+                                                                                            {{ session('error') }}
+                                                                                        </div>
+                                                                                    @endif --}}
+                                                                                   <p class="text-sm text-gray-700">Apakah Anda yakin ingin Mengarsipkan/Meng-Aktifkan <strong>{{ strtoupper( $exam->title ) }}</strong> ?</p>
+                                                                                <div class="pt-4">
+                                                                                    <input type="hidden" name="examid" value="{{ $exam->id }}">
+                                                                                @if($exam->is_active == 1)
+                                                                                    <button type="submit" class="px-4 py-2 text-white transition bg-red-600 rounded hover:bg-red-700">
+                                                                                        Arsipkan
+                                                                                    </button>
+                                                                                @else
+                                                                                    <button type="submit" class="px-4 py-2 text-white transition bg-green-600 rounded hover:bg-green-700">
+                                                                                        Aktifkan
+                                                                                    </button>
+                                                                                @endif
+                                                                                    {{-- tombol batal --}}
+                                                                                    <button type="button" class="px-4 py-2 mt-2 text-white transition bg-gray-600 rounded hover:bg-gray-700" onclick="closeModal('arsipkanUjian{{ $exam->id }}')">
+                                                                                        Batal
+                                                                                    </button>
+                                                                                </div>
+                                                                                </form>
+                                                                        {{-- </form> --}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+
+                                                         </td>
+                                                        </tr>
+                                                        {{-- end of arsipkan feature --}}
                                                         @empty
                                                         <tr>
                                                             <td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada data materi ujian.</td>
