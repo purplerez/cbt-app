@@ -171,6 +171,47 @@ class ExamController extends Controller
         }
     }
 
+    public function edit($exam){
+        try{
+            $exam = Exam::findOrFail($exam);
+
+            return view('admin.edit_exams', compact('exam'));
+        }
+        catch(\Exception $e){
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
+        }
+    }
+
+    public function update(Request $request){
+        try{
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'start_date' => 'required|date',
+                'end_date' => 'required|date|after_or_equal:start_date',
+                'duration' => 'required|integer',
+                'total_quest' => 'required|integer',
+                'score_minimal' => 'required|integer',
+            ]);
+
+            $exam = Exam::findOrFail($request->examid);
+            $exam->update($validated);
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Mengubah mata pelajaran ujian : '.$validated['title']);
+
+            return redirect()->route('admin.exams.manage.view', session('examid'))
+                            ->with('success', 'Data Mapel Ujian berhasil diubah <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
+        }
+        catch(\Exception $e){
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Gagal Mengubah mata pelajaran ujian : '.$request['title']);
+
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Mengubah Ujian : '.$e->getMessage()]);
+        }
+
+    }
+
     public function examquestion(Request $request, $exam){
         try{
             $exam = Exam::findOrFail($exam);

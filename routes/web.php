@@ -112,6 +112,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
     Route::post('exams/inactive', [ExamController::class, 'inactiveExam'])->name('exam.inactive');
     Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
+    Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
+    Route::put('exams/update', [ExamController::class, 'update'])->name('exams.update');
 
 
     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');

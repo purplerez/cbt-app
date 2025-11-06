@@ -136,15 +136,110 @@
                                                                     Bank Soal
                                                                 </button>
                                                             </form>
+
+                                                                <button type=button class="px-4 py-2 text-sm font-medium text-blue-500 transition bg-white rounded-md ring-2 ring-blue-500 hover:ring-white hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-modal-target="editUjianModal{{ $exam->id }}">Ubah</button>
+
+                                                            <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
                                                             {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
-                                                            <form action="{{route('admin.siswa.destroy', $exam->id)}}" method="POST" class="inline-block">
+                                                            <!--form action="{{route('admin.siswa.destroy', $exam->id)}}" method="POST" class="inline-block">
                                                                 @csrf
                                                                 @method('DELETE')
                                                                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini?')">Hapus</button>
-                                                            </form>
+                                                            </form-->
                                                         </div>
                                                     </td>
                                                         </tr>
+                                                        {{-- start edit modal --}}
+                                                            <div id="editUjianModal{{ $exam->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto">
+                                                                <div class="min-h-screen px-4 text-center">
+                                                                    <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+                                                                    <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                                        <div class="flex items-center justify-between pb-3 border-b">
+                                                                            <h3 class="text-lg font-medium text-gray-900">Ubah Materi Ujian</h3>
+                                                                            <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('editUjianModal{{ $exam->id }}')">
+                                                                                <span class="sr-only">Close</span>
+                                                                                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                        {{-- <form  class="mt-4"> --}}
+                                                                        @role('admin')
+                                                                            <form id="editUjianForm" class="mt-4" action="{{ route('admin.exams.update') }}" method="post" enctype="multipart/form-data">
+                                                                        @endrole
+                                                                        @role('super')
+                                                                            <form id="editUjianForm" class="mt-4" action="{{ route('super.exams.update') }}" method="post" enctype="multipart/form-data">
+                                                                        @endrole
+                                                                                     @method('PUT')
+                                                                                    @csrf
+                                                                                    {{-- @if (session('error'))
+                                                                                        <div class="mb-4 text-red-600">
+                                                                                            {{ session('error') }}
+                                                                                        </div>
+                                                                                    @endif --}}
+                                                                                    <x-input-error :messages="$errors->get('error')" class="mb-4" />
+                                                                                        <div>
+                                                                                        <label for="title" class="block text-sm font-medium text-gray-700">Judul Ujian</label>
+                                                                                        <input type="text" name="title" id="title" value="{{ $exam->title }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('title')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="description" class="block text-sm font-medium text-gray-700">Deskripsi</label>
+                                                                                        <textarea name="description" id="description" rows="3" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">{{ $exam->description }}</textarea>
+                                                                                        <x-input-error :messages="$errors->get('description')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="duration" class="block text-sm font-medium text-gray-700">Tanggal Ujian</label>
+                                                                                        <input type="datetime-local" name="start_date" id="start_date" value="{{ $exam->start_date }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('start_date')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="duration" class="block text-sm font-medium text-gray-700">Tanggal Akhir Ujian</label>
+                                                                                        <input type="datetime-local" name="end_date" id="end_date" value="{{ $exam->end_date }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('end_date')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="duration" class="block text-sm font-medium text-gray-700">Durasi</label>
+                                                                                        <input type="number" name="duration" id="duration" value="{{ $exam->duration }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('duration')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="total_quest" class="block text-sm font-medium text-gray-700">Total Soal Ditampilkan</label>
+                                                                                        <input type="number" name="total_quest" id="total_quest" value="{{ $exam->total_quest }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('total_quest')" class="mt-1" />
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <label for="score_minimal" class="block text-sm font-medium text-gray-700">Nilai Minimal</label>
+                                                                                        <input type="number" name="score_minimal" id="score_minimal" value="{{ old('score_minimal', $exam->score_minimal) }}" required
+                                                                                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                                                                                        <x-input-error :messages="$errors->get('score_minimal')" class="mt-1" />
+                                                                                    </div>
+
+                                                                                    <input type="hidden" name="examid" value="{{ $exam->id }}">
+
+                                                                                    <!-- Tombol Submit -->
+                                                                                    <div class="pt-4">
+                                                                                        <button type="submit"
+                                                                                                class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
+                                                                                            Ubah Data
+                                                                                        </button>
+                                                                                    </div>
+                                                                                </form>
+                                                                        {{-- </form> --}}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        {{-- end edit modal --}}
+
+                                                        {{-- start arsipkan feature --}}
+
+                                                        {{--  --}}
                                                         @empty
                                                         <tr>
                                                             <td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada data materi ujian.</td>
@@ -160,82 +255,12 @@
                                 </div>
                             </div>
 
-                            <!-- Siswa Tab -->
-                            <div class="hidden tab-pane" id="siswa">
-                                <div class="bg-white rounded-lg shadow">
-                                    @if(session('success'))
-                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
-                                    @endif
-                                    <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Siswa</h3>
-                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSiswaModal">
-                                            + Tambah Siswa
-                                        </button>
-                                    </div>
-                                    <div class="p-4">
-                                        <div class="overflow-x-auto">
-                                            <x-input-error :messages="$errors->get('error')" class="mb-4" />
 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Guru Tab -->
-                            <div class="hidden tab-pane" id="guru">
-                                <div class="bg-white rounded-lg shadow">
-                                    @if(session('success'))
-                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
-                                    @endif
-                                    <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Guru</h3>
-                                        <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" onclick="openModal('addGuruModal')">
-                                            + Tambah Guru
-                                        </button>
-                                    </div>
-                                    <div class="p-4">
-                                        <div class="overflow-x-auto">
 
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Kepala Sekolah Tab -->
-                            <div class="hidden tab-pane" id="kepala">
-                                <div class="bg-white rounded-lg shadow">
-                                    @if(session('success'))
-                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
-                                    @endif
-                                    <div class="p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Kepala Sekolah</h3>
-                                    </div>
-                                    <div class="p-4">
 
-                                    </div>
-                                </div>
-                            </div>
 
-                            <!-- Subjects Tab -->
-                            <div class="hidden tab-pane" id="subjects">
-                                <div class="bg-white rounded-lg shadow">
-                                    @if(session('success'))
-                                        <div id="successMessage" class="p-4 mb-4 text-sm text-green-700 transition-opacity duration-500 bg-green-100 rounded-lg">{!! session('success') !!}</div>
-                                    @endif
-                                    <div class="flex items-center justify-between p-4 border-b">
-                                        <h3 class="text-lg font-medium">Data Mata Pelajaran</h3>
-                                        <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="addSubjectModal">
-                                            + Tambah Mapel
-                                        </button>
-                                    </div>
-                                    <div class="p-4">
-                                        <div class="overflow-x-auto">
-                                            <x-input-error :messages="$errors->get('error')" class="mb-4" />
-
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
 
                         </div>
                     </div>
@@ -245,7 +270,7 @@
         </div>
     </div>
 
-<!-- Add Siswa Modal -->
+<!-- Add Ujian Modal -->
 <div id="addUjianModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
     <div class="min-h-screen px-4 text-center">
         <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
@@ -329,184 +354,6 @@
     </div>
 </div>
 
-<!-- Add Subject Modal -->
-<div id="addSubjectModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Mata Pelajaran Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addSubjectModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            {{-- <form  class="mt-4"> --}}
-                <form id="addSubjectForm" class="mt-4" action="{{ route('admin.subjects.store') }}" method="post" enctype="multipart/form-data">
-                       @csrf
-                        {{-- @if (session('error'))
-                            <div class="mb-4 text-red-600">
-                                {{ session('error') }}
-                            </div>
-                        @endif --}}
-                        <x-input-error :messages="$errors->get('error')" class="mb-4" />
-                        <div>
-                            <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
-                            <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('name')" class="mt-1" />
-                        </div>
-
-                         <div>
-                            <label for="code" class="block text-sm font-medium text-gray-700">Code</label>
-                            <input type="text" name="code" id="code" value="{{ old('code') }}" required
-                                class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <x-input-error :messages="$errors->get('code')" class="mt-1" />
-                        </div>
-
-
-                        <!-- Tombol Submit -->
-                        <div class="pt-4">
-                            <button type="submit"
-                                    class="w-full px-4 py-2 text-white transition bg-blue-600 rounded hover:bg-blue-700">
-                                Simpan Data
-                            </button>
-                        </div>
-                    </form>
-            {{-- </form> --}}
-        </div>
-    </div>
-</div>
-
-
-<!-- Add Guru Modal -->
-<div id="addGuruModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Guru Baru</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <form id="addGuruForm" class="mt-4" action="{{ route('admin.teachers.store') }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                        <input type="text" id="nip" name="nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input type="text" id="name" name="name" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                    </div>
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select name="gender" id="gender" required
-                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="L">Laki - Laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('gender')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="address" name="address" rows="3" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                        <x-input-error :messages="$errors->get('address')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="photo" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('photo')" class="mt-1" />
-                    </div>
-                </div>
-                <div class="flex justify-end mt-6 space-x-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeModal('addGuruModal')">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<!-- Add Kepala Sekolah Modal -->
-<div id="addKepalaModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
-    <div class="min-h-screen px-4 text-center">
-        <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-        <div class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-            <div class="flex items-center justify-between pb-3 border-b">
-                <h3 class="text-lg font-medium text-gray-900">Tambah Data Kepala Sekolah</h3>
-                <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('addGuruModal')">
-                    <span class="sr-only">Close</span>
-                    <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <form id="addHeadForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
-                @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
-                        <input type="text" id="nip" name="h_nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_nip')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="name" class="block text-sm font-medium text-gray-700">Nama Lengkap</label>
-                        <input type="text" id="name" name="h_name" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_name')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="gender" class="block text-sm font-medium text-gray-700">Jenis Kelamin</label>
-                        <select name="h_gender" id="gender" required
-                            class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
-                            <option value="L">Laki - Laki</option>
-                            <option value="P">Perempuan</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('h_gender')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="address" class="block text-sm font-medium text-gray-700">Alamat</label>
-                        <textarea id="address" name="h_address" rows="3" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                        <x-input-error :messages="$errors->get('h_address')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="kepsek_email" class="block text-sm font-medium text-gray-700">Email</label>
-                        <input type="email" id="kepsek_email" name="h_email" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_email')" class="mt-1" />
-                    </div>
-                    <div>
-                        <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                        <input type="file" id="photo" name="h_photo" required
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                        <x-input-error :messages="$errors->get('h_photo')" class="mt-1" />
-                    </div>
-                </div>
-                <div class="flex justify-end mt-6 space-x-3">
-                    <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500" onclick="closeModal('addGuruModal')">
-                        Batal
-                    </button>
-                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                        Simpan
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <!-- Non Aktifkan Sekolah Modal -->
 <div id="nonAktifModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
