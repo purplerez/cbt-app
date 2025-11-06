@@ -140,9 +140,9 @@
                                                                 <button type=button class="px-4 py-2 text-sm font-medium text-blue-500 transition bg-white rounded-md ring-2 ring-blue-500 hover:ring-white hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-modal-target="editUjianModal{{ $exam->id }}">Ubah</button>
 
                                                                 @if($exam->is_active == 1)
-                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
+                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-red-500 transition bg-white rounded-md ring-2 ring-red-500 hover:bg-red-700 hover:text-white hover:ring-white focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
                                                                 @else
-                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Aktifkan</button>
+                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-green-500 transition bg-white rounded-md ring-2 ring-green-500 hover:text-white hover:bg-green-700 hover:ring-white focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Aktifkan</button>
                                                                 @endif
 
                                                             {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}

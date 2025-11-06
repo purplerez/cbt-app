@@ -126,6 +126,7 @@
                                                 {{ session('perexamname') }}</h3>
                                             <div class="flex items-center space-x-2">
                                                 <!-- Excel Upload Button and Form -->
+                                            @if(session('perexamstatus') == 1)
                                                 <form action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
                                                     method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
                                                     @csrf
@@ -148,8 +149,7 @@
 
                                                 <!-- Export Button -->
                                                 <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                   class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
-                                                          hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                   class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                     Export
                                                 </a>
 
@@ -159,6 +159,7 @@
                                                     data-tab="soal">
                                                     + Tambah Soal
                                                 </button>
+                                            @endif
                                             </div>
                                         </div>
                                         <div class="p-4">
@@ -240,7 +241,10 @@
                                                                         <button
                                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                                             data-modal-target="editSoalModal{{ $q->id }}"
-                                                                            onclick="openEditSoalModal({{ $q->id }})">
+                                                                            onclick="openEditSoalModal({{ $q->id }})"
+                                                                            @if (session('perexamstatus') == 0)
+                                                                                disabled
+                                                                            @endif>
                                                                             Ubah
                                                                         </button>
 
@@ -252,7 +256,11 @@
                                                                             @method('DELETE')
                                                                             <button type="submit"
                                                                                 class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
-                                                                                onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')">Hapus</button>
+                                                                                onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')"
+                                                                                @if (session('perexamstatus') == 0)
+                                                                                    disabled
+                                                                                @endif >
+                                                                                Hapus</button>
                                                                         </form>
                                                                 </tr>
                                                                 {{--  edit data --}}
@@ -506,8 +514,7 @@
                                                             </a>
                                                         </form>
                                                         <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
-                                                                  hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export Soal
                                                         </a>
                                                     @endrole
@@ -532,8 +539,7 @@
                                                             </a>
                                                         </form>
                                                         <a href="{{ route('super.exams.questions.export', session('perexamid')) }}"
-                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md
-                                                                  hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export Soal
                                                         </a>
                                                     @endrole

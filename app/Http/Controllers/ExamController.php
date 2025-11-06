@@ -252,6 +252,7 @@ class ExamController extends Controller
             session([
                 'perexamid' => $exam->id,
                 'perexamname' => $exam->title,
+                'perexamstatus' => $exam->is_active,
             ]);
 
             $user = auth()->user();
