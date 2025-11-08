@@ -144,6 +144,45 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
+
+    // Session-authenticated fallback JSON endpoint for participants (used by admin UI when API token not present)
+    Route::get('exam/{exam}/participants-json', function (\Illuminate\Http\Request $request, $exam) {
+        // Build participants list similar to the API controller but return a simple array (session auth)
+        $schoolId = $request->query('school_id');
+
+        $query = App\Models\Student::with(['grade', 'user', 'user.examSessions' => function ($q) use ($exam) {
+            $q->where('exam_id', $exam)->orderBy('updated_at', 'desc');
+        }])->whereHas('user.preassigned', function ($q) use ($exam) {
+            $q->where('exam_id', $exam);
+        });
+
+        if ($schoolId) {
+            $query->where('school_id', $schoolId);
+        }
+
+        $students = $query->get()->map(function ($student) use ($exam) {
+            $lastSession = $student->user->examSessions->where('exam_id', $exam)->first();
+            return [
+                'id' => $student->id,
+                'user_id' => $student->user_id,
+                'nis' => $student->nis,
+                'name' => $student->name,
+                'grade' => $student->grade->name ?? null,
+                'exam_session_id' => $lastSession ? $lastSession->id : null,
+                'last_activity' => $lastSession ? [
+                    'status' => $lastSession->status,
+                    'start_time' => $lastSession->started_at,
+                    'submit_time' => $lastSession->submited_at,
+                    'time_remaining' => $lastSession->time_remaining,
+                    'score' => $lastSession->total_score,
+                    'attempt' => $lastSession->attempt_number,
+                    'ip' => $lastSession->ip_address
+                ] : null
+            ];
+        });
+
+        return response()->json(['success' => true, 'data' => $students]);
+    })->name('admin.exam.participants.json');
 });
 
 Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kepala')->name('kepala.')->group(function () {

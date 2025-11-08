@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const examId = examIdElement.value;
-    console.debug('Initializing participant logs with examId:', examId);
+    console.log('Initializing participant logs with examId:', examId);
 
     // Initialize the view
     if (schoolDropdown) {
@@ -20,14 +20,10 @@ document.addEventListener('DOMContentLoaded', function () {
             fetchStats();
             fetchParticipants();
         });
-    } else {
-        // still attempt to load even if dropdown is missing
-        fetchStats();
-        fetchParticipants();
     }
 
     // Add event listener for detail buttons
-    document.addEventListener('click', function (event) {
+    document.addEventListener('click', function(event) {
         if (event.target.matches('button[data-tab="detaillog"]')) {
             const sessionId = event.target.getAttribute('data-id');
             const url = window.examSessionDetailUrl.replace(':id', sessionId);
@@ -35,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    function getApiToken() {
+    function getApiToken(){
         const tokenMeta = document.querySelector('meta[name="api_token"]');
         if (tokenMeta) {
             const token = tokenMeta.getAttribute('content');
@@ -44,7 +40,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        if (window.apiToken && window.apiToken.trim() !== '') {
+        if(window.apiToken && window.apiToken.trim() !== '') {
             return window.apiToken;
         }
 
@@ -54,20 +50,21 @@ document.addEventListener('DOMContentLoaded', function () {
     function buildFetchOptions(token) {
         const headers = {
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
 
-        // Attach CSRF if present
-        const csrf = document.querySelector('meta[name="csrf-token"]');
-        if (csrf && csrf.content) headers['X-CSRF-TOKEN'] = csrf.content;
-
-        if (token) headers['Authorization'] = `Bearer ${token}`;
-
-        return {
+        const options = {
             method: 'GET',
             headers: headers,
-            credentials: 'same-origin' // allow session cookies
+            // allow session-based auth via cookies when no token
+            credentials: 'same-origin'
         };
+
+        return options;
     }
 
     function fetchStats() {
@@ -75,8 +72,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = getApiToken();
         const statsUrl = `/api/admin/exam/${examId}/stats${schoolId ? `?school_id=${schoolId}` : ''}`;
 
-        console.debug('Fetching stats', statsUrl, { tokenPresent: !!token });
-        fetch(statsUrl, buildFetchOptions(token))
+    console.debug('Fetching stats', statsUrl, { tokenPresent: !!token });
+    fetch(statsUrl, buildFetchOptions(token))
             .then(response => response.json())
             .then(response => {
                 if (response && response.success) {
@@ -95,20 +92,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = getApiToken();
         const url = `/api/admin/exam/${examId}/participants` + (schoolId ? `?school_id=${schoolId}` : '');
 
-        console.debug('Fetching participants', url, { tokenPresent: !!token });
-        fetch(url, buildFetchOptions(token))
+    console.debug('Fetching participants', url, { tokenPresent: !!token });
+    fetch(url, buildFetchOptions(token))
             .then(response => response.json())
             .then(response => {
                 if (response && response.success) {
-                    // response.data may be a paginator or array
+                    // response.data may be a paginator object (with data array) or an array
                     let participants = [];
-                    if (Array.isArray(response.data)) participants = response.data;
-                    else if (response.data && Array.isArray(response.data.data)) participants = response.data.data;
-                    else if (Array.isArray(response)) participants = response;
-
+                    if (Array.isArray(response.data)) {
+                        participants = response.data;
+                    } else if (response.data && Array.isArray(response.data.data)) {
+                        participants = response.data.data;
+                    } else if (Array.isArray(response)) {
+                        participants = response;
+                    }
                     updateParticipantTable(participants);
                 } else {
                     console.warn('Unexpected participants response, trying session fallback', response);
+                    // try session-authenticated web fallback
                     fetchParticipantsFallback(schoolId);
                 }
             })
@@ -121,11 +122,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function fetchParticipantsFallback(schoolId) {
         const fallbackUrl = `/admin/exam/${examId}/participants-json` + (schoolId ? `?school_id=${schoolId}` : '');
         console.debug('Fetching participants fallback (web) ', fallbackUrl);
-        fetch(fallbackUrl, { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json' } })
+        fetch(fallbackUrl, { method: 'GET', credentials: 'same-origin', headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content } })
             .then(r => r.json())
             .then(data => {
                 if (data && data.success) {
-                    const participants = Array.isArray(data.data) ? data.data : (Array.isArray(data) ? data : []);
+                    const participants = Array.isArray(data.data) ? data.data : [];
                     updateParticipantTable(participants);
                 } else {
                     console.warn('Fallback participants response not usable', data);
@@ -168,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
             row.innerHTML = `
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.nis ?? '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.name ?? '-'}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${participant.grade ?? participant.grade?.name ?? '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${participant.grade ?? '-'}</td>
                 <td class="px-6 py-4 text-sm">${getStatusBadge(lastActivity.status)}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${lastActivity.progress ? lastActivity.progress + '%' : '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -193,5 +194,16 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         return badges[status] || '<span class="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">Unknown</span>';
+    }
+
+    function formatDateTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleString('id-ID', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
     }
 });
