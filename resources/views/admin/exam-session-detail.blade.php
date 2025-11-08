@@ -10,8 +10,8 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     <!-- Student Information -->
-                    <div class="mb-6 bg-gray-50 rounded-lg p-4">
-                        <h3 class="text-lg font-semibold mb-2">Informasi Siswa</h3>
+                    <div class="p-4 mb-6 rounded-lg bg-gray-50">
+                        <h3 class="mb-2 text-lg font-semibold">Informasi Siswa</h3>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <p><span class="font-medium">Nama:</span> {{ $session->student->name }}</p>
@@ -22,7 +22,7 @@
                                 <p><span class="font-medium">Waktu Mulai:</span> {{ $session->started_at ?  $session->started_at->format('d M Y H:i:s') : '-'}}</p>
                                 <p><span class="font-medium">Waktu Selesai:</span> {{ $session->submited_at ? $session->submited_at->format('d M Y H:i:s') : 'Belum selesai' }}</p>
                                 <p><span class="font-medium">Status:</span>
-                                    @if($session->is_completed)
+                                    @if($session->status == 'submited')
                                         <span class="text-green-600">Selesai</span>
                                     @else
                                         <span class="text-yellow-600">Sedang Mengerjakan</span>
@@ -34,24 +34,27 @@
 
                     <!-- Answer Details -->
                     <div class="mt-6">
-                        <h3 class="text-lg font-semibold mb-4">Detail Jawaban</h3>
+                        <h3 class="mb-4 text-lg font-semibold">Detail Jawaban</h3>
                         <div class="overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50">
                                     <tr>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             No
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Soal
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Jawaban Siswa
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Kunci Jawaban
                                         </th>
-                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                            Poin
+                                        </th>
+                                        <th scope="col" class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                             Status
                                         </th>
                                     </tr>
@@ -59,28 +62,64 @@
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     @foreach($answers as $index => $answer)
                                         <tr>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                            <td class="px-6 py-4 text-sm whitespace-nowrap">
                                                 {{ $index + 1 }}
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 {!! nl2br(e($answer['question_text'])) !!}
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                                @if($answer['question_type'] == 1) {{-- Multiple Choice --}}
-                                                    {{ $answer['answer'] ?? '-' }}
-                                                @else {{-- Essay --}}
-                                                    <div class="whitespace-pre-wrap">{{ $answer['answer'] ?? '-' }}</div>
+                                                @php
+                                                    $qtype = $answer['question_type'] ?? null;
+                                                    $ans = $answer['answer'] ?? null;
+                                                @endphp
+
+                                                @if(in_array($qtype, [0,1,2]))
+                                                    {{-- Objective types: Pilihan Ganda (0), Kompleks (1), Benar/Salah (2) --}}
+                                                    @if(is_array($ans))
+                                                        <div>{{ implode(', ', $ans) }}</div>
+                                                    @else
+                                                        <div>{{ $ans ?? '-' }}</div>
+                                                    @endif
+                                                    @if(!empty($answer['choices']))
+                                                        <div class="mt-2 text-sm text-gray-500">
+                                                            {{-- show available choices (optional) --}}
+                                                            @foreach($answer['choices'] as $key => $choice)
+                                                                <div><strong>{{ $key }}.</strong> {!! nl2br(e($choice)) !!}</div>
+                                                            @endforeach
+                                                        </div>
+                                                    @endif
+                                                @else
+                                                    {{-- Essay --}}
+                                                    <div class="whitespace-pre-wrap">{{ $ans ?? '-' }}</div>
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 {{ $answer['correct_answer'] }}
                                             </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm">
-                                                @if($answer['answer'] === null)
+                                            <td class="px-6 py-4 text-sm">
+                                                @php
+                                                    $aw = $answer['points_awarded'] ?? 0;
+                                                    $pp = $answer['points_possible'] ?? 0;
+                                                @endphp
+                                                <span>
+                                                    {{ (floor($aw) == $aw) ? (int)$aw : number_format($aw, 2, ',', '.') }}
+                                                    / 
+                                                    {{ (floor($pp) == $pp) ? (int)$pp : number_format($pp, 2, ',', '.') }}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                                @php
+                                                    $ansVal = $answer['answer'] ?? null;
+                                                    $qtype = $answer['question_type'] ?? null;
+                                                    $isCorrect = $answer['is_correct'] ?? null;
+                                                @endphp
+
+                                                @if($ansVal === null)
                                                     <span class="text-yellow-600">Belum dijawab</span>
-                                                @elseif($answer['question_type'] == 1 && $answer['answer'] === $answer['correct_answer'])
+                                                @elseif(in_array($qtype, [0,1,2]) && $isCorrect === true)
                                                     <span class="text-green-600">Benar</span>
-                                                @elseif($answer['question_type'] == 1)
+                                                @elseif(in_array($qtype, [0,1,2]))
                                                     <span class="text-red-600">Salah</span>
                                                 @else
                                                     <span class="text-blue-600">Essay</span>
@@ -95,7 +134,7 @@
 
                     <!-- Back Button -->
                     <div class="mt-6">
-                        <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 bg-gray-800 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700">
+                        <a href="javascript:history.back()" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase bg-gray-800 border border-transparent rounded-md hover:bg-gray-700">
                             Kembali
                         </a>
                     </div>
