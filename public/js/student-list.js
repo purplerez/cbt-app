@@ -104,6 +104,7 @@ function fetchStudents(schoolId) {
 
 function updateStudentList(response) {
     const tbody = document.getElementById('student-list-body');
+    const examStatus =  session('perexamstatus') ;
     if (!tbody) return;
 
     tbody.innerHTML = '';
@@ -119,6 +120,7 @@ function updateStudentList(response) {
     students.forEach(student => {
         const row = document.createElement('tr');
         const isAssigned = student.is_assigned;
+
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.nis || '-'}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${student.name || '-'}</td>
@@ -126,7 +128,8 @@ function updateStudentList(response) {
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 ${isAssigned ?
                 '<span class="text-green-600">Sudah Terdaftar</span>' :
-                `<button type="button" onclick="addStudentToExam(${student.id})" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                `<button type="button" onclick="addStudentToExam(${student.id})" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700"
+                     ${examStatus == 0 ? 'disabled' : ''} >
                         Tambah ke Ujian
                     </button>`
             }

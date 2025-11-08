@@ -336,6 +336,10 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
 
+    Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
+    Route::put('exams/update', [ExamController::class, 'update'])->name('exams.update');
+    Route::post('exams/archive', [ExamController::class, 'archive'])->name('exams.archive');
+
     // add subject in an exam
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
 

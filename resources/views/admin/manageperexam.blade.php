@@ -198,7 +198,7 @@
                                                                         class="px-6 py-4 text-sm text-gray-800">
                                                                         <div class="whitespace-wrap">{{ $q->question_text }}</div>
                                                                         @if($q->question_image)
-                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs mt-2 rounded-md max-h-32">
+                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question" class="max-w-xs mt-2 rounded-md max-h-32">
                                                                         @endif
                                                                     </td>
                                                                     <td
@@ -317,7 +317,7 @@
                                                                                             class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
                                                                                         @if($q->question_image)
                                                                                             <div class="mb-2">
-                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question Image" class="max-w-xs rounded-md max-h-48">
+                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question" class="max-w-xs rounded-md max-h-48">
                                                                                                 <label class="flex items-center mt-1">
                                                                                                     <input type="checkbox" name="remove_question_image" value="1" class="mr-2">
                                                                                                     <span class="text-sm text-red-600">Hapus gambar</span>
@@ -352,10 +352,10 @@
                                                                                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
 
                                                                                                                     <div class="mt-2">
-                                                                                                                        <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                                                        <label class="block text-xs font-medium text-gray-600" for="gambar_pilihan">Gambar Pilihan (Opsional)</label>
                                                                                                                         @if(isset($choicesImages[$key]))
                                                                                                                             <div class="mb-1">
-                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice Image" class="max-w-xs rounded-md max-h-32">
+                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice" class="max-w-xs rounded-md max-h-32">
                                                                                                                                 <label class="flex items-center mt-1">
                                                                                                                                     <input type="checkbox" name="remove_choice_images[]" value="{{ $key }}" class="mr-2">
                                                                                                                                     <span class="text-xs text-red-600">Hapus gambar</span>
@@ -586,7 +586,7 @@
                                                                             <textarea name="choices[1]" rows="3"
                                                                                 class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                                             <div class="mt-2">
-                                                                                <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                <label class="block text-xs font-medium text-gray-600" for="gambar">Gambar Pilihan (Opsional)</label>
                                                                                 <input type="file" name="choice_images[1]" accept="image/*"
                                                                                     class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                                                                     onchange="previewChoiceImage(this, 1)">
@@ -856,6 +856,7 @@
                 });
 
                 function fetchStudents(schoolId) {
+                    const examstatus = {{ session('perexamstatus') }};
                     const examId = '{{ $exam->id }}'; // Get the exam ID from the current page
                     fetch(`/api/admin/schools/${schoolId}/students?exam_id=${examId}`)
                         .then(response => response.json())
@@ -866,13 +867,15 @@
                             data.forEach(student => {
                                 const row = document.createElement('tr');
                                 row.innerHTML = `
-                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.nis}</td>
+                    <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.nis} - ${examstatus}</td>
                     <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.name}</td>
                     <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${student.grade?.name || '-'}</td>
                     <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
-                            `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900">
+                            `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
+                            ${examstatus == 0 ? 'disabled' : ''}
+                            >
                                             Tambah ke Ujian
                                         </button>`
                         }
