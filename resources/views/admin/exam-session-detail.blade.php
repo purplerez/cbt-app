@@ -14,12 +14,12 @@
                         <h3 class="mb-2 text-lg font-semibold">Informasi Siswa</h3>
                         <div class="grid grid-cols-2 gap-2">
 
-                            <div class="">
+                            <div class="border border-gray-300">
                                 <p><span class="font-medium">Nama:</span> {{ $session->student->name }}</p>
                                 <p><span class="font-medium">NIS:</span> {{ $session->student->nis }}</p>
                                 <p><span class="font-medium">Kelas:</span> {{ $session->student->grade->name }}</p>
                             </div>
-                            <div>
+                            <div class="border border-gray-300">
                                 <p><span class="font-medium">Waktu :</span> {{ $session->started_at ?  $session->started_at->format('d M Y H:i:s') : '-'}} s/d {{ $session->submited_at ? $session->submited_at->format('d M Y H:i:s') : 'Belum selesai' }}</p>
                                 {{-- <p><span class="font-medium">Waktu Selesai:</span> </p> --}}
                                 <p><span class="font-medium">Status:</span>
