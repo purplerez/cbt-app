@@ -10,13 +10,8 @@
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    @role('admin')
-                        <form action="{{ route('admin.grades.update', $grade->id) }}" method="post">
-                    @endrole
 
-                    @role('super')
-                        <form action="{{ route('super.grades.update', $grade->id) }}" method="post">
-                    @endrole
+                        <form action="{{ route('kepala.grade.update') }}" method="post">
                         @csrf
                         @method('PUT')
 
@@ -27,7 +22,7 @@
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('name')" class="mt-1" />
                         </div>
-
+                        <input type="hidden" name="id" value="{{ $grade->id }}">
 
                         <!-- Tombol Submit -->
                         <div class="pt-4">

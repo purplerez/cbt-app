@@ -206,7 +206,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/grades/create', [KepalaController::class, 'gradeCreate'])->name('grade.create');
     Route::post('/grades/create', [KepalaController::class, 'gradeStore'])->name('grade.store');
     Route::get('/grades/{grade}/edit', [KepalaController::class, 'gradeEdit'])->name('grade.edit');
-    Route::put('/grades/{grade}/edit', [KepalaController::class, 'gradeUpdate'])->name('grade.update');
+    Route::put('/grades/edit', [KepalaController::class, 'gradeUpdate'])->name('grade.update');
     Route::delete('/grades/{grade}', [KepalaController::class, 'gradeDestroy'])->name('grade.destroy');
 
     Route::get('/students', [KepalaController::class, 'studentAll'])->name('students');
