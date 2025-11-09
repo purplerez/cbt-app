@@ -7,6 +7,26 @@ use App\Models\ExamSession;
 use App\Models\StudentAnswer;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * ExamScoringService
+ * 
+ * Service untuk menghitung skor ujian dengan dukungan penilaian otomatis
+ * untuk semua tipe soal termasuk essay.
+ * 
+ * Fitur Auto-Scoring Essay:
+ * - Kesamaan 100%: Mendapat poin penuh (full points)
+ * - Kesamaan 80-99%: Mendapat 80% dari poin penuh
+ * - Kesamaan 60-79%: Mendapat 60% dari poin penuh
+ * - Kesamaan <60%: Tidak mendapat poin (0)
+ * 
+ * Metode perhitungan similarity:
+ * 1. Levenshtein distance (untuk jawaban pendek)
+ * 2. Word matching (mencocokkan kata-kata kunci)
+ * 3. PHP similar_text function
+ * 
+ * @version 2.0 - Auto-scoring essay implemented
+ * @date November 9, 2025
+ */
 class ExamScoringService
 {
      /**
@@ -24,7 +44,7 @@ class ExamScoringService
           $answeredQuestions = 0;
           $scoreBreakdown = [
                'multiple_choice' => ['correct' => 0, 'total' => 0, 'score' => 0, 'max_score' => 0],
-               'essay' => ['answered' => 0, 'total' => 0, 'score' => 0, 'max_score' => 0],
+               'essay' => ['answered' => 0, 'correct' => 0, 'total' => 0, 'score' => 0, 'max_score' => 0],
                'true_false' => ['correct' => 0, 'total' => 0, 'score' => 0, 'max_score' => 0],
                'complex_multiple' => ['correct' => 0, 'total' => 0, 'score' => 0, 'max_score' => 0]
           ];
@@ -116,10 +136,35 @@ class ExamScoringService
                     if (isset($essayAnswers[$questionId]) && !empty(trim($essayAnswers[$questionId]))) {
                          $isAnswered = true;
                          $studentAnswer = $essayAnswers[$questionId];
-                         // Essay questions need manual grading
-                         // For now, we can give partial credit or keep for manual review
-                         // You might want to implement automatic scoring based on keywords
-                         $earnedPoints = 0; // Will be updated during manual grading
+
+                         if (!empty($question->answer_key)) {
+                              $correctAnswer = trim($question->answer_key);
+                              $studentAnswerTrimmed = trim($studentAnswer);
+
+                              if (strcasecmp($studentAnswerTrimmed, $correctAnswer) === 0) {
+                                   $isCorrect = true;
+                                   $earnedPoints = $points;
+                              } else {
+                                   $similarity = $this->calculateAnswerSimilarity($studentAnswerTrimmed, $correctAnswer);
+
+                                   if ($similarity >= 100) {
+                                        $isCorrect = true;
+                                        $earnedPoints = $points;
+                                   } elseif ($similarity >= 80) {
+                                        $isCorrect = false;
+                                        $earnedPoints = $points * 0.8;
+                                   } elseif ($similarity >= 60) {
+                                        $isCorrect = false;
+                                        $earnedPoints = $points * 0.6;
+                                   } else {
+                                        $isCorrect = false;
+                                        $earnedPoints = 0;
+                                   }
+                              }
+                         } else {
+                              // If no answer key provided, essay needs manual grading
+                              $earnedPoints = 0;
+                         }
                     }
                     break;
           }
@@ -177,9 +222,99 @@ class ExamScoringService
                     if ($result['is_answered']) {
                          $scoreBreakdown['essay']['answered']++;
                     }
+                    if ($result['is_correct']) {
+                         $scoreBreakdown['essay']['correct'] = ($scoreBreakdown['essay']['correct'] ?? 0) + 1;
+                    }
                     $scoreBreakdown['essay']['score'] += $result['earned_points'];
                     break;
           }
+     }
+
+     /**
+      * Calculate similarity between student answer and correct answer
+      * 
+      * @param string $studentAnswer
+      * @param string $correctAnswer
+      * @return float Similarity percentage (0-100)
+      */
+     private function calculateAnswerSimilarity($studentAnswer, $correctAnswer)
+     {
+          // Normalize both answers
+          $studentAnswer = $this->normalizeText($studentAnswer);
+          $correctAnswer = $this->normalizeText($correctAnswer);
+
+          // If exact match after normalization, return 100%
+          if ($studentAnswer === $correctAnswer) {
+               return 100;
+          }
+
+          // Calculate similarity using multiple methods and take the highest score
+
+          // Method 1: Levenshtein distance (for short answers)
+          $levenshteinSimilarity = 0;
+          if (strlen($studentAnswer) < 255 && strlen($correctAnswer) < 255) {
+               $maxLength = max(strlen($studentAnswer), strlen($correctAnswer));
+               if ($maxLength > 0) {
+                    $distance = levenshtein($studentAnswer, $correctAnswer);
+                    $levenshteinSimilarity = (1 - ($distance / $maxLength)) * 100;
+               }
+          }
+
+          // Method 2: Word matching - check how many words from answer key are in student answer
+          $correctWords = array_filter(explode(' ', $correctAnswer));
+          $studentWords = array_filter(explode(' ', $studentAnswer));
+
+          if (count($correctWords) > 0) {
+               $matchedWords = 0;
+               foreach ($correctWords as $correctWord) {
+                    foreach ($studentWords as $studentWord) {
+                         // Check exact match or very similar words
+                         if ($correctWord === $studentWord) {
+                              $matchedWords++;
+                              break;
+                         } elseif (strlen($correctWord) > 3 && strlen($studentWord) > 3) {
+                              // For longer words, check if they are similar enough
+                              similar_text($correctWord, $studentWord, $percent);
+                              if ($percent >= 80) {
+                                   $matchedWords++;
+                                   break;
+                              }
+                         }
+                    }
+               }
+               $wordMatchSimilarity = ($matchedWords / count($correctWords)) * 100;
+          } else {
+               $wordMatchSimilarity = 0;
+          }
+
+          // Method 3: similar_text function
+          similar_text($studentAnswer, $correctAnswer, $percentSimilar);
+
+          // Return the highest similarity score from all methods
+          return max($levenshteinSimilarity, $wordMatchSimilarity, $percentSimilar);
+     }
+
+     /**
+      * Normalize text for comparison
+      * 
+      * @param string $text
+      * @return string
+      */
+     private function normalizeText($text)
+     {
+          // Convert to lowercase
+          $text = mb_strtolower($text, 'UTF-8');
+
+          // Remove extra whitespaces
+          $text = preg_replace('/\s+/', ' ', $text);
+
+          // Remove punctuation
+          $text = preg_replace('/[^\p{L}\p{N}\s]/u', '', $text);
+
+          // Trim
+          $text = trim($text);
+
+          return $text;
      }
 
      /**
