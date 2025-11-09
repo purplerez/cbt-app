@@ -75,6 +75,9 @@
                         <x-nav-link :href="route('kepala.school')" :active="request()->routeIs('kepala.school')">
                             {{ __('Data Madrasah') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('kepala.grades')" :active="request()->routeIs('kepala.grades')">
+                            {{ __('Data Kelas') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('kepala.students')" :active="request()->routeIs('kepala.students')">
                             {{ __('Data Siswa') }}
                         </x-nav-link>

@@ -18,8 +18,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 
 
 Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('api.admin.')->group(function () {
-    Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
-        ->name('exam.participants');
+    Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool'])
+        ->name('school.students');
     Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
         ->name('exam.participants');
     Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats'])
