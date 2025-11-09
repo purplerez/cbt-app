@@ -104,7 +104,7 @@ function fetchStudents(schoolId) {
 
 function updateStudentList(response) {
     const tbody = document.getElementById('student-list-body');
-    const examStatus =  session('perexamstatus') ;
+    const examStatus = window.examStatus;
     if (!tbody) return;
 
     tbody.innerHTML = '';

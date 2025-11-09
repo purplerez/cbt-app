@@ -973,6 +973,9 @@
             </script>
 
             <!-- Student List Management -->
+            <script>
+                window.examStatus = {{ session('perexamstatus') }};
+            </script>
             <script src="{{ asset('js/student-list.js') }}"></script>
             <!-- Exam Scores Management -->
             <script src="{{ asset('js/exam-scores.js') }}"></script>
