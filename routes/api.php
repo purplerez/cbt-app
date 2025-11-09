@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\ExamlogController;
 use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\ExamScoreController;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
 
 use Illuminate\Http\Request;
@@ -16,7 +17,9 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
-Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('api.admin.')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('api.admin.')->group(function () {
+    Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
+        ->name('exam.participants');
     Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
         ->name('exam.participants');
     Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats'])
@@ -39,6 +42,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
     // logs
     Route::get('/exam/{examId}/participant/{userId}/logs', [ExamController::class, 'getParticipantLogs'])
         ->name('exam.participant.logs');
+
+    Route::get('/exam/{exam}/scores', [ExamScoreController::class, 'getScores']);
 });
 
 

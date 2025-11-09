@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminController;
+use App\Http\Controllers\ExamScoreController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
 use App\Http\Controllers\Guru\DashboardController as GuruController;
@@ -39,6 +40,9 @@ Route::middleware('auth')->group(function () {
 // super admin page
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+
+    // Exam scores export
+    Route::get('/exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])->name('exam.scores.export');
 
     // Routing for schools management
     Route::get('schools', [SchoolController::class, 'index'])->name('schools');
@@ -129,6 +133,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
     Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
+
+    //Route for Scores
+    Route::get('exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])
+    ->name('exam.scores.export');
 
     // Route::get('students', [SchoolController::class, 'students'])->name('students');
 

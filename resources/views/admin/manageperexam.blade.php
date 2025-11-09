@@ -826,6 +826,58 @@
                                     </div>
                                 </div>
 
+                                <!-- Nilai Tab -->
+                                <div class="hidden tab-pane" id="nilaiujian">
+                                    <div class="bg-white rounded-lg shadow">
+                                        <div class="flex items-center justify-between p-4 border-b">
+                                            <h3 class="text-lg font-medium">Daftar Nilai Siswa</h3>
+                                            <div class="flex items-center space-x-2">
+                                                <select id="school_filter_nilai" class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                    <option value="">Semua Madrasah</option>
+                                                    @foreach($schools as $school)
+                                                        <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <select id="grade_filter_nilai" class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                    <option value="">Semua Kelas</option>
+                                                </select>
+                                                <form method="GET" action="{{ route('admin.exam.scores.export', ['exam' => $exam->id]) }}" class="inline">
+                                                    <input type="hidden" name="school_id" id="export_school_id">
+                                                    <input type="hidden" name="grade_id" id="export_grade_id">
+                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                        Export PDF
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div class="p-4">
+                                            <div class="overflow-x-auto">
+                                                <table class="min-w-full divide-y divide-gray-200">
+                                                    <thead class="bg-gray-50">
+                                                        <tr>
+                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                                NIS</th>
+                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                                Nama Lengkap</th>
+                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                                Kelas</th>
+                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                                Nilai</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="nilai-list-body" class="bg-white divide-y divide-gray-200">
+                                                        <tr>
+                                                            <td colspan="4" class="px-6 py-4 text-sm text-center text-gray-500">
+                                                                Pilih madrasah dan kelas untuk melihat nilai
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                         {{-- END OF MAIN CONTENT --}}
@@ -922,6 +974,8 @@
 
             <!-- Student List Management -->
             <script src="{{ asset('js/student-list.js') }}"></script>
+            <!-- Exam Scores Management -->
+            <script src="{{ asset('js/exam-scores.js') }}"></script>
             <!-- edit js -->
             <script>
                 // Preview functions for edit modals

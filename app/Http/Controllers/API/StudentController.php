@@ -121,8 +121,11 @@ class StudentController extends Controller
                 $query->where('school_id', $schoolId);
             }
 
-            $participants = $query->get()
-                ->map(function ($student) use ($examId) {
+            $perPage = max(1, (int) request()->query('per_page', 15));
+
+            $paginated = $query->paginate($perPage);
+
+            $participantsCollection = $paginated->getCollection()->map(function ($student) use ($examId) {
                     $lastSession = $student->user->examSessions
                         ->where('exam_id', $examId)
                         ->first();
@@ -144,11 +147,14 @@ class StudentController extends Controller
                             'ip' => $lastSession->ip_address
                         ] : null
                     ];
-                });
+            });
+
+            // replace collection with transformed items
+            $paginated->setCollection($participantsCollection);
 
             return response()->json([
                 'success' => true,
-                'data' => $participants
+                'data' => $paginated
             ]);
         } catch (\Exception $e) {
             return response()->json([
