@@ -19,8 +19,8 @@
                                 <p><span class="font-medium">Kelas:</span> {{ $session->student->grade->name }}</p>
                             </div>
                             <div>
-                                <p><span class="font-medium">Waktu Mulai:</span> {{ $session->started_at ?  $session->started_at->format('d M Y H:i:s') : '-'}}</p>
-                                <p><span class="font-medium">Waktu Selesai:</span> {{ $session->submited_at ? $session->submited_at->format('d M Y H:i:s') : 'Belum selesai' }}</p>
+                                <p><span class="font-medium">Waktu :</span> {{ $session->started_at ?  $session->started_at->format('d M Y H:i:s') : '-'}} s/d {{ $session->submited_at ? $session->submited_at->format('d M Y H:i:s') : 'Belum selesai' }}</p>
+                                {{-- <p><span class="font-medium">Waktu Selesai:</span> </p> --}}
                                 <p><span class="font-medium">Status:</span>
                                     @if($session->status == 'submited')
                                         <span class="text-green-600">Selesai</span>
@@ -28,6 +28,7 @@
                                         <span class="text-yellow-600">Sedang Mengerjakan</span>
                                     @endif
                                 </p>
+                                <p></p><span class="font-medium">Total Nilai:</span> {{ isset($points_awarded) ? number_format($points_awarded, 2, ',', '.') : '0' }} / {{ isset($points_total) ? number_format($points_total, 2, ',', '.') : '0' }} <span class="font-bold text-gray-950">({{ isset($percentage) ? number_format($percentage, 2, ',', '.') : '0' }}%)</span></p>
                             </div>
                         </div>
                     </div>
@@ -104,7 +105,7 @@
                                                 @endphp
                                                 <span>
                                                     {{ (floor($aw) == $aw) ? (int)$aw : number_format($aw, 2, ',', '.') }}
-                                                    / 
+                                                    /
                                                     {{ (floor($pp) == $pp) ? (int)$pp : number_format($pp, 2, ',', '.') }}
                                                 </span>
                                             </td>

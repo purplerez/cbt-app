@@ -25,6 +25,11 @@ class ExamSessionDetailController extends Controller
                 ->orderBy('id')
                 ->get();
 
+            // add the total score of all the questions
+            $totalScore = $questions->sum(function ($question) {
+                return is_numeric($question->points) ? (float)$question->points : 0.0;
+            });
+
             // Process each question. Note: Question model uses `question_type_id` and relation `questionType()`
             foreach ($questions as $question) {
                 $questionId = (string)$question->id; // JSON keys are strings
@@ -49,6 +54,7 @@ class ExamSessionDetailController extends Controller
                 $isCorrect = null;
                 $pointsPossible = is_numeric($question->points) ? (float)$question->points : 0.0;
                 $pointsAwarded = 0.0;
+                $totalPoints = 0.0;
 
                 // Scoring rules:
                 // - Types 0 (MC single), 2 (True/False), 3 (Essay): full points if answer equals key
@@ -124,11 +130,19 @@ class ExamSessionDetailController extends Controller
                     'points_possible' => $pointsPossible,
                 ];
             }
+            // sums all awarded points
+            $totalPoints = array_sum(array_map(fn($a) => $a['points_awarded'], $answers));
+            $percentage = ($totalScore > 0) ? ($totalPoints / $totalScore) * 100 : 0;
         }
+
+        // dd($answers, $totalPoints, $totalScore );
 
         return view('admin.exam-session-detail', [
             'session' => $examSession,
-            'answers' => $answers
+            'answers' => $answers,
+            'points_total' => $totalScore,
+            'points_awarded' => $totalPoints,
+            'percentage' => $percentage,
             // 'questions' =>
 
         ]);
