@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Grade;
+use App\Models\School;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -13,6 +14,8 @@ class GradeSeeder extends Seeder
       */
      public function run(): void
      {
+        $schools = School::all();
+
           $grades = [
                'Kelas 1',
                'Kelas 2',
@@ -29,7 +32,10 @@ class GradeSeeder extends Seeder
           ];
 
           foreach ($grades as $grade) {
-               Grade::firstOrCreate(['name' => $grade]);
+               Grade::firstOrCreate([
+                'name' => $grade,
+                'school_id' => $schools->random()->id
+            ]);
           }
      }
 }
