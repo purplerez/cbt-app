@@ -114,54 +114,73 @@ class StudentController extends Controller
     {
         try {
             $schoolId = request()->query('school_id');
+            $perPage = max(1, (int) request()->query('per_page', 15));
 
-            $query = Student::with(['grade', 'user', 'user.examSessions' => function ($query) use ($examId) {
-                $query->where('exam_id', $examId)
-                    ->orderBy('updated_at', 'desc');
-            }])
+            // --- 1️⃣ Dapatkan siswa dari preassigneds (belum mulai ujian)
+            $preassignedQuery = Student::with(['grade', 'user'])
                 ->whereHas('user.preassigned', function ($query) use ($examId) {
                     $query->where('exam_id', $examId);
                 });
 
             if ($schoolId) {
-                $query->where('school_id', $schoolId);
+                $preassignedQuery->where('school_id', $schoolId);
             }
 
-            $perPage = max(1, (int) request()->query('per_page', 15));
+            // --- 2️⃣ Dapatkan siswa dari exam_sessions (sudah mulai / selesai ujian)
+            $examSessionQuery = Student::with(['grade', 'user', 'user.examSessions' => function ($query) use ($examId) {
+                $query->where('exam_id', $examId)
+                    ->orderBy('updated_at', 'desc');
+            }])
+                ->whereHas('user.examSessions', function ($query) use ($examId) {
+                    $query->where('exam_id', $examId);
+                });
 
-            $paginated = $query->paginate($perPage);
+            if ($schoolId) {
+                $examSessionQuery->where('school_id', $schoolId);
+            }
 
-            $participantsCollection = $paginated->getCollection()->map(function ($student) use ($examId) {
-                    $lastSession = $student->user->examSessions
-                        ->where('exam_id', $examId)
-                        ->first();
+            // --- 3️⃣ Gabungkan dua sumber data (union)
+            $students = $preassignedQuery->get()->merge($examSessionQuery->get())->unique('id');
 
-                    return [
-                        'id' => $student->id,
-                        'user_id' => $student->user_id,
-                        'nis' => $student->nis,
-                        'name' => $student->name,
-                        'grade' => $student->grade->name,
-                        'exam_session_id' => $lastSession ? $lastSession->id : null,
-                        'last_activity' => $lastSession ? [
-                            'status' => $lastSession->status,
-                            'start_time' => $lastSession->started_at,
-                            'submit_time' => $lastSession->submited_at,
-                            'time_remaining' => $lastSession->time_remaining,
-                            'score' => $lastSession->total_score,
-                            'attempt' => $lastSession->attempt_number,
-                            'ip' => $lastSession->ip_address
-                        ] : null
-                    ];
-            });
+            // --- 4️⃣ Transform data menjadi response JSON
+            $participants = $students->map(function ($student) use ($examId) {
+                $lastSession = $student->user->examSessions
+                    ->where('exam_id', $examId)
+                    ->sortByDesc('updated_at')
+                    ->first();
 
-            // replace collection with transformed items
-            $paginated->setCollection($participantsCollection);
+                return [
+                    'id' => $student->id,
+                    'user_id' => $student->user_id,
+                    'nis' => $student->nis,
+                    'name' => $student->name,
+                    'grade' => $student->grade->name ?? '-',
+                    'exam_session_id' => $lastSession?->id,
+                    'last_activity' => $lastSession ? [
+                        'status' => $lastSession->status,
+                        'start_time' => $lastSession->started_at,
+                        'submit_time' => $lastSession->submited_at,
+                        'time_remaining' => $lastSession->time_remaining,
+                        'score' => $lastSession->total_score,
+                        'attempt' => $lastSession->attempt_number,
+                        'ip' => $lastSession->ip_address
+                    ] : null
+                ];
+            })->values();
+
+            // --- 5️⃣ Pagination manual
+            $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+                $participants->forPage(request('page', 1), $perPage),
+                $participants->count(),
+                $perPage,
+                request('page', 1)
+            );
 
             return response()->json([
                 'success' => true,
                 'data' => $paginated
             ]);
+
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -169,6 +188,7 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
 
     public function getExamStats($examId)
     {
