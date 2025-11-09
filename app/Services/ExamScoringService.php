@@ -13,18 +13,25 @@ use Illuminate\Support\Facades\Log;
  * Service untuk menghitung skor ujian dengan dukungan penilaian otomatis
  * untuk semua tipe soal termasuk essay.
  * 
- * Fitur Auto-Scoring Essay:
- * - Kesamaan 100%: Mendapat poin penuh (full points)
- * - Kesamaan 80-99%: Mendapat 80% dari poin penuh
- * - Kesamaan 60-79%: Mendapat 60% dari poin penuh
- * - Kesamaan <60%: Tidak mendapat poin (0)
+ * Fitur Auto-Scoring Essay (Keyword-Based):
+ * - Sistem akan mengecek apakah SEMUA keyword dari answer_key ada di jawaban siswa
+ * - Tidak peduli urutan kata, case sensitivity (UPPER/lower/CamelCase), atau ada kalimat tambahan
+ * - Jika SEMUA keyword ditemukan: Dapat poin PENUH ✅
+ * - Jika ada keyword yang hilang: Tidak dapat poin (0) ❌
  * 
- * Metode perhitungan similarity:
- * 1. Levenshtein distance (untuk jawaban pendek)
- * 2. Word matching (mencocokkan kata-kata kunci)
- * 3. PHP similar_text function
+ * Contoh:
+ * Answer Key: "Jakarta ibukota Indonesia"
+ * ✅ "Jakarta adalah ibukota negara Indonesia" → BENAR (dapat poin penuh)
+ * ✅ "Ibukota Indonesia adalah Jakarta" → BENAR (dapat poin penuh)
+ * ✅ "JAKARTA merupakan IBUKOTA dari INDONESIA" → BENAR (dapat poin penuh)
+ * ❌ "Jakarta adalah kota besar" → SALAH (keyword "ibukota" dan "indonesia" tidak ada)
  * 
- * @version 2.0 - Auto-scoring essay implemented
+ * Metode perhitungan:
+ * - Keyword matching dengan normalisasi text (lowercase, remove punctuation)
+ * - Persentase = (jumlah keyword yang ditemukan / total keyword) * 100
+ * - 100% = semua keyword ada = dapat poin penuh
+ * 
+ * @version 2.1 - Keyword-based essay scoring implemented
  * @date November 9, 2025
  */
 class ExamScoringService
@@ -137,32 +144,21 @@ class ExamScoringService
                          $isAnswered = true;
                          $studentAnswer = $essayAnswers[$questionId];
 
+                         // Auto-scoring for essay based on keyword matching
                          if (!empty($question->answer_key)) {
                               $correctAnswer = trim($question->answer_key);
                               $studentAnswerTrimmed = trim($studentAnswer);
 
-                              if (strcasecmp($studentAnswerTrimmed, $correctAnswer) === 0) {
+                              $keywordMatch = $this->calculateAnswerSimilarity($studentAnswerTrimmed, $correctAnswer);
+
+                              if ($keywordMatch >= 100) {
                                    $isCorrect = true;
                                    $earnedPoints = $points;
                               } else {
-                                   $similarity = $this->calculateAnswerSimilarity($studentAnswerTrimmed, $correctAnswer);
-
-                                   if ($similarity >= 100) {
-                                        $isCorrect = true;
-                                        $earnedPoints = $points;
-                                   } elseif ($similarity >= 80) {
-                                        $isCorrect = false;
-                                        $earnedPoints = $points * 0.8;
-                                   } elseif ($similarity >= 60) {
-                                        $isCorrect = false;
-                                        $earnedPoints = $points * 0.6;
-                                   } else {
-                                        $isCorrect = false;
-                                        $earnedPoints = 0;
-                                   }
+                                   $isCorrect = false;
+                                   $earnedPoints = 0;
                               }
                          } else {
-                              // If no answer key provided, essay needs manual grading
                               $earnedPoints = 0;
                          }
                     }
@@ -177,15 +173,6 @@ class ExamScoringService
           ];
      }
 
-     /**
-      * Update score breakdown by question type
-      * 
-      * @param array &$scoreBreakdown
-      * @param int $questionType
-      * @param float $points
-      * @param array $result
-      * @return void
-      */
      private function updateScoreBreakdown(&$scoreBreakdown, $questionType, $points, $result)
      {
           switch ($questionType) {
@@ -230,68 +217,34 @@ class ExamScoringService
           }
      }
 
-     /**
-      * Calculate similarity between student answer and correct answer
-      * 
-      * @param string $studentAnswer
-      * @param string $correctAnswer
-      * @return float Similarity percentage (0-100)
-      */
      private function calculateAnswerSimilarity($studentAnswer, $correctAnswer)
      {
-          // Normalize both answers
-          $studentAnswer = $this->normalizeText($studentAnswer);
-          $correctAnswer = $this->normalizeText($correctAnswer);
+          // Normalize both answers (lowercase, remove extra spaces and punctuation)
+          $studentAnswerNormalized = $this->normalizeText($studentAnswer);
+          $correctAnswerNormalized = $this->normalizeText($correctAnswer);
 
-          // If exact match after normalization, return 100%
-          if ($studentAnswer === $correctAnswer) {
+          if ($studentAnswerNormalized === $correctAnswerNormalized) {
                return 100;
           }
 
-          // Calculate similarity using multiple methods and take the highest score
+          $keywords = array_filter(explode(' ', $correctAnswerNormalized));
 
-          // Method 1: Levenshtein distance (for short answers)
-          $levenshteinSimilarity = 0;
-          if (strlen($studentAnswer) < 255 && strlen($correctAnswer) < 255) {
-               $maxLength = max(strlen($studentAnswer), strlen($correctAnswer));
-               if ($maxLength > 0) {
-                    $distance = levenshtein($studentAnswer, $correctAnswer);
-                    $levenshteinSimilarity = (1 - ($distance / $maxLength)) * 100;
+          if (empty($keywords)) {
+               return 0;
+          }
+
+          $matchedKeywords = 0;
+          $totalKeywords = count($keywords);
+
+          foreach ($keywords as $keyword) {
+               if (strpos($studentAnswerNormalized, $keyword) !== false) {
+                    $matchedKeywords++;
                }
           }
 
-          // Method 2: Word matching - check how many words from answer key are in student answer
-          $correctWords = array_filter(explode(' ', $correctAnswer));
-          $studentWords = array_filter(explode(' ', $studentAnswer));
+          $matchPercentage = ($matchedKeywords / $totalKeywords) * 100;
 
-          if (count($correctWords) > 0) {
-               $matchedWords = 0;
-               foreach ($correctWords as $correctWord) {
-                    foreach ($studentWords as $studentWord) {
-                         // Check exact match or very similar words
-                         if ($correctWord === $studentWord) {
-                              $matchedWords++;
-                              break;
-                         } elseif (strlen($correctWord) > 3 && strlen($studentWord) > 3) {
-                              // For longer words, check if they are similar enough
-                              similar_text($correctWord, $studentWord, $percent);
-                              if ($percent >= 80) {
-                                   $matchedWords++;
-                                   break;
-                              }
-                         }
-                    }
-               }
-               $wordMatchSimilarity = ($matchedWords / count($correctWords)) * 100;
-          } else {
-               $wordMatchSimilarity = 0;
-          }
-
-          // Method 3: similar_text function
-          similar_text($studentAnswer, $correctAnswer, $percentSimilar);
-
-          // Return the highest similarity score from all methods
-          return max($levenshteinSimilarity, $wordMatchSimilarity, $percentSimilar);
+          return $matchPercentage;
      }
 
      /**
