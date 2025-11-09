@@ -12,8 +12,9 @@
                     <!-- Student Information -->
                     <div class="p-4 mb-6 rounded-lg bg-gray-50">
                         <h3 class="mb-2 text-lg font-semibold">Informasi Siswa</h3>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
+                        <div class="grid grid-cols-2 gap-2">
+
+                            <div class="">
                                 <p><span class="font-medium">Nama:</span> {{ $session->student->name }}</p>
                                 <p><span class="font-medium">NIS:</span> {{ $session->student->nis }}</p>
                                 <p><span class="font-medium">Kelas:</span> {{ $session->student->grade->name }}</p>
