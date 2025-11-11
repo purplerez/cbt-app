@@ -46,9 +46,11 @@ class KepalaExamController extends Controller
                 throw new \Exception('Ujian Tidak ditemukan');
             }
 
+            $schoolId = session('school_id');
             $mapels = Exam::where('exam_type_id', session('exam_id'))->get();
+            $grades = Grade::where('school_id', $schoolId)->get();
 
-            return view('kepala.manageexam', compact('mapels'));
+            return view('kepala.manageexam', compact('mapels', 'grades'));
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Tidak bisa melakukan manage Ujian :' . $e->getMessage()]);
         }
@@ -57,10 +59,11 @@ class KepalaExamController extends Controller
     /**
      * Return JSON list of exam sessions (scores) for a given exam filtered by current school in session
      */
-    public function scores(Exam $exam)
+    public function scores(Request $request, Exam $exam)
     {
         try {
             $schoolId = session('school_id');
+            $gradeId = $request->query('grade_id');
 
             if (!$schoolId) {
                 return response()->json(['error' => 'School not found in session'], 400);
@@ -68,8 +71,11 @@ class KepalaExamController extends Controller
 
             $sessions = ExamSession::with(['user.student'])
                 ->where('exam_id', $exam->id)
-                ->whereHas('user.student', function ($q) use ($schoolId) {
+                ->whereHas('user.student', function ($q) use ($schoolId, $gradeId) {
                     $q->where('school_id', $schoolId);
+                    if ($gradeId) {
+                        $q->where('grade_id', $gradeId);
+                    }
                 })
                 ->get();
 

@@ -581,4 +581,87 @@ class DashboardController extends Controller
 
         return 'admin';
     }
+
+    public function gradeAll()
+    {
+        $school_id = $this->getSchoolId();
+        $grades = Grade::where('school_id', $school_id)->get();
+        return view('kepala.view_grades', compact('grades'));
+    }
+
+    public function gradeCreate()
+    {
+        return view('kepala.inputgrades');
+    }
+
+    public function gradeStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'school_id' => 'nullable|exists:schools,id',
+        ]);
+
+        try{
+// dd($validated);
+
+        $grader = Grade::create([
+            'name' => $validated['name'],
+            'school_id' => $validated['school_id'],
+        ]);
+
+        if(!$grader){
+            throw new \Exception('Gagal Menambahkan Data Tingkat');
+        }
+
+        $user = auth()->user();
+        logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menambahkan Data Tingkat : ' . $validated['name']);
+
+        return redirect()->route('kepala.grades')->with('success', 'Data tingkat berhasil ditambahkan');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Input Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function gradeEdit(Grade $grade)
+    {
+        return view('kepala.editgrade', compact('grade'));
+    }
+
+    public function gradeUpdate(Request $request){
+        $validated = $request->validate([
+            'id' => 'required|exists:grades,id',
+            'name' => 'required|string|max:255',
+        ]);
+        try{
+        $grade = Grade::findOrFail($validated['id']);
+        $grade->update([
+            'name' => $validated['name'],
+        ]);
+
+        $user = auth()->user();
+        logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Tingkat : ' . $validated['name']);
+
+        return redirect()->route('kepala.grades')->with('success', 'Data tingkat berhasil diubah');
+        }
+        catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function gradeDestroy($id)
+    {
+        try {
+            $grade = Grade::findOrFail($id);
+            $gradeName = $grade->name;
+            $grade->delete();
+
+            $user = auth()->user();
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menghapus Data Tingkat : ' . $gradeName);
+
+            return redirect()->route('kepala.grades')->with('success', 'Data tingkat berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
+        }
+    }
 }
