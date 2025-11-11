@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Question;
 use App\Models\ExamSession;
 use App\Models\StudentAnswer;
+use App\Helpers\AnswerKeyHelper;
 use Illuminate\Support\Facades\Log;
 
 class ExamScoringService
@@ -97,18 +98,35 @@ class ExamScoringService
           $studentAnswer = null;
 
           switch ($questionType) {
-               case 0: // Multiple Choice
-               case 1: // Complex Multiple Choice
+               case 0: // Multiple Choice (Single Answer)
                case 2: // True/False
-                    if (isset($answers[$questionId]) && !empty(trim($answers[$questionId]))) {
+                    if (isset($answers[$questionId]) && $answers[$questionId] !== null && $answers[$questionId] !== '') {
                          $isAnswered = true;
-                         $studentAnswer = trim(strtoupper($answers[$questionId]));
-                         $correctAnswer = trim(strtoupper($question->answer_key));
+                         $studentAnswer = $answers[$questionId];
 
-                         if ($studentAnswer === $correctAnswer) {
-                              $isCorrect = true;
+                         // Normalize both answers to letter format and compare
+                         $isCorrect = AnswerKeyHelper::compareAnswers($studentAnswer, $question->answer_key);
+
+                         if ($isCorrect) {
                               $earnedPoints = $points;
                          }
+                    }
+                    break;
+
+               case 1: // Complex Multiple Choice (Multiple Answers)
+                    if (isset($answers[$questionId]) && !empty($answers[$questionId])) {
+                         $isAnswered = true;
+                         $studentAnswer = $answers[$questionId];
+
+                         // Calculate partial score for complex multiple choice
+                         $scoreResult = AnswerKeyHelper::calculatePartialScore(
+                              $studentAnswer,
+                              $question->answer_key,
+                              $points
+                         );
+
+                         $earnedPoints = $scoreResult['points'];
+                         $isCorrect = $scoreResult['is_correct'];
                     }
                     break;
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExamSession;
 use App\Models\StudentAnswer;
 use App\Models\Question;
+use App\Helpers\AnswerKeyHelper;
 use Illuminate\Http\Request;
 
 class ExamSessionDetailController extends Controller
@@ -56,61 +57,34 @@ class ExamSessionDetailController extends Controller
                 $pointsAwarded = 0.0;
                 $totalPoints = 0.0;
 
-                // Scoring rules:
+                // Scoring rules using AnswerKeyHelper for consistency
                 // - Types 0 (MC single), 2 (True/False), 3 (Essay): full points if answer equals key
                 // - Type 1 (MC complex): points are split by number of correct answers in key
                 $qtype = (int)$question->question_type_id;
 
                 if ($qtype === 1) {
-                    // complex MC: parse correct answers as array
-                    $rawKey = $question->answer_key;
-                    $correctAnswers = [];
-                    if ($rawKey !== null && $rawKey !== '') {
-                        $decoded = json_decode($rawKey, true);
-                        if (is_array($decoded)) {
-                            $correctAnswers = $decoded;
-                        } else {
-                            // try comma-separated
-                            $correctAnswers = array_map('trim', explode(',', (string)$rawKey));
-                        }
+                    // Complex Multiple Choice: calculate partial score
+                    if ($answer !== null && $answer !== '') {
+                        $scoreResult = AnswerKeyHelper::calculatePartialScore(
+                            $answer,
+                            $question->answer_key,
+                            $pointsPossible
+                        );
+
+                        $pointsAwarded = $scoreResult['points'];
+                        $isCorrect = $scoreResult['is_correct'];
+                    } else {
+                        $isCorrect = null;
+                        $pointsAwarded = 0.0;
                     }
-
-                    // normalize to strings
-                    $correctAnswers = array_map('strval', array_filter($correctAnswers, fn($v) => $v !== '' && $v !== null));
-                    $correctCount = count($correctAnswers);
-
-                    // student answers as array
-                    $studentAnswers = [];
-                    if (is_array($answer)) {
-                        $studentAnswers = array_map('strval', $answer);
-                    } elseif ($answer !== null && $answer !== '') {
-                        // if stored as comma-separated string
-                        $studentAnswers = array_map('trim', explode(',', (string)$answer));
-                        $studentAnswers = array_map('strval', $studentAnswers);
-                    }
-
-                    // count matches (unique)
-                    $matches = array_intersect($correctAnswers, $studentAnswers);
-                    $matchedCount = count(array_unique($matches));
-
-                    $perAnswerPoint = $correctCount > 0 ? ($pointsPossible / $correctCount) : 0.0;
-                    $pointsAwarded = $perAnswerPoint * $matchedCount;
-
-                    // mark correctness if full match
-                    $isCorrect = ($correctCount > 0 && $matchedCount === $correctCount);
                 } elseif (in_array($qtype, [0, 2, 3], true)) {
-                    // single-answer objective types and essay (as requested): compare key
-                    if ($answer === null) {
+                    // Single-answer types (MC Single, True/False, Essay)
+                    if ($answer === null || $answer === '') {
                         $isCorrect = null;
                         $pointsAwarded = 0.0;
                     } else {
-                        if (is_array($answer)) {
-                            // if array, check if any matches
-                            $found = in_array((string)$question->answer_key, array_map('strval', $answer), true);
-                            $isCorrect = $found;
-                        } else {
-                            $isCorrect = ((string)$answer === (string)$question->answer_key);
-                        }
+                        // Use AnswerKeyHelper to normalize and compare answers
+                        $isCorrect = AnswerKeyHelper::compareAnswers($answer, $question->answer_key);
                         $pointsAwarded = $isCorrect ? $pointsPossible : 0.0;
                     }
                 }
