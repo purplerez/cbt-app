@@ -7,33 +7,6 @@ use App\Models\ExamSession;
 use App\Models\StudentAnswer;
 use Illuminate\Support\Facades\Log;
 
-/**
- * ExamScoringService
- * 
- * Service untuk menghitung skor ujian dengan dukungan penilaian otomatis
- * untuk semua tipe soal termasuk essay.
- * 
- * Fitur Auto-Scoring Essay (Keyword-Based):
- * - Sistem akan mengecek apakah SEMUA keyword dari answer_key ada di jawaban siswa
- * - Tidak peduli urutan kata, case sensitivity (UPPER/lower/CamelCase), atau ada kalimat tambahan
- * - Jika SEMUA keyword ditemukan: Dapat poin PENUH ✅
- * - Jika ada keyword yang hilang: Tidak dapat poin (0) ❌
- * 
- * Contoh:
- * Answer Key: "Jakarta ibukota Indonesia"
- * ✅ "Jakarta adalah ibukota negara Indonesia" → BENAR (dapat poin penuh)
- * ✅ "Ibukota Indonesia adalah Jakarta" → BENAR (dapat poin penuh)
- * ✅ "JAKARTA merupakan IBUKOTA dari INDONESIA" → BENAR (dapat poin penuh)
- * ❌ "Jakarta adalah kota besar" → SALAH (keyword "ibukota" dan "indonesia" tidak ada)
- * 
- * Metode perhitungan:
- * - Keyword matching dengan normalisasi text (lowercase, remove punctuation)
- * - Persentase = (jumlah keyword yang ditemukan / total keyword) * 100
- * - 100% = semua keyword ada = dapat poin penuh
- * 
- * @version 2.1 - Keyword-based essay scoring implemented
- * @date November 9, 2025
- */
 class ExamScoringService
 {
      /**
