@@ -114,7 +114,7 @@ class StudentController extends Controller
     {
         try {
             $schoolId = request()->query('school_id');
-            $perPage = max(1, (int) request()->query('per_page', 15));
+            $perPage = max(1, (int) request()->query('per_page', 60));
 
             // --- 1️⃣ Dapatkan siswa dari preassigneds (belum mulai ujian)
             $preassignedQuery = Student::with(['grade', 'user'])
