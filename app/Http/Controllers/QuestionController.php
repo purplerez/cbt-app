@@ -28,7 +28,6 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-        dd($request->all());
         // dd($request->all());
         try {
             $choices = $request->input('choices', []);
@@ -74,10 +73,7 @@ class QuestionController extends Controller
 
                 $validated = $request->validate($rules, $messages);
                 $validated['choices'] = json_encode($validated['choices']);
-
-                // No need to encode answer_key here - the Model mutator will handle conversion
-                // Just pass the array as-is, mutator will convert indices to letters
-                // Leave as array for mutator to process
+                $validated['answer_key'] = json_encode($validated['answer_key']);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
@@ -176,10 +172,7 @@ class QuestionController extends Controller
                     'points' => 'required|numeric|min:1'
                 ]);
                 $validated['choices'] = json_encode($validated['choices']);
-
-                // No need to encode answer_key here - the Model mutator will handle conversion
-                // Just pass the array as-is, mutator will convert indices to letters
-                // Leave as array for mutator to process
+                $validated['answer_key'] = json_encode($validated['answer_key']);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
