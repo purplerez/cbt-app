@@ -98,7 +98,7 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                                {{ $answer['correct_answer'] }}
+                                               {{ is_array($answer['correct_answer']) ? json_encode($answer['correct_answer']) : $answer['correct_answer'] }}
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 @php
