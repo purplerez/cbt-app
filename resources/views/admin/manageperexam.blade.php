@@ -397,7 +397,8 @@
                                                                                                                             class="block text-xs font-medium text-gray-600"
                                                                                                                             for="gambar_pilihan">Gambar
                                                                                                                             Pilihan
-                                                                                                                            (Opsional)</label>
+                                                                                                                            (Opsional)
+                                                                                                                        </label>
                                                                                                                         @if (isset($choicesImages[$key]))
                                                                                                                             <div
                                                                                                                                 class="mb-1">
@@ -434,7 +435,7 @@
                                                                                                                 <button
                                                                                                                     type="button"
                                                                                                                     class="mt-1 text-red-500 hover:text-red-700"
-                                                                                                                    onclick="this.closest('.edit-choice-item').remove(); initEditForm({{ $q->id }}, null, {{ $q->answer_key }})">
+                                                                                                                    onclick="this.closest('.edit-choice-item').remove(); initEditForm({{ $q->id }}, null, {{ is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key }})">
                                                                                                                     <svg class="w-4 h-4"
                                                                                                                         fill="none"
                                                                                                                         viewBox="0 0 24 24"
@@ -465,15 +466,15 @@
                                                                                                 Jawaban</label>
                                                                                             <div
                                                                                                 id="edit-answer-key-container-{{ $q->id }}">
-                                                                                                @if (is_array(json_decode($q->answer_key)))
+                                                                                                @if (is_array(json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)))
                                                                                                     @foreach (json_decode($q->choices, true) as $key => $choice)
                                                                                                         <div
                                                                                                             class="flex items-center gap-2">
                                                                                                             <input
-                                                                                                                type="{{ count(json_decode($q->answer_key)) > 1 ? 'checkbox' : 'radio' }}"
+                                                                                                                type="{{ count(json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)) > 1 ? 'checkbox' : 'radio' }}"
                                                                                                                 name="answer_key[]"
                                                                                                                 value="{{ $key }}"
-                                                                                                                {{ in_array($key, json_decode($q->answer_key)) ? 'checked' : '' }}>
+                                                                                                                {{ in_array($key, json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)) ? 'checked' : '' }}>
                                                                                                             <span>{{ $choice }}</span>
                                                                                                         </div>
                                                                                                     @endforeach
@@ -1041,10 +1042,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                        ${examstatus == 0 ? 'disabled' : ''}
-                                        >
-                                                        Tambah ke Ujian
-                                                    </button>`
+                                                    ${examstatus == 0 ? 'disabled' : ''}
+                                                    >
+                                                                    Tambah ke Ujian
+                                                                </button>`
                         }
                     </td>
                 `;
