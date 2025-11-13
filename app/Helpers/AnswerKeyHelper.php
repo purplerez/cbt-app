@@ -29,7 +29,47 @@ class AnswerKeyHelper
      public static function letterToIndex($letter)
      {
           $letter = strtoupper(trim($letter));
+
+          // Handle True/False
+          if ($letter === 'T') {
+               return 0;
+          }
+          if ($letter === 'F') {
+               return 1;
+          }
+
           return ord($letter) - 65; // 65 is ASCII for 'A'
+     }
+
+     /**
+      * Convert answer key from letter format to index format
+      * Used for frontend compatibility or when indices are needed
+      * 
+      * @param mixed $answerKey - Can be string, array, or JSON string
+      * @return int|array - Answer key in index format
+      */
+     public static function letterToIndexFormat($answerKey)
+     {
+          // Handle null or empty
+          if ($answerKey === null || $answerKey === '') {
+               return null;
+          }
+
+          // If it's a JSON string, decode it first
+          if (is_string($answerKey) && (strpos($answerKey, '[') === 0)) {
+               $decoded = json_decode($answerKey, true);
+               if (json_last_error() === JSON_ERROR_NONE) {
+                    $answerKey = $decoded;
+               }
+          }
+
+          // Handle array
+          if (is_array($answerKey)) {
+               return array_map([self::class, 'letterToIndex'], $answerKey);
+          }
+
+          // Handle single value
+          return self::letterToIndex($answerKey);
      }
 
      /**
@@ -37,9 +77,10 @@ class AnswerKeyHelper
       * Handles both index-based and letter-based answer keys
       * 
       * @param mixed $answerKey - Can be string, array, or JSON string
+      * @param int|null $questionType - Question type for True/False conversion
       * @return string|array - Normalized answer key in letter format
       */
-     public static function normalizeAnswerKey($answerKey)
+     public static function normalizeAnswerKey($answerKey, $questionType = null)
      {
           // Handle null or empty (but not 0 which is valid index)
           if ($answerKey === null || $answerKey === '') {
@@ -59,7 +100,12 @@ class AnswerKeyHelper
                $normalized = [];
                foreach ($answerKey as $key) {
                     if (is_numeric($key)) {
-                         $normalized[] = self::indexToLetter((int)$key);
+                         // For True/False (type 2), convert 0 to T, 1 to F
+                         if ($questionType == 2) {
+                              $normalized[] = $key == 0 ? 'T' : 'F';
+                         } else {
+                              $normalized[] = self::indexToLetter((int)$key);
+                         }
                     } else {
                          $normalized[] = strtoupper(trim($key));
                     }
@@ -77,6 +123,10 @@ class AnswerKeyHelper
 
           // Handle single value (string or number)
           if (is_numeric($answerKey)) {
+               // For True/False (type 2), convert 0 to T, 1 to F
+               if ($questionType == 2) {
+                    return $answerKey == 0 ? 'T' : 'F';
+               }
                return self::indexToLetter((int)$answerKey);
           }
 

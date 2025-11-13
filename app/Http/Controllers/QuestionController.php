@@ -26,24 +26,23 @@ class QuestionController extends Controller
         return view('admin.view_questiontypes', compact('types'));
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         // dd($request->all());
-        try{
+        try {
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
 
             // type : 0 pilihan ganda, 1 pilihan ganda kompleks
             // type : 2 benar salah, 3 esai
-            if(is_array($choices) && count($choices) > 2){
-                if(count($answerKey) > 1){
+            if (is_array($choices) && count($choices) > 2) {
+                if (count($answerKey) > 1) {
                     $type = '1';
-                }
-                else {
+                } else {
                     $type = '0';
                 }
-            }
-            else if(is_array($choices) && count($choices) == 2){
-                if(count($answerKey) == 1){
+            } else if (is_array($choices) && count($choices) == 2) {
+                if (count($answerKey) == 1) {
                     $type = '2';
                 }
             }
@@ -52,7 +51,7 @@ class QuestionController extends Controller
                 $type = '3';
             }
 
-            if($type != 3) {
+            if ($type != 3) {
                 $rules = [
                     'question_text' => 'required_without:question_image|string|nullable',
                     'question_image' => 'required_without:question_text|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -74,9 +73,11 @@ class QuestionController extends Controller
 
                 $validated = $request->validate($rules, $messages);
                 $validated['choices'] = json_encode($validated['choices']);
-                $validated['answer_key'] = json_encode($validated['answer_key']);
-            }
-            else {
+
+                // No need to encode answer_key here - the Model mutator will handle conversion
+                // Just pass the array as-is, mutator will convert indices to letters
+                // Leave as array for mutator to process
+            } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -119,45 +120,41 @@ class QuestionController extends Controller
 
             $role = auth()->user()->getRoleNames()->first();
 
-            if(!isset($roleRoutes[$role])) {
-                throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menambah ujian');
             }
 
             Question::create($validated);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Membuat Soal Baru'.session('perexamname'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Membuat Soal Baru' . session('perexamname'));
 
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil ditambahkan. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
-
-        }
-        catch (\Exception $e){
-            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal menambahkan soal : '.$e->getMessage()]);
-
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal menambahkan soal : ' . $e->getMessage()]);
         }
     }
 
-    public function update(Request $request, $exam){
+    public function update(Request $request, $exam)
+    {
         // dd($request->all());
         DB::beginTransaction();
-        try{
+        try {
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
             $type = '';
 
             // type : 0 pilihan ganda, 1 pilihan ganda kompleks
             // type : 2 benar salah, 3 esai
-            if(is_array($choices) && count($choices) > 2){
-                if(count($answerKey) > 1){
+            if (is_array($choices) && count($choices) > 2) {
+                if (count($answerKey) > 1) {
                     $type = '1';
-                }
-                else {
+                } else {
                     $type = '0';
                 }
-            }
-            else if(is_array($choices) && count($choices) == 2){
-                if(count($answerKey) == 1){
+            } else if (is_array($choices) && count($choices) == 2) {
+                if (count($answerKey) == 1) {
                     $type = '2';
                 }
             }
@@ -166,7 +163,7 @@ class QuestionController extends Controller
                 $type = '3';
             }
 
-            if($type != '3') {
+            if ($type != '3') {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -178,9 +175,11 @@ class QuestionController extends Controller
                     'points' => 'required|numeric|min:1'
                 ]);
                 $validated['choices'] = json_encode($validated['choices']);
-                $validated['answer_key'] = json_encode($validated['answer_key']);
-            }
-            else {
+
+                // No need to encode answer_key here - the Model mutator will handle conversion
+                // Just pass the array as-is, mutator will convert indices to letters
+                // Leave as array for mutator to process
+            } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string|max:255',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -201,8 +200,8 @@ class QuestionController extends Controller
 
             $role = auth()->user()->getRoleNames()->first();
 
-            if(!isset($roleRoutes[$role])) {
-                throw new \Exception ('Anda tidak memiliki akses untuk merubah soal');
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk merubah soal');
             }
 
             $question = Question::findOrFail($exam);
@@ -257,21 +256,21 @@ class QuestionController extends Controller
             $question->update($validated);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil merubah data soal  ');
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil merubah data soal  ');
 
 
             DB::commit();
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Merubah soal :'.$e->getMessage()]);
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Merubah soal :' . $e->getMessage()]);
         }
     }
 
-    public function destroy($exam){
-        try{
+    public function destroy($exam)
+    {
+        try {
             $question = Question::findOrFail($exam);
 
             // Delete question image if exists
@@ -298,17 +297,16 @@ class QuestionController extends Controller
 
             $role = auth()->user()->getRoleNames()->first();
 
-            if(!isset($roleRoutes[$role])) {
-                throw new \Exception ('Anda tidak memiliki akses untuk menghapus soal');
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menghapus soal');
             }
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil menghapus soal  '.session('perexamname'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil menghapus soal  ' . session('perexamname'));
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
-        }
-        catch(\Exception $e){
-            return redirect()->route($roleRoutes[$role], session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : '.$e->getMessage()]);
+        } catch (\Exception $e) {
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : ' . $e->getMessage()]);
         }
     }
 
@@ -380,7 +378,7 @@ class QuestionController extends Controller
     public function typestore(Request $request)
     {
         //
-        try{
+        try {
             $validates = $request->validate([
                 'name' => 'required|string|max:255',
             ]);
@@ -388,9 +386,7 @@ class QuestionController extends Controller
             QuestionTypes::create($validates);
 
             return redirect()->route('admin.questions.types')->with('success', 'Jenis Soal berhasil ditambahkan.');
-        }
-        catch(\Exception $e)
-        {
+        } catch (\Exception $e) {
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal menambahkan jenis soal :', $e->getMessage()]);
         }
     }
@@ -409,14 +405,13 @@ class QuestionController extends Controller
     public function typeedit(int $type)
     {
         //
-        try{
+        try {
             $type = QuestionTypes::findOrFail($type);
 
             return view('admin.editquestiontype', compact('type'));
-        }
-        catch(\Exception $e){
+        } catch (\Exception $e) {
 
-            return redirect()->route('admin.questions.types')->withErrors(['error' => 'Jenis Soal tidak ditemukan : '.$e->getMessage()]);
+            return redirect()->route('admin.questions.types')->withErrors(['error' => 'Jenis Soal tidak ditemukan : ' . $e->getMessage()]);
         }
     }
 
@@ -426,7 +421,7 @@ class QuestionController extends Controller
     public function typeupdate(Request $request, string $id)
     {
         //
-        try{
+        try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
             ]);
@@ -435,10 +430,8 @@ class QuestionController extends Controller
             $type->update($validated);
 
             return redirect()->route('admin.questions.types')->with('success', 'Jenis Soal berhasil dirubah');
-        }
-        catch(\Exception $e)
-        {
-            return redirect()->back()->withInput()->withErrors((['error' => 'Gagal Merubah Jenis Soal : '.$e->getMessage()]));
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors((['error' => 'Gagal Merubah Jenis Soal : ' . $e->getMessage()]));
         }
     }
 
@@ -448,15 +441,13 @@ class QuestionController extends Controller
     public function typedestroy(string $id)
     {
         //
-        try{
+        try {
             $type = QuestionTypes::findOrFail($id);
             $type->delete();
 
             return redirect()->route('admin.questions.types')->with('success', 'Jenis Soal berhasil dihapus');
-        }
-        catch(\Exception $e)
-        {
-            return redirect()->route('admin.question.types')->withErrors(['error' => 'Gagal menghapus jenis soal :'.$e->getMessage()]);
+        } catch (\Exception $e) {
+            return redirect()->route('admin.question.types')->withErrors(['error' => 'Gagal menghapus jenis soal :' . $e->getMessage()]);
         }
     }
 
@@ -487,10 +478,9 @@ class QuestionController extends Controller
 
             $roleRoute = auth()->user()->hasRole('super') ? 'super.exams.manage.question' : 'admin.exams.manage.question';
             return redirect()->route($roleRoute, $exam)->with('success', 'Soal berhasil diimport');
-
         } catch (\Maatwebsite\Excel\Validators\ValidationException $e) {
             $failures = $e->failures();
-            $errors = collect($failures)->map(function($failure) {
+            $errors = collect($failures)->map(function ($failure) {
                 return "Baris {$failure->row()}: {$failure->errors()[0]}";
             })->join('<br>');
 
@@ -512,5 +502,4 @@ class QuestionController extends Controller
             return redirect()->back()->withErrors(['error' => 'Gagal export soal: ' . $e->getMessage()]);
         }
     }
-
 }

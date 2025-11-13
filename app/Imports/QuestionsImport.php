@@ -97,13 +97,28 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
             return $row['kunci_jawaban'];
         }
 
+        // Split answers by comma and trim
         $answers = array_map('trim', explode(',', $row['kunci_jawaban']));
-        $formattedAnswers = array_map(function($answer) {
-            // Convert A,B,C,D,E to 1,2,3,4,5
-            return strpos('ABCDE', strtoupper($answer)) + 1;
+
+        // Convert letters to uppercase and keep them as letters (A, B, C, D, E, T, F)
+        $formattedAnswers = array_map(function ($answer) use ($type) {
+            $answer = strtoupper(trim($answer));
+
+            // For True/False (type 2), ensure only T or F
+            if ($type == '2') {
+                return $answer;  // Keep as T or F
+            }
+
+            // For multiple choice, keep as letters (A, B, C, D, E)
+            return $answer;
         }, $answers);
 
-        return json_encode($formattedAnswers);
+        // Return single value or array based on count
+        if (count($formattedAnswers) === 1) {
+            return $formattedAnswers[0];  // Return single letter like 'A' or 'T'
+        }
+
+        return json_encode($formattedAnswers);  // Return JSON array like ["A","C"] for complex multiple choice
     }
 
     public function rules(): array
