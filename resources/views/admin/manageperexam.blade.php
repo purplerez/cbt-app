@@ -67,25 +67,25 @@
                                         Nilai
                                     </button>
                                     {{--  <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"> --}}
-                                        @role('admin')
-                                            <a href="{{ route('admin.exams.question.exit') }}"
+                                    @role('admin')
+                                        <a href="{{ route('admin.exams.question.exit') }}"
                                             class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                                             title="Non-aktifkan Akun">
                                         @endrole
                                         @role('super')
                                             <a href="{{ route('super.exams.question.exit') }}"
-                                            class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                                            title="Non-aktifkan Akun">
-                                        @endrole
-                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                                        </svg>
-                                        Kembali Ke Ujian
-                                    </a>
-                                    {{-- </button> --}}
-                                    {{-- <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="guru" @if (session('is_active') == '0') disabled @endif>
+                                                class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                                                title="Non-aktifkan Akun">
+                                            @endrole
+                                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            </svg>
+                                            Kembali Ke Ujian
+                                        </a>
+                                        {{-- </button> --}}
+                                        {{-- <button type="button" class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-gray-700 transition rounded-md hover:bg-gray-200" data-tab="guru" @if (session('is_active') == '0') disabled @endif>
                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                                         </svg>
@@ -126,40 +126,55 @@
                                                 {{ session('perexamname') }}</h3>
                                             <div class="flex items-center space-x-2">
                                                 <!-- Excel Upload Button and Form -->
-                                            @if(session('perexamstatus') == 1)
-                                                <form action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
-                                                    method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
-                                                    @csrf
-                                                    <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
-                                                    <button type="button" onclick="document.getElementById('excel_file').click()"
-                                                        class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
-                                                        </svg>
-                                                        Import Excel
-                                                    </button>
-                                                    <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
-                                                        class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                                        </svg>
-                                                        Download Template
+                                                @if (session('perexamstatus') == 1)
+                                                    <form
+                                                        action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                        method="POST" enctype="multipart/form-data"
+                                                        class="flex items-center space-x-2">
+                                                        @csrf
+                                                        <input type="file" name="excel_file" id="excel_file"
+                                                            accept=".xlsx, .xls" class="hidden"
+                                                            onchange="this.form.submit()">
+                                                        <button type="button"
+                                                            onclick="document.getElementById('excel_file').click()"
+                                                            class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                            <svg class="w-4 h-4 mr-1" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                </path>
+                                                            </svg>
+                                                            Import Excel
+                                                        </button>
+                                                        <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
+                                                            class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                            <svg class="w-4 h-4 mr-1" fill="none"
+                                                                stroke="currentColor" viewBox="0 0 24 24"
+                                                                xmlns="http://www.w3.org/2000/svg">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                </path>
+                                                            </svg>
+                                                            Download Template
+                                                        </a>
+                                                    </form>
+
+                                                    <!-- Export Button -->
+                                                    <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                        class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                        Export
                                                     </a>
-                                                </form>
 
-                                                <!-- Export Button -->
-                                                <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                   class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                                                    Export
-                                                </a>
-
-                                                <!-- Add Question Button -->
-                                                <button type="button"
-                                                    class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                    data-tab="soal">
-                                                    + Tambah Soal
-                                                </button>
-                                            @endif
+                                                    <!-- Add Question Button -->
+                                                    <button type="button"
+                                                        class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                        data-tab="soal">
+                                                        + Tambah Soal
+                                                    </button>
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="p-4">
@@ -194,11 +209,13 @@
                                                                         class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                         {{ $q->id }}
                                                                     </td>
-                                                                    <td
-                                                                        class="px-6 py-4 text-sm text-gray-800">
-                                                                        <div class="whitespace-wrap">{{ $q->question_text }}</div>
-                                                                        @if($q->question_image)
-                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Question" class="max-w-xs mt-2 rounded-md max-h-32">
+                                                                    <td class="px-6 py-4 text-sm text-gray-800">
+                                                                        <div class="whitespace-wrap">
+                                                                            {{ $q->question_text }}</div>
+                                                                        @if ($q->question_image)
+                                                                            <img src="{{ Storage::url($q->question_image) }}"
+                                                                                alt="Question"
+                                                                                class="max-w-xs mt-2 rounded-md max-h-32">
                                                                         @endif
                                                                     </td>
                                                                     <td
@@ -242,9 +259,7 @@
                                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                                             data-modal-target="editSoalModal{{ $q->id }}"
                                                                             onclick="openEditSoalModal({{ $q->id }})"
-                                                                            @if (session('perexamstatus') == 0)
-                                                                                disabled
-                                                                            @endif>
+                                                                            @if (session('perexamstatus') == 0) disabled @endif>
                                                                             Ubah
                                                                         </button>
 
@@ -257,9 +272,7 @@
                                                                             <button type="submit"
                                                                                 class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                                                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')"
-                                                                                @if (session('perexamstatus') == 0)
-                                                                                    disabled
-                                                                                @endif >
+                                                                                @if (session('perexamstatus') == 0) disabled @endif>
                                                                                 Hapus</button>
                                                                         </form>
                                                                 </tr>
@@ -268,7 +281,7 @@
                                                                 <div id="editSoalModal{{ $q->id }}"
                                                                     class="fixed inset-0 z-50 hidden overflow-y-auto"
                                                                     data-choices="{{ $q->choices }}"
-                                                                    data-answer-key="{{ $q->answer_key }}">
+                                                                    data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key }}">
                                                                     <div class="min-h-screen px-4 text-center">
                                                                         <div
                                                                             class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
@@ -299,7 +312,9 @@
                                                                             {{-- <form  class="mt-4"> --}}
                                                                             <form
                                                                                 action="{{ route('admin.exams.question.update', $q->id) }}"
-                                                                                method="post" enctype="multipart/form-data" class="mb-4">
+                                                                                method="post"
+                                                                                enctype="multipart/form-data"
+                                                                                class="mb-4">
                                                                                 @csrf
                                                                                 @method('PUT')
                                                                                 <div class="space-y-4">
@@ -313,22 +328,39 @@
 
                                                                                     <!-- Question Image -->
                                                                                     <div>
-                                                                                        <label for="edit_question_image_{{ $q->id }}"
-                                                                                            class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
-                                                                                        @if($q->question_image)
+                                                                                        <label
+                                                                                            for="edit_question_image_{{ $q->id }}"
+                                                                                            class="block text-sm font-medium text-gray-700">Gambar
+                                                                                            Soal (Opsional)</label>
+                                                                                        @if ($q->question_image)
                                                                                             <div class="mb-2">
-                                                                                                <img src="{{ Storage::url($q->question_image) }}" alt="Question" class="max-w-xs rounded-md max-h-48">
-                                                                                                <label class="flex items-center mt-1">
-                                                                                                    <input type="checkbox" name="remove_question_image" value="1" class="mr-2">
-                                                                                                    <span class="text-sm text-red-600">Hapus gambar</span>
+                                                                                                <img src="{{ Storage::url($q->question_image) }}"
+                                                                                                    alt="Question"
+                                                                                                    class="max-w-xs rounded-md max-h-48">
+                                                                                                <label
+                                                                                                    class="flex items-center mt-1">
+                                                                                                    <input
+                                                                                                        type="checkbox"
+                                                                                                        name="remove_question_image"
+                                                                                                        value="1"
+                                                                                                        class="mr-2">
+                                                                                                    <span
+                                                                                                        class="text-sm text-red-600">Hapus
+                                                                                                        gambar</span>
                                                                                                 </label>
                                                                                             </div>
                                                                                         @endif
-                                                                                        <input type="file" id="edit_question_image_{{ $q->id }}" name="question_image" accept="image/*"
+                                                                                        <input type="file"
+                                                                                            id="edit_question_image_{{ $q->id }}"
+                                                                                            name="question_image"
+                                                                                            accept="image/*"
                                                                                             class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                                                                             onchange="previewEditQuestionImage(this, {{ $q->id }})">
-                                                                                        <div id="edit_question_image_preview_{{ $q->id }}" class="hidden mt-2">
-                                                                                            <img src="" alt="Preview" class="max-w-xs rounded-md max-h-48">
+                                                                                        <div id="edit_question_image_preview_{{ $q->id }}"
+                                                                                            class="hidden mt-2">
+                                                                                            <img src=""
+                                                                                                alt="Preview"
+                                                                                                class="max-w-xs rounded-md max-h-48">
                                                                                         </div>
                                                                                     </div>
 
@@ -342,31 +374,60 @@
                                                                                                 class="space-y-2">
                                                                                                 @if ($q->choices)
                                                                                                     @php
-                                                                                                        $choicesImages = $q->choices_images ? json_decode($q->choices_images, true) : [];
+                                                                                                        $choicesImages = $q->choices_images
+                                                                                                            ? json_decode(
+                                                                                                                $q->choices_images,
+                                                                                                                true,
+                                                                                                            )
+                                                                                                            : [];
                                                                                                     @endphp
                                                                                                     @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                                        <div class="edit-choice-item" data-choice-id="{{ $key }}">
-                                                                                                            <div class="flex items-start gap-2">
-                                                                                                                <div class="flex-1">
+                                                                                                        <div class="edit-choice-item"
+                                                                                                            data-choice-id="{{ $key }}">
+                                                                                                            <div
+                                                                                                                class="flex items-start gap-2">
+                                                                                                                <div
+                                                                                                                    class="flex-1">
                                                                                                                     <textarea name="choices[{{ $key }}]" rows="3"
                                                                                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
 
-                                                                                                                    <div class="mt-2">
-                                                                                                                        <label class="block text-xs font-medium text-gray-600" for="gambar_pilihan">Gambar Pilihan (Opsional)</label>
-                                                                                                                        @if(isset($choicesImages[$key]))
-                                                                                                                            <div class="mb-1">
-                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Choice" class="max-w-xs rounded-md max-h-32">
-                                                                                                                                <label class="flex items-center mt-1">
-                                                                                                                                    <input type="checkbox" name="remove_choice_images[]" value="{{ $key }}" class="mr-2">
-                                                                                                                                    <span class="text-xs text-red-600">Hapus gambar</span>
+                                                                                                                    <div
+                                                                                                                        class="mt-2">
+                                                                                                                        <label
+                                                                                                                            class="block text-xs font-medium text-gray-600"
+                                                                                                                            for="gambar_pilihan">Gambar
+                                                                                                                            Pilihan
+                                                                                                                            (Opsional)</label>
+                                                                                                                        @if (isset($choicesImages[$key]))
+                                                                                                                            <div
+                                                                                                                                class="mb-1">
+                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}"
+                                                                                                                                    alt="Choice"
+                                                                                                                                    class="max-w-xs rounded-md max-h-32">
+                                                                                                                                <label
+                                                                                                                                    class="flex items-center mt-1">
+                                                                                                                                    <input
+                                                                                                                                        type="checkbox"
+                                                                                                                                        name="remove_choice_images[]"
+                                                                                                                                        value="{{ $key }}"
+                                                                                                                                        class="mr-2">
+                                                                                                                                    <span
+                                                                                                                                        class="text-xs text-red-600">Hapus
+                                                                                                                                        gambar</span>
                                                                                                                                 </label>
                                                                                                                             </div>
                                                                                                                         @endif
-                                                                                                                        <input type="file" name="choice_images[{{ $key }}]" accept="image/*"
+                                                                                                                        <input
+                                                                                                                            type="file"
+                                                                                                                            name="choice_images[{{ $key }}]"
+                                                                                                                            accept="image/*"
                                                                                                                             class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
                                                                                                                             onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
-                                                                                                                        <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}" class="hidden mt-1">
-                                                                                                                            <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
+                                                                                                                        <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}"
+                                                                                                                            class="hidden mt-1">
+                                                                                                                            <img src=""
+                                                                                                                                alt="Preview"
+                                                                                                                                class="max-w-xs rounded-md max-h-32">
                                                                                                                         </div>
                                                                                                                     </div>
                                                                                                                 </div>
@@ -494,152 +555,194 @@
                                                 <!-- Import/Export Buttons -->
                                                 <div class="flex gap-2 mb-4">
                                                     @role('admin')
-                                                        <form action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
-                                                            method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                                        <form
+                                                            action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                            method="POST" enctype="multipart/form-data"
+                                                            class="flex items-center space-x-2">
                                                             @csrf
-                                                            <input type="file" name="excel_file" id="excel_file_admin" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
-                                                            <button type="button" onclick="document.getElementById('excel_file_admin').click()"
+                                                            <input type="file" name="excel_file" id="excel_file_admin"
+                                                                accept=".xlsx, .xls" class="hidden"
+                                                                onchange="this.form.submit()">
+                                                            <button type="button"
+                                                                onclick="document.getElementById('excel_file_admin').click()"
                                                                 class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                    </path>
                                                                 </svg>
                                                                 Import Excel
                                                             </button>
                                                             <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
                                                                 class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                    </path>
                                                                 </svg>
                                                                 Download Template
                                                             </a>
                                                         </form>
                                                         <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export Soal
                                                         </a>
                                                     @endrole
                                                     @role('super')
-                                                        <form action="{{ route('super.exams.questions.import', session('perexamid')) }}"
-                                                            method="POST" enctype="multipart/form-data" class="flex items-center space-x-2">
+                                                        <form
+                                                            action="{{ route('super.exams.questions.import', session('perexamid')) }}"
+                                                            method="POST" enctype="multipart/form-data"
+                                                            class="flex items-center space-x-2">
                                                             @csrf
-                                                            <input type="file" name="excel_file" id="excel_file_super" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
-                                                            <button type="button" onclick="document.getElementById('excel_file_super').click()"
+                                                            <input type="file" name="excel_file" id="excel_file_super"
+                                                                accept=".xlsx, .xls" class="hidden"
+                                                                onchange="this.form.submit()">
+                                                            <button type="button"
+                                                                onclick="document.getElementById('excel_file_super').click()"
                                                                 class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                    </path>
                                                                 </svg>
                                                                 Import Excel
                                                             </button>
                                                             <a href="{{ route('super.exams.questions.template', session('perexamid')) }}"
                                                                 class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                                        stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                    </path>
                                                                 </svg>
                                                                 Download Template
                                                             </a>
                                                         </form>
                                                         <a href="{{ route('super.exams.questions.export', session('perexamid')) }}"
-                                                           class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export Soal
                                                         </a>
                                                     @endrole
                                                 </div>
 
                                                 @role('admin')
-                                                <form
-                                                    action="{{ route('admin.exams.question.store', session('perexamid')) }}"
-                                                    method="post" enctype="multipart/form-data" class="mb-4">
-                                                @endrole
+                                                    <form
+                                                        action="{{ route('admin.exams.question.store', session('perexamid')) }}"
+                                                        method="post" enctype="multipart/form-data" class="mb-4">
+                                                    @endrole
 
-                                                @role('super')
-                                                <form
-                                                    action="{{ route('super.exams.question.store', session('perexamid')) }}"
-                                                    method="post" enctype="multipart/form-data" class="mb-4">
-                                                @endrole
+                                                    @role('super')
+                                                        <form
+                                                            action="{{ route('super.exams.question.store', session('perexamid')) }}"
+                                                            method="post" enctype="multipart/form-data" class="mb-4">
+                                                        @endrole
 
-                                                    @csrf
-                                                    <div class="space-y-4">
-                                                        <div>
-                                                            <label for="question_text"
-                                                                class="block text-sm font-medium text-gray-700">Pertanyaan</label>
-                                                            <textarea id="question_text" name="question_text" rows="3"
-                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                        </div>
-                                                        <div>
-                                                            <label for="question_image"
-                                                                class="block text-sm font-medium text-gray-700">Gambar Soal (Opsional)</label>
-                                                            <input type="file" id="question_image" name="question_image" accept="image/*"
-                                                                class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                                onchange="previewQuestionImage(this)">
-                                                            <div id="question_image_preview" class="hidden mt-2">
-                                                                <img src="" alt="Preview" class="max-w-xs rounded-md max-h-48">
+                                                        @csrf
+                                                        <div class="space-y-4">
+                                                            <div>
+                                                                <label for="question_text"
+                                                                    class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                                <textarea id="question_text" name="question_text" rows="3"
+                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                             </div>
-                                                        </div>
-                                                        <div>
-                                                            <label for="options"
-                                                                class="block text-sm font-medium text-gray-700">Pilihan
-                                                                Jawaban</label>
-                                                            <div id="choices-container" class="space-y-2">
-                                                                <div class="choice-item" data-choice-id="1">
-                                                                    <div class="flex items-start gap-2">
-                                                                        <div class="flex-1">
-                                                                            <textarea name="choices[1]" rows="3"
-                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                                            <div class="mt-2">
-                                                                                <label class="block text-xs font-medium text-gray-600" for="gambar">Gambar Pilihan (Opsional)</label>
-                                                                                <input type="file" name="choice_images[1]" accept="image/*"
-                                                                                    class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                                                                                    onchange="previewChoiceImage(this, 1)">
-                                                                                <div id="choice_image_preview_1" class="hidden mt-1">
-                                                                                    <img src="" alt="Preview" class="max-w-xs rounded-md max-h-32">
-                                                                                </div>
-                                                                            </div>
-                                                                        </div>
-                                                                        <button type="button"
-                                                                            class="mt-1 text-red-500 remove-choice hover:text-red-700"
-                                                                            onclick="removeChoice(this)">
-                                                                            <svg class="w-4 h-4" fill="none"
-                                                                                viewBox="0 0 24 24" stroke="currentColor">
-                                                                                <path stroke-linecap="round"
-                                                                                    stroke-linejoin="round"
-                                                                                    stroke-width="2"
-                                                                                    d="M6 18L18 6M6 6l12 12" />
-                                                                            </svg>
-                                                                        </button>
-                                                                    </div>
+                                                            <div>
+                                                                <label for="question_image"
+                                                                    class="block text-sm font-medium text-gray-700">Gambar
+                                                                    Soal (Opsional)</label>
+                                                                <input type="file" id="question_image"
+                                                                    name="question_image" accept="image/*"
+                                                                    class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                                    onchange="previewQuestionImage(this)">
+                                                                <div id="question_image_preview" class="hidden mt-2">
+                                                                    <img src="" alt="Preview"
+                                                                        class="max-w-xs rounded-md max-h-48">
                                                                 </div>
                                                             </div>
-                                                            <button type="button" id="add-choice"
-                                                                class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
-                                                                + Add Choice
-                                                            </button>
-                                                        </div>
+                                                            <div>
+                                                                <label for="options"
+                                                                    class="block text-sm font-medium text-gray-700">Pilihan
+                                                                    Jawaban</label>
+                                                                <div id="choices-container" class="space-y-2">
+                                                                    <div class="choice-item" data-choice-id="1">
+                                                                        <div class="flex items-start gap-2">
+                                                                            <div class="flex-1">
+                                                                                <textarea name="choices[1]" rows="3"
+                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                                <div class="mt-2">
+                                                                                    <label
+                                                                                        class="block text-xs font-medium text-gray-600"
+                                                                                        for="gambar">Gambar Pilihan
+                                                                                        (Opsional)</label>
+                                                                                    <input type="file"
+                                                                                        name="choice_images[1]"
+                                                                                        accept="image/*"
+                                                                                        class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                                                        onchange="previewChoiceImage(this, 1)">
+                                                                                    <div id="choice_image_preview_1"
+                                                                                        class="hidden mt-1">
+                                                                                        <img src=""
+                                                                                            alt="Preview"
+                                                                                            class="max-w-xs rounded-md max-h-32">
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                            <button type="button"
+                                                                                class="mt-1 text-red-500 remove-choice hover:text-red-700"
+                                                                                onclick="removeChoice(this)">
+                                                                                <svg class="w-4 h-4" fill="none"
+                                                                                    viewBox="0 0 24 24"
+                                                                                    stroke="currentColor">
+                                                                                    <path stroke-linecap="round"
+                                                                                        stroke-linejoin="round"
+                                                                                        stroke-width="2"
+                                                                                        d="M6 18L18 6M6 6l12 12" />
+                                                                                </svg>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <button type="button" id="add-choice"
+                                                                    class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
+                                                                    + Add Choice
+                                                                </button>
+                                                            </div>
 
-                                                        {{-- answer --}}
-                                                        <div>
-                                                            <label for="answer_key"
-                                                                class="block text-sm font-medium text-gray-700">Kunci
-                                                                Jawaban</label>
-                                                            <div id="answer-key-container"></div>
-                                                        </div>
+                                                            {{-- answer --}}
+                                                            <div>
+                                                                <label for="answer_key"
+                                                                    class="block text-sm font-medium text-gray-700">Kunci
+                                                                    Jawaban</label>
+                                                                <div id="answer-key-container"></div>
+                                                            </div>
 
-                                                        {{--  points --}}
-                                                        <div>
-                                                            <label for="points"
-                                                                class="block text-sm font-medium text-gray-700">Point</label>
-                                                            <input type="number" name="points"
-                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                                                        </div>
+                                                            {{--  points --}}
+                                                            <div>
+                                                                <label for="points"
+                                                                    class="block text-sm font-medium text-gray-700">Point</label>
+                                                                <input type="number" name="points"
+                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                            </div>
 
-                                                        {{--  button --}}
-                                                        <div>
-                                                            <button type="submit"
-                                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
-                                                                Simpan
-                                                            </button>
+                                                            {{--  button --}}
+                                                            <div>
+                                                                <button type="submit"
+                                                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+                                                                    Simpan
+                                                                </button>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </form>
+                                                    </form>
 
                                             </div>
                                         </div>
@@ -832,19 +935,25 @@
                                         <div class="flex items-center justify-between p-4 border-b">
                                             <h3 class="text-lg font-medium">Daftar Nilai Siswa</h3>
                                             <div class="flex items-center space-x-2">
-                                                <select id="school_filter_nilai" class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                <select id="school_filter_nilai"
+                                                    class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                                     <option value="">Semua Madrasah</option>
-                                                    @foreach($schools as $school)
-                                                        <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                    @foreach ($schools as $school)
+                                                        <option value="{{ $school->id }}">{{ $school->name }}
+                                                        </option>
                                                     @endforeach
                                                 </select>
-                                                <select id="grade_filter_nilai" class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                                                <select id="grade_filter_nilai"
+                                                    class="block w-48 px-3 py-2 text-sm border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500">
                                                     <option value="">Semua Kelas</option>
                                                 </select>
-                                                <form method="GET" action="{{ route('admin.exam.scores.export', ['exam' => $exam->id]) }}" class="inline">
+                                                <form method="GET"
+                                                    action="{{ route('admin.exam.scores.export', ['exam' => $exam->id]) }}"
+                                                    class="inline">
                                                     <input type="hidden" name="school_id" id="export_school_id">
                                                     <input type="hidden" name="grade_id" id="export_grade_id">
-                                                    <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                    <button type="submit"
+                                                        class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                                                         Export PDF
                                                     </button>
                                                 </form>
@@ -855,19 +964,25 @@
                                                 <table class="min-w-full divide-y divide-gray-200">
                                                     <thead class="bg-gray-50">
                                                         <tr>
-                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                            <th
+                                                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                                                 NIS</th>
-                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                            <th
+                                                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                                                 Nama Lengkap</th>
-                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                            <th
+                                                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                                                 Kelas</th>
-                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
+                                                            <th
+                                                                class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">
                                                                 Nilai</th>
                                                         </tr>
                                                     </thead>
-                                                    <tbody id="nilai-list-body" class="bg-white divide-y divide-gray-200">
+                                                    <tbody id="nilai-list-body"
+                                                        class="bg-white divide-y divide-gray-200">
                                                         <tr>
-                                                            <td colspan="4" class="px-6 py-4 text-sm text-center text-gray-500">
+                                                            <td colspan="4"
+                                                                class="px-6 py-4 text-sm text-center text-gray-500">
                                                                 Pilih madrasah dan kelas untuk melihat nilai
                                                             </td>
                                                         </tr>
@@ -926,10 +1041,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                            ${examstatus == 0 ? 'disabled' : ''}
-                            >
-                                            Tambah ke Ujian
-                                        </button>`
+                                        ${examstatus == 0 ? 'disabled' : ''}
+                                        >
+                                                        Tambah ke Ujian
+                                                    </button>`
                         }
                     </td>
                 `;
@@ -1017,7 +1132,7 @@
                 // Global variable to store current answer keys
                 let currentAnswerKeys = {};
                 // Global variable to store current answer keys
-               // let currentAnswerKeys = {};
+                // let currentAnswerKeys = {};
 
                 function updateAnswerKey(input, questionId) {
                     if (!currentAnswerKeys[questionId]) {
@@ -1290,7 +1405,8 @@
                 // Remove choice
                 function removeChoice(button) {
                     // Save current selections before removing
-                    selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb =>
+                        cb.value);
                     button.closest('.choice-item').remove();
                     renderAnswerKey();
                 }
@@ -1329,7 +1445,8 @@
                     // Update selected keys when checkboxes change
                     answerKeyContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                         cb.addEventListener('change', function() {
-                            selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                            selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll(
+                                'input[type="checkbox"]:checked')).map(cb => cb.value);
                         });
                     });
                 }
