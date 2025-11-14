@@ -6,7 +6,7 @@ class AnswerKeyHelper
 {
      /**
       * Convert choice index (0,1,2...) to letter (A,B,C...)
-      * 
+      *
       * @param int $index
       * @return string
       */
@@ -22,7 +22,7 @@ class AnswerKeyHelper
 
      /**
       * Convert letter (A,B,C...) to choice index (0,1,2...)
-      * 
+      *
       * @param string $letter
       * @return int
       */
@@ -44,7 +44,7 @@ class AnswerKeyHelper
      /**
       * Convert answer key from letter format to index format
       * Used for frontend compatibility or when indices are needed
-      * 
+      *
       * @param mixed $answerKey - Can be string, array, or JSON string
       * @return int|array - Answer key in index format
       */
@@ -75,7 +75,7 @@ class AnswerKeyHelper
      /**
       * Normalize answer key to letter format
       * Handles both index-based and letter-based answer keys
-      * 
+      *
       * @param mixed $answerKey - Can be string, array, or JSON string
       * @param int|null $questionType - Question type for True/False conversion
       * @return string|array - Normalized answer key in letter format
@@ -136,7 +136,7 @@ class AnswerKeyHelper
 
      /**
       * Normalize student answer to letter format
-      * 
+      *
       * @param mixed $studentAnswer
       * @return string|array|null
       */
@@ -187,7 +187,7 @@ class AnswerKeyHelper
      /**
       * Compare student answer with correct answer key
       * Both will be normalized to letter format before comparison
-      * 
+      *
       * @param mixed $studentAnswer
       * @param mixed $correctAnswer
       * @return bool
@@ -219,7 +219,7 @@ class AnswerKeyHelper
      /**
       * Calculate partial score for complex multiple choice
       * Awards points proportionally based on correct matches
-      * 
+      *
       * @param mixed $studentAnswer
       * @param mixed $correctAnswer
       * @param float $totalPoints
@@ -238,11 +238,14 @@ class AnswerKeyHelper
           $studentArray = array_filter($studentArray);
           $correctArray = array_filter($correctArray);
 
+        //   dd($studentArray, $correctArray);
+
           // Calculate matches
           $matches = array_intersect($correctArray, $studentArray);
+
           $matchedCount = count($matches);
           $totalCorrect = count($correctArray);
-
+            dd($studentArray, $correctArray, $matches, $matchedCount, $totalCorrect);
           // Calculate points
           $perAnswerPoint = $totalCorrect > 0 ? ($totalPoints / $totalCorrect) : 0;
           $earnedPoints = $perAnswerPoint * $matchedCount;
