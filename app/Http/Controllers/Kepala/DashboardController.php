@@ -192,7 +192,7 @@ class DashboardController extends Controller
         }
 
         $students = $query->get();
-        $grade = Grade::all();
+        $grade = Grade::where('school_id', $school_id)->get();
         return view(
             'kepala.view_datasiswa',
             [
