@@ -30,7 +30,7 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('api.ad
         ->name('dashboard.stats');
     Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
         ->name('dashboard.active-exams');
-        // ->name('exam.stats');
+    // ->name('exam.stats');
 
     Route::apiResource('exams', ExamController::class);
 
@@ -56,8 +56,7 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.si
 
     // Student Answer Backup & Restore Routes
     Route::prefix('exam-session')->group(function () {
-        Route::post('/save-answers', [StudentAnswerBackupController::class, 'saveAnswers'])
-            ->name('answers.save');
+        Route::post('/save-answers', [StudentAnswerBackupController::class, 'saveAnswers'])->name('answers.save');
 
         // Update single answer for real-time auto-save
         Route::post('/update-answer', [StudentAnswerBackupController::class, 'updateSingleAnswer'])
