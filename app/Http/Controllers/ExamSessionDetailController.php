@@ -61,7 +61,7 @@ class ExamSessionDetailController extends Controller
                 // - Types 0 (MC single), 2 (True/False), 3 (Essay): full points if answer equals key
                 // - Type 1 (MC complex): points are split by number of correct answers in key
                 $qtype = (int)$question->question_type_id;
-
+                // dd($answer, $choices);
                 if ($qtype === 1) {
                     // Complex Multiple Choice: calculate partial score
                     if ($answer !== null && $answer !== '') {
