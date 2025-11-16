@@ -255,7 +255,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     // JSON endpoint to fetch scores for a given exam (subject)
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
 
-    //Route exam details per siswa 
+    //Route exam details per siswa
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
 
