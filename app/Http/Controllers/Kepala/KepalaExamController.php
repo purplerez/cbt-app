@@ -17,7 +17,9 @@ class KepalaExamController extends Controller
 {
     //
     public function indexAll(){
-        $exams = Examtype::where('is_global', true)->get();
+        $exams = Examtype::where('is_global', true)
+                    ->where('is_active', true)
+                    ->get();
 
         return view('kepala.view_examglobal', compact('exams'));
     }
