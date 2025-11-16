@@ -27,7 +27,7 @@
 
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                             <div>
-                            <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
+                            <label for="nis" class="block text-sm font-medium text-gray-700">NISN</label>
                             <input type="text" name="nis" id="nis" value="{{ old('nis') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('nis')" class="mt-1" />

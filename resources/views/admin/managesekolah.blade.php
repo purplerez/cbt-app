@@ -142,7 +142,7 @@
                                             <table class="min-w-full divide-y divide-gray-200">
                                                 <thead class="bg-gray-50">
                                                     <tr>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NISN</th>
                                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
                                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
                                                         @if(auth()->user()->hasRole('admin'))
@@ -197,7 +197,7 @@
                                                                             @endif --}}
                                                                             <x-input-error :messages="$errors->get('error')" class="mb-4" />
                                                                                 <div>
-                                                                                <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
+                                                                                <label for="nis" class="block text-sm font-medium text-gray-700">NISN</label>
                                                                                 <input type="text" name="nis" id="nis" value="{{$student->nis}}" required
                                                                                     class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                                                                 <x-input-error :messages="$errors->get('nis')" class="mt-1" />
@@ -320,7 +320,7 @@
                                             <table class="min-w-full divide-y divide-gray-200">
                                                 <thead class="bg-gray-50">
                                                     <tr>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIP</th>
+                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NSM</th>
                                                         <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
                                                         @if(auth()->user()->hasRole('admin'))
                                                             <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Action</th>
@@ -365,7 +365,7 @@
                                                                             @endif --}}
                                                                             <x-input-error :messages="$errors->get('error')" class="mb-4" />
                                                                                 <div>
-                                                                                <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                                                                                <label for="nip" class="block text-sm font-medium text-gray-700">NSM</label>
                                                                                 <input type="text" name="nip" id="nip" value="{{$teacher->nip}}" required
                                                                                     class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                                                                 <x-input-error :messages="$errors->get('nip')" class="mt-1" />
@@ -464,7 +464,7 @@
 
                                             <div class="space-y-4">
                                                 <div>
-                                                    <label for="h_nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                                                    <label for="h_nip" class="block text-sm font-medium text-gray-700">NSM</label>
                                                     <input value="{{ $headmaster->nip }}" type="text" id="h_nip" name="h_nip"
                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                                         @if(!session('edit')) disabled @endif>
@@ -691,7 +691,7 @@
                         @endif --}}
                         <x-input-error :messages="$errors->get('error')" class="mb-4" />
                             <div>
-                            <label for="nis" class="block text-sm font-medium text-gray-700">NIS</label>
+                            <label for="nis" class="block text-sm font-medium text-gray-700">NISN</label>
                             <input type="text" name="nis" id="nis" value="{{ old('nis') }}" required
                                 class="block w-full mt-1 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                             <x-input-error :messages="$errors->get('nis')" class="mt-1" />
@@ -845,7 +845,7 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                        <label for="nip" class="block text-sm font-medium text-gray-700">NSM</label>
                         <input type="text" id="nip" name="nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                     </div>
                     <div>
@@ -905,7 +905,7 @@
                 @csrf
                 <div class="space-y-4">
                     <div>
-                        <label for="nip" class="block text-sm font-medium text-gray-700">NIP</label>
+                        <label for="nip" class="block text-sm font-medium text-gray-700">NSM</label>
                         <input type="text" id="nip" name="h_nip" required class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                         <x-input-error :messages="$errors->get('h_nip')" class="mt-1" />
                     </div>
