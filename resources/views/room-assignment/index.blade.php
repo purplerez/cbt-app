@@ -160,6 +160,8 @@
                                                 <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama</th>
                                                 <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
                                                 <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
+                                                <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
+
                                             </tr>
                                         </thead>
                                         <tbody class="bg-white divide-y divide-gray-200">
@@ -180,6 +182,16 @@
                                                             <span class="inline-flex px-2 text-xs font-semibold leading-5 text-gray-800 bg-gray-100 rounded-full">
                                                                 Belum ditugaskan
                                                             </span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        {{-- delete/remove from assigned room button using <a> </a> tag if student is already assigned --}}
+                                                        @if($student->assigned_room_id)
+                                                            <a href="{{ route('kepala.room-assignment.remove', ['student_id' => $student->id, 'exam_type_id' => request('exam_type_id')]) }}"
+                                                               onclick="return confirm('Yakin ingin menghapus penugasan siswa ini dari ruangan?')"
+                                                               class="text-sm text-red-600 hover:text-red-800">
+                                                                Hapus dari Ruangan
+                                                            </a>
                                                         @endif
                                                     </td>
                                                 </tr>

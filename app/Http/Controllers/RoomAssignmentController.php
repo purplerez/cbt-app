@@ -235,6 +235,7 @@ class RoomAssignmentController extends Controller
      */
     public function removeStudent(Request $request)
     {
+        // dd($request->all());
         $validated = $request->validate([
             'student_id' => 'required|exists:students,id',
             'exam_type_id' => 'required|exists:exam_types,id',

@@ -265,7 +265,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
     Route::post('/room-assignment/auto-assign', [RoomAssignmentController::class, 'autoAssign'])->name('room-assignment.auto-assign');
-    Route::delete('/room-assignment/remove', [RoomAssignmentController::class, 'removeStudent'])->name('room-assignment.remove');
+    Route::get('/room-assignment/remove', [RoomAssignmentController::class, 'removeStudent'])->name('room-assignment.remove');
     Route::get('/room-assignment/room/{room}', [RoomAssignmentController::class, 'getRoomDetails'])->name('room-assignment.room-details');
 
     // Berita Acara routes
