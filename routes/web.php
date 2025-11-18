@@ -224,6 +224,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
     Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
     Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
+    Route::delete('/rooms/{room}', [RoomController::class, 'roomDestroy'])->name('room.destroy');
 
     //route for room and students
     Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');

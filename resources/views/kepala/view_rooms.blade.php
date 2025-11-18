@@ -48,7 +48,7 @@
 
 
 
-                                        <form action="{{--  --}}" method="POST" class="inline-block">
+                                        <form action="{{route('kepala.room.destroy', $room->id)}}" method="POST" class="inline-block"  onsubmit="return confirm('Yakin ingin menghapus ruang ?');" >
 
                                             @csrf
                                             @method('DELETE')

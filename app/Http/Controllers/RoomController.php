@@ -64,6 +64,22 @@ class RoomController extends Controller
         return view('kepala.room_participants', compact('room', 'participants'));
     }
 
+    public function roomDestroy(Rooms $room)
+    {
+        try {
+            $roomName = $room->name;
+            $room->delete();
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus data ruang : '.$roomName);
+
+
+            return redirect()->route($this->getRoutePrefix() . '.rooms', session('exam_type_id'))->with('success', 'Data ruang berhasil dihapus');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal menghapus data ruang: ' . $e->getMessage()]);
+        }
+    }
+
     private function getRoutePrefix()
     {
         $user = auth()->user();
