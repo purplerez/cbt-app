@@ -115,7 +115,7 @@ class KepalaExamController extends Controller
         })
         ->get();
 
-        $grade = Grade::all();
+        $grade = Grade::where('school_id', $schoolId)->get();
 
         // also fetch exams for the given exam_type_id (passed via URL)
         $examsList = Exam::where('exam_type_id', $id)->get();
