@@ -33,7 +33,8 @@ class RoomAssignmentController extends Controller
         }
 
         // Get exam types
-        $examTypes = Examtype::all();
+        $examTypes = Examtype::where('is_active', true)
+                        ->get();
 
         // Get rooms for the school
         $rooms = Rooms::where('school_id', $schoolId)
