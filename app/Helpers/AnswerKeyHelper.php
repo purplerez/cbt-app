@@ -17,7 +17,7 @@ class AnswerKeyHelper
           }
 
           $index = (int)$index;
-          return chr(65 + $index); // 65 is ASCII for 'A'
+          return chr(64 + $index); // 65 is ASCII for 'A'
      }
 
      /**
