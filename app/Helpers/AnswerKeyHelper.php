@@ -38,7 +38,8 @@ class AnswerKeyHelper
                return 1;
           }
 
-          return ord($letter) - 65; // 65 is ASCII for 'A'
+          //return ord($letter) - 65; // 65 is ASCII for 'A'
+          return ord($letter) - 64; // 65 is ASCII for 'A'
      }
 
      /**
