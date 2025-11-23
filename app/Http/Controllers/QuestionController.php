@@ -120,7 +120,7 @@ class QuestionController extends Controller
             if (!isset($roleRoutes[$role])) {
                 throw new \Exception('Anda tidak memiliki akses untuk menambah ujian');
             }
-
+            dd($validated);
             Question::create($validated);
 
             $user = auth()->user();
