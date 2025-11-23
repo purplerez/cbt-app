@@ -245,7 +245,7 @@ class AnswerKeyHelper
 
           $matchedCount = count($matches);
           $totalCorrect = count($correctArray);
-            // dd($studentArray, $correctArray, $matches, $matchedCount, $totalCorrect);
+            dd($studentArray, $correctArray, $matches, $matchedCount, $totalCorrect);
           // Calculate points
           $perAnswerPoint = $totalCorrect > 0 ? ($totalPoints / $totalCorrect) : 0;
           $earnedPoints = $perAnswerPoint * $matchedCount;
