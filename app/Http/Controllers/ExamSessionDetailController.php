@@ -89,6 +89,19 @@ class ExamSessionDetailController extends Controller
                     }
                 }
 
+                //addition to status of complex multiple choice
+                $displayCorrectAnswer = $question->answer_key;
+                if ($qtype !== 3) { // Not essay
+                    $normalized = AnswerKeyHelper::normalizeAnswerKey($question->answer_key, $qtype);
+                    if (is_array($normalized)) {
+                        $displayCorrectAnswer = implode(', ', $normalized);
+                    } else {
+                        $displayCorrectAnswer = $normalized;
+                    }
+                }
+
+
+
                 // Add to answers array
                 $answers[] = [
                     'question_id' => $questionId,
@@ -97,7 +110,7 @@ class ExamSessionDetailController extends Controller
                     'question_type_name' => $question->questionType->name ?? ($question->getQuestionTypeLabelAttribute() ?? 'Unknown'),
                     'choices' => $choices,
                     'answer' => $answer,
-                    'correct_answer' => $question->answer_key,
+                    'correct_answer' => $displayCorrectAnswer, // $question->answer_key,
                     'answered_at' => $examSession->studentAnswer->last_answered_at ?? null,
                     'is_correct' => $isCorrect,
                     'points_awarded' => $pointsAwarded,

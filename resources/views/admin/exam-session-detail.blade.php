@@ -98,7 +98,8 @@
                                                 @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                               {{ is_array($answer['correct_answer']) ? json_encode($answer['correct_answer']) : $answer['correct_answer'] }}
+                                                {{ $answer['correct_answer'] }}
+                                               {{-- {{ is_array($answer['correct_answer']) ? json_encode($answer['correct_answer']) : $answer['correct_answer'] }} --}}
 
                                             </td>
                                             <td class="px-6 py-4 text-sm">
@@ -117,13 +118,24 @@
                                                     $ansVal = $answer['answer'] ?? null;
                                                     $qtype = $answer['question_type'] ?? null;
                                                     $isCorrect = $answer['is_correct'] ?? null;
+                                                    $pointsAwarded = $answer['points_awarded'] ?? 0;
+                                                    $pointsPossible = $answer['points_possible'] ?? 0;
                                                 @endphp
 
                                                 @if($ansVal === null)
                                                     <span class="text-yellow-600">Belum dijawab</span>
-                                                @elseif(in_array($qtype, [0,1,2]) && $isCorrect === true)
+                                                    @elseif($qtype === 1)
+                                                        {{-- Complex Multiple Choice: Show partial status --}}
+                                                        @if($isCorrect === true)
+                                                            <span class="text-green-600">Benar Sempurna</span>
+                                                        @elseif($pointsAwarded > 0)
+                                                            <span class="text-blue-600">Benar Sebagian ({{ number_format(($pointsAwarded / $pointsPossible) * 100, 0) }}%)</span>
+                                                        @else
+                                                            <span class="text-red-600">Salah</span>
+                                                        @endif
+                                                @elseif(in_array($qtype, [0,2]) && $isCorrect === true)
                                                     <span class="text-green-600">Benar</span>
-                                                @elseif(in_array($qtype, [0,1,2]))
+                                                @elseif(in_array($qtype, [0,2]))
                                                     <span class="text-red-600">Salah</span>
                                                 @else
                                                     <span class="text-blue-600">Essay</span>
