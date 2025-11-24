@@ -44,8 +44,8 @@ class StudentSeeder extends Seeder
                          'grade_id' => $grades->random()->id,
                          'gender' => collect(['L', 'P'])->random(),
                          'p_birth' => collect(['Jakarta', 'Bandung', 'Surabaya', 'Medan', 'Semarang'])->random(),
-                         'd_birth' => fake()->dateTimeBetween('-18 years', '-15 years')->format('Y-m-d'),
-                         'address' => fake()->address(),
+                         'd_birth' => \Illuminate\Support\Facades\Date::now()->subYears(rand(15, 18))->format('Y-m-d'),
+                         'address' => 'Jl. Contoh No. ' . rand(1, 100),
                          'photo' => 'assets/images/students/default.jpg',
                     ]);
                }

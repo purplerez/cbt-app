@@ -135,19 +135,36 @@ class ExamScoringService
                          $isAnswered = true;
                          $studentAnswer = $essayAnswers[$questionId];
 
-                         // Auto-scoring for essay based on keyword matching
+                         // Auto-scoring for essay based on exact match or keyword matching
                          if (!empty($question->answer_key)) {
                               $correctAnswer = trim($question->answer_key);
                               $studentAnswerTrimmed = trim($studentAnswer);
 
-                              $keywordMatch = $this->calculateAnswerSimilarity($studentAnswerTrimmed, $correctAnswer);
-
-                              if ($keywordMatch >= 100) {
+                              // Check for exact match (case-insensitive, ignore punctuation)
+                              if ($this->isExactMatch($studentAnswerTrimmed, $correctAnswer)) {
                                    $isCorrect = true;
                                    $earnedPoints = $points;
                               } else {
-                                   $isCorrect = false;
-                                   $earnedPoints = 0;
+                                   // Fallback to keyword matching for partial scoring
+                                   $keywordMatch = $this->calculateAnswerSimilarity($studentAnswerTrimmed, $correctAnswer);
+
+                                   if ($keywordMatch >= 80) {
+                                        // 80% keyword match = full points
+                                        $isCorrect = true;
+                                        $earnedPoints = $points;
+                                   } elseif ($keywordMatch >= 60) {
+                                        // 60-79% keyword match = partial points (80%)
+                                        $isCorrect = false;
+                                        $earnedPoints = $points * 0.8;
+                                   } elseif ($keywordMatch >= 40) {
+                                        // 40-59% keyword match = partial points (50%)
+                                        $isCorrect = false;
+                                        $earnedPoints = $points * 0.5;
+                                   } else {
+                                        // Below 40% = no points
+                                        $isCorrect = false;
+                                        $earnedPoints = 0;
+                                   }
                               }
                          } else {
                               $earnedPoints = 0;
@@ -236,6 +253,34 @@ class ExamScoringService
           $matchPercentage = ($matchedKeywords / $totalKeywords) * 100;
 
           return $matchPercentage;
+     }
+
+     /**
+      * Check if student answer exactly matches the correct answer
+      * (case-insensitive, ignores punctuation and extra spaces)
+      * 
+      * This method handles various text normalization to ensure fair grading:
+      * - Case insensitive: "JAKARTA" matches "jakarta" and "Jakarta"
+      * - Punctuation agnostic: "Paris Van Java" matches "paris van java!!!"
+      * - Space normalization: "Bhinneka  Tunggal   Ika" matches "bhinneka tunggal ika"
+      * - Unicode support: Works with Indonesian characters
+      * 
+      * Examples:
+      * - "JAKARTA" (key) matches "jakarta" (student) ✓
+      * - "Merah Putih" (key) matches "merah putih" (student) ✓
+      * - "H2O" (key) matches "h2o" (student) ✓
+      * - "17-08-1945" (key) matches "17 08 1945" (student) ✓ (after punctuation removal)
+      * 
+      * @param string $studentAnswer
+      * @param string $correctAnswer
+      * @return bool
+      */
+     private function isExactMatch($studentAnswer, $correctAnswer)
+     {
+          $normalizedStudent = $this->normalizeText($studentAnswer);
+          $normalizedCorrect = $this->normalizeText($correctAnswer);
+
+          return $normalizedStudent === $normalizedCorrect;
      }
 
      /**
