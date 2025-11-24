@@ -24,6 +24,7 @@ class BeritaAcaraController extends Controller
     {
        // dd($request->all());
         $query = BeritaAcara::with(['examType', 'exam', 'school', 'room'])
+            ->where('school_id', session('school_id'))
             ->orderBy('created_at', 'desc');
 
         // Filter by school (for kepala sekolah)
@@ -77,9 +78,9 @@ class BeritaAcaraController extends Controller
             $defaultSchoolId = null;
         }
 
-        $examTypes = Examtype::all();
+        $examTypes = Examtype::where('is_active', '1')->get();
         $exams = Exam::all();
-        $rooms = Rooms::all();
+        $rooms = Rooms::where('school_id', $defaultSchoolId)->get();
 
         // Get teachers for pengawas
         $teachers = User::role(['guru', 'kepala'])->get();
