@@ -46,11 +46,26 @@ class ParticipantController extends Controller
             ->with(['exam.examType'])
             ->get()
             ->map(function ($preassigned) {
+                $now = Carbon::now();
+                $startDate = Carbon::parse($preassigned->exam->start_date);
+                $endDate = Carbon::parse($preassigned->exam->end_date);
+
+                $status = 'upcoming'; // belum dimulai
+                if ($now->greaterThanOrEqualTo($startDate) && $now->lessThanOrEqualTo($endDate)) {
+                    $status = 'available'; // bisa dimulai
+                } elseif ($now->greaterThan($endDate)) {
+                    $status = 'expired'; // sudah lewat
+                }
+
                 return [
                     'exam_id' => $preassigned->exam->id,
                     'title' => $preassigned->exam->title,
                     'duration' => $preassigned->exam->duration,
                     'total_quest' => $preassigned->exam->total_quest,
+                    'start_date' => $preassigned->exam->start_date ? $startDate->toISOString() : null,
+                    'end_date' => $preassigned->exam->end_date ? $endDate->toISOString() : null,
+                    'status' => $status,
+                    'can_start' => $status === 'available',
                 ];
             });
 
@@ -73,6 +88,26 @@ class ParticipantController extends Controller
                     'success' => false,
                     'message' => 'Ujian tidak ditemukan'
                 ], 404);
+            }
+
+            $now = Carbon::now();
+
+            if ($exam->start_date && $now->lessThan(Carbon::parse($exam->start_date))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Ujian belum dimulai. Ujian akan dimulai pada ' . Carbon::parse($exam->start_date)->format('d M Y H:i'),
+                    'error_code' => 'EXAM_NOT_STARTED',
+                    'start_date' => Carbon::parse($exam->start_date)->toISOString()
+                ], 422);
+            }
+
+            if ($exam->end_date && $now->greaterThan(Carbon::parse($exam->end_date))) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Waktu ujian telah berakhir. Ujian berakhir pada ' . Carbon::parse($exam->end_date)->format('d M Y H:i'),
+                    'error_code' => 'EXAM_EXPIRED',
+                    'end_date' => Carbon::parse($exam->end_date)->toISOString()
+                ], 422);
             }
 
             // Ensure duration and total_quest are strictly integers with validation
