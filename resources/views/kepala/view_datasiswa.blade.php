@@ -86,6 +86,7 @@
                         <thead class="text-gray-700 bg-gray-200">
                             <tr>
                                 <th class="w-5 px-4 py-2 border">No</th>
+                                <th class="w-5 px-4 py-2 border">NISN</th>
                                 <th class="w-40 px-4 py-2 border">Nama Siswa</th>
                                 <th class="px-4 py-2 border w-11">Action</th>
                             </tr>
@@ -94,6 +95,7 @@
                             @forelse ($students as $index => $student)
                                 <tr>
                                     <td class="px-4 py-2 border">{{ $student->id }}</td>
+                                    <td class="px-4 py-2 border">{{ $student->nis }}</td>
                                     <td class="px-4 py-2 border">{{ $student->name }}</td>
                                     <td class="px-4 py-2 border">
                                         @role('kepala')
