@@ -43,9 +43,9 @@
                         <x-nav-link :href="route('admin.grades')" :active="request()->routeIs('admin.grades')">
                             {{ __('Tingkat') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.questions.types')" :active="request()->routeIs('admin.questions.types')">
+                        {{-- <x-nav-link :href="route('admin.questions.types')" :active="request()->routeIs('admin.questions.types')">
                             {{ __('Jenis Soal') }}
-                        </x-nav-link>
+                        </x-nav-link> --}}
                         <x-nav-link :href="route('admin.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
