@@ -129,7 +129,7 @@ class StudentController extends Controller
             // --- 2️⃣ Dapatkan siswa dari exam_sessions (sudah mulai / selesai ujian)
             $examSessionQuery = Student::with(['grade', 'user', 'user.examSessions' => function ($query) use ($examId) {
                 $query->where('exam_id', $examId)
-                    ->orderBy('updated_at', 'asc');
+                    ->orderBy('updated_at', 'desc');
             }])
                 ->whereHas('user.examSessions', function ($query) use ($examId) {
                     $query->where('exam_id', $examId);
