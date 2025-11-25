@@ -1526,28 +1526,28 @@
                 @auth
                     @role('admin')
                         <a href="{{ route('admin.dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
                             Admin Dashboard
                         </a>
                     @endrole
 
                     @role('kepala')
                         <a href="{{ route('kepala.dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
                             Dashboard Kepala Sekolah
                         </a>
                     @endrole
 
                     @role('guru')
                         <a href="{{ route('guru.dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
                             Dashboard Guru
                         </a>
                     @endrole
 
                     @role('siswa')
                         <a href="{{ route('siswa.dashboard') }}"
-                            class="inline-block px-5 py-1.5 dark:text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border text-[#1b1b18] dark:border-[#3E3E3A] dark:hover:border-[#62605b] rounded-sm text-sm leading-normal">
+                            class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
                             Dashboard Siswa
                         </a>
                     @endrole
