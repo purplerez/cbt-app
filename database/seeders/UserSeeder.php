@@ -71,11 +71,11 @@ class UserSeeder extends Seeder
                 ['name' => 'Guru Bahasa Inggris', 'email' => 'guru3@gmail.com'],
             ],
             'siswa' => [
-                ['name' => 'Ahmad Rizki', 'email' => 'siswa1@gmail.com'],
-                ['name' => 'Siti Nurhaliza', 'email' => 'siswa2@gmail.com'],
-                ['name' => 'Budi Santoso', 'email' => 'siswa3@gmail.com'],
-                ['name' => 'Dewi Sartika', 'email' => 'siswa4@gmail.com'],
-                ['name' => 'Muhammad Fauzi', 'email' => 'siswa5@gmail.com'],
+                ['name' => 'Ahmad Rizki', 'email' => '000001'],
+                ['name' => 'Siti Nurhaliza', 'email' => '000002'],
+                ['name' => 'Budi Santoso', 'email' => '000003'],
+                ['name' => 'Dewi Sartika', 'email' => '000004'],
+                ['name' => 'Muhammad Fauzi', 'email' => '000005'],
             ]
         ];
 

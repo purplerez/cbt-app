@@ -46,8 +46,8 @@ class ExamSeeder extends Seeder
                     'title' => $title,
                     'exam_type_id' => $examTypes->random()->id,
                     'description' => "Ujian $title untuk siswa",
-                    'start_date' => now()->addDays(rand(1, 15)),
-                    'end_date' => now()->addDays(rand(16, 30)),
+                    'start_date' => now()->addMinute(rand(1, 30)),
+                    'end_date' => now()->addDays(rand(1, 10)),
                     'duration' => rand(10, 16), // minutes
                     'total_quest' => rand(20, 50),
                     'score_minimal' => rand(60, 80),
