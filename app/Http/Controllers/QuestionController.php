@@ -76,10 +76,10 @@ class QuestionController extends Controller
                 $validated['answer_key'] = json_encode($validated['answer_key']);
             } else {
                 $validated = $request->validate([
-                    'question_text' => 'required|string|max:255',
+                    'question_text' => 'required|string',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
-                    'points' => 'required|numeric|min:1'
+                    'points' => 'required|numeric'
                 ]);
                 $validated['choices'] = null;
             }
@@ -175,10 +175,10 @@ class QuestionController extends Controller
                 $validated['answer_key'] = json_encode($validated['answer_key']);
             } else {
                 $validated = $request->validate([
-                    'question_text' => 'required|string|max:255',
+                    'question_text' => 'required|string',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|string|max:255',
-                    'points' => 'required|numeric|min:1'
+                    'points' => 'required|numeric'
                 ]);
                 $validated['choices'] = null;
             }
