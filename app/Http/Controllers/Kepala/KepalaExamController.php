@@ -8,6 +8,7 @@ use App\Models\Examtype;
 use App\Models\ExamSession;
 use App\Models\Grade;
 use App\Models\Preassigned;
+use App\Models\Question;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -62,45 +63,55 @@ class KepalaExamController extends Controller
      * Return JSON list of exam sessions (scores) for a given exam filtered by current school in session
      */
     public function scores(Request $request, Exam $exam)
-    {
-        try {
-            $schoolId = session('school_id');
-            $gradeId = $request->query('grade_id');
+{
+    try {
+        $schoolId = session('school_id');
+        $gradeId = $request->query('grade_id');
 
-            if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
-            }
-
-            $sessions = ExamSession::with(['user.student'])
-                ->where('exam_id', $exam->id)
-                ->whereHas('user.student', function ($q) use ($schoolId, $gradeId) {
-                    $q->where('school_id', $schoolId);
-                    if ($gradeId) {
-                        $q->where('grade_id', $gradeId);
-                    }
-                })
-                ->get();
-
-            $data = $sessions->map(function ($s) {
-                return [
-                    'id' => $s->id,
-                    'student_name' => $s->user?->name ?? ($s->user?->student?->name ?? 'N/A'),
-                    'nis' => $s->user?->student?->nis ?? '-',
-                    'total_score' => $s->total_score,
-                    'status' => $s->status,
-                    'started_at' => $s->started_at?->toDateTimeString(),
-                    'submited_at' => $s->submited_at?->toDateTimeString(),
-                ];
-            });
-
-            return response()->json([
-                'exam' => $exam->title,
-                'sessions' => $data,
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
+        if (!$schoolId) {
+            return response()->json(['error' => 'School not found in session'], 400);
         }
+
+        // Get total possible score for this exam
+        $totalPossibleScore = Question::where('exam_id', $exam->id)
+            ->sum(\Illuminate\Support\Facades\DB::raw('CAST(points as DECIMAL(10,2))'));
+
+        $sessions = ExamSession::with(['user.student'])
+            ->where('exam_id', $exam->id)
+            ->whereHas('user.student', function ($q) use ($schoolId, $gradeId) {
+                $q->where('school_id', $schoolId);
+                if ($gradeId) {
+                    $q->where('grade_id', $gradeId);
+                }
+            })
+            ->get();
+
+        $data = $sessions->map(function ($s) use ($totalPossibleScore) {
+            $totalScore = (float) ($s->total_score ?? 0);
+            $percentage = ($totalPossibleScore > 0) ? ($totalScore / $totalPossibleScore) * 100 : 0;
+
+            return [
+                'id' => $s->id,
+                'student_name' => $s->user?->name ?? ($s->user?->student?->name ?? 'N/A'),
+                'nis' => $s->user?->student?->nis ?? '-',
+                'total_score' => number_format($totalScore, 2),
+                'total_possible' => number_format($totalPossibleScore, 2),
+                'percentage' => number_format($percentage, 2),
+                'status' => $s->status,
+                'started_at' => $s->started_at?->toDateTimeString(),
+                'submited_at' => $s->submited_at?->toDateTimeString(),
+            ];
+        });
+
+        return response()->json([
+            'exam' => $exam->title,
+            'total_possible_score' => number_format($totalPossibleScore, 2),
+            'sessions' => $data,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     public function participants(Request $request, $id)
     {
