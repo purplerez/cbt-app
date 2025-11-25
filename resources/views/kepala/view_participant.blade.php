@@ -24,6 +24,7 @@
                                             <option value="{{ $g->id }}" @if(isset($selectedGrade) && $selectedGrade == $g->id) selected @endif>{{ $g->name }}</option>
                                         @endforeach
                                     </select>
+
                                     <x-input-error :messages="$errors->get('grade_id')" class="mt-1" />
                                     <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Filter</button>
                                 </form>

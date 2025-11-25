@@ -249,7 +249,7 @@
 
 
     <!-- Proctors -->
-    @if($beritaAcara->pengawas_users->isNotEmpty())
+    {{-- @if($beritaAcara->pengawas_users->isNotEmpty()) --}}
     <div class="section-title">Yang membuat berita acara : </div>
 
     <table class="data-table" style="border: none; border-collapse: collapse;">
@@ -261,16 +261,24 @@
             </tr>
         </thead> --}}
         <tbody>
-            @foreach($beritaAcara->pengawas_users as $index => $pengawas)
-            <tr>
-                <td style="text-align: center; border: none; " width="25%">Pengawas {{ $index + 1 }} :</td>
-                <td style=" border: none; ">{{ $pengawas->name }}</td>
-                <td style="border: none; border-bottom : solid 1px black;" width="20%"></td>
-            </tr>
+            @foreach($beritaAcara->pengawas as $index => $namaPengawas)
+                @if(!empty(trim($namaPengawas)))
+                <tr>
+                    <td style="text-align: center; border: none; padding: 5px 0;" width="25%">
+                        Pengawas {{ $index + 1 }} :
+                    </td>
+                    <td style="border: none; padding: 5px 0;">
+                        {{ strtoupper($namaPengawas) }}
+                    </td>
+                    <td style="border: none; border-bottom: solid 1px black; padding: 5px 0;" width="20%">
+                        <!-- Kolom untuk tanda tangan -->
+                    </td>
+                </tr>
+                @endif
             @endforeach
         </tbody>
     </table>
-    @endif
+    {{-- @endif --}}
 
 
     <!-- Closing Statement -->

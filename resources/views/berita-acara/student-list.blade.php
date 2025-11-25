@@ -8,16 +8,16 @@
             margin: 1.5cm;
         }
         body {
-            font-family: Arial, Arial, Helvetica, sans-serif;
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 11pt;
-            line-height: 1.4;
+            line-height: 1.1;
             color: #000;
         }
         .header {
             text-align: center;
             margin-bottom: 20px;
             border-bottom: 2px solid #000;
-            padding-bottom: 15px;
+            padding-bottom: 10px;
         }
         /* .header h1 {
             font-size: 16pt;
@@ -50,7 +50,7 @@
             font-weight: bold;
         }
         .grade-section {
-            page-break-inside: avoid;
+          /*  page-break-inside: avoid; */
             margin-top: 25px;
         }
         .grade-section:first-child {
@@ -95,6 +95,9 @@
             width: 40%;
             min-height: 40px;
         }
+        table.student-table tbody tr {
+            page-break-inside: avoid;
+        }
         .footer {
             margin-top: 30px;
             page-break-inside: avoid;
@@ -109,8 +112,8 @@
             float: right;
         }
         .signature-space {
-            height: 70px;
-            margin: 15px 0;
+            height: 30px;
+            margin: 10px 0;
         }
         .signature-name {
             font-weight: bold;
@@ -140,6 +143,13 @@
             text-align: left;
             border-bottom: 1px solid #000;
             padding-left: 10px;
+        }
+        .notes-section {
+            margin-top: 20px;
+            border: 1px solid #000;
+            padding: 10px;
+            min-height: 80px;
+            page-break-inside: avoid;
         }
     </style>
 </head>
@@ -278,7 +288,7 @@
     </div>
 
     <!-- Notes Section -->
-    <div style="margin-top: 20px; border: 1px solid #000; padding: 10px; min-height: 80px;">
+    <div class="notes-section">
         <strong>CATATAN:</strong>
         <div style="margin-top: 10px;">
             _____________________________________________________________________________
@@ -295,20 +305,19 @@
     <div class="footer">
         <table style="width: 100%; border: none;">
             <tr>
+                @foreach($beritaAcara->pengawas as $index => $namaPengawas)
+                @if(!empty(trim($namaPengawas)))
                 <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
-                    <div style="margin-bottom: 10px;">Pengawas I</div>
+                    <div style="margin-bottom: 5px;">Pengawas {{ $index + 1 }}</div>
                     <div class="signature-space"></div>
                     <div>
                         <span class="signature-name">
-                            @if($beritaAcara->pengawas_users->count() > 0)
-                                {{ $beritaAcara->pengawas_users->first()->name }}
-                            @else
-                                (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
-                            @endif
+                            {{ $namaPengawas }}
+
                         </span>
                     </div>
                 </td>
-                <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
+                {{-- <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
                     <div style="margin-bottom: 10px;">Pengawas II</div>
                     <div class="signature-space"></div>
                     <div>
@@ -320,7 +329,10 @@
                             @endif
                         </span>
                     </div>
-                </td>
+                </td> --}}
+                @endif
+                @endforeach
+
             </tr>
             <tr>
                 <td colspan=2 style="text-align: center">

@@ -112,7 +112,7 @@ class BeritaAcaraController extends Controller
             'jumlah_peserta_tidak_hadir' => 'required|integer|min:0',
             'jumlah_peserta_terdaftar' => 'required|integer|min:0',
             'pengawas' => 'nullable|array',
-            'pengawas.*' => 'exists:users,id',
+            'pengawas.*' => 'string',
             'catatan_khusus' => 'nullable|string',
             'kondisi_pelaksanaan' => 'required|in:lancar,ada_kendala,terganggu',
             'kendala' => 'nullable|string',
@@ -122,6 +122,15 @@ class BeritaAcaraController extends Controller
 
         try {
             DB::beginTransaction();
+
+            // Filter pengawas yang tidak kosong
+            if (isset($validated['pengawas'])) {
+                $validated['pengawas'] = array_filter($validated['pengawas'], function($value) {
+                    return !empty(trim($value));
+                });
+                // Re-index array
+                $validated['pengawas'] = array_values($validated['pengawas']);
+            }
 
             $validated['created_by'] = auth()->id();
             $validated['status'] = 'approved';
