@@ -203,7 +203,7 @@
                                                             </tr>
                                                         </thead>
                                                         <tbody class="bg-white divide-y divide-gray-200">
-                                                            @forelse ($questions as $q )
+                                                            @forelse ($questions as $q)
                                                                 <tr>
                                                                     <td
                                                                         class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
@@ -276,247 +276,6 @@
                                                                                 Hapus</button>
                                                                         </form>
                                                                 </tr>
-                                                                {{--  edit data --}}
-
-                                                                <div id="editSoalModal{{ $q->id }}"
-                                                                    class="fixed inset-0 z-50 hidden overflow-y-auto"
-                                                                    data-choices="{{ $q->choices }}"
-                                                                    data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key }}">
-                                                                    <div class="min-h-screen px-4 text-center">
-                                                                        <div
-                                                                            class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
-
-                                                                        </div>
-                                                                        <div
-                                                                            class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-                                                                            <div
-                                                                                class="flex items-center justify-between pb-3 border-b">
-                                                                                <h3
-                                                                                    class="text-lg font-medium text-gray-900">
-                                                                                    Ubah Soal</h3>
-                                                                                <button type="button"
-                                                                                    class="text-gray-400 hover:text-gray-500"
-                                                                                    onclick="closeModal('editSoalModal')">
-                                                                                    <span class="sr-only">Close</span>
-                                                                                    <svg class="w-6 h-6"
-                                                                                        fill="none"
-                                                                                        viewBox="0 0 24 24"
-                                                                                        stroke="currentColor">
-                                                                                        <path stroke-linecap="round"
-                                                                                            stroke-linejoin="round"
-                                                                                            stroke-width="2"
-                                                                                            d="M6 18L18 6M6 6l12 12" />
-                                                                                    </svg>
-                                                                                </button>
-                                                                            </div>
-                                                                            {{-- <form  class="mt-4"> --}}
-                                                                            <form
-                                                                                action="{{ route('admin.exams.question.update', $q->id) }}"
-                                                                                method="post"
-                                                                                enctype="multipart/form-data"
-                                                                                class="mb-4">
-                                                                                @csrf
-                                                                                @method('PUT')
-                                                                                <div class="space-y-4">
-                                                                                    <!-- Question Text -->
-                                                                                    <div>
-                                                                                        <label for="edit_question_text"
-                                                                                            class="block text-sm font-medium text-gray-700">Pertanyaan</label>
-                                                                                        <textarea id="edit_question_text" name="question_text" rows="3"
-                                                                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
-                                                                                    </div>
-
-                                                                                    <!-- Question Image -->
-                                                                                    <div>
-                                                                                        <label
-                                                                                            for="edit_question_image_{{ $q->id }}"
-                                                                                            class="block text-sm font-medium text-gray-700">Gambar
-                                                                                            Soal (Opsional)</label>
-                                                                                        @if ($q->question_image)
-                                                                                            <div class="mb-2">
-                                                                                                <img src="{{ Storage::url($q->question_image) }}"
-                                                                                                    alt="Question"
-                                                                                                    class="max-w-xs rounded-md max-h-48">
-                                                                                                <label
-                                                                                                    class="flex items-center mt-1">
-                                                                                                    <input
-                                                                                                        type="checkbox"
-                                                                                                        name="remove_question_image"
-                                                                                                        value="1"
-                                                                                                        class="mr-2">
-                                                                                                    <span
-                                                                                                        class="text-sm text-red-600">Hapus
-                                                                                                        gambar</span>
-                                                                                                </label>
-                                                                                            </div>
-                                                                                        @endif
-                                                                                        <input type="file"
-                                                                                            id="edit_question_image_{{ $q->id }}"
-                                                                                            name="question_image"
-                                                                                            accept="image/*"
-                                                                                            class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                                                            onchange="previewEditQuestionImage(this, {{ $q->id }})">
-                                                                                        <div id="edit_question_image_preview_{{ $q->id }}"
-                                                                                            class="hidden mt-2">
-                                                                                            <img src=""
-                                                                                                alt="Preview"
-                                                                                                class="max-w-xs rounded-md max-h-48">
-                                                                                        </div>
-                                                                                    </div>
-
-                                                                                    @if ($q->question_type_id != 3)
-                                                                                        <!-- Choices (for multiple-choice questions) -->
-                                                                                        <div>
-                                                                                            <label for="options"
-                                                                                                class="block text-sm font-medium text-gray-700">Pilihan
-                                                                                                Jawaban</label>
-                                                                                            <div id="edit-choices-container-{{ $q->id }}"
-                                                                                                class="space-y-2">
-                                                                                                @if ($q->choices)
-                                                                                                    @php
-                                                                                                        $choicesImages = $q->choices_images
-                                                                                                            ? json_decode(
-                                                                                                                $q->choices_images,
-                                                                                                                true,
-                                                                                                            )
-                                                                                                            : [];
-                                                                                                    @endphp
-                                                                                                    @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                                        <div class="edit-choice-item"
-                                                                                                            data-choice-id="{{ $key }}">
-                                                                                                            <div
-                                                                                                                class="flex items-start gap-2">
-                                                                                                                <div
-                                                                                                                    class="flex-1">
-                                                                                                                    <textarea name="choices[{{ $key }}]" rows="3"
-                                                                                                                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $choice }}</textarea>
-
-                                                                                                                    <div
-                                                                                                                        class="mt-2">
-                                                                                                                        <label
-                                                                                                                            class="block text-xs font-medium text-gray-600"
-                                                                                                                            for="gambar_pilihan">Gambar
-                                                                                                                            Pilihan
-                                                                                                                            (Opsional)
-                                                                                                                        </label>
-                                                                                                                        @if (isset($choicesImages[$key]))
-                                                                                                                            <div
-                                                                                                                                class="mb-1">
-                                                                                                                                <img src="{{ Storage::url($choicesImages[$key]) }}"
-                                                                                                                                    alt="Choice"
-                                                                                                                                    class="max-w-xs rounded-md max-h-32">
-                                                                                                                                <label
-                                                                                                                                    class="flex items-center mt-1">
-                                                                                                                                    <input
-                                                                                                                                        type="checkbox"
-                                                                                                                                        name="remove_choice_images[]"
-                                                                                                                                        value="{{ $key }}"
-                                                                                                                                        class="mr-2">
-                                                                                                                                    <span
-                                                                                                                                        class="text-xs text-red-600">Hapus
-                                                                                                                                        gambar</span>
-                                                                                                                                </label>
-                                                                                                                            </div>
-                                                                                                                        @endif
-                                                                                                                        <input
-                                                                                                                            type="file"
-                                                                                                                            name="choice_images[{{ $key }}]"
-                                                                                                                            accept="image/*"
-                                                                                                                            class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                                                                                                                            onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
-                                                                                                                        <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}"
-                                                                                                                            class="hidden mt-1">
-                                                                                                                            <img src=""
-                                                                                                                                alt="Preview"
-                                                                                                                                class="max-w-xs rounded-md max-h-32">
-                                                                                                                        </div>
-                                                                                                                    </div>
-                                                                                                                </div>
-                                                                                                                <button
-                                                                                                                    type="button"
-                                                                                                                    class="mt-1 text-red-500 hover:text-red-700"
-                                                                                                                    onclick="this.closest('.edit-choice-item').remove(); initEditForm({{ $q->id }}, null, {{ is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key }})">
-                                                                                                                    <svg class="w-4 h-4"
-                                                                                                                        fill="none"
-                                                                                                                        viewBox="0 0 24 24"
-                                                                                                                        stroke="currentColor">
-                                                                                                                        <path
-                                                                                                                            stroke-linecap="round"
-                                                                                                                            stroke-linejoin="round"
-                                                                                                                            stroke-width="2"
-                                                                                                                            d="M6 18L18 6M6 6l12 12" />
-                                                                                                                    </svg>
-                                                                                                                </button>
-                                                                                                            </div>
-                                                                                                        </div>
-                                                                                                    @endforeach
-                                                                                                @endif
-                                                                                            </div>
-                                                                                            <button type="button"
-                                                                                                id="edit-add-choice-{{ $q->id }}"
-                                                                                                class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
-                                                                                                + Tambah Pilihan
-                                                                                            </button>
-                                                                                        </div>
-
-                                                                                        <!-- Answer Key for Multiple Choice -->
-                                                                                        <div>
-                                                                                            <label for="answer_key"
-                                                                                                class="block text-sm font-medium text-gray-700">Kunci
-                                                                                                Jawaban</label>
-                                                                                            <div
-                                                                                                id="edit-answer-key-container-{{ $q->id }}">
-                                                                                                @if (is_array(json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)))
-                                                                                                    @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                                        <div
-                                                                                                            class="flex items-center gap-2">
-                                                                                                            <input
-                                                                                                                type="{{ count(json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)) > 1 ? 'checkbox' : 'radio' }}"
-                                                                                                                name="answer_key[]"
-                                                                                                                value="{{ $key }}"
-                                                                                                                {{ in_array($key, json_decode(is_array($q->answer_key) ? json_encode($q->answer_key) : $q->answer_key)) ? 'checked' : '' }}>
-                                                                                                            <span>{{ $choice }}</span>
-                                                                                                        </div>
-                                                                                                    @endforeach
-                                                                                                @endif
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    @else
-                                                                                        <!-- Answer Key for Essay -->
-                                                                                        <div>
-                                                                                            <label for="answer_key"
-                                                                                                class="block text-sm font-medium text-gray-700">Kunci
-                                                                                                Jawaban</label>
-                                                                                            <textarea name="answer_key" rows="3"
-                                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->answer_key }}</textarea>
-                                                                                        </div>
-                                                                                    @endif
-
-                                                                                    <!-- Points -->
-                                                                                    <div>
-                                                                                        <label for="points"
-                                                                                            class="block text-sm font-medium text-gray-700">Point</label>
-                                                                                        <input type="number"
-                                                                                            name="points"
-                                                                                            value="{{ $q->points }}"
-                                                                                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                                                                                    </div>
-
-                                                                                    <!-- Submit Button -->
-                                                                                    <div>
-                                                                                        <button type="submit"
-                                                                                            class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
-                                                                                            Update Soal
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </div>
-                                                                            </form>
-
-                                                                            {{-- </form> --}}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                {{-- end of edit data --}}
                                                             @empty
                                                                 <tr>
                                                                     <td colspan="4"
@@ -531,6 +290,99 @@
                                             </div>
                                         </div>
 
+                                        {{-- Render all edit modals OUTSIDE table to fix HTML structure --}}
+                                        @foreach ($questions as $q)
+                                            <div id="editSoalModal{{ $q->id }}"
+                                                class="fixed inset-0 z-50 hidden overflow-y-auto"
+                                                data-choices="{{ $q->choices }}"
+                                                data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : json_encode([$q->answer_key]) }}">
+                                                <div class="min-h-screen px-4 text-center">
+                                                    <div
+                                                        class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
+                                                    </div>
+                                                    <div
+                                                        class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                        <div class="flex items-center justify-between pb-3 border-b">
+                                                            <h3 class="text-lg font-medium text-gray-900">Ubah Soal
+                                                                #{{ $q->id }}</h3>
+                                                            <button type="button"
+                                                                class="text-gray-400 hover:text-gray-500"
+                                                                onclick="closeModal('editSoalModal{{ $q->id }}')">
+                                                                <span class="sr-only">Close</span>
+                                                                <svg class="w-6 h-6" fill="none"
+                                                                    viewBox="0 0 24 24" stroke="currentColor">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M6 18L18 6M6 6l12 12" />
+                                                                </svg>
+                                                            </button>
+                                                        </div>
+                                                        <form
+                                                            action="{{ route('admin.exams.question.update', $q->id) }}"
+                                                            method="post" enctype="multipart/form-data"
+                                                            class="mt-4">
+                                                            @csrf
+                                                            @method('PUT')
+                                                            <div class="space-y-4">
+                                                                <div>
+                                                                    <label
+                                                                        class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                                    <textarea name="question_text" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">{{ $q->question_text }}</textarea>
+                                                                </div>
+                                                                @if ($q->question_type_id != 3)
+                                                                    <div>
+                                                                        <label
+                                                                            class="block text-sm font-medium text-gray-700">Pilihan
+                                                                            Jawaban</label>
+                                                                        <div id="edit-choices-container-{{ $q->id }}"
+                                                                            class="space-y-2">
+                                                                            @if ($q->choices)
+                                                                                @foreach (json_decode($q->choices, true) as $key => $choice)
+                                                                                    <div class="edit-choice-item"
+                                                                                        data-choice-id="{{ $key }}">
+                                                                                        <textarea name="choices[{{ $key }}]" rows="2" class="block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
+                                                                                    </div>
+                                                                                @endforeach
+                                                                            @endif
+                                                                        </div>
+                                                                    </div>
+                                                                    <div>
+                                                                        <label
+                                                                            class="block text-sm font-medium text-gray-700">Kunci
+                                                                            Jawaban</label>
+                                                                        <div
+                                                                            id="edit-answer-key-container-{{ $q->id }}">
+                                                                            <p class="text-sm text-gray-500">Loading...
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                @else
+                                                                    <div>
+                                                                        <label
+                                                                            class="block text-sm font-medium text-gray-700">Kunci
+                                                                            Jawaban</label>
+                                                                        <textarea name="answer_key" rows="3" class="block w-full mt-1 border-gray-300 rounded-md">{{ $q->answer_key }}</textarea>
+                                                                    </div>
+                                                                @endif
+                                                                <div>
+                                                                    <label
+                                                                        class="block text-sm font-medium text-gray-700">Point</label>
+                                                                    <input type="number" name="points"
+                                                                        value="{{ $q->points }}"
+                                                                        class="block w-full mt-1 border-gray-300 rounded-md">
+                                                                </div>
+                                                                <div>
+                                                                    <button type="submit"
+                                                                        class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                                                        Update Soal
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
 
                                     </div>
                                 </div>
@@ -1042,10 +894,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                                    ${examstatus == 0 ? 'disabled' : ''}
-                                                    >
-                                                                    Tambah ke Ujian
-                                                                </button>`
+                                                                            ${examstatus == 0 ? 'disabled' : ''}
+                                                                            >
+                                                                                            Tambah ke Ujian
+                                                                                        </button>`
                         }
                     </td>
                 `;
@@ -1213,16 +1065,28 @@
                         let choiceCount = choiceElements.length;
                         let isMultipleAnswer = false;
 
+                        // Normalize answerKey to array format
+                        let normalizedAnswerKey = [];
                         if (Array.isArray(answerKey)) {
-                            // More than one answer = multiple choice complex
+                            normalizedAnswerKey = answerKey;
                             isMultipleAnswer = answerKey.length > 1;
                         } else if (answerKey) {
-                            // Convert string to array for existing data
-                            answerKey = [answerKey];
-                        } else {
-                            // Default to empty array
-                            answerKey = [];
+                            // answerKey might be a string like "A" or "B" - convert to index
+                            if (typeof answerKey === 'string') {
+                                // If it's a letter (A, B, C, D), convert to index (0, 1, 2, 3)
+                                if (answerKey.match(/^[A-Z]$/)) {
+                                    let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
+                                    normalizedAnswerKey = [index.toString()];
+                                } else {
+                                    normalizedAnswerKey = [answerKey];
+                                }
+                            } else {
+                                normalizedAnswerKey = [answerKey.toString()];
+                            }
                         }
+
+                        console.log('Normalized answer key:', normalizedAnswerKey);
+                        console.log('Choice elements:', choiceElements.length);
 
                         // True/False uses radio, Multiple choice complex uses checkbox, regular multiple choice uses radio
                         let inputType = choiceCount === 2 ? 'radio' : (isMultipleAnswer ? 'checkbox' : 'radio');
@@ -1231,10 +1095,15 @@
                         choiceElements.forEach((choice, index) => {
                             let id = choice.dataset.choiceId;
                             let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
-                            let checked = Array.isArray(answerKey) && answerKey.includes(id.toString()) ? 'checked' : '';
+
+                            // Check if this choice is in the answer key
+                            let checked = normalizedAnswerKey.includes(id.toString()) || normalizedAnswerKey.includes(id);
+
+                            console.log(`Choice ${id}: text="${text}", checked=${checked}`);
+
                             checkboxes += `
                 <label class="flex items-center gap-2">
-                    <input type="${inputType}" name="answer_key[]" value="${id}" ${checked}>
+                    <input type="${inputType}" name="answer_key[]" value="${id}" ${checked ? 'checked' : ''}>
                     ${text}
                 </label>
             `;
@@ -1300,6 +1169,11 @@
                         let choices = modal.dataset.choices;
                         let answerKey = modal.dataset.answerKey;
 
+                        console.log('Raw modal data:', {
+                            choices: choices,
+                            answerKey: answerKey
+                        });
+
                         try {
                             choices = JSON.parse(choices);
                         } catch (e) {
@@ -1309,13 +1183,26 @@
 
                         try {
                             answerKey = JSON.parse(answerKey);
-                            // Ensure answerKey is always an array for multiple choice questions
-                            if (typeof answerKey === 'string' && choices) {
-                                answerKey = [answerKey];
-                            }
                         } catch (e) {
-                            console.error('Failed to parse answerKey:', e);
-                            answerKey = choices ? [] : '';
+                            console.log('Answer key is not JSON, treating as string:', answerKey);
+                            // Keep as is - might be a letter like "A" or empty string
+                        }
+
+                        // Convert answer key letter to index if needed
+                        // e.g., "A" -> "0", "B" -> "1", ["A","C"] -> ["0","2"]
+                        if (typeof answerKey === 'string' && answerKey.match(/^[A-Z]$/)) {
+                            let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
+                            answerKey = [index.toString()];
+                        } else if (Array.isArray(answerKey)) {
+                            answerKey = answerKey.map(key => {
+                                if (typeof key === 'string' && key.match(/^[A-Z]$/)) {
+                                    return (key.charCodeAt(0) - 65).toString();
+                                }
+                                return key.toString();
+                            });
+                        } else if (!answerKey && choices) {
+                            // Empty answer key for multiple choice
+                            answerKey = [];
                         }
 
                         console.log('Processed modal data:', {
