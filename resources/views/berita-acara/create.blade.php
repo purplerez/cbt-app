@@ -241,7 +241,9 @@
                                 Pilih Pengawas
                             </label>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto border border-gray-300 rounded-md p-4">
-                                @foreach($teachers as $teacher)
+                                <input type="text" name="pengawas[]" id="">
+                                <input type="text" name="pengawas[]" id="">
+                                {{-- @foreach($teachers as $teacher)
                                     <div>
                                         <label class="inline-flex items-center">
                                             <input type="checkbox" name="pengawas[]" value="{{ $teacher->id }}"
@@ -250,7 +252,7 @@
                                             <span class="ml-2 text-sm text-gray-700">{{ $teacher->name }}</span>
                                         </label>
                                     </div>
-                                @endforeach
+                                @endforeach --}}
                             </div>
                             <x-input-error :messages="$errors->get('pengawas')" class="mt-2" />
                         </div>

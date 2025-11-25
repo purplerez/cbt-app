@@ -102,10 +102,14 @@ class KepalaExamController extends Controller
         }
     }
 
-    public function participants($id)
+    public function participants(Request $request, $id)
     {
         // Fetch users (students) who belong to the currently selected school
         $schoolId = session('school_id');
+
+        $selGrade = $request->query('grade_id');
+        $selExam = $request->query('exam_id');
+
 
         $students = User::with(['preassigned' => function ($q) use ($id) {
             $q->where('exam_id', $id);
