@@ -9,6 +9,7 @@
             @if($grade)
                 <p class="text-gray-600">Kelas {{ $grade->name }}</p>
             @endif
+            <p class="text-gray-600 mt-2">Total Skor Maksimal: {{ $totalPossibleScore }}</p>
         </div>
 
         <table class="min-w-full border border-gray-300">
@@ -19,6 +20,8 @@
                     <th class="border border-gray-300 px-4 py-2">Nama Lengkap</th>
                     <th class="border border-gray-300 px-4 py-2">Kelas</th>
                     <th class="border border-gray-300 px-4 py-2">Nilai</th>
+                    <th class="border border-gray-300 px-4 py-2">Total Skor</th>
+                    <th class="border border-gray-300 px-4 py-2">Persentase</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,6 +32,8 @@
                         <td class="border border-gray-300 px-4 py-2">{{ $score['name'] }}</td>
                         <td class="border border-gray-300 px-4 py-2">{{ $score['grade'] }}</td>
                         <td class="border border-gray-300 px-4 py-2 text-right">{{ $score['score'] }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-center">{{ $score['score'] }}/{{ $score['total_possible'] }}</td>
+                        <td class="border border-gray-300 px-4 py-2 text-right">{{ $score['percentage'] }}%</td>
                     </tr>
                 @endforeach
             </tbody>

@@ -3,6 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Student;
+use App\Models\ExamSession;
+use App\Models\StudentAnswer;
+use App\Models\Question;
+use App\Helpers\AnswerKeyHelper;
 use App\Models\Exam;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -17,8 +21,11 @@ class ExamScoreController extends Controller
         try {
             $exam = Exam::findOrFail($examId);
             $schoolId = $request->query('school_id');
-            // there is a possubility that grade_id is not provided
             $gradeId = $request->query('grade_id') ?: null;
+
+            // Get total possible score for this exam
+            $totalPossibleScore = Question::where('exam_id', $examId)
+                ->sum(\DB::raw('CAST(points as DECIMAL(10,2))'));
 
             $query = Student::with(['grade', 'user.examSessions' => function ($query) use ($examId) {
                 $query->where('exam_id', $examId)
@@ -54,25 +61,31 @@ class ExamScoreController extends Controller
 
             $students = $query->get();
 
-            $scores = $students->map(function ($student) use ($examId) {
+            $scores = $students->map(function ($student) use ($examId, $totalPossibleScore) {
                 $lastSession = $student->user->examSessions
                     ->where('exam_id', $examId)
                     ->where('status', 'submited')
                     ->first();
 
+                $totalScore = $lastSession ? (float) $lastSession->total_score : 0;
+                $percentage = ($totalPossibleScore > 0) ? ($totalScore / $totalPossibleScore) * 100 : 0;
+
                 return [
                     'nis' => $student->nis,
                     'name' => $student->name,
                     'grade' => $student->grade->name,
-                    'score' => $lastSession ? number_format((float) $lastSession->total_score, 2) : '0.00'
+                    'score' => number_format($totalScore, 2),
+                    'total_possible' => number_format($totalPossibleScore, 2),
+                    'percentage' => number_format($percentage, 2)
                 ];
             });
 
             $pdf = PDF::loadView('exports.exam-scores', [
                 'scores' => $scores,
                 'exam' => $exam,
-                'school' => $schoolId ? Student::find($scores->first()['id'])->school : null,
-                'grade' => $gradeId ? Student::find($scores->first()['id'])->grade : null
+                'school' => $schoolId ? Student::find($scores->first()['id'] ?? null)->school ?? null : null,
+                'grade' => $gradeId ? Student::find($scores->first()['id'] ?? null)->grade ?? null : null,
+                'totalPossibleScore' => number_format($totalPossibleScore, 2)
             ]);
 
             return $pdf->download('nilai-ujian-' . Str::slug($exam->name) . '.pdf');
