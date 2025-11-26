@@ -279,6 +279,7 @@
                                                 tr.innerHTML = `
                                                     <td class="px-4 py-2 border"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
                                                     <td class="px-4 py-2 border">${s.name}</td>
+                                                    <td class="px-4 py-2 border">${s.grade}</td>
                                                     <td class="px-4 py-2 border">${s.registered ? '<span class="font-semibold text-green-600">Sudah terdaftar</span>' : '<button type="button" data-student-id="'+s.id+'" class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">Daftarkan</button>'}</td>
                                                 `;
                                                 tableBody.appendChild(tr);

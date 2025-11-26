@@ -221,6 +221,7 @@ class KepalaExamController extends Controller
             return [
                 'id' => $u->id,
                 'name' => $u->student->name ?? $u->name,
+                'grade' => $u->student->grade->name ?? '-',
                 'registered' => $registered,
             ];
         });
