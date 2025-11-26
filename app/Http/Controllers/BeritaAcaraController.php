@@ -79,7 +79,7 @@ class BeritaAcaraController extends Controller
         }
 
         $examTypes = Examtype::where('is_active', '1')->get();
-        $exams = Exam::all();
+        $exams = Exam::where('is_active', '1')->get();
         $rooms = Rooms::where('school_id', $defaultSchoolId)->get();
 
         // Get teachers for pengawas
