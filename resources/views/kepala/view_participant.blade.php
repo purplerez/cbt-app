@@ -60,6 +60,7 @@
                             <tr>
                                     <th class="w-1/6 px-4 py-2 border"><input type="checkbox" id="selectAll"></th>
                                 <th class="w-2 px-4 py-2 border">Nama Siswa</th>
+                                <th class="w-2 px-4 py-2 border">Kelas</th>
                                 <th class="px-4 py-2 border w-11">Action</th>
                             </tr>
                         </thead>
@@ -68,6 +69,7 @@
                                 <tr>
                                     <td class="px-4 py-2 border"><input type="checkbox" name="student_ids[]" value="{{$student->id}}"></td>
                                     <td class="px-4 py-2 border">{{ $student->student->name ?? $student->name }}</td>
+                                    <td class="px-4 py-2 border">{{ $student->student->grade->name ?? $student->grade->name ?? '-' }}</td>
                                     <td class="px-4 py-2 border">
                                         @if ($student->preassigned->isNotEmpty())
                                             <span class="font-semibold text-green-600">Sudah terdaftar</span>
@@ -203,7 +205,8 @@
                                             .then(data => {
                                                 // On success, replace button cell with 'Sudah terdaftar'
                                                 const td = btn.closest('td');
-                                                if (td) td.innerHTML = '<span class="font-semibold text-green-600">Sudah terdaftar</span>';
+                                                if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a>';
+                                                // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a> <span class="font-semibold text-green-600">Sudah terdaftar</span>';
                                             })
                                             .catch(async (err) => {
                                                 let msg = 'Gagal mendaftarkan siswa.';
