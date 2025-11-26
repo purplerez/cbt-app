@@ -199,6 +199,38 @@ class KepalaExamController extends Controller
         }
     }
 
+    public function deleteParticipant(Request $request)
+    {
+        try {
+            $data = $request->validate([
+                'student_id' => 'required|integer|exists:users,id',
+                'exam_id' => 'required|integer|exists:exams,id',
+            ]);
+
+            $deleted = Preassigned::where('user_id', $data['student_id'])
+                ->where('exam_id', $data['exam_id'])
+                ->delete();
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => $deleted > 0,
+                    'message' => $deleted > 0 ? 'Berhasil menghapus peserta' : 'Peserta tidak ditemukan'
+                ], 200);
+            }
+
+            if ($deleted > 0) {
+                return redirect()->back()->with('success', 'Berhasil menghapus peserta dari ujian.');
+            } else {
+                return redirect()->back()->with('error', 'Peserta tidak ditemukan.');
+            }
+        } catch (\Exception $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus peserta: ' . $e->getMessage());
+        }
+    }
+
     /**
      * Return students for current school with a flag whether they are preassigned for given exam_id
      */

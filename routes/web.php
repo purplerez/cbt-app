@@ -246,6 +246,8 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
     Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
+        ->name('exams.participants.delete');
     // new route for registering selected students into a chosen exam
     Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
     // ajax: return students + registration status for selected exam_id
@@ -318,6 +320,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
     Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
+        ->name('exams.participants.delete');
     // new route for registering selected students into a chosen exam
     Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
     // ajax: return students + registration status for selected exam_id

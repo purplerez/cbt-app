@@ -162,7 +162,7 @@
                                 }
 
                                 // Attach single-register button handlers (call after rows are rendered)
-                                function attachSingleHandlers(){
+                                function attachActionHandlers(){
                                     const singleButtons = document.querySelectorAll('.single-register-btn');
                                     singleButtons.forEach(btn => {
                                         // remove any existing to avoid double-binding
@@ -205,7 +205,7 @@
                                             .then(data => {
                                                 // On success, replace button cell with 'Sudah terdaftar'
                                                 const td = btn.closest('td');
-                                                if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a>';
+                                                // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a>';
                                                 // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a> <span class="font-semibold text-green-600">Sudah terdaftar</span>';
                                             })
                                             .catch(async (err) => {
@@ -215,7 +215,73 @@
                                             });
                                         });
                                     });
+
+                                    const deleteButtons = document.querySelectorAll('.delete-btn');
+                                    deleteButtons.forEach(btn => {
+                                        btn.replaceWith(btn.cloneNode(true));
+                                    });
+                                    const freshDeleteButtons = document.querySelectorAll('.delete-btn');
+                                    freshDeleteButtons.forEach(btn => {
+                                        btn.addEventListener('click', function() {
+                                            const studentId = this.getAttribute('data-student-id');
+                                            if (!confirm('Konfirmasi: hapus siswa ini dari ujian?')) return;
+
+                                            const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
+                                            const examId = (bulkExamInput && bulkExamInput.value) || (examSelect && examSelect.value);
+                                            if (!examId) {
+                                                alert('Pilih ujian terlebih dahulu');
+                                                return;
+                                            }
+
+                                            @role('kepala')
+                                                const url = '{{ route("kepala.exams.participants.delete") }}';
+                                            @endrole
+                                            @role('guru')
+                                                const url = '{{ route("guru.exams.participants.delete") }}';
+                                            @endrole
+
+                                            fetch(url, {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'X-CSRF-TOKEN': token,
+                                                    'Accept': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest'
+                                                },
+                                                credentials: 'include',
+                                                body: JSON.stringify({ student_id: studentId, exam_id: examId })
+                                            })
+                                            .then(res => {
+                                                if (!res.ok) throw res;
+                                                return res.json();
+                                            })
+                                            .then(data => {
+                                                if (data.success) {
+                                                    const td = btn.closest('td');
+                                                    if (td) {
+                                                        td.innerHTML = `
+                                                            <button type="button" 
+                                                                    data-student-id="${studentId}" 
+                                                                    class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                                Daftarkan
+                                                            </button>
+                                                        `;
+                                                        attachActionHandlers();
+                                                    }
+                                                    alert('Berhasil menghapus peserta dari ujian');
+                                                } else {
+                                                    alert(data.message || 'Gagal menghapus peserta');
+                                                }
+                                            })
+                                            .catch(async (err) => {
+                                                let msg = 'Gagal menghapus peserta.';
+                                                try { const ebody = await err.json(); if (ebody.error) msg = ebody.error; } catch(e){}
+                                                alert(msg);
+                                            });
+                                        });
+                                    });
                                 }
+                                
 
                                 // Load students for a given exam via API and render rows
                                 async function loadStudentsForExam(examId) {
@@ -276,14 +342,27 @@
                                         } else {
                                             json.students.forEach(s => {
                                                 const tr = document.createElement('tr');
-                                                tr.innerHTML = `
-                                                    <td class="px-4 py-2 border"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
-                                                    <td class="px-4 py-2 border">${s.name}</td>
-                                                    <td class="px-4 py-2 border">${s.grade}</td>
-                                                    <td class="px-4 py-2 border">${s.registered ? '<span class="font-semibold text-green-600">Sudah terdaftar</span>' : '<button type="button" data-student-id="'+s.id+'" class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">Daftarkan</button>'}</td>
-                                                `;
-                                                tableBody.appendChild(tr);
-                                            });
+                                                const actionCell = s.registered 
+                                                            ? `<button type="button" 
+                                                                    data-student-id="${s.id}"
+                                                                    class="delete-btn px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+                                                                Hapus dari Mapel
+                                                            </button>`
+                                                            : `<button type="button" 
+                                                                    data-student-id="${s.id}" 
+                                                                    class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                                Daftarkan
+                                                            </button>`;
+                                                        
+                                                        tr.innerHTML = `
+                                                            <td class="px-4 py-2 border"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
+                                                            <td class="px-4 py-2 border">${s.name}</td>
+                                                            <td class="px-4 py-2 border">${s.grade}</td>
+                                                            <td class="px-4 py-2 border">${actionCell}</td>
+                                                        `;
+                                                        tableBody.appendChild(tr);
+                                                    });
+    
                                         }
 
                                         // set hidden bulk input and set selectAll to checked (auto-select rows for bulk)
@@ -296,7 +375,7 @@
                                         // enable bulk button only if there are student rows
                                         if (bulkBtn) bulkBtn.disabled = !(json.students && json.students.length);
                                         // reattach handlers for dynamic buttons
-                                        attachSingleHandlers();
+                                        attachActionHandlers();
                                     } catch (err) {
                                         console.error(err);
                                         alert(err.message || 'Terjadi kesalahan saat memuat siswa.');
@@ -334,7 +413,7 @@
                                 }
 
                                 // attach initial handlers for any server-rendered buttons
-                                attachSingleHandlers();
+                                attachActionHandlers();
                             });
                         </script>
                 </div>
