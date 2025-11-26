@@ -124,10 +124,14 @@ class KepalaExamController extends Controller
 
         $students = User::with(['preassigned' => function ($q) use ($id) {
             $q->where('exam_id', $id);
-        }, 'student'])
+        }, 'student.grade'])
         ->whereHas('student', function ($q) use ($schoolId) {
             $q->where('school_id', $schoolId);
         })
+        ->join('students', 'users.id', '=', 'students.user_id')
+        ->orderBy('students.grade_id', 'asc')
+        ->orderBy('users.name', 'asc')
+        ->select('users.*')
         ->get();
 
         $grade = Grade::where('school_id', $schoolId)->get();
@@ -210,14 +214,20 @@ class KepalaExamController extends Controller
             return response()->json(['error' => 'school not found in session'], 400);
         }
 
-        $users = User::with('student')
+        $users = User::with(['student.grade'])
             ->whereHas('student', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
+            ->join('students', 'users.id', '=', 'students.user_id')
+            ->orderBy('students.grade_id', 'asc')
+            ->select('users.*')
             ->get();
 
         $data = $users->map(function ($u) use ($examId) {
-            $registered = Preassigned::where('user_id', $u->id)->where('exam_id', $examId)->exists();
+            $registered = Preassigned::where('user_id', $u->id)
+            ->where('exam_id', $examId)
+            ->exists();
+
             return [
                 'id' => $u->id,
                 'name' => $u->student->name ?? $u->name,
