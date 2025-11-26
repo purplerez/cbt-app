@@ -129,7 +129,8 @@ class KepalaExamController extends Controller
             $q->where('school_id', $schoolId);
         })
         ->join('students', 'users.id', '=', 'students.user_id')
-        ->orderBy('students.grade_id', 'asc')
+        ->join('grades', 'students.grade_id', '=', 'grades.id')
+        ->orderBy('grades.name', 'asc')
         ->orderBy('users.name', 'asc')
         ->select('users.*')
         ->get();
