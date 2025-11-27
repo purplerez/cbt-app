@@ -138,6 +138,14 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])
     ->name('exam.scores.export');
 
+    // Force Submit Routes
+    Route::post('exam-sessions/{examSession}/force-submit', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitSession'])
+        ->name('exam-sessions.force-submit');
+    Route::post('exam-sessions/force-submit-multiple', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitMultiple'])
+        ->name('exam-sessions.force-submit-multiple');
+    Route::get('exams/{exam}/incomplete-sessions', [\App\Http\Controllers\ForceSubmitController::class, 'getIncompleteSessions'])
+        ->name('exams.incomplete-sessions');
+
     // Route::get('students', [SchoolController::class, 'students'])->name('students');
 
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
