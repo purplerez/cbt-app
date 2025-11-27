@@ -133,7 +133,7 @@
 
                                                                 @csrf
                                                                 {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
-                                                                <button class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                                <button class="px-2 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                                                                     Bank Soal
                                                                 </button>
                                                             </form>
