@@ -106,7 +106,7 @@
                                         <a href="{{ route('guru.student.edit', $student->id)}}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
                                         @endrole --}}
 
-
+{{--
                                         @role('kepala')
                                         <form action="{{route('kepala.student.destroy', $student->id)}}" method="POST" class="inline-block">
                                         @endrole
@@ -117,7 +117,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">Delete</button>
-                                        </form>
+                                        </form> --}}
                                 </tr>
                             @empty
                                 <tr>
