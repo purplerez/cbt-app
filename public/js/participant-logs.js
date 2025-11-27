@@ -167,26 +167,44 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Determine if force submit button should be shown
             const isIncomplete = lastActivity.status && lastActivity.status !== 'submited';
-            const actionButton = isIncomplete ?
-                `<button type="button" class="force-submit-btn px-2 py-1 text-xs text-red-600 hover:text-red-900 hover:underline mr-2" data-session-id="${participant.exam_session_id ?? ''}">Force Submit</button>` +
-                `<button type="button" data-tab="detaillog" data-id="${participant.exam_session_id ?? ''}" class="px-2 py-1 text-xs text-blue-600 hover:text-blue-900 hover:underline">Detail</button>` :
-                `<button type="button" data-tab="detaillog" data-id="${participant.exam_session_id ?? ''}" class="px-3 py-1 text-sm text-blue-600 hover:text-blue-900 hover:underline">Detail</button>`;
+            const sessionId = participant.exam_session_id;
+
+            let actionButtons = '';
+
+            if (isIncomplete && sessionId) {
+                // Show Force Submit + Detail for incomplete sessions
+                actionButtons = `
+                    <div class="flex items-center gap-2">
+                        <button type="button" class="force-submit-btn px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" data-session-id="${sessionId}">
+                            Force Submit
+                        </button>
+                        <button type="button" data-tab="detaillog" data-id="${sessionId}" class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 hover:underline">
+                            Detail
+                        </button>
+                    </div>
+                `;
+            } else {
+                // Show Detail only for completed sessions
+                actionButtons = `<button type="button" data-tab="detaillog" data-id="${sessionId || ''}" class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 hover:underline">Detail</button>`;
+            }
 
             row.innerHTML = `
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.nis ?? '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.name ?? '-'}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${participant.grade ?? participant.grade?.name ?? '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${participant.grade ?? '-'}</td>
                 <td class="px-6 py-4 text-sm">${getStatusBadge(lastActivity.status)}</td>
-                <td class="px-6 py-4 text-sm text-gray-900">${lastActivity.progress ? lastActivity.progress + '%' : '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                    ${actionButton}
+                    ${lastActivity.submit_time ? new Date(lastActivity.submit_time).toLocaleString('id-ID') : (lastActivity.start_time ? new Date(lastActivity.start_time).toLocaleString('id-ID') : '-')}
+                </td>
+                <td class="px-6 py-4 text-sm">
+                    ${actionButtons}
                 </td>
             `;
 
             tbody.appendChild(row);
         });
 
-        // Attach force submit button handlers
+        // Attach force submit button handlers after rendering
         attachForceSubmitHandlers();
     }
 
