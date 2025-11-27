@@ -148,9 +148,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td class="px-6 py-4 text-sm text-center text-gray-900 whitespace-nowrap">${s.total_score ?? '-'}/${s.total_possible ?? '-'}</td>
                         <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                            <!--button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                                 Detail
-                            </button>
+                            </button-->
                         </td>
                     `;
                     scoresBody.appendChild(tr);
