@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             row.innerHTML = `
-                <td class="px-6 py-4 text-sm text-gray-900">test ${participant.nis ?? '-'}</td>
+                <td class="px-6 py-4 text-sm text-gray-900">${participant.nis ?? '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.name ?? '-'}</td>
                 <td class="px-6 py-4 text-sm text-gray-900">${participant.grade ?? '-'}</td>
                 <td class="px-6 py-4 text-sm">${getStatusBadge(lastActivity.status)}</td>
