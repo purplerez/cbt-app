@@ -81,7 +81,7 @@ class BeritaAcaraController extends Controller
         $examTypes = Examtype::where('is_active', '1')->get();
         $exams = Exam::where('is_active', '1')->get();
         $rooms = Rooms::join('exam_types', 'rooms.exam_type_id', '=', 'exam_types.id')
-                    ->where('school_id', $defaultSchoolId)
+                    ->where('rooms.school_id', $defaultSchoolId)
                     ->where('exam_types.is_active', '1')
                     ->get();
 
