@@ -101,27 +101,27 @@
                                                         <tr>
                                                             <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
                                                             <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Materi Ujian</th>
-                                                            <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Bank Soal</th>
+                                                            <th class="px-4 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Bank Soal</th>
                                                             <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Action</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody class="bg-white divide-y divide-gray-200">
                                                         @forelse ($exam as $exam)
                                                     <tr>
-                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                        <td class="px-4 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->id}}
                                                         </td>
-                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                        <td class="px-4 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->title}} <br/>
                                                             <span class="text-xs text-gray-500"> Durasi: {{$exam->duration}} menit | Tanggal Ujian: {{ \Carbon\Carbon::parse($exam->start_date)->format('d M Y H:i') }} - {{ \Carbon\Carbon::parse($exam->end_date)->format('d M Y H:i') }}</span>
                                                         </td>
-                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                        <td class="px-4 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->questions->count()}}
                                                         </td>
                                                         {{-- <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->is_active}}
                                                         </td> --}}
-                                                        <td class="px-6 py-4 text-xs text-gray-800 whitespace-nowrap">
+                                                        <td class="px-4 py-4 text-xs text-gray-800 whitespace-nowrap">
                                                               <div class="flex gap-2">
                                                             @role('admin')
                                                             <form method="post" action="{{ route('admin.exams.question', $exam->id) }}">
@@ -135,17 +135,17 @@
                                                                 {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
                                                                 {{-- smaller size for button --}}
 
-                                                                <button class="px-3 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                                <button class="px-3 py-2 text-xs font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                                                                     Bank Soal
                                                                 </button>
                                                             </form>
 
-                                                                <button type=button class="px-4 py-2 text-sm font-medium text-blue-500 transition bg-white rounded-md ring-2 ring-blue-500 hover:ring-white hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-modal-target="editUjianModal{{ $exam->id }}">Ubah</button>
+                                                                <button type=button class="px-3 py-2 text-xs font-medium text-blue-500 transition bg-white rounded-md ring-2 ring-blue-500 hover:ring-white hover:text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500" data-modal-target="editUjianModal{{ $exam->id }}">Ubah</button>
 
                                                                 @if($exam->is_active == 1)
-                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-red-500 transition bg-white rounded-md ring-2 ring-red-500 hover:bg-red-700 hover:text-white hover:ring-white focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
+                                                                    <button type=button class="px-3 py-2 text-xs font-medium text-red-500 transition bg-white rounded-md ring-2 ring-red-500 hover:bg-red-700 hover:text-white hover:ring-white focus:outline-none focus:ring-2 focus:ring-red-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Arsipkan</button>
                                                                 @else
-                                                                    <button type=button class="px-4 py-2 text-sm font-medium text-green-500 transition bg-white rounded-md ring-2 ring-green-500 hover:text-white hover:bg-green-700 hover:ring-white focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Aktifkan</button>
+                                                                    <button type=button class="px-3 py-2 text-xs font-medium text-green-500 transition bg-white rounded-md ring-2 ring-green-500 hover:text-white hover:bg-green-700 hover:ring-white focus:outline-none focus:ring-2 focus:ring-green-500" data-modal-target="arsipkanUjian{{ $exam->id }}">Aktifkan</button>
                                                                 @endif
 
                                                             {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
