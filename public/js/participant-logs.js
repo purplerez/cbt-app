@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const row = document.createElement('tr');
 
             // Determine if force submit button should be shown
-            const isIncomplete = lastActivity.status && lastActivity.status !== 'submited';
+            const isIncomplete = lastActivity.status !== 'submited';
             const sessionId = participant.exam_session_id;
 
             let actionButtons = '';
