@@ -98,13 +98,13 @@
                                     <td class="px-4 py-2 border">{{ $student->nis }}</td>
                                     <td class="px-4 py-2 border">{{ $student->name }}</td>
                                     <td class="px-4 py-2 border">
-                                        @role('kepala')
+                                        {{-- @role('kepala')
                                         <a href="{{ route('kepala.student.edit', $student->id)}}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
                                         @endrole
 
                                         @role('guru')
                                         <a href="{{ route('guru.student.edit', $student->id)}}" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Edit</a>
-                                        @endrole
+                                        @endrole --}}
 
 
                                         @role('kepala')
