@@ -17,6 +17,9 @@
                 <tr>
                     <th class="px-4 py-2 border border-gray-300">No</th>
                     <th class="px-4 py-2 border border-gray-300">NIS</th>
+                     @if(!$school)
+                        <th class="px-4 py-2 border border-gray-300">Madrasah</th>
+                    @endif
                     <th class="px-4 py-2 border border-gray-300">Nama Lengkap</th>
                     <th class="px-4 py-2 border border-gray-300">Kelas</th>
                     <th class="px-4 py-2 border border-gray-300">Nilai </th>
@@ -29,6 +32,9 @@
                     <tr>
                         <td class="px-4 py-2 text-center border border-gray-300">{{ $index + 1 }}</td>
                         <td class="px-4 py-2 border border-gray-300">{{ $score['nis'] }}</td>
+                        @if(!$school)
+                            <td class="px-4 py-2 border border-gray-300">{{ $score['school'] }}</td>
+                        @endif
                         <td class="px-4 py-2 border border-gray-300">{{ $score['name'] }}</td>
                         <td class="px-4 py-2 border border-gray-300">{{ $score['grade'] }}</td>
                         <td class="px-4 py-2 text-center border border-gray-300">{{ $score['score'] }}/{{ $score['total_possible'] }}</td>

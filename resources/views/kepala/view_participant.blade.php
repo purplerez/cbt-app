@@ -205,7 +205,11 @@
                                             .then(data => {
                                                 // On success, replace button cell with 'Sudah terdaftar'
                                                 const td = btn.closest('td');
-                                                // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a>';
+                                                 if (td) td.innerHTML = ' <button type="button" 
+                                                                    data-student-id="${s.id}"
+                                                                    class="delete-btn px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
+                                                                Hapus dari Mapel
+                                                            </button>';
                                                 // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a> <span class="font-semibold text-green-600">Sudah terdaftar</span>';
                                             })
                                             .catch(async (err) => {

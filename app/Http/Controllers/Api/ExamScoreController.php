@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\DB;
 
 class ExamScoreController extends Controller
 {
-    public function getScores($examId)
+    /*
+    public function getScores(Request $request, $examId)
     {
         try {
-            $schoolId = request()->query('school_id');
-            $gradeId = request()->query('grade_id');
-
+            $schoolId = $request->school_id;
+            $gradeId = $request->grade_id;
+            // $schoolId = $request->query('school_id');
+            // $gradeId = $request->query('grade_id');
             $query = Student::with(['grade', 'user.examSessions' => function ($query) use ($examId) {
                 $query->where('exam_id', $examId)
                     ->where('status', 'submited')
@@ -75,5 +77,45 @@ class ExamScoreController extends Controller
                 'message' => 'Error fetching scores: ' . $e->getMessage()
             ], 500);
         }
+    }
+        */
+    public function getScores(Request $request, $examId)
+    {
+        $schoolId = $request->school_id;
+        $gradeId = $request->grade_id;
+
+        if (!$schoolId) {
+            return response()->json(['error' => 'school_id is required'], 422);
+        }
+
+        // Query siswa
+        $studentsQuery = Student::where('school_id', $schoolId);
+
+        if ($gradeId) {
+            $studentsQuery->where('grade_id', $gradeId);
+        }
+
+        // Ambil siswa beserta skor mereka
+        $students = $studentsQuery->with([
+            'examScores' => function ($query) use ($examId) {
+                $query->where('exam_id', $examId);
+            },
+            'grade'
+        ])->get();
+
+        // Bentuk output sesuai kebutuhan JavaScript
+        $formatted = $students->map(function ($s) {
+            return [
+                'nis'   => $s->nis,
+                'name'  => $s->name,
+                'grade' => $s->grade->name ?? '-',
+                'score' => $s->examScores->first()->score ?? 0
+            ];
+        });
+
+        return response()->json([
+            'students' => $formatted,
+            'total_possible_score' => 100
+        ]);
     }
 }

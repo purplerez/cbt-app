@@ -14,19 +14,34 @@ document.addEventListener('DOMContentLoaded', function() {
     if (schoolDropdown) {
         schoolDropdown.addEventListener('change', function() {
             const schoolId = this.value;
+
+            // Reset grade dropdown
+            gradeDropdown.innerHTML = '<option value="">Semua Kelas</option>';
+
+            // Clear scores table
+            const tbody = document.getElementById('nilai-list-body');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Pilih kelas untuk melihat nilai</td></tr>';
+            }
+
             if (schoolId) {
                 fetchGrades(schoolId);
-                fetchScores();
-            } else {
-                gradeDropdown.innerHTML = '<option value="">Semua Kelas</option>';
-                fetchScores();
             }
+
+            updateExportFields();
+
+                // fetchScores();
+            // } else {
+            //     gradeDropdown.innerHTML = '<option value="">Semua Kelas</option>';
+            //     fetchScores();
+            // }
         });
     }
 
     if (gradeDropdown) {
         gradeDropdown.addEventListener('change', function() {
             fetchScores();
+            updateExportFields();
         });
     }
 
@@ -40,13 +55,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    //  updateExportFields();
+
     // Update export fields when dropdowns change
-    if (schoolDropdown) {
-        schoolDropdown.addEventListener('change', updateExportFields);
-    }
-    if (gradeDropdown) {
-        gradeDropdown.addEventListener('change', updateExportFields);
-    }
+    // if (schoolDropdown) {
+    //     schoolDropdown.addEventListener('change', updateExportFields);
+    // }
+    // if (gradeDropdown) {
+    //     gradeDropdown.addEventListener('change', updateExportFields);
+    // }
 
     // Initial update of export fields
     updateExportFields();
@@ -71,6 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const headers = {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest',
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         };
         if (token) {
@@ -89,10 +107,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchGrades(schoolId) {
         const token = getApiToken();
+        console.log('Fetching grades for school:', schoolId); // Debug
 
         fetch(`/api/admin/schools/${schoolId}/grades`, buildFetchOptions(token))
-            .then(response => response.json())
+            .then(response => {
+                console.log('Grades response status:', response.status); // Debug
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                if (data.error) {
+                    console.error('Error from server:', data.error);
+                    alert('Error: ' + data.error);
+                    return;
+                }
+
                 gradeDropdown.innerHTML = '<option value="">Semua Kelas</option>';
                 data.forEach(grade => {
                     const option = document.createElement('option');
@@ -112,16 +143,47 @@ document.addEventListener('DOMContentLoaded', function() {
         const gradeId = gradeDropdown.value;
         const token = getApiToken();
 
+        if (!schoolId) {
+            const tbody = document.getElementById('nilai-list-body');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Pilih madrasah terlebih dahulu</td></tr>';
+            }
+            return;
+        }
+
+        // Show loading
+        const tbody = document.getElementById('nilai-list-body');
+        if (tbody) {
+            tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Memuat data...</td></tr>';
+        }
+
         fetch(`/api/admin/exam/${examId}/scores?school_id=${schoolId || ''}&grade_id=${gradeId || ''}`, buildFetchOptions(token))
-            .then(response => response.json())
             .then(response => {
-                if (response.success) {
-                    updateScoresTable(response.data);
+                console.log('Scores response status:', response.status); // Debug
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Scores data:', data); // Debug
+
+                if (data.error) {
+                    if (tbody) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">${data.error}</td></tr>`;
+                    }
+                    return;
+                }
+
+                updateScoresTable(data.students || [], data.total_possible_score);
             })
             .catch(error => {
                 console.error('Error fetching scores:', error);
+                if (tbody) {
+                    tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-4 text-center text-red-500">Error: ${error.message}</td></tr>`;
+                }
             });
+
     }
 
     function updateScoresTable(scores) {

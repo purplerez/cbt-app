@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ExamScoreController;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -44,6 +45,10 @@ Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('api.ad
         ->name('exam.participant.logs');
 
     Route::get('/exam/{exam}/scores', [ExamScoreController::class, 'getScores']);
+
+    Route::get('/schools/{schoolId}/grades', [StudentController::class, 'getGradesBySchool'])
+    ->name('school.grades');
+
 });
 
 
@@ -90,4 +95,6 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
 
     Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
         ->name('dashboard.stats');
+
+
 });

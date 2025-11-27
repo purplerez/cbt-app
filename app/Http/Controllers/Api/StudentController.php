@@ -11,6 +11,7 @@ use App\Models\ExamLog;
 use App\Models\Preassigned;
 use App\Models\User;
 use App\Models\ExamSession;
+use App\Models\Grade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -228,4 +229,12 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
+    public function getGradesBySchool($schoolId)
+    {
+        $grades = Grade::where('school_id', $schoolId)->get(['id', 'name']);
+
+        return response()->json($grades);
+    }
+
 }
