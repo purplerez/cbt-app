@@ -257,6 +257,8 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
     // JSON endpoint to fetch scores for a given exam (subject)
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
+    // Export scores as PDF
+    Route::get('/exams/{exam}/export-scores', [KepalaExamController::class, 'exportScoresPDF'])->name('exams.export-scores');
 
     //Route exam details per siswa
     // Route for exam session details

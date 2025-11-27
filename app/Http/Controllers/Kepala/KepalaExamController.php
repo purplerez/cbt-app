@@ -330,6 +330,68 @@ class KepalaExamController extends Controller
         }
     }
 
+    /**
+     * Export exam scores as PDF with header containing school, exam, and grade
+     */
+    public function exportScoresPDF(Request $request, Exam $exam)
+    {
+        try {
+            $schoolId = session('school_id');
+            $gradeId = $request->query('grade_id');
+
+            if (!$schoolId) {
+                return back()->with('error', 'School not found in session');
+            }
+
+            // Get school and grade info
+            $school = \App\Models\School::find($schoolId);
+            $grade = $gradeId ? Grade::find($gradeId) : null;
+
+            // Get total possible score for this exam
+            $totalPossibleScore = Question::where('exam_id', $exam->id)
+                ->sum(\Illuminate\Support\Facades\DB::raw('CAST(points as DECIMAL(10,2))'));
+
+            // Fetch exam sessions with student data
+            $sessions = ExamSession::with(['user.student'])
+                ->where('exam_id', $exam->id)
+                ->whereHas('user.student', function ($q) use ($schoolId, $gradeId) {
+                    $q->where('school_id', $schoolId);
+                    if ($gradeId) {
+                        $q->where('grade_id', $gradeId);
+                    }
+                })
+                ->get();
+
+            $scores = $sessions->map(function ($s, $idx) use ($totalPossibleScore) {
+                $totalScore = (float) ($s->total_score ?? 0);
+                $percentage = ($totalPossibleScore > 0) ? ($totalScore / $totalPossibleScore) * 100 : 0;
+
+                return [
+                    'no' => $idx + 1,
+                    'nis' => $s->user?->student?->nis ?? '-',
+                    'student_name' => $s->user?->name ?? 'N/A',
+                    'grade_name' => $s->user?->student?->grade?->name ?? '-',
+                    'total_score' => number_format($totalScore, 2),
+                    'total_possible' => number_format($totalPossibleScore, 2),
+                    'percentage' => number_format($percentage, 2),
+                ];
+            });
+
+            // Load view and generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.kepala-exam-scores', [
+                'scores' => $scores,
+                'exam' => $exam,
+                'school' => $school,
+                'grade' => $grade,
+                'totalPossibleScore' => number_format($totalPossibleScore, 2),
+            ]);
+
+            return $pdf->download('nilai-ujian-' . \Illuminate\Support\Str::slug($exam->title) . '.pdf');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error exporting scores: ' . $e->getMessage());
+        }
+    }
+
     private function getRoutePrefix()
     {
         $user = auth()->user();

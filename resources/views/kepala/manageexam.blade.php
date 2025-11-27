@@ -46,6 +46,9 @@
                                                 <option value="{{ $grade->id }}">{{ $grade->name }}</option>
                                             @endforeach
                                         </select>
+                                        <button id="exportPdfBtn" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                            Export PDF
+                                        </button>
                                     </div>
                                 </div>
 
@@ -84,6 +87,7 @@
 @push('scripts')
 <script>
 let currentExamId = null;
+let currentSessions = [];
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add grade filter change handler
@@ -95,6 +99,18 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+
+    // Add export PDF button handler
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', function() {
+            const gradeId = document.getElementById('gradeFilter').value;
+            const schoolId = session('school_id'); // Get from session (this will be replaced by server-side variable)
+            const url = `/kepala/exams/${currentExamId}/export-scores?grade_id=${gradeId || ''}`;
+            window.location.href = url;
+        });
+    }
+
     // Attach click handlers for mapel buttons
     document.querySelectorAll('.mapel-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
@@ -133,6 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     return;
                 }
                 const sessions = data.sessions || [];
+                currentSessions = sessions; // Store for export
                 if (!sessions.length) {
                     scoresBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Belum ada sesi untuk mata pelajaran ini.</td></tr>`;
                     return;
