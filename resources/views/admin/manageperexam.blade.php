@@ -854,6 +854,71 @@
             </div>
         </div>
 
+        @push('styles')
+            <style>
+                /* Modal animations */
+                @keyframes fadeIn {
+                    from {
+                        opacity: 0;
+                    }
+                    to {
+                        opacity: 1;
+                    }
+                }
+
+                @keyframes slideUp {
+                    from {
+                        opacity: 0;
+                        transform: translateY(20px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateY(0);
+                    }
+                }
+
+                .animate-in {
+                    animation: fadeIn 0.3s ease-out;
+                }
+
+                .fade-in {
+                    animation: fadeIn 0.3s ease-out;
+                }
+
+                /* Force Submit Button Styles */
+                .force-submit-btn {
+                    transition: all 0.3s ease;
+                    position: relative;
+                }
+
+                .force-submit-btn:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+
+                .force-submit-btn:not(:disabled):hover {
+                    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
+                }
+
+                .force-submit-btn svg {
+                    transition: transform 0.2s ease;
+                }
+
+                .force-submit-btn:not(:disabled):hover svg {
+                    transform: rotate(180deg);
+                }
+
+                /* Modal Styles */
+                .fixed.bg-black {
+                    animation: fadeIn 0.2s ease-out;
+                }
+
+                .fixed.bg-black > div {
+                    animation: slideUp 0.3s ease-out;
+                }
+            </style>
+        @endpush
+
         @push('scripts')
             <script>
                 window.examSessionDetailUrl = "{{ route('admin.exam-sessions.detail', ['examSession' => ':id']) }}";
