@@ -4,12 +4,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportButton = document.getElementById('export_nilai_pdf');
     const examIdElement = document.getElementById('current-exam-id');
 
-    if (!examIdElement) {
-        console.error('Exam ID element not found');
-        return;
+    // Resolve examId from several possible places (hidden input, export form action, or global)
+    let examId = null;
+    if (examIdElement) {
+        examId = examIdElement.value;
+    } else {
+        // Try parse from export form action url
+        const exportForm = document.querySelector('form[action*="/scores/export"]');
+        if (exportForm) {
+            const action = exportForm.getAttribute('action') || '';
+            const m = action.match(/exam\/(\d+)\/scores\/export/);
+            if (m) examId = m[1];
+        }
     }
 
-    const examId = examIdElement.value;
+    // fallback to window.examId if present
+    if (!examId && window.examId) {
+        examId = window.examId;
+    }
+
+    if (!examId) {
+        console.warn('Exam ID not found. Scores fetch and export will be disabled until an exam is available.');
+    }
 
     if (schoolDropdown) {
         schoolDropdown.addEventListener('change', function() {
@@ -139,6 +155,13 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function fetchScores() {
+        if (!examId) {
+            const tbody = document.getElementById('nilai-list-body');
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-4 text-center text-gray-500">Exam ID belum tersedia</td></tr>';
+            }
+            return;
+        }
         const schoolId = schoolDropdown.value;
         const gradeId = gradeDropdown.value;
         const token = getApiToken();

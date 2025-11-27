@@ -95,21 +95,22 @@ class ExamScoreController extends Controller
             $studentsQuery->where('grade_id', $gradeId);
         }
 
-        // Ambil siswa beserta skor mereka
+        // Ambil siswa beserta sesi ujian (examSessions) dan grade
         $students = $studentsQuery->with([
-            'examScores' => function ($query) use ($examId) {
-                $query->where('exam_id', $examId);
+            'examSessions' => function ($query) use ($examId) {
+                $query->where('exam_id', $examId)->where('status', 'submited');
             },
             'grade'
         ])->get();
 
         // Bentuk output sesuai kebutuhan JavaScript
         $formatted = $students->map(function ($s) {
+            $session = $s->examSessions->first();
             return [
                 'nis'   => $s->nis,
                 'name'  => $s->name,
-                'grade' => $s->grade->name ?? '-',
-                'score' => $s->examScores->first()->score ?? 0
+                'grade' => $s->grade?->name ?? '-',
+                'score' => $session?->total_score ?? 0
             ];
         });
 
