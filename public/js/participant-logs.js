@@ -161,18 +161,31 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        participants.forEach(participant => {
+        console.log('Rendering participants:', participants);
+
+        participants.forEach((participant, index) => {
             const lastActivity = participant.last_activity || {};
             const row = document.createElement('tr');
 
+            // Log participant data for debugging
+            console.log(`Participant ${index}:`, {
+                name: participant.name,
+                status: lastActivity.status,
+                sessionId: participant.exam_session_id,
+                lastActivity: lastActivity
+            });
+
             // Determine if force submit button should be shown
-            const isIncomplete = lastActivity.status !== 'submited';
-            const sessionId = participant.exam_session_id;
+            // Show button if status exists AND is not 'submited' AND sessionId exists
+            const hasSession = participant.exam_session_id && participant.exam_session_id !== '';
+            const isNotSubmitted = !lastActivity.status || lastActivity.status !== 'submited';
+            const showForceSubmit = hasSession && isNotSubmitted;
 
             let actionButtons = '';
 
-            if (isIncomplete && sessionId) {
+            if (showForceSubmit) {
                 // Show Force Submit + Detail for incomplete sessions
+                const sessionId = participant.exam_session_id;
                 actionButtons = `
                     <div class="flex items-center gap-2">
                         <button type="button" class="force-submit-btn px-3 py-1.5 text-xs font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" data-session-id="${sessionId}">
@@ -185,7 +198,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 `;
             } else {
                 // Show Detail only for completed sessions
-                actionButtons = `<button type="button" data-tab="detaillog" data-id="${sessionId || ''}" class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 hover:underline">Detail</button>`;
+                const sessionId = participant.exam_session_id || '';
+                actionButtons = `<button type="button" data-tab="detaillog" data-id="${sessionId}" class="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-900 hover:underline">Detail</button>`;
             }
 
             row.innerHTML = `
