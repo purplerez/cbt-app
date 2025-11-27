@@ -242,7 +242,6 @@ class ForceSubmitController extends Controller
     {
         // Get all questions for this exam
         $questions = Question::where('exam_id', $examSession->exam_id)
-            ->where('status', 'active')
             ->get();
 
         if ($questions->isEmpty()) {
@@ -255,18 +254,26 @@ class ForceSubmitController extends Controller
             ];
         }
 
-        // Get student answers
-        $studentAnswers = StudentAnswer::where('session_id', $examSession->id)->get();
+        // Get student answers (stored as JSON in student_answers table)
+        $studentAnswerRecord = StudentAnswer::where('session_id', $examSession->id)->first();
 
-        // Build answers array for scoring service
+        // Extract answers from JSON fields
         $answers = [];
         $essayAnswers = [];
 
-        foreach ($studentAnswers as $answer) {
-            if ($answer->answer_type === 'essay') {
-                $essayAnswers[$answer->question_id] = $answer->answer;
-            } else {
-                $answers[$answer->question_id] = $answer->answer;
+        if ($studentAnswerRecord) {
+            // answers is a JSON object with question_id as key
+            if ($studentAnswerRecord->answers) {
+                $answers = is_array($studentAnswerRecord->answers)
+                    ? $studentAnswerRecord->answers
+                    : json_decode($studentAnswerRecord->answers, true) ?? [];
+            }
+
+            // essay_answers is a JSON object with question_id as key
+            if ($studentAnswerRecord->essay_answers) {
+                $essayAnswers = is_array($studentAnswerRecord->essay_answers)
+                    ? $studentAnswerRecord->essay_answers
+                    : json_decode($studentAnswerRecord->essay_answers, true) ?? [];
             }
         }
 
