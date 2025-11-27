@@ -122,7 +122,7 @@ class StudentsImport implements ToCollection, WithHeadingRow, WithValidation, Sk
                 DB::transaction(function() use ($nis, $nama, $kelasId, $jenisKelamin, $tempatLahir, $parsedDate, $alamat) {
                     $user = User::create([
                         'name' => $nama,
-                        'email' => $nis . '@student.test',
+                        'email' => $nis,
                         'password' => Hash::make($nis),
                         'email_verified_at' => now(),
                     ]);
