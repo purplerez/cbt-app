@@ -1,26 +1,43 @@
+// IMMEDIATE DEBUG - run before anything else
+console.log('📌 participant-logs.js file loaded!');
+
 document.addEventListener('DOMContentLoaded', function () {
+    console.log('=== PARTICIPANT LOGS SCRIPT STARTED ===');
+
     const schoolDropdown = document.getElementById('school_filter_logs');
     const examIdElement = document.getElementById('current-exam-id');
 
+    console.log('✅ schoolDropdown found:', !!schoolDropdown, schoolDropdown);
+    console.log('✅ examIdElement found:', !!examIdElement, examIdElement);
+
     if (!examIdElement) {
-        console.error('Exam ID element not found');
+        console.error('❌ Exam ID element not found - stopping script');
         return;
     }
 
     const examId = examIdElement.value;
-    console.debug('Initializing participant logs with examId:', examId);
+    console.log('✅ Exam ID value:', examId);
+
+    if (!examId) {
+        console.error('❌ Exam ID is empty - stopping script');
+        return;
+    }
 
     // Initialize the view
+    console.log('🔄 Starting to fetch data...');
     if (schoolDropdown) {
+        console.log('✅ School dropdown found, fetching data...');
         fetchStats();
         fetchParticipants();
 
         // Add event listener for school filter
         schoolDropdown.addEventListener('change', function () {
+            console.log('📌 School filter changed');
             fetchStats();
             fetchParticipants();
         });
     } else {
+        console.log('⚠️ School dropdown NOT found, but fetching data anyway...');
         // still attempt to load even if dropdown is missing
         fetchStats();
         fetchParticipants();
@@ -95,10 +112,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const token = getApiToken();
         const url = `/api/admin/exam/${examId}/participants` + (schoolId ? `?school_id=${schoolId}` : '');
 
-        console.debug('Fetching participants', url, { tokenPresent: !!token });
+        console.log('🔄 Fetching participants from:', url);
         fetch(url, buildFetchOptions(token))
-            .then(response => response.json())
             .then(response => {
+                console.log('📡 API Response status:', response.status);
+                return response.json();
+            })
+            .then(response => {
+                console.log('✅ API Response:', response);
                 if (response && response.success) {
                     // response.data may be a paginator or array
                     let participants = [];
@@ -106,14 +127,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     else if (response.data && Array.isArray(response.data.data)) participants = response.data.data;
                     else if (Array.isArray(response)) participants = response;
 
+                    console.log('📊 Participants count:', participants.length);
                     updateParticipantTable(participants);
                 } else {
-                    console.warn('Unexpected participants response, trying session fallback', response);
+                    console.warn('❌ API response not success, trying fallback', response);
                     fetchParticipantsFallback(schoolId);
                 }
             })
             .catch(error => {
-                console.error('Error fetching participants, trying session fallback:', error);
+                console.error('❌ API fetch error, trying fallback:', error);
                 fetchParticipantsFallback(schoolId);
             });
     }
