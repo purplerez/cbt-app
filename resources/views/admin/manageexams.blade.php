@@ -112,7 +112,8 @@
                                                             {{$exam->id}}
                                                         </td>
                                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                            {{$exam->title}}
+                                                            {{$exam->title}} <br/>
+                                                            <span class="text-xs text-gray-500"> Durasi: {{$exam->duration}} menit | Tanggal Ujian: {{ \Carbon\Carbon::parse($exam->start_date)->format('d M Y H:i') }} - {{ \Carbon\Carbon::parse($exam->end_date)->format('d M Y H:i') }}</span>
                                                         </td>
                                                         <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->questions->count()}}
