@@ -88,6 +88,7 @@
 <script>
 let currentExamId = null;
 let currentSessions = [];
+const schoolId = '{{ session("school_id") }}'; // Get school_id from PHP session
 
 document.addEventListener('DOMContentLoaded', function() {
     // Add grade filter change handler
@@ -104,8 +105,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', function() {
+            if (!currentExamId) {
+                alert('Pilih mata pelajaran terlebih dahulu');
+                return;
+            }
             const gradeId = document.getElementById('gradeFilter').value;
-            const schoolId = session('school_id'); // Get from session (this will be replaced by server-side variable)
             const url = `/kepala/exams/${currentExamId}/export-scores?grade_id=${gradeId || ''}`;
             window.location.href = url;
         });
