@@ -11,6 +11,8 @@ use App\Models\Exam;
 use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
+use App\Models\School;
+use App\Models\Grade;
 
 
 class ExamScoreController extends Controller
@@ -80,11 +82,15 @@ class ExamScoreController extends Controller
                 ];
             });
 
+            // Resolve school and grade models directly from the provided IDs (safer than deriving from first student)
+            $schoolModel = $schoolId ? School::find($schoolId) : null;
+            $gradeModel = $gradeId ? Grade::find($gradeId) : null;
+
             $pdf = PDF::loadView('exports.exam-scores', [
                 'scores' => $scores,
                 'exam' => $exam,
-                'school' => $schoolId ? Student::find($scores->first()['id'] ?? null)->school ?? null : null,
-                'grade' => $gradeId ? Student::find($scores->first()['id'] ?? null)->grade ?? null : null,
+                'school' => $schoolModel,
+                'grade' => $gradeModel,
                 'totalPossibleScore' => number_format($totalPossibleScore, 2)
             ]);
 
