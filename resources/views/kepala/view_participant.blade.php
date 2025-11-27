@@ -11,12 +11,7 @@
                 <div class="p-6 text-gray-900">
                         <div class="flex items-center justify-between space-x-4">
                             <div class="flex items-center space-x-4">
-                                @role('kepala')
-                                <form action="{{ route('kepala.students') }}" method="get" class="flex items-center space-x-2">
-                                @endrole
-                                @role('guru')
-                                <form action="{{ route('guru.students') }}" method="get" class="flex items-center space-x-2">
-                                @endrole
+                                <div class="flex items-center space-x-2">
                                     <label for="grade_id" class="sr-only">Kelas</label>
                                     <select name="grade_id" id="grade_id" class="block w-48 border-gray-300 rounded shadow-sm focus:ring-blue-500 focus:border-blue-500">
                                         <option value="">Pilih Kelas</option>
@@ -26,8 +21,7 @@
                                     </select>
 
                                     <x-input-error :messages="$errors->get('grade_id')" class="mt-1" />
-                                    <button type="submit" class="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">Filter</button>
-                                </form>
+                                </div>
 
                                 <!-- Form start - wraps both exam select and student table -->
                                 @role('kepala')
@@ -96,6 +90,8 @@
                                 const bulkExamInput = document.getElementById('bulk_exam_id');
                                 const tableBody = document.querySelector('table tbody');
                                 const bulkBtn = document.getElementById('bulkRegisterBtn');
+                                const gradeFilter = document.getElementById('grade_id');
+                                const examTypeId = '{{ $examId ?? "" }}'; // Store exam type ID from controller
 
                                 // Bulk form submit validation (keeps synchronous post behavior)
                                 if (bulkForm) {
@@ -110,12 +106,10 @@
                                         const checked = document.querySelectorAll('input[name="student_ids[]"]:checked');
                                         const examVal = bulkExamInput ? bulkExamInput.value : '';
                                         if (!examVal) {
-                                            e.preventDefault();
                                             alert('Pilih ujian terlebih dahulu');
                                             return;
                                         }
                                         if (!checked.length) {
-                                            e.preventDefault();
                                             alert('Pilih minimal satu siswa untuk didaftarkan');
                                             return;
                                         }
@@ -172,7 +166,7 @@
                                     freshButtons.forEach(btn => {
                                         btn.addEventListener('click', function() {
                                             const studentId = this.getAttribute('data-student-id');
-                                            if (!confirm('Konfirmasi: daftarkan siswa id=' + studentId + ' ke ujian ini?')) return;
+                                            if (!confirm('Konfirmasi: daftarkan siswa ke ujian ini?')) return;
 
                                             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '{{ csrf_token() }}';
                                             const examId = (bulkExamInput && bulkExamInput.value) || (examSelect && examSelect.value);
@@ -203,14 +197,8 @@
                                                 return res.json().catch(() => ({ success: true }));
                                             })
                                             .then(data => {
-                                                // On success, replace button cell with 'Sudah terdaftar'
-                                                const td = btn.closest('td');
-                                                 if (td) td.innerHTML = ' <button type="button" 
-                                                                    data-student-id="${s.id}"
-                                                                    class="delete-btn px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
-                                                                Hapus dari Mapel
-                                                            </button>';
-                                                // if (td) td.innerHTML = '<a href="{{--  --}}" class="button-delete">Hapus dari Mapel</a> <span class="font-semibold text-green-600">Sudah terdaftar</span>';
+                                                // On success, reload the exam students to refresh table
+                                                loadStudentsForExam(examId);
                                             })
                                             .catch(async (err) => {
                                                 let msg = 'Gagal mendaftarkan siswa.';
@@ -261,17 +249,8 @@
                                             })
                                             .then(data => {
                                                 if (data.success) {
-                                                    const td = btn.closest('td');
-                                                    if (td) {
-                                                        td.innerHTML = `
-                                                            <button type="button" 
-                                                                    data-student-id="${studentId}" 
-                                                                    class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
-                                                                Daftarkan
-                                                            </button>
-                                                        `;
-                                                        attachActionHandlers();
-                                                    }
+                                                    // Reload to refresh table
+                                                    loadStudentsForExam(examId);
                                                     alert('Berhasil menghapus peserta dari ujian');
                                                 } else {
                                                     alert(data.message || 'Gagal menghapus peserta');
@@ -285,79 +264,55 @@
                                         });
                                     });
                                 }
-                                
+
 
                                 // Load students for a given exam via API and render rows
                                 async function loadStudentsForExam(examId) {
                                     // Clear table if no exam selected
                                     if (!examId) {
-                                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Pilih ujian untuk menampilkan siswa.</td></tr>';
+                                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Pilih ujian untuk menampilkan siswa.</td></tr>';
                                         if (bulkExamInput) bulkExamInput.value = '';
                                         return;
                                     }
 
-                                    if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Memuat...</td></tr>';
+                                    if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Memuat...</td></tr>';
                                     if (bulkBtn) bulkBtn.disabled = true; // prevent submit while loading
-                                    const base = '{{ url("/api/kepala/exams") }}';
-                                    const url = base + '/' + examId + '/participants';
+
+                                    // Get grade filter value if present
+                                    const gradeId = gradeFilter ? gradeFilter.value : '';
+
+                                    // Try web route first (more reliable for session-based auth)
                                     try {
-                                        let res = null;
-                                        let json = null;
-                                        try {
-                                            res = await fetch(url, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'include' });
-                                            if (res.ok) {
-                                                json = await res.json();
-                                            } else {
-                                                // If auth problems (401/419) or other server errors, we'll attempt fallback
-                                                console.warn('API fetch failed', res.status);
-                                            }
-                                        } catch (err) {
-                                            console.warn('API fetch error', err);
+                                        const webUrl = '{{ url('/kepala/exams') }}' + '/' + examTypeId + '/students-by-exam?exam_id=' + examId + (gradeId ? '&grade_id=' + gradeId : '');
+                                        const fres = await fetch(webUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'include' });
+
+                                        if (!fres.ok) {
+                                            let msg = 'Gagal memuat data siswa (status ' + (fres.status || 'network') + ')';
+                                            try { const body = await fres.json(); if (body.error) msg = body.error; } catch(e){}
+                                            throw new Error(msg);
                                         }
 
-                                        // Fallback to web route (session-auth) if API didn't return a good result
-                                        if (!json) {
-                                            try {
-                                                // use the examType id (passed to the view as $examId) for the route segment
-                                                // and include the selected exam_id as a query param so the controller receives it
-                                                @role('kepala')
-                                                    const webUrl = '{{ url('/kepala/exams') }}' + '/' + '{{ $examId ?? '' }}' + '/students-by-exam?exam_id=' + examId;
-                                                @endrole
-                                                @role('guru')
-                                                    const webUrl = '{{ url('/guru/exams') }}' + '/' + '{{ $examId ?? '' }}' + '/students-by-exam?exam_id=' + examId;
-                                                @endrole
-                                                const fres = await fetch(webUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'include' });
-                                                if (fres.ok) {
-                                                    json = await fres.json();
-                                                } else {
-                                                    let msg = 'Gagal memuat data siswa (status ' + (fres.status || 'network') + ')';
-                                                    try { const body = await fres.json(); if (body.error) msg = body.error; } catch(e){}
-                                                    throw new Error(msg);
-                                                }
-                                            } catch (err) {
-                                                console.error('Both API and web fallback failed', err);
-                                                throw err;
-                                            }
-                                        }
+                                        const json = await fres.json();
+
                                         if (!tableBody) return;
                                         tableBody.innerHTML = '';
                                         if (!json.students || !json.students.length) {
-                                            tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Tidak ada siswa.</td></tr>';
+                                            tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Tidak ada siswa.</td></tr>';
                                         } else {
                                             json.students.forEach(s => {
                                                 const tr = document.createElement('tr');
-                                                const actionCell = s.registered 
-                                                            ? `<button type="button" 
+                                                const actionCell = s.registered
+                                                            ? `<button type="button"
                                                                     data-student-id="${s.id}"
                                                                     class="delete-btn px-3 py-1.5 bg-red-600 text-white text-sm font-medium rounded hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 transition">
                                                                 Hapus dari Mapel
                                                             </button>`
-                                                            : `<button type="button" 
-                                                                    data-student-id="${s.id}" 
+                                                            : `<button type="button"
+                                                                    data-student-id="${s.id}"
                                                                     class="single-register-btn px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
                                                                 Daftarkan
                                                             </button>`;
-                                                        
+
                                                         tr.innerHTML = `
                                                             <td class="px-4 py-2 border"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
                                                             <td class="px-4 py-2 border">${s.name}</td>
@@ -366,7 +321,7 @@
                                                         `;
                                                         tableBody.appendChild(tr);
                                                     });
-    
+
                                         }
 
                                         // set hidden bulk input and set selectAll to checked (auto-select rows for bulk)
@@ -383,7 +338,7 @@
                                     } catch (err) {
                                         console.error(err);
                                         alert(err.message || 'Terjadi kesalahan saat memuat siswa.');
-                                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="3" class="text-center">Gagal memuat data siswa.</td></tr>';
+                                        if (tableBody) tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Gagal memuat data siswa.</td></tr>';
                                     }
                                 }
 
@@ -399,6 +354,7 @@
                                     singleBtns.forEach(b => b.disabled = !examId);
                                 }
 
+                                // Handle exam dropdown change
                                 if (examSelect) {
                                     examSelect.addEventListener('change', function() {
                                         const examId = this.value;
@@ -414,6 +370,24 @@
                                     if (examSelect.value) {
                                         loadStudentsForExam(examSelect.value);
                                     }
+                                }
+
+                                // Handle grade filter change - reload exam students with new grade filter
+                                // The grade filter is now a standalone select (not in a form)
+                                // It should reload the current exam's students when changed
+                                if (gradeFilter) {
+                                    gradeFilter.addEventListener('change', function() {
+                                        const currentExamId = examSelect ? examSelect.value : '';
+                                        if (currentExamId) {
+                                            // Reload students for selected exam with the new grade filter
+                                            loadStudentsForExam(currentExamId);
+                                        } else {
+                                            // If no exam selected, show message to select exam first
+                                            if (tableBody) {
+                                                tableBody.innerHTML = '<tr><td colspan="4" class="text-center">Pilih ujian terlebih dahulu untuk melihat siswa berdasarkan kelas.</td></tr>';
+                                            }
+                                        }
+                                    });
                                 }
 
                                 // attach initial handlers for any server-rendered buttons

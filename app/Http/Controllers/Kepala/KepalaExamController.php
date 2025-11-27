@@ -237,6 +237,7 @@ class KepalaExamController extends Controller
     public function studentsByExam($examTypeId, Request $request)
     {
         $examId = $request->query('exam_id');
+        $gradeId = $request->query('grade_id');
 
         if (!$examId) {
             return response()->json(['error' => 'exam_id is required'], 400);
@@ -247,13 +248,19 @@ class KepalaExamController extends Controller
             return response()->json(['error' => 'school not found in session'], 400);
         }
 
-        $users = User::with(['student.grade'])
+        $query = User::with(['student.grade'])
             ->whereHas('student', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
             ->join('students', 'users.id', '=', 'students.user_id')
-            ->join('grades', 'students.grade_id', '=', 'grades.id')
-            ->orderBy('grades.name', 'asc')
+            ->join('grades', 'students.grade_id', '=', 'grades.id');
+
+        // Apply grade filter if provided
+        if ($gradeId) {
+            $query->where('students.grade_id', $gradeId);
+        }
+
+        $users = $query->orderBy('grades.name', 'asc')
             ->orderBy('users.name', 'asc')
             ->select('users.*')
             ->get();
