@@ -121,7 +121,7 @@
                                                         {{-- <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                             {{$exam->is_active}}
                                                         </td> --}}
-                                                        <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
+                                                        <td class="px-6 py-4 text-xs text-gray-800 whitespace-nowrap">
                                                               <div class="flex gap-2">
                                                             @role('admin')
                                                             <form method="post" action="{{ route('admin.exams.question', $exam->id) }}">
@@ -133,7 +133,9 @@
 
                                                                 @csrf
                                                                 {{-- <input type="hidden" name="id" value="{{$exam->id}}"> --}}
-                                                                <button class="px-2 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                                                                {{-- smaller size for button --}}
+
+                                                                <button class="px-3 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
                                                                     Bank Soal
                                                                 </button>
                                                             </form>
