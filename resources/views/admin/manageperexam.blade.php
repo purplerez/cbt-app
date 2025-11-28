@@ -856,74 +856,14 @@
 
         @push('styles')
             <style>
-                /* Modal animations */
-                @keyframes fadeIn {
-                    from {
-                        opacity: 0;
-                    }
-                    to {
-                        opacity: 1;
-                    }
-                }
-
-                @keyframes slideUp {
-                    from {
-                        opacity: 0;
-                        transform: translateY(20px);
-                    }
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-
-                .animate-in {
-                    animation: fadeIn 0.3s ease-out;
-                }
-
-                .fade-in {
-                    animation: fadeIn 0.3s ease-out;
-                }
-
-                /* Force Submit Button Styles */
+                /* Minimal Force Submit Button Styles */
                 .force-submit-btn {
                     background-color: #dc2626;
                     color: white;
-                    transition: all 0.3s ease;
-                    position: relative;
                 }
 
                 .force-submit-btn:hover {
                     background-color: #b91c1c;
-                    box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.4);
-                    transform: translateY(-2px);
-                }
-
-                .force-submit-btn:active {
-                    transform: translateY(0);
-                }
-
-                .force-submit-btn:disabled {
-                    opacity: 0.6;
-                    cursor: not-allowed;
-                    background-color: #9ca3af;
-                }
-
-                .force-submit-btn svg {
-                    transition: transform 0.2s ease;
-                }
-
-                .force-submit-btn:not(:disabled):hover svg {
-                    transform: rotate(180deg);
-                }
-
-                /* Modal Styles */
-                .fixed.bg-black {
-                    animation: fadeIn 0.2s ease-out;
-                }
-
-                .fixed.bg-black > div {
-                    animation: slideUp 0.3s ease-out;
                 }
             </style>
         @endpush
