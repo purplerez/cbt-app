@@ -161,13 +161,24 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             <div class="flex space-x-2">
-                                                <a href="{{ route('kepala.berita-acara.show', $ba) }}"
-                                                   class="text-blue-600 hover:text-blue-900" title="Lihat">
+                                                <form action="{{route('kepala.berita-acara.destroy')}}" method="post">
+                                                    @csrf
+                                                        @method('DELETE')
+                                                    <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus berita acara ini?');" class="text-red-600 hover:text-red-900" title="Hapus">
+
                                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M9 7h6m-7 0h8m-5-3h2a1 1 0 011 1v1H8V5a1 1 0 011-1h2z" />
                                                     </svg>
-                                                </a>
+                                                    </button>
+                                                    <input type="hidden" name="berita_acara_id" value="{{ $ba->id }}">
+                                                </form>
+                                                {{-- <a href="{{ route('kepala.berita-acara.des', $ba) }}"
+                                                   class="text-blue-600 hover:text-blue-900" title="Lihat"> --}}
+
+                                                {{-- </a> --}}
                                                 @if($ba->canBeEdited() && auth()->user()->hasRole('kepala'))
                                                     <a href="{{ route('kepala.berita-acara.edit', $ba) }}"
                                                        class="text-yellow-600 hover:text-yellow-900" title="Edit">

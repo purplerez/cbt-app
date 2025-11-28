@@ -278,15 +278,26 @@ class BeritaAcaraController extends Controller
     /**
      * Remove the specified berita acara
      */
-    public function destroy(BeritaAcara $beritaAcara)
+    public function destroy(Request $request)
     {
-        // Only draft can be deleted
-        if ($beritaAcara->status !== 'draft') {
+        // dd($request->all());
+        try{
+
+        $beritaAcaraId = $request->input('berita_acara_id');
+        $beritaAcara = BeritaAcara::findOrFail($beritaAcaraId);
+
+        return $this->deleteBeritaAcara($beritaAcara);
+        }
+        catch(\Exception $e){
             return redirect()
-                ->back()
-                ->withErrors(['error' => 'Hanya Berita Acara dengan status Draft yang dapat dihapus']);
+            ->back()
+            ->withErrors(['error' => 'Berita Acara tidak ditemukan']);
         }
 
+    }
+
+    private function deleteBeritaAcara(BeritaAcara $beritaAcara)
+    {
         try {
             $nomorBA = $beritaAcara->nomor_ba;
             $beritaAcara->delete();
