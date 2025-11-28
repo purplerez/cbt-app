@@ -295,13 +295,15 @@
                                             <div id="editSoalModal{{ $q->id }}"
                                                 class="fixed inset-0 z-50 hidden overflow-y-auto"
                                                 data-choices="{{ $q->choices }}"
-                                                data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : json_encode([$q->answer_key]) }}">
+                                                data-choice-images="{{ $q->choices_images }}"
+                                                data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : json_encode([$q->answer_key]) }}"
+                                                data-question-type="{{ $q->question_type_id }}">
                                                 <div class="min-h-screen px-4 text-center">
                                                     <div
                                                         class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
                                                     </div>
                                                     <div
-                                                        class="inline-block w-full max-w-md p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                        class="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
                                                         <div class="flex items-center justify-between pb-3 border-b">
                                                             <h3 class="text-lg font-medium text-gray-900">Ubah Soal
                                                                 #{{ $q->id }}</h3>
@@ -320,32 +322,89 @@
                                                         <form
                                                             action="{{ route('admin.exams.question.update', $q->id) }}"
                                                             method="post" enctype="multipart/form-data"
-                                                            class="mt-4">
+                                                            class="mt-4 max-h-96 overflow-y-auto">
                                                             @csrf
                                                             @method('PUT')
                                                             <div class="space-y-4">
                                                                 <div>
-                                                                    <label
-                                                                        class="block text-sm font-medium text-gray-700">Pertanyaan</label>
-                                                                    <textarea name="question_text" rows="3" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">{{ $q->question_text }}</textarea>
+                                                                    <label for="question_text_{{ $q->id }}"
+                                                                    class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                                    <textarea id="question_text_{{ $q->id }}" name="question_text" rows="3"
+                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
                                                                 </div>
+
+                                                                <!-- Question Image Section -->
+                                                                <div>
+                                                                    <label for="question_image_{{ $q->id }}" class="block text-sm font-medium text-gray-700">
+                                                                        Gambar Soal (Opsional)
+                                                                    </label>
+                                                                    <input type="file" id="question_image_{{ $q->id }}"
+                                                                        name="question_image" accept="image/*"
+                                                                        class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                                        onchange="previewEditQuestionImage(this, {{ $q->id }})">
+
+                                                                    <!-- Current Image Preview -->
+                                                                    @if ($q->question_image)
+                                                                        <div class="mt-2 p-2 bg-gray-100 rounded">
+                                                                            <p class="text-xs font-medium text-gray-600 mb-1">Gambar Saat Ini:</p>
+                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Current" class="max-w-xs rounded max-h-32">
+                                                                        </div>
+                                                                    @endif
+
+                                                                    <!-- New Image Preview -->
+                                                                    <div id="edit_question_image_preview_{{ $q->id }}" class="hidden mt-2 p-2 bg-gray-100 rounded">
+                                                                        <p class="text-xs font-medium text-gray-600 mb-1">Preview Gambar Baru:</p>
+                                                                        <img src="" alt="New Preview" class="max-w-xs rounded max-h-32">
+                                                                    </div>
+                                                                </div>
+
                                                                 @if ($q->question_type_id != 3)
                                                                     <div>
                                                                         <label
                                                                             class="block text-sm font-medium text-gray-700">Pilihan
                                                                             Jawaban</label>
                                                                         <div id="edit-choices-container-{{ $q->id }}"
-                                                                            class="space-y-2">
+                                                                            class="space-y-4">
                                                                             @if ($q->choices)
-                                                                                @foreach (json_decode($q->choices, true) as $key => $choice)
-                                                                                    <div class="edit-choice-item"
+                                                                                @php
+                                                                                    $choices = json_decode($q->choices, true);
+                                                                                    $choicesImages = json_decode($q->choices_images, true) ?? [];
+                                                                                @endphp
+                                                                                @foreach ($choices as $key => $choice)
+                                                                                    <div class="edit-choice-item border-l-4 border-blue-400 pl-4"
                                                                                         data-choice-id="{{ $key }}">
-                                                                                        <textarea name="choices[{{ $key }}]" rows="2" class="block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
+                                                                                        <div class="space-y-2">
+                                                                                            <textarea name="choices[{{ $key }}]" rows="2" class="block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
+
+                                                                                            <div>
+                                                                                                <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                                <input type="file"
+                                                                                                    name="choice_images[{{ $key }}]"
+                                                                                                    accept="image/*"
+                                                                                                    class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                                                                    onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
+
+                                                                                                <!-- Current Image Preview -->
+                                                                                                @if (isset($choicesImages[$key]))
+                                                                                                    <div class="mt-2 p-2 bg-gray-100 rounded">
+                                                                                                        <p class="text-xs font-medium text-gray-600 mb-1">Gambar Saat Ini:</p>
+                                                                                                        <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Current" class="max-w-xs rounded max-h-32">
+                                                                                                    </div>
+                                                                                                @endif
+
+                                                                                                <!-- New Image Preview -->
+                                                                                                <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}" class="hidden mt-2 p-2 bg-gray-100 rounded">
+                                                                                                    <p class="text-xs font-medium text-gray-600 mb-1">Preview Gambar Baru:</p>
+                                                                                                    <img src="" alt="New Preview" class="max-w-xs rounded max-h-32">
+                                                                                                </div>
+                                                                                            </div>
+                                                                                        </div>
                                                                                     </div>
                                                                                 @endforeach
                                                                             @endif
                                                                         </div>
                                                                     </div>
+
                                                                     <div>
                                                                         <label
                                                                             class="block text-sm font-medium text-gray-700">Kunci
@@ -364,6 +423,7 @@
                                                                         <textarea name="answer_key" rows="3" class="block w-full mt-1 border-gray-300 rounded-md">{{ $q->answer_key }}</textarea>
                                                                     </div>
                                                                 @endif
+
                                                                 <div>
                                                                     <label
                                                                         class="block text-sm font-medium text-gray-700">Point</label>
@@ -371,10 +431,16 @@
                                                                         value="{{ $q->points }}"
                                                                         class="block w-full mt-1 border-gray-300 rounded-md">
                                                                 </div>
-                                                                <div>
+
+                                                                <div class="flex gap-2">
                                                                     <button type="submit"
                                                                         class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
                                                                         Update Soal
+                                                                    </button>
+                                                                    <button type="button"
+                                                                        onclick="closeModal('editSoalModal{{ $q->id }}')"
+                                                                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
+                                                                        Batal
                                                                     </button>
                                                                 </div>
                                                             </div>
@@ -407,99 +473,16 @@
 
                                                 <!-- Import/Export Buttons -->
                                                 <div class="flex gap-2 mb-4">
-                                                    @role('admin')
-                                                        <form
-                                                            action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
-                                                            method="POST" enctype="multipart/form-data"
-                                                            class="flex items-center space-x-2">
-                                                            @csrf
-                                                            <input type="file" name="excel_file" id="excel_file_admin"
-                                                                accept=".xlsx, .xls" class="hidden"
-                                                                onchange="this.form.submit()">
-                                                            <button type="button"
-                                                                onclick="document.getElementById('excel_file_admin').click()"
-                                                                class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
-                                                                    </path>
-                                                                </svg>
-                                                                Import Excel
-                                                            </button>
-                                                            <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
-                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
-                                                                    </path>
-                                                                </svg>
-                                                                Download Template
-                                                            </a>
-                                                        </form>
-                                                        <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                                                            Export Soal
-                                                        </a>
-                                                    @endrole
-                                                    @role('super')
-                                                        <form
-                                                            action="{{ route('super.exams.questions.import', session('perexamid')) }}"
-                                                            method="POST" enctype="multipart/form-data"
-                                                            class="flex items-center space-x-2">
-                                                            @csrf
-                                                            <input type="file" name="excel_file" id="excel_file_super"
-                                                                accept=".xlsx, .xls" class="hidden"
-                                                                onchange="this.form.submit()">
-                                                            <button type="button"
-                                                                onclick="document.getElementById('excel_file_super').click()"
-                                                                class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
-                                                                    </path>
-                                                                </svg>
-                                                                Import Excel
-                                                            </button>
-                                                            <a href="{{ route('super.exams.questions.template', session('perexamid')) }}"
-                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                                <svg class="w-4 h-4 mr-1" fill="none"
-                                                                    stroke="currentColor" viewBox="0 0 24 24"
-                                                                    xmlns="http://www.w3.org/2000/svg">
-                                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                                        stroke-width="2"
-                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
-                                                                    </path>
-                                                                </svg>
-                                                                Download Template
-                                                            </a>
-                                                        </form>
-                                                        <a href="{{ route('super.exams.questions.export', session('perexamid')) }}"
-                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                                                            Export Soal
-                                                        </a>
-                                                    @endrole
+
                                                 </div>
 
-                                                @role('admin')
+
                                                     <form
                                                         action="{{ route('admin.exams.question.store', session('perexamid')) }}"
                                                         method="post" enctype="multipart/form-data" class="mb-4">
-                                                    @endrole
 
-                                                    @role('super')
-                                                        <form
-                                                            action="{{ route('super.exams.question.store', session('perexamid')) }}"
-                                                            method="post" enctype="multipart/form-data" class="mb-4">
-                                                        @endrole
+
+
 
                                                         @csrf
                                                         <div class="space-y-4">
@@ -966,7 +949,10 @@
                 // Preview functions for edit modals
                 function previewEditQuestionImage(input, questionId) {
                     const preview = document.getElementById('edit_question_image_preview_' + questionId);
+                    if (!preview) return;
+
                     const img = preview.querySelector('img');
+                    if (!img) return;
 
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
@@ -982,7 +968,10 @@
 
                 function previewEditChoiceImage(input, questionId, choiceId) {
                     const preview = document.getElementById('edit_choice_image_preview_' + questionId + '_' + choiceId);
+                    if (!preview) return;
+
                     const img = preview.querySelector('img');
+                    if (!img) return;
 
                     if (input.files && input.files[0]) {
                         const reader = new FileReader();
@@ -1025,11 +1014,12 @@
                     console.log('Updated answer key:', currentAnswerKeys[questionId]);
                 }
 
-                function initEditForm(questionId, choices, answerKey) {
+                function initEditForm(questionId, choices, answerKey, questionType) {
                     console.log('Init Edit Form with:', {
                         questionId,
                         choices,
-                        answerKey
+                        answerKey,
+                        questionType
                     });
 
                     // Initialize current answer key for this question
@@ -1075,43 +1065,55 @@
                             return;
                         }
 
-                        // Determine if it's multiple choice or single choice
-                        let choiceCount = choiceElements.length;
-                        let isMultipleAnswer = false;
-
                         // Normalize answerKey to array format
                         let normalizedAnswerKey = [];
                         if (Array.isArray(answerKey)) {
-                            normalizedAnswerKey = answerKey;
-                            isMultipleAnswer = answerKey.length > 1;
+                            // Convert to integers
+                            normalizedAnswerKey = answerKey.map(k => {
+                                const parsed = parseInt(k);
+                                return !isNaN(parsed) ? parsed : k;
+                            });
                         } else if (answerKey) {
                             // answerKey might be a string like "A" or "B" - convert to index
                             if (typeof answerKey === 'string') {
                                 // If it's a letter (A, B, C, D), convert to index (0, 1, 2, 3)
                                 if (answerKey.match(/^[A-Z]$/)) {
                                     let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
-                                    normalizedAnswerKey = [index.toString()];
+                                    normalizedAnswerKey = [index];
                                 } else {
-                                    normalizedAnswerKey = [answerKey];
+                                    normalizedAnswerKey = [parseInt(answerKey) || answerKey];
                                 }
                             } else {
-                                normalizedAnswerKey = [answerKey.toString()];
+                                normalizedAnswerKey = [parseInt(answerKey) || answerKey];
                             }
                         }
 
                         console.log('Normalized answer key:', normalizedAnswerKey);
                         console.log('Choice elements:', choiceElements.length);
+                        console.log('Question type:', questionType);
 
-                        // True/False uses radio, Multiple choice complex uses checkbox, regular multiple choice uses radio
-                        let inputType = choiceCount === 2 ? 'radio' : (isMultipleAnswer ? 'checkbox' : 'radio');
+                        // Determine input type:
+                        // questionType 1 = PG Kompleks (multiple answers) → checkbox
+                        // questionType 2 = True/False → radio
+                        // questionType 0 = PG (single answer) → radio
+                        let inputType = 'radio';
+                        if (questionType === 1 || questionType === '1') {
+                            inputType = 'checkbox'; // PG Kompleks uses checkbox
+                        } else if (choiceElements.length === 2) {
+                            inputType = 'radio'; // True/False uses radio
+                        }
 
                         let checkboxes = '';
                         choiceElements.forEach((choice, index) => {
-                            let id = choice.dataset.choiceId;
+                            // Use string ID to match form input names (choices[1], choices[2], etc)
+                            let id = choice.dataset.choiceId.toString();
                             let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
 
+                            // Normalize answer key for comparison (convert all to strings for consistency)
+                            let normalizedForComparison = normalizedAnswerKey.map(k => k.toString());
+                            
                             // Check if this choice is in the answer key
-                            let checked = normalizedAnswerKey.includes(id.toString()) || normalizedAnswerKey.includes(id);
+                            let checked = normalizedForComparison.includes(id);
 
                             console.log(`Choice ${id}: text="${text}", checked=${checked}`);
 
@@ -1182,10 +1184,12 @@
                         // Get data from modal's dataset
                         let choices = modal.dataset.choices;
                         let answerKey = modal.dataset.answerKey;
+                        let questionType = modal.dataset.questionType;
 
                         console.log('Raw modal data:', {
                             choices: choices,
-                            answerKey: answerKey
+                            answerKey: answerKey,
+                            questionType: questionType
                         });
 
                         try {
@@ -1221,10 +1225,11 @@
 
                         console.log('Processed modal data:', {
                             choices: choices,
-                            answerKey: answerKey
+                            answerKey: answerKey,
+                            questionType: questionType
                         });
 
-                        initEditForm(questionId, choices, answerKey);
+                        initEditForm(questionId, choices, answerKey, questionType);
                     }
                 }
             </script>

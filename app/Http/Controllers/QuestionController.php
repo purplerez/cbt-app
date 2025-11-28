@@ -33,6 +33,12 @@ class QuestionController extends Controller
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
 
+            // Cast answer_key values to integers ONLY if it's an array (multiple choice)
+            if (is_array($answerKey)) {
+                $answerKey = array_map('intval', $answerKey);
+                $request->merge(['answer_key' => $answerKey]);
+            }
+
             // type : 0 pilihan ganda, 1 pilihan ganda kompleks
             // type : 2 benar salah, 3 esai
             if (is_array($choices) && count($choices) > 2) {
@@ -52,6 +58,9 @@ class QuestionController extends Controller
             }
 
             if ($type != 3) {
+                // Build validation rules with proper in: rule for answer_key
+                $validChoiceKeys = implode(',', array_keys($choices));
+
                 $rules = [
                     'question_text' => 'required_without:question_image|string|nullable',
                     'question_image' => 'required_without:question_text|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -59,7 +68,7 @@ class QuestionController extends Controller
                     'choices.*' => 'required_without:choice_images.*|string|nullable|max:255',
                     'choice_images.*' => 'required_without:choices.*|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
-                    'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
+                    'answer_key.*' => 'required|integer|in:' . $validChoiceKeys,
                     'points' => 'required|numeric|min:1'
                 ];
 
@@ -73,7 +82,11 @@ class QuestionController extends Controller
 
                 $validated = $request->validate($rules, $messages);
                 $validated['choices'] = json_encode($validated['choices']);
-                $validated['answer_key'] = json_encode($validated['answer_key']);
+
+                // Sort answer_key numerically to maintain consistent order regardless of checkbox click order
+                $answerKeyArray = $validated['answer_key'];
+                sort($answerKeyArray, SORT_NUMERIC);
+                $validated['answer_key'] = json_encode($answerKeyArray);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
@@ -138,8 +151,33 @@ class QuestionController extends Controller
         // dd($request->all());
         DB::beginTransaction();
         try {
+            $question = Question::findOrFail($exam);
+
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
+
+            // Cast answer_key values to integers ONLY if it's an array (multiple choice)
+            if (is_array($answerKey)) {
+                $answerKey = array_map('intval', $answerKey);
+                $request->merge(['answer_key' => $answerKey]);
+            }
+
+            // Preserve existing choice text if not provided in update
+            $existingChoices = $question->choices ? json_decode($question->choices, true) : [];
+            foreach ($choices as $key => $choice) {
+                if (empty($choice) && isset($existingChoices[$key])) {
+                    $choices[$key] = $existingChoices[$key];
+                }
+            }
+
+            // Ensure choice keys are strings for consistency with form input names
+            $choices = array_combine(
+                array_map('strval', array_keys($choices)),
+                array_values($choices)
+            );
+
+            $request->merge(['choices' => $choices]);
+
             $type = '';
 
             // type : 0 pilihan ganda, 1 pilihan ganda kompleks
@@ -161,6 +199,9 @@ class QuestionController extends Controller
             }
 
             if ($type != '3') {
+                // Build validation rules with proper in: rule for answer_key
+                $validChoiceKeys = implode(',', array_keys($choices));
+
                 $validated = $request->validate([
                     'question_text' => 'required|string',
                     'question_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
@@ -168,11 +209,15 @@ class QuestionController extends Controller
                     'choices.*' => 'required|string|max:255',
                     'choice_images.*' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
                     'answer_key' => 'required|array|min:1',
-                    'answer_key.*' => 'required|integer|in:' . implode(',', array_keys($choices)),
+                    'answer_key.*' => 'required|integer|in:' . $validChoiceKeys,
                     'points' => 'required|numeric|min:1'
                 ]);
                 $validated['choices'] = json_encode($validated['choices']);
-                $validated['answer_key'] = json_encode($validated['answer_key']);
+
+                // Sort answer_key numerically to maintain consistent order regardless of checkbox click order
+                $answerKeyArray = $validated['answer_key'];
+                sort($answerKeyArray, SORT_NUMERIC);
+                $validated['answer_key'] = json_encode($answerKeyArray);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
@@ -197,8 +242,6 @@ class QuestionController extends Controller
             if (!isset($roleRoutes[$role])) {
                 throw new \Exception('Anda tidak memiliki akses untuk merubah soal');
             }
-
-            $question = Question::findOrFail($exam);
 
             // Handle question image upload
             if ($request->hasFile('question_image')) {
