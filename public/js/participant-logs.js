@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const sessionId = participant.exam_session_id;
                 actionButtons = `
                     <div class="flex items-center gap-2">
-                        <button type="button" class="force-submit-btn px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 inline-flex items-center gap-1.5" data-session-id="${sessionId}" title="Paksa submit ujian ini">
+                        <button type="button" class="force-submit-btn px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-all duration-200 inline-flex items-center gap-1.5" data-session-id="${sessionId}" title="Paksa submit ujian ini">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8l-4-2m4 2l4-2"></path></svg>
                             Force Submit
                         </button>

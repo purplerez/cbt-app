@@ -887,17 +887,26 @@
 
                 /* Force Submit Button Styles */
                 .force-submit-btn {
+                    background-color: #dc2626;
+                    color: white;
                     transition: all 0.3s ease;
                     position: relative;
+                }
+
+                .force-submit-btn:hover {
+                    background-color: #b91c1c;
+                    box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.4);
+                    transform: translateY(-2px);
+                }
+
+                .force-submit-btn:active {
+                    transform: translateY(0);
                 }
 
                 .force-submit-btn:disabled {
                     opacity: 0.6;
                     cursor: not-allowed;
-                }
-
-                .force-submit-btn:not(:disabled):hover {
-                    box-shadow: 0 10px 15px -3px rgba(220, 38, 38, 0.3);
+                    background-color: #9ca3af;
                 }
 
                 .force-submit-btn svg {
