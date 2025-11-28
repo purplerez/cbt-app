@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const sessionId = participant.exam_session_id;
                 actionButtons = `
                     <div class="flex items-center gap-2">
-                        <button type="button" class="force-submit-btn px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" onclick="forceSubmitExam(${sessionId})" title="Paksa submit ujian ini">
+                        <button type="button" class="force-submit-btn px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" data-session-id="${sessionId}" title="Paksa submit ujian ini">
                             Force Submit
                         </button>
                         <button type="button" data-tab="detaillog" data-id="${sessionId}" class="px-3 py-2 text-sm font-medium text-blue-600 border border-blue-300 hover:border-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
@@ -256,16 +256,72 @@ document.addEventListener('DOMContentLoaded', function () {
         return badges[status] || '<span class="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">Unknown</span>';
     }
 
+    function attachForceSubmitHandlers() {
+        document.addEventListener('click', function (event) {
+            if (event.target.matches('button.force-submit-btn')) {
+                const sessionId = event.target.getAttribute('data-session-id');
+                if (sessionId) {
+                    forceSubmitExam(sessionId);
+                }
+            }
+        });
+    }
+
     function forceSubmitExam(sessionId) {
-        if (!confirm('Apakah Anda yakin ingin force submit ujian peserta ini?\n\nSistem akan menghitung skor berdasarkan jawaban yang sudah diisi.')) {
-            return;
-        }
-        performForceSubmit(sessionId);
+        // Show custom confirmation modal
+        showConfirmationModal({
+            title: '⚠️ Konfirmasi Force Submit',
+            message: 'Apakah Anda yakin ingin force submit ujian peserta ini?<br><br><small class="text-gray-600">Sistem akan menghitung skor berdasarkan jawaban yang sudah diisi.</small>',
+            confirmText: 'Ya, Force Submit',
+            cancelText: 'Batal',
+            onConfirm: () => {
+                performForceSubmit(sessionId);
+            }
+        });
+    }
+
+    function showConfirmationModal(options) {
+        // Create modal overlay
+        const modalId = 'force-submit-modal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity duration-300';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 transform transition-all duration-300 scale-100 animate-in fade-in">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-3">${options.title || 'Konfirmasi'}</h3>
+                    <p class="text-gray-700 mb-6">${options.message || 'Apakah Anda yakin?'}</p>
+                    <div class="flex gap-3 justify-end">
+                        <button type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition" onclick="document.getElementById('${modalId}').remove()">
+                            ${options.cancelText || 'Batal'}
+                        </button>
+                        <button type="button" class="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 rounded-lg shadow-md transition" onclick="document.getElementById('${modalId}').remove(); (${options.onConfirm.toString()})()">
+                            ${options.confirmText || 'Ya'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        // Close on overlay click
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
     }
 
     function performForceSubmit(sessionId) {
         const token = document.querySelector('meta[name="csrf-token"]');
         const csrfToken = token ? token.content : '';
+
+        // Show loading state
+        const btn = document.querySelector(`button[data-session-id="${sessionId}"]`);
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<svg class="w-4 h-4 animate-spin inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Processing...';
+        }
 
         fetch(`/admin/exam-sessions/${sessionId}/force-submit`, {
             method: 'POST',
@@ -283,17 +339,73 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert('✓ Ujian berhasil di-force submit!\n\nSkor: ' + data.score + ' / ' + data.max_score + ' (' + data.percentage.toFixed(1) + '%)');
-                fetchStats();
-                fetchParticipants();
+                showSuccessModal({
+                    title: '✅ Berhasil!',
+                    message: `Ujian berhasil di-force submit!<br><br><strong>Skor: ${data.score} / ${data.max_score}</strong><br><small class="text-gray-600">${data.percentage.toFixed(1)}%</small>`,
+                    onClose: () => {
+                        fetchStats();
+                        fetchParticipants();
+                    }
+                });
             } else {
-                alert('✗ Gagal force submit:\n\n' + (data.message || 'Terjadi kesalahan'));
+                showErrorModal({
+                    title: '❌ Gagal!',
+                    message: data.message || 'Terjadi kesalahan saat force submit'
+                });
             }
         })
         .catch(error => {
             console.error('Force submit error:', error);
-            alert('✗ Terjadi kesalahan: ' + error.message);
+            showErrorModal({
+                title: '❌ Terjadi Kesalahan',
+                message: error.message
+            });
+        })
+        .finally(() => {
+            // Restore button state
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8m0 8l-4-2m4 2l4-2"></path></svg>Force Submit';
+            }
         });
+    }
+
+    function showSuccessModal(options) {
+        const modalId = 'success-modal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-green-600 mb-3">${options.title || 'Berhasil'}</h3>
+                    <p class="text-gray-700 mb-6">${options.message || ''}</p>
+                    <button type="button" class="w-full px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition" onclick="document.getElementById('${modalId}').remove(); (${options.onClose.toString()})()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    function showErrorModal(options) {
+        const modalId = 'error-modal-' + Date.now();
+        const modal = document.createElement('div');
+        modal.id = modalId;
+        modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        modal.innerHTML = `
+            <div class="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4">
+                <div class="p-6">
+                    <h3 class="text-lg font-bold text-red-600 mb-3">${options.title || 'Error'}</h3>
+                    <p class="text-gray-700 mb-6">${options.message || ''}</p>
+                    <button type="button" class="w-full px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition" onclick="document.getElementById('${modalId}').remove()">
+                        OK
+                    </button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
     }
 });
 
