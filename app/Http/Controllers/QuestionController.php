@@ -59,7 +59,8 @@ class QuestionController extends Controller
 
             if ($type != 3) {
                 // Build validation rules with proper in: rule for answer_key
-                $validChoiceKeys = implode(',', array_keys($choices));
+                // Ensure validChoiceKeys uses string keys for consistency
+                $validChoiceKeys = implode(',', array_map('strval', array_keys($choices)));
 
                 $rules = [
                     'question_text' => 'required_without:question_image|string|nullable',
@@ -170,12 +171,41 @@ class QuestionController extends Controller
                 }
             }
 
+            // Normalize choice keys from letter (A, B, C, D) to numeric (1, 2, 3, 4) if needed
+            $normalizedChoices = [];
+            $keyMapping = []; // Map old key to new key for answer_key update
+            $index = 1;
+            foreach ($choices as $oldKey => $choiceText) {
+                // If key is a letter (A, B, C, etc), convert to numeric index
+                if (preg_match('/^[A-Z]$/', $oldKey)) {
+                    $numericKey = ord($oldKey) - ord('A') + 1; // A=1, B=2, C=3, etc
+                    $keyMapping[$oldKey] = $numericKey;
+                    $normalizedChoices[$numericKey] = $choiceText;
+                } else {
+                    // Key is already numeric
+                    $keyMapping[$oldKey] = (int)$oldKey;
+                    $normalizedChoices[(int)$oldKey] = $choiceText;
+                }
+            }
+            
             // Ensure choice keys are strings for consistency with form input names
             $choices = array_combine(
-                array_map('strval', array_keys($choices)),
-                array_values($choices)
+                array_map('strval', array_keys($normalizedChoices)),
+                array_values($normalizedChoices)
             );
 
+            // Update answer_key to use normalized keys
+            if (is_array($answerKey)) {
+                $answerKey = array_map(function($key) use ($keyMapping) {
+                    // If answer_key is letter, map it to numeric
+                    if (preg_match('/^[A-Z]$/', (string)$key)) {
+                        return $keyMapping[$key] ?? intval($key);
+                    }
+                    return intval($key);
+                }, $answerKey);
+                $request->merge(['answer_key' => $answerKey]);
+            }
+            
             $request->merge(['choices' => $choices]);
 
             $type = '';
@@ -200,7 +230,8 @@ class QuestionController extends Controller
 
             if ($type != '3') {
                 // Build validation rules with proper in: rule for answer_key
-                $validChoiceKeys = implode(',', array_keys($choices));
+                // Ensure validChoiceKeys uses string keys for consistency
+                $validChoiceKeys = implode(',', array_map('strval', array_keys($choices)));
 
                 $validated = $request->validate([
                     'question_text' => 'required|string',

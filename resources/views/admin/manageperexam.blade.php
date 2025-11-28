@@ -1078,7 +1078,7 @@
                             if (typeof answerKey === 'string') {
                                 // If it's a letter (A, B, C, D), convert to index (0, 1, 2, 3)
                                 if (answerKey.match(/^[A-Z]$/)) {
-                                    let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
+                                    let index = answerKey.charCodeAt(0) - 64; // A=0, B=1, etc
                                     normalizedAnswerKey = [index];
                                 } else {
                                     normalizedAnswerKey = [parseInt(answerKey) || answerKey];
@@ -1111,7 +1111,7 @@
 
                             // Normalize answer key for comparison (convert all to strings for consistency)
                             let normalizedForComparison = normalizedAnswerKey.map(k => k.toString());
-                            
+
                             // Check if this choice is in the answer key
                             let checked = normalizedForComparison.includes(id);
 
@@ -1209,12 +1209,12 @@
                         // Convert answer key letter to index if needed
                         // e.g., "A" -> "0", "B" -> "1", ["A","C"] -> ["0","2"]
                         if (typeof answerKey === 'string' && answerKey.match(/^[A-Z]$/)) {
-                            let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
+                            let index = answerKey.charCodeAt(0) - 64; // A=0, B=1, etc
                             answerKey = [index.toString()];
                         } else if (Array.isArray(answerKey)) {
                             answerKey = answerKey.map(key => {
                                 if (typeof key === 'string' && key.match(/^[A-Z]$/)) {
-                                    return (key.charCodeAt(0) - 65).toString();
+                                    return (key.charCodeAt(0) - 64).toString();
                                 }
                                 return key.toString();
                             });
