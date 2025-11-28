@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const sessionId = participant.exam_session_id;
                 actionButtons = `
                     <div class="flex items-center gap-2">
-                        <button type="button" class="force-submit-btn px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" data-session-id="${sessionId}" title="Paksa submit ujian ini">
+                        <button type="button" class="force-submit-btn px-3 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded transition" onclick="if(confirm('Apakah Anda yakin ingin force submit ujian peserta ini?\\n\\nSistem akan menghitung skor berdasarkan jawaban yang sudah diisi.')) { forceSubmitExam(${sessionId}); }" title="Paksa submit ujian ini">
                             Force Submit
                         </button>
                         <button type="button" data-tab="detaillog" data-id="${sessionId}" class="px-3 py-2 text-sm font-medium text-blue-600 border border-blue-300 hover:border-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200">
@@ -239,9 +239,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
             tbody.appendChild(row);
         });
-
-        // Attach force submit button handlers after rendering
-        attachForceSubmitHandlers();
     }
 
     function getStatusBadge(status) {
@@ -254,17 +251,6 @@ document.addEventListener('DOMContentLoaded', function () {
         };
 
         return badges[status] || '<span class="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded">Unknown</span>';
-    }
-
-    function attachForceSubmitHandlers() {
-        document.addEventListener('click', function (event) {
-            if (event.target.matches('button.force-submit-btn')) {
-                const sessionId = event.target.getAttribute('data-session-id');
-                if (sessionId) {
-                    forceSubmitExam(sessionId);
-                }
-            }
-        });
     }
 
     function forceSubmitExam(sessionId) {
