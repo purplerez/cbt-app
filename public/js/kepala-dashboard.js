@@ -3,7 +3,6 @@
 class KephalaDashboardManager {
     constructor() {
         this.apiToken = this.getApiToken();
-        this.csrfToken = this.getCsrfToken();
         this.refreshInterval = 30000; // 30 seconds
         this.isLoading = false;
 
@@ -17,9 +16,10 @@ class KephalaDashboardManager {
     }
 
     /**
-     * Get API token from meta tag (safe method)
+     * Get API token from window global (fallback from app.blade)
      */
     getApiToken() {
+        // Check meta tag first
         const tokenMeta = document.querySelector('meta[name="api_token"]');
         if (tokenMeta) {
             const token = tokenMeta.getAttribute('content');
@@ -28,7 +28,7 @@ class KephalaDashboardManager {
             }
         }
 
-        // Fallback to window global (less safe, but works)
+        // Fallback to window global
         if (window.apiToken && window.apiToken.trim() !== '') {
             console.warn("Using window.apiToken - consider using meta tag instead");
             return window.apiToken;
@@ -37,21 +37,7 @@ class KephalaDashboardManager {
         return null;
     }
 
-    /**
-     * Get CSRF token from meta tag
-     */
-    getCsrfToken() {
-        const csrfMeta = document.querySelector('meta[name="csrf-token"]');
-        return csrfMeta ? csrfMeta.getAttribute('content') : null;
-    }
-
     init() {
-        if (!this.apiToken) {
-            console.error("API Token not found");
-            this.showError("Token autentikasi tidak ditemukan");
-            return;
-        }
-
         this.setupEventListeners();
         this.loadAllDashboardData();
         this.startAutoRefresh();
@@ -69,24 +55,16 @@ class KephalaDashboardManager {
      */
     async apiRequest(endpoint, options = {}) {
         try {
-            const headers = {
-                "Authorization": `Bearer ${this.apiToken}`,
-                "Accept": "application/json",
-                "Content-Type": "application/json",
-                ...options.headers
-            };
-
-            // Add CSRF token for state-changing requests
-            if (this.csrfToken && options.method && ['POST', 'PUT', 'DELETE', 'PATCH'].includes(options.method.toUpperCase())) {
-                headers['X-CSRF-TOKEN'] = this.csrfToken;
-            }
-
             const response = await fetch(endpoint, {
-                headers,
+                headers: {
+                    "Authorization": `Bearer ${this.apiToken}`,
+                    "Accept": "application/json",
+                    "Content-Type": "application/json",
+                    ...options.headers
+                },
                 ...options
             });
 
-            // Handle unauthorized
             if (response.status === 401) {
                 this.handleUnauthorized();
                 throw new Error("Sesi Anda telah berakhir. Silakan login kembali.");
@@ -109,7 +87,6 @@ class KephalaDashboardManager {
     handleUnauthorized() {
         console.warn("Unauthorized - redirecting to login");
         this.showError("Sesi anda telah berakhir. Silakan login kembali.");
-        // Redirect to login after 2 seconds
         setTimeout(() => {
             window.location.href = '/login';
         }, 2000);
@@ -154,7 +131,7 @@ class KephalaDashboardManager {
             this.updateElement('activeExams', data.active_exams);
             this.updateElement('participantCount', `${this.formatNumber(data.participant_count)} peserta`);
             this.updateElement('totalExams', data.total_exams);
-            this.updateElement('examTypes', `${data.exam_types} jenis`);
+            this.updateElement('examTypes', `${data.total_preassigned} terdaftar`);
 
             // Update exam status badge
             const examStatus = document.getElementById('examStatus');
@@ -162,8 +139,6 @@ class KephalaDashboardManager {
                 examStatus.textContent = data.exam_status.text;
                 examStatus.className = `px-2 py-1 text-xs font-semibold rounded-full ${data.exam_status.color}`;
             }
-
-            this.showSuccess("Statistik berhasil dimuat");
         } catch (error) {
             this.showError("Gagal memuat statistik");
         }
@@ -238,13 +213,6 @@ class KephalaDashboardManager {
             }
 
             tbody.innerHTML = data.map(exam => {
-                const statusColor = exam.status === 'in_progress' ? 'bg-green-100 text-green-800' :
-                                   exam.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                                   'bg-gray-100 text-gray-800';
-
-                const statusText = exam.status === 'in_progress' ? 'Sedang Berlangsung' :
-                                  exam.status === 'waiting' ? 'Menunggu' : 'Selesai';
-
                 const progressPercentage = exam.total_participants > 0
                     ? Math.round((exam.completed_participants / exam.total_participants) * 100)
                     : 0;
@@ -271,8 +239,8 @@ class KephalaDashboardManager {
                             <span class="text-sm font-medium text-gray-900">${exam.remaining_time} min</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusColor}">
-                                ${statusText}
+                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                Berlangsung
                             </span>
                         </td>
                     </tr>
@@ -366,19 +334,11 @@ class KephalaDashboardManager {
     }
 
     /**
-     * Show success notification
-     */
-    showSuccess(message) {
-        console.log("✓ " + message);
-        // Integrate with your notification system (e.g., Toast, Alert)
-    }
-
-    /**
      * Show error notification
      */
     showError(message) {
         console.error("✗ " + message);
-        // Integrate with your notification system
+        // Integrate with your notification system if available
     }
 
     /**
@@ -390,13 +350,6 @@ class KephalaDashboardManager {
                 this.loadAllDashboardData();
             }
         }, this.refreshInterval);
-    }
-
-    /**
-     * Stop auto-refresh (useful for cleanup)
-     */
-    stopAutoRefresh() {
-        clearInterval(this.refreshInterval);
     }
 
     /**

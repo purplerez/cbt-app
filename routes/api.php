@@ -99,29 +99,29 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     //dashboard api starts
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Get overview statistics
-        Route::get('/stats', 'KepalaApiDashboardController@getStats')
+        Route::get('/stats', 'Api\KepalaApiDashboardController@getStats')
             ->name('stats');
 
         // Get statistics grouped by grade
-        Route::get('/grade-stats', 'KepalaApiDashboardController@getGradeStats')
+        Route::get('/grade-stats', 'Api\KepalaApiDashboardController@getGradeStats')
             ->name('grade_stats');
 
-        // Get active exams
-        Route::get('/active-exams', 'KepalaApiDashboardController@getActiveExams')
+        // Get active exams (in progress)
+        Route::get('/active-exams', 'Api\KepalaApiDashboardController@getActiveExams')
             ->name('active_exams');
 
-        // Get recent exam scores
-        Route::get('/recent-scores', 'KepalaApiDashboardController@getRecentScores')
+        // Get recent exam scores (completed)
+        Route::get('/recent-scores', 'Api\KepalaApiDashboardController@getRecentScores')
             ->name('recent_scores');
     });
 
     Route::prefix('exams')->name('exams.')->group(function () {
-        // Get scores for specific exam
-        Route::get('{exam}/scores', 'KepalaApiDashboardController@getExamScores')
+        // Get scores for specific exam (with optional grade filter)
+        Route::get('{exam}/scores', 'Api\KepalaApiDashboardController@getExamScores')
             ->name('scores');
 
         // Get session details
-        Route::get('sessions/{sessionId}', 'KepalaApiDashboardController@getSessionDetails')
+        Route::get('sessions/{sessionId}', 'Api\KepalaApiDashboardController@getSessionDetails')
             ->name('session_details');
     });
 
