@@ -21,13 +21,27 @@ class KepalaApiDashboardController extends Controller
      * Get overview statistics for kepala sekolah's school
      * Based on: preassigneds (registered), exam_sessions (active/completed), and students
      */
+    private function getSchoolId()
+    {
+        $user = auth()->user();
+
+        if (!$user || !$user->student) {
+            return null;
+        }
+
+        return $user->student->school_id;
+    }
+
+    /**
+     * Get overview statistics for kepala sekolah's school
+     */
     public function getStats()
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             $school = School::find($schoolId);
@@ -36,7 +50,7 @@ class KepalaApiDashboardController extends Controller
             $totalStudents = Student::where('school_id', $schoolId)->count();
 
             // Get online students (recently active - last 5 minutes)
-            $onlineStudents = User::whereHas('student', function ($q) use ($schoolId) {
+            $onlineStudents = \App\Models\User::whereHas('student', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
             ->where('last_activity_at', '>=', now()->subMinutes(5))
@@ -84,6 +98,7 @@ class KepalaApiDashboardController extends Controller
             return response()->json([
                 'school_name' => $school?->name ?? '-',
                 'school_info' => $school?->address ?? '-',
+                'school_id' => $schoolId,
                 'total_students' => $totalStudents,
                 'total_grades' => $totalGrades,
                 'online_students' => $onlineStudents,
@@ -104,15 +119,14 @@ class KepalaApiDashboardController extends Controller
 
     /**
      * Get statistics grouped by grade
-     * Shows: total students per grade, online students, percentage
      */
     public function getGradeStats()
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             $grades = Grade::where('school_id', $schoolId)->get();
@@ -122,7 +136,7 @@ class KepalaApiDashboardController extends Controller
                 $totalStudents = Student::where('grade_id', $grade->id)->count();
 
                 // Online students in grade (last 5 minutes activity)
-                $onlineStudents = User::whereHas('student', function ($q) use ($grade) {
+                $onlineStudents = \App\Models\User::whereHas('student', function ($q) use ($grade) {
                     $q->where('grade_id', $grade->id);
                 })
                 ->where('last_activity_at', '>=', now()->subMinutes(5))
@@ -150,15 +164,14 @@ class KepalaApiDashboardController extends Controller
 
     /**
      * Get active exams (exam_sessions with progress status)
-     * Shows current exams being taken by students in this school
      */
     public function getActiveExams()
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             // Get exam sessions that are in progress for this school
@@ -204,15 +217,14 @@ class KepalaApiDashboardController extends Controller
 
     /**
      * Get recent exam scores (completed exams)
-     * Shows exams that have been submitted, grouped by exam and grade
      */
     public function getRecentScores()
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             // Get submitted exam sessions grouped by exam and grade
@@ -261,24 +273,23 @@ class KepalaApiDashboardController extends Controller
     }
 
     /**
-     * Get exam scores with detailed breakdown for a specific exam
-     * Used for viewing detailed scores per student
+     * Get exam scores with detailed breakdown
      */
     public function getExamScores(Exam $exam)
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
             $gradeId = request()->query('grade_id');
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             // Get total possible score
             $totalPossibleScore = Question::where('exam_id', $exam->id)
                 ->sum(DB::raw('CAST(points as DECIMAL(10,2))'));
 
-            // Get exam sessions - both preassigned (not started) and submitted
+            // Get exam sessions
             $sessions = ExamSession::with(['user.student'])
                 ->where('exam_id', $exam->id)
                 ->where('status', 'submited')
@@ -356,15 +367,15 @@ class KepalaApiDashboardController extends Controller
     }
 
     /**
-     * Get student details for a specific session
+     * Get student session details
      */
     public function getSessionDetails($sessionId)
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
-                return response()->json(['error' => 'School not found in session'], 400);
+                return response()->json(['error' => 'School not found for this user'], 400);
             }
 
             $session = ExamSession::with(['exam', 'user.student'])
