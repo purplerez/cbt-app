@@ -78,6 +78,8 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.si
         Route::post('/restore-answers', [StudentAnswerBackupController::class, 'restoreAnswers'])
             ->name('answers.restore');
 
+        // Restore answers from backup (resume exam) - XML FORMAT
+
         // Get session progress/stats
         Route::get('/{sessionId}/progress', [StudentAnswerBackupController::class, 'getSessionProgress'])
             ->name('session.progress');
