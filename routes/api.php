@@ -8,7 +8,8 @@ use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\ExamScoreController;
-use App\Http\Controllers\Api\KepalaApiDashboardController;
+use App\Http\Controllers\Api\Kepala\KepalaApiDashboardController;
+// use App\Http\Controllers\Api\KepalaApiDashboardController as KepalaDashboard1;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
 
 
