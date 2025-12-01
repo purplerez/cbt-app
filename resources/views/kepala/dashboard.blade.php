@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Dashboard Kepala Sekolah') }}
+            {{ __('Dashboard Kepala Sekolah') }} {{ session('school_id') }}
         </h2>
     </x-slot>
 
@@ -9,7 +9,7 @@
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
             <!-- Informasi Sekolah -->
             <div class="p-6 mb-6 bg-white rounded-lg shadow-sm">
-                <h3 class="text-sm font-medium text-gray-500">Sekolah Anda</h3>
+                <h3 class="text-sm font-medium text-gray-500">Sekolah Anda {{ session('school_id') }}</h3>
                 <p class="text-2xl font-semibold text-gray-900" id="schoolName">-</p>
                 <div class="flex items-center mt-2 text-sm">
                     <span class="text-gray-600" id="schoolInfo">-</span>
