@@ -8,7 +8,9 @@ use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\ExamScoreController;
+use App\Http\Controllers\Api\KepalaApiDashboardController;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
+
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -78,7 +80,6 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.si
         Route::post('/restore-answers', [StudentAnswerBackupController::class, 'restoreAnswers'])
             ->name('answers.restore');
 
-        // Restore answers from backup (resume exam) - XML FORMAT
 
         // Get session progress/stats
         Route::get('/{sessionId}/progress', [StudentAnswerBackupController::class, 'getSessionProgress'])
@@ -101,29 +102,29 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     //dashboard api starts
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Get overview statistics
-        Route::get('/stats', 'Api\KepalaApiDashboardController@getStats')
+        Route::get('/stats',[KepalaApiDashboardController::class, 'getStats'])
             ->name('stats');
 
         // Get statistics grouped by grade
-        Route::get('/grade-stats', 'Api\KepalaApiDashboardController@getGradeStats')
+        Route::get('/grade-stats', [KepalaApiDashboardController::class, 'getGradeStats'])
             ->name('grade_stats');
 
         // Get active exams (in progress)
-        Route::get('/active-exams', 'Api\KepalaApiDashboardController@getActiveExams')
+        Route::get('/active-exams', [KepalaApiDashboardController::class, 'getActiveExams'])
             ->name('active_exams');
 
         // Get recent exam scores (completed)
-        Route::get('/recent-scores', 'Api\KepalaApiDashboardController@getRecentScores')
+        Route::get('/recent-scores', [KepalaApiDashboardController::class, 'getRecentScores'])
             ->name('recent_scores');
     });
 
     Route::prefix('exams')->name('exams.')->group(function () {
         // Get scores for specific exam (with optional grade filter)
-        Route::get('{exam}/scores', 'Api\KepalaApiDashboardController@getExamScores')
+        Route::get('{exam}/scores', [KepalaApiDashboardController::class, 'getExamScores'])
             ->name('scores');
 
         // Get session details
-        Route::get('sessions/{sessionId}', 'Api\KepalaApiDashboardController@getSessionDetails')
+        Route::get('sessions/{sessionId}', [KepalaApiDashboardController::class, 'getSessionDetails'])
             ->name('session_details');
     });
 
