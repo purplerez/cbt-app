@@ -96,5 +96,35 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
         ->name('dashboard.stats');
 
+    //dashboard api starts
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        // Get overview statistics
+        Route::get('/stats', 'KepalaApiDashboardController@getStats')
+            ->name('stats');
+
+        // Get statistics grouped by grade
+        Route::get('/grade-stats', 'KepalaApiDashboardController@getGradeStats')
+            ->name('grade_stats');
+
+        // Get active exams
+        Route::get('/active-exams', 'KepalaApiDashboardController@getActiveExams')
+            ->name('active_exams');
+
+        // Get recent exam scores
+        Route::get('/recent-scores', 'KepalaApiDashboardController@getRecentScores')
+            ->name('recent_scores');
+    });
+
+    Route::prefix('exams')->name('exams.')->group(function () {
+        // Get scores for specific exam
+        Route::get('{exam}/scores', 'KepalaApiDashboardController@getExamScores')
+            ->name('scores');
+
+        // Get session details
+        Route::get('sessions/{sessionId}', 'KepalaApiDashboardController@getSessionDetails')
+            ->name('session_details');
+    });
+
+    //dashboard api ends
 
 });
