@@ -93,8 +93,8 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants'])
         ->name('exam.participants');
 
-    Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
-        ->name('dashboard.stats');
+    // Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
+    //     ->name('dashboard.stats');
 
     //dashboard api starts
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
