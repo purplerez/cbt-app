@@ -80,4 +80,10 @@ class User extends Authenticatable
     {
         return $this->hasOne(Headmaster::class);
     }
+
+    // roles
+    public function role()
+    {
+        return $this->role;
+    }
 }

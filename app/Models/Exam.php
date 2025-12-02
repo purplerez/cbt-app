@@ -54,4 +54,14 @@ class Exam extends Model
     {
         return $this->belongsTo(Examtype::class);
     }
+
+    public function preassigneds()
+    {
+        return $this->hasMany(Preassigned::class);
+    }
+
+    public function examSessions()
+    {
+        return $this->hasMany(ExamSession::class);
+    }
 }

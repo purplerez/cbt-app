@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\Grade;
+use App\Models\Headmaster;
 use App\Models\Preassigned;
 use App\Models\Question;
 use App\Models\School;
@@ -13,23 +14,25 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-
 class KepalaApiDashboardController extends Controller
 {
-    //
     /**
-     * Get overview statistics for kepala sekolah's school
-     * Based on: preassigneds (registered), exam_sessions (active/completed), and students
+     * Get school_id from Headmaster table
      */
     private function getSchoolId()
     {
         $user = auth()->user();
 
-        if (!$user || !$user->student) {
+        if (!$user) {
             return null;
         }
 
-        return $user->student->school_id;
+        if ($user->hasRole('kepala')) {
+            $schoolId = Headmaster::where('user_id', $user->id)->value('school_id');
+            return $schoolId;
+        }
+
+        return null;
     }
 
     /**
@@ -49,12 +52,13 @@ class KepalaApiDashboardController extends Controller
             // Get total students in school
             $totalStudents = Student::where('school_id', $schoolId)->count();
 
-            // Get online students (recently active - last 5 minutes)
-            $onlineStudents = \App\Models\User::whereHas('student', function ($q) use ($schoolId) {
-                $q->where('school_id', $schoolId);
-            })
-            ->where('last_activity_at', '>=', now()->subMinutes(5))
-            ->count();
+            // Get online students (from active exam sessions)
+            $onlineStudents = ExamSession::where('status', 'progress')
+                ->whereHas('user.student', function ($q) use ($schoolId) {
+                    $q->where('school_id', $schoolId);
+                })
+                ->distinct('user_id')
+                ->count('user_id');
 
             $onlinePercentage = $totalStudents > 0 ? round(($onlineStudents / $totalStudents) * 100, 2) : 0;
 
@@ -135,12 +139,13 @@ class KepalaApiDashboardController extends Controller
                 // Total students in grade
                 $totalStudents = Student::where('grade_id', $grade->id)->count();
 
-                // Online students in grade (last 5 minutes activity)
-                $onlineStudents = \App\Models\User::whereHas('student', function ($q) use ($grade) {
-                    $q->where('grade_id', $grade->id);
-                })
-                ->where('last_activity_at', '>=', now()->subMinutes(5))
-                ->count();
+                // Online students in grade (from active exam sessions)
+                $onlineStudents = ExamSession::where('status', 'progress')
+                    ->whereHas('user.student', function ($q) use ($grade) {
+                        $q->where('grade_id', $grade->id);
+                    })
+                    ->distinct('user_id')
+                    ->count('user_id');
 
                 $percentage = $totalStudents > 0 ? round(($onlineStudents / $totalStudents) * 100, 2) : 0;
 
@@ -204,7 +209,7 @@ class KepalaApiDashboardController extends Controller
                     'total_participants' => $totalParticipants,
                     'active_participants' => $activeParticipants,
                     'completed_participants' => $completedParticipants,
-                    'remaining_time' => (int) ceil($remainingTime / 60), // Convert to minutes
+                    'remaining_time' => (int) ceil($remainingTime / 60),
                     'status' => 'in_progress'
                 ];
             })->values();
