@@ -87,14 +87,14 @@ class BeritaAcaraController extends Controller
                 ->get();
 
         // Get teachers for pengawas
-        $teachers = User::role(['guru', 'kepala'])->get();
+        //$teachers = User::role(['guru', 'kepala'])->get();
 
         return view('berita-acara.create', compact(
             'examTypes',
             'exams',
             'schools',
             'rooms',
-            'teachers',
+            //'teachers',
             'defaultSchoolId'
         ));
     }
