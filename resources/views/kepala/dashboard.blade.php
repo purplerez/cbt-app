@@ -142,6 +142,7 @@
 </x-app-layout>
 
 @push('scripts')
+
     <script src="{{ asset('js/kepala-dashboard.js') }}"></script>
     <script>
         // Initialize dashboard setelah DOM siap
