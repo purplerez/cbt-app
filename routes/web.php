@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\ExamScoreController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
@@ -160,6 +161,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
+
+    // Route for users management
+    Route::get('users', [UserManagementController::class, 'index'])->name('users');
+    Route::get('users/create', [UserManagementController::class, 'create'])->name('users.create');
+    Route::post('users/create', [UserManagementController::class, 'store'])->name('users.store');
+    Route::post('users/inactive', [UserManagementController::class, 'inactive'])->name('users.inactive');
 
     // Session-authenticated fallback JSON endpoint for participants (used by admin UI when API token not present)
     Route::get('exam/{exam}/participants-json', function (\Illuminate\Http\Request $request, $exam) {

@@ -13,7 +13,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
 use App\Models\School;
 use App\Models\Grade;
-
+use Illuminate\Support\Facades\DB;
 
 class ExamScoreController extends Controller
 {
@@ -27,7 +27,7 @@ class ExamScoreController extends Controller
 
             // Get total possible score for this exam
             $totalPossibleScore = Question::where('exam_id', $examId)
-                ->sum(\DB::raw('CAST(points as DECIMAL(10,2))'));
+                ->sum(DB::raw('CAST(points as DECIMAL(10,2))'));
 
             $query = Student::with(['grade', 'user.examSessions' => function ($query) use ($examId) {
                 $query->where('exam_id', $examId)

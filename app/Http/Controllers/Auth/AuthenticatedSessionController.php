@@ -32,6 +32,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
+        if(!$user->is_active){
+            return $this->forceLogout($request, 'Akun Anda tidak aktif. Silakan hubungi administrator.');
+        }
+
         //sanctum token
         $token = $user->createToken('dashboard-token')->plainTextToken;
         session(['api_token' => $token]);

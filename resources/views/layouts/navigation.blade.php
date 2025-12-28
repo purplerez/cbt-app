@@ -49,6 +49,9 @@
                         <x-nav-link :href="route('admin.exams')" :active="request()->routeIs('admin.exams')">
                             {{ __('Jenis Ujian') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')">
+                            {{ __('Data User') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Log Aktifitas') }}
                         </x-nav-link>
