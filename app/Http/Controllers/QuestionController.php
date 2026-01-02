@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Validation\ValidationException;
+use App\Services\WordTemplateService;
+use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpWord\IOFactory;
 
 class QuestionController extends Controller
 {
@@ -187,7 +190,7 @@ class QuestionController extends Controller
                     $normalizedChoices[(int)$oldKey] = $choiceText;
                 }
             }
-            
+
             // Ensure choice keys are strings for consistency with form input names
             $choices = array_combine(
                 array_map('strval', array_keys($normalizedChoices)),
@@ -205,7 +208,7 @@ class QuestionController extends Controller
                 }, $answerKey);
                 $request->merge(['answer_key' => $answerKey]);
             }
-            
+
             $request->merge(['choices' => $choices]);
 
             $type = '';
@@ -555,6 +558,181 @@ class QuestionController extends Controller
             return redirect()->back()->withErrors(['error' => 'Error saat import: <br>' . $errors]);
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => 'Gagal import soal: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Import questions from Word file
+     */
+    public function importFromWord(Request $request, $exam)
+    {
+        try {
+            $request->validate([
+                'word_file' => 'required|mimes:docx',
+            ]);
+
+            $wordFile = $request->file('word_file');
+            $tempPath = $wordFile->storeAs('temp', uniqid() . '.docx');
+            $fullPath = Storage::disk('local')->path($tempPath);
+
+            // Parse Word file
+            $importService = new \App\Services\WordQuestionImportService();
+            $questions = $importService->parseWordFile($fullPath);
+
+            // Store questions temporarily in session for preview/confirmation
+            session(['word_import_data' => [
+                'exam_id' => $exam,
+                'questions' => $questions,
+                'temp_file' => $tempPath,
+            ]]);
+
+            // Clean up temp file
+            Storage::disk('local')->delete($tempPath);
+
+            // Return JSON response with questions for preview
+            return response()->json([
+                'success' => true,
+                'message' => 'File Word berhasil diparse. ' . count($questions) . ' soal ditemukan.',
+                'questions' => $questions,
+                'exam_id' => $exam,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal: ' . implode(', ', array_merge(...array_values($e->errors()))),
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal import file Word: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Save imported Word questions to database
+     */
+    public function saveWordQuestions(Request $request)
+    {
+        try {
+            $exam = $request->input('exam_id');
+            $questions = $request->input('questions', []);
+            $userId = Auth::id();
+
+            if (empty($questions)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada soal untuk disimpan',
+                ], 400);
+            }
+
+            DB::beginTransaction();
+
+            $savedCount = 0;
+            $errors = [];
+
+            foreach ($questions as $index => $questionData) {
+                try {
+                    // Prepare question data
+                    $choices = isset($questionData['choices']) ? array_filter($questionData['choices']) : [];
+                    $answerKey = isset($questionData['answer_key']) ? array_filter($questionData['answer_key']) : [];
+                    $questionType = isset($questionData['question_type']) ? intval($questionData['question_type']) : 0;
+                    $questionText = isset($questionData['question_text']) ? trim($questionData['question_text']) : '';
+
+                    // Validate question text exists
+                    if (empty($questionText)) {
+                        $errors[] = "Soal ke-" . ($index + 1) . ": Teks soal kosong";
+                        continue;
+                    }
+
+                    // Determine question type based on choices
+                    if (empty($choices)) {
+                        $questionType = 3; // Essay
+                    } elseif (count($choices) === 2) {
+                        $questionType = 2; // True/False
+                    } elseif (count($answerKey) > 1) {
+                        $questionType = 1; // Complex Multiple Choice
+                    } else {
+                        $questionType = 0; // Simple Multiple Choice
+                    }
+
+                    // Create question in database
+                    $question = Question::create([
+                        'exam_id' => $exam,
+                        'created_by' => $userId,
+                        'question_text' => $questionText,
+                        'question_type_id' => $questionType,
+                        'points' => 1, // Default points
+                        'answer_key' => !empty($answerKey) ? json_encode(array_map('intval', $answerKey)) : null,
+                        'choices' => !empty($choices) ? json_encode($choices) : null,
+                        'choices_images' => null,
+                    ]);
+
+                    $savedCount++;
+
+                    Log::info('Question saved: ' . $question->id . ' (Type: ' . $questionType . ')');
+
+                } catch (\Exception $e) {
+                    $errors[] = "Soal ke-" . ($index + 1) . ": " . $e->getMessage();
+                    Log::error('Error saving question ' . ($index + 1) . ': ' . $e->getMessage());
+                    continue;
+                }
+            }
+
+            DB::commit();
+
+            // Log activity
+            $user = auth()->user();
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil mengimport ' . $savedCount . ' soal untuk ujian ' . session('perexamname'));
+
+            return response()->json([
+                'success' => true,
+                'message' => $savedCount . " dari " . count($questions) . " soal berhasil disimpan",
+                'saved_count' => $savedCount,
+                'total_count' => count($questions),
+                'errors' => $errors,
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Save Word Questions Error: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan soal: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Download Word template for questions
+     */
+    public function downloadWordTemplate($exam)
+    {
+        try {
+            $wordService = new WordTemplateService();
+            $phpWord = $wordService->generateTemplate();
+
+            $filename = 'template-soal-ujian.docx';
+
+            // Create writer
+            $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
+
+            // Create temporary file
+            $tempFile = tempnam(sys_get_temp_dir(), 'template_');
+            $tempFile = $tempFile . '.docx'; // Add extension for safety
+
+            // Save to temp file
+            $objWriter->save($tempFile);
+
+            // Return download response
+            return response()->download($tempFile, $filename)->deleteFileAfterSend(true);
+
+        } catch (\Exception $e) {
+            Log::error('Download Word Template Error: ' . $e->getMessage() . '\n' . $e->getTraceAsString());
+
+            return redirect()->back()->withErrors(['error' => 'Gagal download template: ' . $e->getMessage()]);
         }
     }
 

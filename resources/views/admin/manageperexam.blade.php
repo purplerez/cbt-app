@@ -125,18 +125,18 @@
                                             <h3 class="text-lg font-medium">Data Materi Ujian
                                                 {{ session('perexamname') }}</h3>
                                             <div class="flex items-center space-x-2">
-                                                <!-- Excel Upload Button and Form -->
+                                                <!-- Word Upload Button and Form -->
                                                 @if (session('perexamstatus') == 1)
-                                                    <form
-                                                        action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                    <form id="wordImportForm"
+                                                        action="{{ route('admin.exams.questions.import-word', session('perexamid')) }}"
                                                         method="POST" enctype="multipart/form-data"
                                                         class="flex items-center space-x-2">
                                                         @csrf
-                                                        <input type="file" name="excel_file" id="excel_file"
-                                                            accept=".xlsx, .xls" class="hidden"
-                                                            onchange="this.form.submit()">
+                                                        <input type="file" name="word_file" id="word_file"
+                                                            accept=".docx" class="hidden"
+                                                            onchange="handleWordFileUpload(event)">
                                                         <button type="button"
-                                                            onclick="document.getElementById('excel_file').click()"
+                                                            onclick="document.getElementById('word_file').click()"
                                                             class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
                                                                 stroke="currentColor" viewBox="0 0 24 24"
@@ -146,9 +146,9 @@
                                                                     d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
                                                                 </path>
                                                             </svg>
-                                                            Import Excel
+                                                            Import Word
                                                         </button>
-                                                        <a href="{{ route('admin.exams.questions.template', session('perexamid')) }}"
+                                                        <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
                                                             class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
                                                                 stroke="currentColor" viewBox="0 0 24 24"
@@ -1559,6 +1559,129 @@
                         openModal(modalId);
                     });
                 });
+
+                // Handle Word file upload
+                function handleWordFileUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const formData = new FormData();
+                    formData.append('word_file', file);
+
+                    // Show loading message
+                    showLoadingMessage('Memproses file Word...');
+
+                    const examId = '{{ session("perexamid") }}';
+                    const route = '{{ route("admin.exams.questions.import-word", "__EXAM_ID__") }}'.replace('__EXAM_ID__', examId);
+
+                    fetch(route, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show confirmation modal with questions preview
+                            showWordImportPreview(data.questions, examId);
+                        } else {
+                            alert('Error: ' + (data.message || 'Terjadi kesalahan saat memproses file'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('Terjadi kesalahan saat upload file');
+                    });
+                }
+
+                function showLoadingMessage(message) {
+                    const div = document.createElement('div');
+                    div.id = 'loading-message';
+                    div.className = 'fixed top-4 right-4 bg-blue-500 text-white px-6 py-3 rounded shadow-lg';
+                    div.textContent = message;
+                    document.body.appendChild(div);
+                }
+
+                function hideLoadingMessage() {
+                    const div = document.getElementById('loading-message');
+                    if (div) div.remove();
+                }
+
+                function showWordImportPreview(questions, examId) {
+                    hideLoadingMessage();
+
+                    // Create modal for preview
+                    const modal = document.createElement('div');
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.innerHTML = `
+                        <div class="bg-white rounded-lg shadow-xl max-w-4xl max-h-96 overflow-y-auto p-6">
+                            <h2 class="text-xl font-bold mb-4">Preview Soal yang Diimport (${questions.length} soal)</h2>
+                            <div class="space-y-4">
+                                ${questions.map((q, idx) => `
+                                    <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                        <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
+                                        <p class="text-sm text-gray-600">
+                                            Tipe: ${getQuestionTypeName(q.question_type)} |
+                                            Pilihan: ${Object.keys(q.choices || {}).length}
+                                        </p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <div class="mt-6 flex justify-end space-x-4">
+                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Batal</button>
+                                <button onclick="saveWordQuestions(${examId}, '${btoa(JSON.stringify(questions))}')" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Simpan Semua Soal</button>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                }
+
+                function getQuestionTypeName(type) {
+                    const types = {
+                        0: 'Pilihan Ganda',
+                        1: 'Pilihan Ganda Kompleks',
+                        2: 'Benar/Salah',
+                        3: 'Essay'
+                    };
+                    return types[type] || 'Tidak diketahui';
+                }
+
+                function saveWordQuestions(examId, questionsData) {
+                    const questions = JSON.parse(atob(questionsData));
+                    const route = '{{ route("admin.exams.questions.save-word-questions") }}';
+
+                    showLoadingMessage('Menyimpan soal...');
+
+                    fetch(route, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            exam_id: examId,
+                            questions: questions
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        hideLoadingMessage();
+                        if (data.success) {
+                            alert(data.message);
+                            // Reload page to show new questions
+                            setTimeout(() => location.reload(), 1000);
+                        } else {
+                            alert('Error: ' + (data.message || 'Terjadi kesalahan'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        hideLoadingMessage();
+                        alert('Terjadi kesalahan saat menyimpan soal');
+                    });
+                }
             </script>
         @endpush
 

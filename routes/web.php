@@ -132,7 +132,10 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Import/Export Questions routes
     Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
+    Route::get('exams/banksoal/{exam}/template-word', [QuestionController::class, 'downloadWordTemplate'])->name('exams.questions.template-word');
     Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
+    Route::post('exams/banksoal/{exam}/import-word', [QuestionController::class, 'importFromWord'])->name('exams.questions.import-word');
+    Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.questions.save-word-questions');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
 
     //Route for Scores
@@ -437,12 +440,17 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
 
     // Import/Export routes for bank soal
     Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.manage.question.template');
+    Route::get('exams/banksoal/{exam}/template-word', [QuestionController::class, 'downloadWordTemplate'])->name('exams.manage.question.template-word');
     Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.manage.question.import');
+    Route::post('exams/banksoal/{exam}/import-word', [QuestionController::class, 'importFromWord'])->name('exams.manage.question.import-word');
+    Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.manage.question.save-word-questions');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.manage.question.export');
 
     // Import/Export Questions routes
     Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
     Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
+    Route::post('exams/banksoal/{exam}/import-word', [QuestionController::class, 'importFromWord'])->name('exams.questions.import-word');
+    Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.questions.save-word-questions');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
 
     // Berita Acara routes (View and Export only for Super)
