@@ -51,24 +51,27 @@
                 </div>
             @endif
 
-            <!-- Filters -->
+            <!-- Filters Section -->
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
+                    <!-- Filter Form -->
                     <form method="GET" action="{{ route('admin.users') }}" class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                        <!-- Status Filter -->
                         <div>
                             <label for="status" class="block text-sm font-medium text-gray-700">Status</label>
                             <select name="status" id="status" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">Semua Status</option>
                                 <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
                                 <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Tidak Aktif</option>
-                                <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Ditangguhkan</option>
                             </select>
                         </div>
 
+                        <!-- Role Filter -->
                         <div>
                             <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
                             <select name="role" id="role" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                 <option value="">Semua Role</option>
+                                <option value="super" {{ request('role') == 'super' ? 'selected' : '' }}>Super Admin</option>
                                 <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                                 <option value="kepala" {{ request('role') == 'kepala' ? 'selected' : '' }}>Kepala Sekolah</option>
                                 <option value="guru" {{ request('role') == 'guru' ? 'selected' : '' }}>Guru</option>
@@ -76,20 +79,59 @@
                             </select>
                         </div>
 
+                        <!-- Search Filter -->
                         <div>
                             <label for="search" class="block text-sm font-medium text-gray-700">Cari User</label>
-                            <input type="text" name="search" id="search" placeholder="Nama atau Email..." value="{{ request('search') }}" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            <input type="text" name="search" id="search" placeholder="Nama atau Email..."
+                                value="{{ request('search') }}"
+                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                         </div>
 
+                        <!-- Buttons -->
                         <div class="flex items-end gap-2">
                             <button type="submit" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-gray-800 border border-transparent rounded-md hover:bg-gray-700">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                                </svg>
                                 Filter
                             </button>
                             <a href="{{ route('admin.users') }}" class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-gray-700 uppercase transition duration-150 ease-in-out bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
                                 Reset
                             </a>
                         </div>
                     </form>
+
+                    <!-- Active Filters Display -->
+                    @if(request()->filled('status') || request()->filled('role') || request()->filled('search'))
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <p class="text-sm text-gray-600 mb-2">Filter aktif:</p>
+                            <div class="flex flex-wrap gap-2">
+                                @if(request()->filled('status'))
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        Status: {{ request('status') == 'active' ? 'Aktif' : 'Tidak Aktif' }}
+                                        <a href="{{ route('admin.users', array_merge(request()->query(), ['status' => null])) }}" class="ml-2 text-blue-600 hover:text-blue-900">×</a>
+                                    </span>
+                                @endif
+
+                                @if(request()->filled('role'))
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        Role: {{ request('role') }}
+                                        <a href="{{ route('admin.users', array_merge(request()->query(), ['role' => null])) }}" class="ml-2 text-blue-600 hover:text-blue-900">×</a>
+                                    </span>
+                                @endif
+
+                                @if(request()->filled('search'))
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                                        Pencarian: {{ request('search') }}
+                                        <a href="{{ route('admin.users', array_merge(request()->query(), ['search' => null])) }}" class="ml-2 text-blue-600 hover:text-blue-900">×</a>
+                                    </span>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </div>
 

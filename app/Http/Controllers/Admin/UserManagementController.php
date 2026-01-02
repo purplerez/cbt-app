@@ -18,13 +18,54 @@ class UserManagementController extends Controller
     //
     public function index()
     {
-        try{
-            $users = User::with('roles')->orderBy('role', 'asc')->get();
+        try {
+            // Get all users atau dengan filter
+            $query = User::with('roles')->orderBy('role', 'asc');
+
+            // Apply filters
+            $query = $this->applyFilters($query);
+
+            $users = $query->get();
+
             return view('admin.view_users', compact('users'));
-        }catch(\Exception $e){
-            return view('admin.view_users');
+        } catch (\Exception $e) {
+            Log::error('UserManagement Index Error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return view('admin.view_users', ['users' => []]);
         }
-        // return view('admin.view_users');
+    }
+
+    private function applyFilters($query)
+    {
+        // Filter by status
+        if (request()->filled('status')) {
+            $status = request('status');
+            if ($status === 'active') {
+                $query->where('is_active', 1);
+            } elseif ($status === 'inactive') {
+                $query->where('is_active', 0);
+            }
+        }
+
+        // Filter by role
+        if (request()->filled('role')) {
+            $role = request('role');
+            $query->where('role', $role);
+        }
+
+        // Filter by search (name or email)
+        if (request()->filled('search')) {
+            $search = request('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%');
+            });
+        }
+
+        return $query;
     }
 
     public function toggleActive(Request $request, User $user)
