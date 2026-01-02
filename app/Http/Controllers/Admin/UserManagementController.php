@@ -19,4 +19,18 @@ class UserManagementController extends Controller
         }
         // return view('admin.view_users');
     }
+
+    public function toggleActive(Request $request, User $user)
+    {
+        // dd($user->email);?\
+        try {
+
+            $user->is_active = !$user->is_active;
+            $user->save();
+
+            return redirect()->route('admin.users')->with('success', 'Status user berhasil diubah.');
+        } catch (\Exception $e) {
+            return redirect()->route('admin.users')->with('error', 'Terjadi kesalahan saat mengubah status user.');
+        }
+    }
 }

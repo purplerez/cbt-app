@@ -166,7 +166,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('users', [UserManagementController::class, 'index'])->name('users');
     Route::get('users/create', [UserManagementController::class, 'create'])->name('users.create');
     Route::post('users/create', [UserManagementController::class, 'store'])->name('users.store');
-    Route::post('users/inactive', [UserManagementController::class, 'inactive'])->name('users.inactive');
+    Route::patch('users/{user}/inactive', [UserManagementController::class, 'toggleActive'])->name('users.inactive');
 
     // Session-authenticated fallback JSON endpoint for participants (used by admin UI when API token not present)
     Route::get('exam/{exam}/participants-json', function (\Illuminate\Http\Request $request, $exam) {
