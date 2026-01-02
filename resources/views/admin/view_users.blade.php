@@ -36,7 +36,7 @@
             @endif
 
             <!-- Error Message -->
-            @if ($errors->any())
+            @if (session('error'))
                 <div class="p-4 mb-4 rounded-md bg-red-50">
                     <div class="flex">
                         <div class="flex-shrink-0">
@@ -193,12 +193,16 @@
                                                 {{-- end modal view user --}}
 
                                                 <!-- Edit Button -->
-                                                <a href="{{ route('admin.users', $user) }}"
-                                                   class="text-yellow-600 hover:text-yellow-900" title="Set Password">
-                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                                    </svg>
-                                                </a>
+                                                <form action="{{ route('admin.users.setpassword', $user) }}" method="POST" style="display:inline;" onsubmit="return confirm('Set Default Password user?');">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    <button type="submit"
+                                                    class="text-yellow-600 hover:text-yellow-900" title="Set Password">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
 
                                                 <!-- Activate/Deactivate Button -->
                                                 @if($user->is_active == '1')
