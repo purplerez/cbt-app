@@ -330,7 +330,7 @@
                                                                     <label for="question_text_{{ $q->id }}"
                                                                     class="block text-sm font-medium text-gray-700">Pertanyaan</label>
                                                                     <textarea id="question_text_{{ $q->id }}" name="question_text" rows="3"
-                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
+                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
                                                                 </div>
 
                                                                 <!-- Question Image Section -->
@@ -374,7 +374,7 @@
                                                                                     <div class="edit-choice-item border-l-4 border-blue-400 pl-4"
                                                                                         data-choice-id="{{ $key }}">
                                                                                         <div class="space-y-2">
-                                                                                            <textarea name="choices[{{ $key }}]" rows="2" class="block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
+                                                                                            <textarea name="choices[{{ $key }}]" rows="2" class="tinymce-editor block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
 
                                                                                             <div>
                                                                                                 <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
@@ -479,8 +479,7 @@
 
                                                     <form
                                                         action="{{ route('admin.exams.question.store', session('perexamid')) }}"
-                                                        method="post" enctype="multipart/form-data" class="mb-4">
-
+                                                        method="post" enctype="multipart/form-data" class="mb-4 question-form">
 
 
 
@@ -490,7 +489,7 @@
                                                                 <label for="question_text"
                                                                     class="block text-sm font-medium text-gray-700">Pertanyaan</label>
                                                                 <textarea id="question_text" name="question_text" rows="3"
-                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                             </div>
                                                             <div>
                                                                 <label for="question_image"
@@ -514,7 +513,7 @@
                                                                         <div class="flex items-start gap-2">
                                                                             <div class="flex-1">
                                                                                 <textarea name="choices[1]" rows="3"
-                                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                                                 <div class="mt-2">
                                                                                     <label
                                                                                         class="block text-xs font-medium text-gray-600"
@@ -1143,7 +1142,7 @@
                 <div class="flex items-start gap-2">
                     <div class="flex-1">
                         <textarea name="choices[${editChoiceCounter}]" rows="3"
-                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                            class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
                         <div class="mt-2">
                             <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
                             <input type="file" name="choice_images[${editChoiceCounter}]" accept="image/*"
@@ -1162,6 +1161,29 @@
                 </div>
             `;
                             editContainer.appendChild(div);
+                            // Re-initialize TinyMCE for the new textarea
+                            setTimeout(() => {
+                                tinymce.init({
+                                    selector: '.tinymce-editor:not(.tox-hidden)',
+                                    license_key: 'gpl',
+                                    theme: 'silver',
+                                    plugins: [
+                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                        'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                                        'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
+                                        'wordcount'
+                                    ],
+                                    toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
+                                    menubar: 'file edit view insert format tools table help',
+                                    branding: false,
+                                    height: 300,
+                                    body_class: 'mce-content-body',
+                                    content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
+                                    paste_as_text: false,
+                                    valid_elements: '+*[*]',
+                                    valid_children: '+*[*]'
+                                });
+                            }, 100);
                             renderEditAnswerKey();
                         });
                     }
@@ -1283,7 +1305,7 @@
             <div class="flex items-start gap-2">
                 <div class="flex-1">
                     <textarea name="choices[${choiceCounter}]" rows="3"
-                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                        class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
                     <div class="mt-2">
                         <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
                         <input type="file" name="choice_images[${choiceCounter}]" accept="image/*"
@@ -1303,6 +1325,29 @@
             </div>
         `;
                     container.appendChild(div);
+                    // Re-initialize TinyMCE for the new textarea
+                    setTimeout(() => {
+                        tinymce.init({
+                            selector: '.tinymce-editor:not(.tox-hidden)',
+                            license_key: 'gpl',
+                            theme: 'silver',
+                            plugins: [
+                                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                                'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
+                                'wordcount'
+                            ],
+                            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
+                            menubar: 'file edit view insert format tools table help',
+                            branding: false,
+                            height: 300,
+                            body_class: 'mce-content-body',
+                            content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
+                            paste_as_text: false,
+                            valid_elements: '+*[*]',
+                            valid_children: '+*[*]'
+                        });
+                    }, 100);
                     renderAnswerKey();
                 });
 
@@ -1682,6 +1727,16 @@
                         alert('Terjadi kesalahan saat menyimpan soal');
                     });
                 }
+
+                // Handle form submission for TinyMCE
+                document.querySelectorAll('.question-form').forEach(form => {
+                    form.addEventListener('submit', function(e) {
+                        // Trigger TinyMCE to save content to textarea
+                        if (typeof tinymce !== 'undefined') {
+                            tinymce.triggerSave();
+                        }
+                    });
+                });
             </script>
         @endpush
 

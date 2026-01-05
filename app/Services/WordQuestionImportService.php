@@ -102,7 +102,9 @@ class WordQuestionImportService
                     $currentQuestion = [
                         'question_number' => $questionNumber,
                         'question_text' => $this->cleanText($text),
+                        'question_html' => '',
                         'choices' => [],
+                        'choice_html' => [],
                         'question_images' => [],
                     ];
                 } elseif ($currentQuestion && $this->isChoice($text)) {
@@ -170,7 +172,9 @@ class WordQuestionImportService
                     $currentQuestion = [
                         'question_number' => $questionNumber,
                         'question_text' => $this->cleanText($text),
+                        'question_html' => '',
                         'choices' => [],
+                        'choice_html' => [],
                         'question_images' => [],
                     ];
                 } elseif ($currentQuestion && $this->isChoice($text)) {
@@ -324,16 +328,40 @@ class WordQuestionImportService
     private function processQuestions($questions)
     {
         return array_map(function ($question) {
-            $question['question_type'] = $this->detectQuestionType($question);
-            $question['question_text'] = $this->cleanText($question['question_text']);
-            $question['choices'] = $this->normalizeChoiceKeys($question['choices']);
-
-            // Attach answer key from parsed data
+            // First attach answer key from parsed data
             $questionNumber = $question['question_number'] ?? null;
             if ($questionNumber && isset($this->answerKeys[$questionNumber])) {
                 $question['answer_key'] = $this->answerKeys[$questionNumber];
             } else {
                 $question['answer_key'] = [];
+            }
+
+            // Normalize choices
+            $question['choices'] = $this->normalizeChoiceKeys($question['choices']);
+            $question['choice_html'] = $this->normalizeChoiceKeys($question['choice_html'] ?? []);
+
+            // Now detect question type AFTER answer_key is attached
+            $question['question_type'] = $this->detectQuestionType($question);
+
+            // Log for debugging
+            \Log::info('Question Type Detection', [
+                'question_number' => $questionNumber,
+                'choice_count' => count($question['choices'] ?? []),
+                'answer_count' => count($question['answer_key'] ?? []),
+                'detected_type' => $question['question_type'],
+                'choices' => array_keys($question['choices'] ?? []),
+                'answer_key' => $question['answer_key']
+            ]);
+
+            // Clean question text
+            $question['question_text'] = $this->cleanText($question['question_text']);
+            $question['question_html'] = !empty($question['question_html']) ? $this->cleanText($question['question_html']) : '';
+
+            // Attach points from parsed data
+            if ($questionNumber && isset($this->questionPoints[$questionNumber])) {
+                $question['points'] = $this->questionPoints[$questionNumber];
+            } else {
+                $question['points'] = 1;
             }
 
             unset($question['question_number']);
@@ -342,21 +370,31 @@ class WordQuestionImportService
     }
 
     /**
-     * Detect question type
+     * Detect question type based on number of choices and answer keys
+     * Type: 0 = PG (single choice), 1 = PG Kompleks (multiple choices), 2 = True/False, 3 = Essay
      */
     private function detectQuestionType($question)
     {
-        $choiceCount = count($question['choices']);
+        $choiceCount = count($question['choices'] ?? []);
+        $answerCount = count($question['answer_key'] ?? []);
 
+        // Essay: no choices
         if ($choiceCount === 0) {
-            return 3; // Essay
+            return 3;
         }
 
-        if ($choiceCount === 2) {
-            return 2; // True/False
+        // Benar/Salah: exactly 2 choices, single answer
+        if ($choiceCount === 2 && $answerCount <= 1) {
+            return 2;
         }
 
-        return 0; // Single choice
+        // PG Kompleks: multiple answers (more than 1)
+        if ($answerCount > 1) {
+            return 1;
+        }
+
+        // PG (default): 3-4 choices, single answer
+        return 0;
     }
 
     /**

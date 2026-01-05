@@ -620,6 +620,12 @@ class QuestionController extends Controller
             $questions = $request->input('questions', []);
             $userId = Auth::id();
 
+            Log::info('SaveWordQuestions started', [
+                'exam' => $exam,
+                'total_questions' => count($questions),
+                'user_id' => $userId
+            ]);
+
             if (empty($questions)) {
                 return response()->json([
                     'success' => false,
@@ -634,48 +640,84 @@ class QuestionController extends Controller
 
             foreach ($questions as $index => $questionData) {
                 try {
-                    // Prepare question data
-                    $choices = isset($questionData['choices']) ? array_filter($questionData['choices']) : [];
-                    $answerKey = isset($questionData['answer_key']) ? array_filter($questionData['answer_key']) : [];
+                    Log::info("Processing question $index", ['data' => $questionData]);
+
+                    // Prepare question data - use values exactly as provided from Word parsing
+                    $choices = isset($questionData['choices']) && is_array($questionData['choices']) ? $questionData['choices'] : [];
+                    $choiceHtml = isset($questionData['choice_html']) && is_array($questionData['choice_html']) ? $questionData['choice_html'] : [];
+                    $answerKey = isset($questionData['answer_key']) && is_array($questionData['answer_key']) ? $questionData['answer_key'] : [];
                     $questionType = isset($questionData['question_type']) ? intval($questionData['question_type']) : 0;
                     $questionText = isset($questionData['question_text']) ? trim($questionData['question_text']) : '';
+                    $questionHtml = isset($questionData['question_html']) ? trim($questionData['question_html']) : '';
+                    $points = isset($questionData['points']) ? floatval($questionData['points']) : 1;
 
+                    Log::info("Question type", ['data' => $questionType]);
                     // Validate question text exists
                     if (empty($questionText)) {
                         $errors[] = "Soal ke-" . ($index + 1) . ": Teks soal kosong";
                         continue;
                     }
 
-                    // Determine question type based on choices
-                    if (empty($choices)) {
-                        $questionType = 3; // Essay
-                    } elseif (count($choices) === 2) {
-                        $questionType = 2; // True/False
-                    } elseif (count($answerKey) > 1) {
-                        $questionType = 1; // Complex Multiple Choice
-                    } else {
-                        $questionType = 0; // Simple Multiple Choice
+                    // Filter out empty choice values while preserving array structure
+                    $filteredChoices = [];
+                    foreach ($choices as $key => $choice) {
+                        if (!empty(trim($choice))) {
+                            $filteredChoices[$key] = trim($choice);
+                        }
                     }
+                    $choices = $filteredChoices;
 
-                    // Create question in database
+                    // Filter out empty choice_html values while preserving array structure
+                    $filteredChoiceHtml = [];
+                    foreach ($choiceHtml as $key => $choice) {
+                        if (!empty(trim($choice))) {
+                            $filteredChoiceHtml[$key] = trim($choice);
+                        }
+                    }
+                    $choiceHtml = $filteredChoiceHtml;
+
+                    // Filter out empty/non-numeric answer keys
+                    $answerKey = array_filter($answerKey, function($val) {
+                        return is_numeric($val) && intval($val) > 0;
+                    });
+
+                    // Log data sebelum save untuk debugging
+                    Log::info("Question $index before save", [
+                        'question_type_from_data' => isset($questionData['question_type']) ? intval($questionData['question_type']) : 'NOT SET',
+                        'choice_count' => count($choices),
+                        'answer_count' => count($answerKey),
+                        'choices' => $choices,
+                        'answer_key' => $answerKey
+                    ]);
+
+                    // solusi tebak2 berhadiah, karena copilot solution doesn't work
+                    $questionType++;
+
+                    // Create question in database - use question_type exactly as provided
                     $question = Question::create([
                         'exam_id' => $exam,
                         'created_by' => $userId,
                         'question_text' => $questionText,
+                        'question_html' => !empty($questionHtml) ? $questionHtml : null,
                         'question_type_id' => $questionType,
-                        'points' => 1, // Default points
+                        'points' => $points,
                         'answer_key' => !empty($answerKey) ? json_encode(array_map('intval', $answerKey)) : null,
                         'choices' => !empty($choices) ? json_encode($choices) : null,
+                        'choice_html' => !empty($choiceHtml) ? json_encode($choiceHtml) : null,
                         'choices_images' => null,
                     ]);
 
                     $savedCount++;
 
-                    Log::info('Question saved: ' . $question->id . ' (Type: ' . $questionType . ')');
+                    Log::info('Question saved: ' . $question->id . ' (Type: ' . $questionType . ', Choices: ' . count($choices) . ', AnswerKeys: ' . count($answerKey) . ', Points: ' . $points . ')');
 
                 } catch (\Exception $e) {
                     $errors[] = "Soal ke-" . ($index + 1) . ": " . $e->getMessage();
-                    Log::error('Error saving question ' . ($index + 1) . ': ' . $e->getMessage());
+                    Log::error('Error saving question ' . ($index + 1), [
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                        'question_data' => $questionData
+                    ]);
                     continue;
                 }
             }
@@ -696,7 +738,10 @@ class QuestionController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Save Word Questions Error: ' . $e->getMessage());
+            Log::error('Save Word Questions Error', [
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
 
             return response()->json([
                 'success' => false,

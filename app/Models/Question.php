@@ -14,8 +14,10 @@ class Question extends Model
         'exam_id',
         'question_type_id',
         'question_text',
+        'question_html',
         'question_image',
         'choices',
+        'choice_html',
         'choices_images',
         'answer_key',
         'points',
@@ -26,7 +28,7 @@ class Question extends Model
      * Mutator: Convert answer key to letter format before saving
      * Handles conversion from index [0,1,2] to letter ['A','B','C']
      * For True/False: converts [0] to ['T'] or [1] to ['F']
-     * 
+     *
      * @param mixed $value
      * @return void
      */
@@ -88,7 +90,7 @@ class Question extends Model
 
     /**
      * Accessor: Always return answer key in letter format
-     * 
+     *
      * @param mixed $value
      * @return string|array
      */
@@ -132,7 +134,7 @@ class Question extends Model
 
     /**
      * Check if a string is valid JSON
-     * 
+     *
      * @param string $string
      * @return bool
      */
