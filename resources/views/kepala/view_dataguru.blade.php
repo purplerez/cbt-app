@@ -1,55 +1,83 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Master Data Siswa'.session('schoolname')) }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">
+                {{ __('Master Data Guru'.session('schoolname')) }}
+            </h2>
+            <a href="{{ route('kepala.teacher.create') }}"
+               class="inline-flex items-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-blue-600 border border-transparent rounded-md hover:bg-blue-700">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Tambah Guru Baru
+            </a>
+        </div>
     </x-slot>
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <!-- Error Message -->
+            <x-input-error :messages="$errors->get('error')" class="mb-4" />
+
+            <!-- Table -->
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
-                        <a href="{{route('kepala.teacher.create')}}" class="px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-green-500 transition" >
-                            + Tambah
-                        </a>
-                        <x-input-error :messages="$errors->get('error')" class="mb-4 mt-4" />
-                    <table class="min-w-full mt-4 divide-y divide-gray-200">
-                                                <thead class="bg-gray-50">
-                                                    <tr>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIP</th>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Guru</th>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-                                                    <!-- Data guru akan ditampilkan disini -->
-                                                    @forelse ($teachers as $teacher)
-                                                        <tr class="border-b-slate-50">
-                                                            <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->nip }}</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">{{ $teacher->name }}</td>
-                                                            <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIP</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Guru</th>
+                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                @forelse($teachers as $teacher)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                            {{ $teacher->nip }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                            {{ $teacher->name }}
+                                        </td>
+                                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                            <div class="flex space-x-2">
+                                                <!-- Edit Button -->
+                                                <a href="{{ route('kepala.teacher.edit', $teacher->id) }}"
+                                                   class="text-blue-600 hover:text-blue-900" title="Edit">
+                                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                    </svg>
+                                                </a>
 
-                                                                    <a href="{{ route('kepala.teacher.edit', $teacher->id) }}" class="px-4 py-2 text-sm font-medium text-white transition bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                                                        Edit
-                                                                    </a>
+                                                <!-- Delete Button -->
+                                                <form action="{{ route('kepala.teacher.destroy', $teacher->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus data Guru ini?');">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m-7-6h10m-11 0V4a1 1 0 011-1h4a1 1 0 011 1v3m-6 0h12"/>
+                                                        </svg>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="3" class="px-6 py-4 text-sm text-center text-gray-500">
+                                            Tidak ada data guru.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
 
-                                                                    <form action="{{route('kepala.teacher.destroy', $teacher->id)}}" method="POST" class="inline-block">
-                                                                        @csrf
-                                                                        @method('DELETE')
-                                                                        {{-- <input type="hidden" name="id" value="{{$teacher->id}}"> --}}
-                                                                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500" onclick="return confirm('Apakah Anda yakin ingin menghapus data Guru ini?')">Hapus</button>
-                                                                    </form>
-                                                                </td>
-                                                        </tr>
-
-
-                                                    @empty
-                                                        <tr>
-                                                            <td colspan="4" class="px-6 py-4 text-center text-gray-500">Tidak ada data guru.</td>
-                                                        </tr>
-                                                    @endforelse
-                                                </tbody>
-                                            </table>
+                    <!-- Pagination -->
+                    <div class="mt-4">
+                        {{-- $teachers->links() --}}
+                    </div>
                 </div>
             </div>
         </div>
