@@ -9,6 +9,7 @@ use App\Models\ExamSession;
 use App\Models\Grade;
 use App\Models\Preassigned;
 use App\Models\Question;
+use App\Models\School;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -396,6 +397,80 @@ class KepalaExamController extends Controller
             return $pdf->download('nilai-ujian-' . \Illuminate\Support\Str::slug($exam->title) . '.pdf');
         } catch (\Exception $e) {
             return back()->with('error', 'Error exporting scores: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Print participant ID cards as PDF
+     */
+    public function printParticipantCards(Request $request, $examTypeId)
+    {
+        try {
+            $schoolId = session('school_id');
+
+            if (!$schoolId) {
+                return back()->with('error', 'Sekolah tidak ditemukan di session');
+            }
+
+            // Get examtype info
+            $examType = Examtype::findOrFail($examTypeId);
+
+            // Get school info
+            $school = School::findOrFail($schoolId);
+
+            $headmaster = $school->headmasters->first();
+
+            $logoPath = storage_path('app/public/' . $school->logo);
+
+            $logo = null;
+            if (file_exists($logoPath)) {
+                $logo = base64_encode(file_get_contents($logoPath));
+            }
+
+            // Get all preassigned students for this exam type's exams
+            // First get all Exam records for this ExamType
+            $examIds = Exam::where('exam_type_id', $examTypeId)->pluck('id')->toArray();
+
+            // Get all students preassigned to any of these exams
+            $preassignedUsers = Preassigned::whereIn('exam_id', $examIds)
+                ->with(['user.student.grade'])
+                ->get()
+                ->groupBy('user_id')
+                ->map(function ($group) {
+                    return $group->first(); // Get first (unique per user)
+                })
+                ->values();
+
+            $students = $preassignedUsers->map(function ($preassigned) {
+                $user = $preassigned->user;
+                $student = $user->student;
+
+                return [
+                    'name' => $user->name ?? 'N/A',
+                    'email' => $user->email ?? '-',
+                    'password' => $student?->nis ?? '-', // Use NIS as password (was used during user creation)
+                    'nis' => $student?->nis ?? '-',
+                    'class' => $student?->grade?->name ?? '-',
+                ];
+            });
+
+            // Load view and generate PDF
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.participant-cards', [
+                'students' => $students,
+                'examType' => $examType,
+                'school' => $school,
+                'logo' => $logo,
+                'headmaster' => $headmaster,
+            ]);
+
+            // Set PDF options for better quality
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOption('dpi', 150);
+            $pdf->setOption('isPhpEnabled', true);
+
+            return $pdf->download('Data Kartu Peserta - ' . $examType->title . '.pdf');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error mencetak kartu peserta: ' . $e->getMessage());
         }
     }
 

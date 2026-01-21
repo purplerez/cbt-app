@@ -278,6 +278,8 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
     // Export scores as PDF
     Route::get('/exams/{exam}/export-scores', [KepalaExamController::class, 'exportScoresPDF'])->name('exams.export-scores');
+    // Print participant cards route
+    Route::get('/exams/{exam}/print-participants', [KepalaExamController::class, 'printParticipantCards'])->name('exams.print-participants');
 
     //Route exam details per siswa
     // Route for exam session details
@@ -352,6 +354,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
     // JSON endpoint to fetch scores for a given exam (subject)
     Route::get('/exams/{exam}/scores', [KepalaExamController::class, 'scores'])->name('exams.scores');
+    // Print participant cards route
+    Route::get('/exams/{exam}/print-participants', [KepalaExamController::class, 'printParticipantCards'])->name('exams.print-participants');
 
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
