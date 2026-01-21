@@ -34,10 +34,10 @@
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                         <!-- Grade Filter -->
                         @role('kepala')
-                        <form action="{{ route('kepala.students') }}" method="get" class="md:col-span-2 flex items-end gap-2">
+                        <form action="{{ route('kepala.students') }}" method="get" class="flex items-end gap-2 md:col-span-2">
                         @endrole
                         @role('guru')
-                        <form action="{{ route('guru.students') }}" method="get" class="md:col-span-2 flex items-end gap-2">
+                        <form action="{{ route('guru.students') }}" method="get" class="flex items-end gap-2 md:col-span-2">
                         @endrole
                             <div class="flex-1">
                                 <label for="grade_id" class="block text-sm font-medium text-gray-700">Kelas</label>
@@ -57,21 +57,21 @@
                         </form>
 
                         <!-- Import Buttons -->
-                        <div class="md:col-span-2 flex items-end gap-2">
+                        <div class="flex items-end gap-2 md:col-span-2">
                             @role('kepala')
-                            <form action="{{ route('kepala.student.import') }}" method="POST" enctype="multipart/form-data" class="flex-1">
+                            <form action="{{ route('kepala.student.import') }}" method="POST" enctype="multipart/form-data" class="flex-4" >
                             @endrole
                             @role('guru')
-                            <form action="{{ route('guru.student.import') }}" method="POST" enctype="multipart/form-data" class="flex-1">
+                            <form action="{{ route('guru.student.import') }}" method="POST" enctype="multipart/form-data" class="flex-4">
                             @endrole
                                 @csrf
                                 <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .xls" class="hidden" onchange="this.form.submit()">
                                 <button type="button" onclick="document.getElementById('excel_file').click()"
-                                    class="w-full inline-flex items-center justify-center px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-green-600 border border-transparent rounded-md hover:bg-green-700">
+                                    class="inline-flex items-center justify-center w-full px-4 py-2 text-xs font-semibold tracking-widest text-white uppercase transition duration-150 ease-in-out bg-green-600 border border-transparent rounded-md hover:bg-green-700" style="width: 100%;">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/>
                                     </svg>
-                                    Import Excel
+                                    Import-XLS
                                 </button>
                             </form>
                             @role('kepala')
