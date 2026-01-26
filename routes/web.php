@@ -20,6 +20,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\RoomAssignmentController;
 use App\Http\Controllers\ExamSessionDetailController;
+use App\Http\Controllers\UploadQuestionController;
 use App\Models\School;
 use Illuminate\Support\Facades\Route;
 
@@ -44,6 +45,13 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Exam scores export
     Route::get('/exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])->name('exam.scores.export');
+
+    // Upload exam questions via word
+    Route::get('/upload-questions', [UploadQuestionController::class, 'index'])->name('questions.index');
+    Route::get('/upload-questions/create', [UploadQuestionController::class, 'create'])->name('questions.create');
+    Route::post('/upload-questions/import', [UploadQuestionController::class, 'import'])->name('questions.import');
+    Route::get('/upload-questions/{id}', [UploadQuestionController::class, 'show'])->name('questions.show');
+    Route::delete('/upload-questions/{id}', [UploadQuestionController::class, 'destroy'])->name('questions.destroy');
 
     // Routing for schools management
     Route::get('schools', [SchoolController::class, 'index'])->name('schools');
@@ -140,7 +148,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     //Route for Scores
     Route::get('exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])
-    ->name('exam.scores.export');
+        ->name('exam.scores.export');
 
     // Force Submit Routes
     Route::post('exam-sessions/{examSession}/force-submit', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitSession'])
@@ -339,7 +347,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
 
 
-     //routing for exams in kepala dashboard
+    //routing for exams in kepala dashboard
     Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
     Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
@@ -383,7 +391,6 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
     // Route::get('berita-acara/{beritaAcara}/pdf', [BeritaAcaraController::class, 'exportPdf'])->name('berita-acara.pdf');
     Route::get('berita-acara/{beritaAcara}/student-list', [BeritaAcaraController::class, 'printStudentList'])->name('berita-acara.student-list');
-
 });
 
 Route::middleware(['auth', 'role:siswa'])->prefix('siswa')->name('siswa.')->group(function () {

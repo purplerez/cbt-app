@@ -48,7 +48,7 @@ class ExamSeeder extends Seeder
                     'description' => "Ujian $title untuk siswa",
                     'start_date' => now()->addMinute(rand(1, 30)),
                     'end_date' => now()->addDays(rand(1, 10)),
-                    'duration' => rand(10, 16), // minutes
+                    'duration' => rand(45, 50), // minutes
                     'total_quest' => rand(20, 50),
                     'score_minimal' => rand(60, 80),
                     'created_by' => $adminUsers->random()->id,

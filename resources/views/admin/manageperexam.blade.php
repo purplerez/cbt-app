@@ -135,8 +135,7 @@
                                                         <input type="file" name="word_file" id="word_file"
                                                             accept=".docx" class="hidden"
                                                             onchange="handleWordFileUpload(event)">
-                                                        <button type="button"
-                                                            onclick="document.getElementById('word_file').click()"
+                                                        <a href="{{ route('admin.questions.create', ['exam_id' => session('perexamid')]) }}"
                                                             class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
                                                                 stroke="currentColor" viewBox="0 0 24 24"
@@ -147,7 +146,7 @@
                                                                 </path>
                                                             </svg>
                                                             Import Word
-                                                        </button>
+                                                        </a>
                                                         <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
                                                             class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
@@ -328,17 +327,19 @@
                                                             <div class="space-y-4">
                                                                 <div>
                                                                     <label for="question_text_{{ $q->id }}"
-                                                                    class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                                        class="block text-sm font-medium text-gray-700">Pertanyaan</label>
                                                                     <textarea id="question_text_{{ $q->id }}" name="question_text" rows="3"
-                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
+                                                                        class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
                                                                 </div>
 
                                                                 <!-- Question Image Section -->
                                                                 <div>
-                                                                    <label for="question_image_{{ $q->id }}" class="block text-sm font-medium text-gray-700">
+                                                                    <label for="question_image_{{ $q->id }}"
+                                                                        class="block text-sm font-medium text-gray-700">
                                                                         Gambar Soal (Opsional)
                                                                     </label>
-                                                                    <input type="file" id="question_image_{{ $q->id }}"
+                                                                    <input type="file"
+                                                                        id="question_image_{{ $q->id }}"
                                                                         name="question_image" accept="image/*"
                                                                         class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                                                         onchange="previewEditQuestionImage(this, {{ $q->id }})">
@@ -346,15 +347,23 @@
                                                                     <!-- Current Image Preview -->
                                                                     @if ($q->question_image)
                                                                         <div class="mt-2 p-2 bg-gray-100 rounded">
-                                                                            <p class="text-xs font-medium text-gray-600 mb-1">Gambar Saat Ini:</p>
-                                                                            <img src="{{ Storage::url($q->question_image) }}" alt="Current" class="max-w-xs rounded max-h-32">
+                                                                            <p
+                                                                                class="text-xs font-medium text-gray-600 mb-1">
+                                                                                Gambar Saat Ini:</p>
+                                                                            <img src="{{ Storage::url($q->question_image) }}"
+                                                                                alt="Current"
+                                                                                class="max-w-xs rounded max-h-32">
                                                                         </div>
                                                                     @endif
 
                                                                     <!-- New Image Preview -->
-                                                                    <div id="edit_question_image_preview_{{ $q->id }}" class="hidden mt-2 p-2 bg-gray-100 rounded">
-                                                                        <p class="text-xs font-medium text-gray-600 mb-1">Preview Gambar Baru:</p>
-                                                                        <img src="" alt="New Preview" class="max-w-xs rounded max-h-32">
+                                                                    <div id="edit_question_image_preview_{{ $q->id }}"
+                                                                        class="hidden mt-2 p-2 bg-gray-100 rounded">
+                                                                        <p
+                                                                            class="text-xs font-medium text-gray-600 mb-1">
+                                                                            Preview Gambar Baru:</p>
+                                                                        <img src="" alt="New Preview"
+                                                                            class="max-w-xs rounded max-h-32">
                                                                     </div>
                                                                 </div>
 
@@ -367,17 +376,29 @@
                                                                             class="space-y-4">
                                                                             @if ($q->choices)
                                                                                 @php
-                                                                                    $choices = json_decode($q->choices, true);
-                                                                                    $choicesImages = json_decode($q->choices_images, true) ?? [];
+                                                                                    $choices = json_decode(
+                                                                                        $q->choices,
+                                                                                        true,
+                                                                                    );
+                                                                                    $choicesImages =
+                                                                                        json_decode(
+                                                                                            $q->choices_images,
+                                                                                            true,
+                                                                                        ) ?? [];
                                                                                 @endphp
                                                                                 @foreach ($choices as $key => $choice)
                                                                                     <div class="edit-choice-item border-l-4 border-blue-400 pl-4"
                                                                                         data-choice-id="{{ $key }}">
                                                                                         <div class="space-y-2">
-                                                                                            <textarea name="choices[{{ $key }}]" rows="2" class="tinymce-editor block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
+                                                                                            <textarea name="choices[{{ $key }}]" rows="2"
+                                                                                                class="tinymce-editor block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
 
                                                                                             <div>
-                                                                                                <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
+                                                                                                <label
+                                                                                                    class="block text-xs font-medium text-gray-600">Gambar
+                                                                                                    Pilihan
+                                                                                                    (Opsional)
+                                                                                                </label>
                                                                                                 <input type="file"
                                                                                                     name="choice_images[{{ $key }}]"
                                                                                                     accept="image/*"
@@ -386,16 +407,28 @@
 
                                                                                                 <!-- Current Image Preview -->
                                                                                                 @if (isset($choicesImages[$key]))
-                                                                                                    <div class="mt-2 p-2 bg-gray-100 rounded">
-                                                                                                        <p class="text-xs font-medium text-gray-600 mb-1">Gambar Saat Ini:</p>
-                                                                                                        <img src="{{ Storage::url($choicesImages[$key]) }}" alt="Current" class="max-w-xs rounded max-h-32">
+                                                                                                    <div
+                                                                                                        class="mt-2 p-2 bg-gray-100 rounded">
+                                                                                                        <p
+                                                                                                            class="text-xs font-medium text-gray-600 mb-1">
+                                                                                                            Gambar Saat
+                                                                                                            Ini:</p>
+                                                                                                        <img src="{{ Storage::url($choicesImages[$key]) }}"
+                                                                                                            alt="Current"
+                                                                                                            class="max-w-xs rounded max-h-32">
                                                                                                     </div>
                                                                                                 @endif
 
                                                                                                 <!-- New Image Preview -->
-                                                                                                <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}" class="hidden mt-2 p-2 bg-gray-100 rounded">
-                                                                                                    <p class="text-xs font-medium text-gray-600 mb-1">Preview Gambar Baru:</p>
-                                                                                                    <img src="" alt="New Preview" class="max-w-xs rounded max-h-32">
+                                                                                                <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}"
+                                                                                                    class="hidden mt-2 p-2 bg-gray-100 rounded">
+                                                                                                    <p
+                                                                                                        class="text-xs font-medium text-gray-600 mb-1">
+                                                                                                        Preview Gambar
+                                                                                                        Baru:</p>
+                                                                                                    <img src=""
+                                                                                                        alt="New Preview"
+                                                                                                        class="max-w-xs rounded max-h-32">
                                                                                                 </div>
                                                                                             </div>
                                                                                         </div>
@@ -477,107 +510,107 @@
                                                 </div>
 
 
-                                                    <form
-                                                        action="{{ route('admin.exams.question.store', session('perexamid')) }}"
-                                                        method="post" enctype="multipart/form-data" class="mb-4 question-form">
+                                                <form
+                                                    action="{{ route('admin.exams.question.store', session('perexamid')) }}"
+                                                    method="post" enctype="multipart/form-data"
+                                                    class="mb-4 question-form">
 
 
 
-                                                        @csrf
-                                                        <div class="space-y-4">
-                                                            <div>
-                                                                <label for="question_text"
-                                                                    class="block text-sm font-medium text-gray-700">Pertanyaan</label>
-                                                                <textarea id="question_text" name="question_text" rows="3"
-                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                            </div>
-                                                            <div>
-                                                                <label for="question_image"
-                                                                    class="block text-sm font-medium text-gray-700">Gambar
-                                                                    Soal (Opsional)</label>
-                                                                <input type="file" id="question_image"
-                                                                    name="question_image" accept="image/*"
-                                                                    class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                                    onchange="previewQuestionImage(this)">
-                                                                <div id="question_image_preview" class="hidden mt-2">
-                                                                    <img src="" alt="Preview"
-                                                                        class="max-w-xs rounded-md max-h-48">
-                                                                </div>
-                                                            </div>
-                                                            <div>
-                                                                <label for="options"
-                                                                    class="block text-sm font-medium text-gray-700">Pilihan
-                                                                    Jawaban</label>
-                                                                <div id="choices-container" class="space-y-2">
-                                                                    <div class="choice-item" data-choice-id="1">
-                                                                        <div class="flex items-start gap-2">
-                                                                            <div class="flex-1">
-                                                                                <textarea name="choices[1]" rows="3"
-                                                                                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
-                                                                                <div class="mt-2">
-                                                                                    <label
-                                                                                        class="block text-xs font-medium text-gray-600"
-                                                                                        for="gambar">Gambar Pilihan
-                                                                                        (Opsional)</label>
-                                                                                    <input type="file"
-                                                                                        name="choice_images[1]"
-                                                                                        accept="image/*"
-                                                                                        class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                                                                                        onchange="previewChoiceImage(this, 1)">
-                                                                                    <div id="choice_image_preview_1"
-                                                                                        class="hidden mt-1">
-                                                                                        <img src=""
-                                                                                            alt="Preview"
-                                                                                            class="max-w-xs rounded-md max-h-32">
-                                                                                    </div>
-                                                                                </div>
-                                                                            </div>
-                                                                            <button type="button"
-                                                                                class="mt-1 text-red-500 remove-choice hover:text-red-700"
-                                                                                onclick="removeChoice(this)">
-                                                                                <svg class="w-4 h-4" fill="none"
-                                                                                    viewBox="0 0 24 24"
-                                                                                    stroke="currentColor">
-                                                                                    <path stroke-linecap="round"
-                                                                                        stroke-linejoin="round"
-                                                                                        stroke-width="2"
-                                                                                        d="M6 18L18 6M6 6l12 12" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <button type="button" id="add-choice"
-                                                                    class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
-                                                                    + Add Choice
-                                                                </button>
-                                                            </div>
-
-                                                            {{-- answer --}}
-                                                            <div>
-                                                                <label for="answer_key"
-                                                                    class="block text-sm font-medium text-gray-700">Kunci
-                                                                    Jawaban</label>
-                                                                <div id="answer-key-container"></div>
-                                                            </div>
-
-                                                            {{--  points --}}
-                                                            <div>
-                                                                <label for="points"
-                                                                    class="block text-sm font-medium text-gray-700">Point</label>
-                                                                <input type="number" name="points"
-                                                                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
-                                                            </div>
-
-                                                            {{--  button --}}
-                                                            <div>
-                                                                <button type="submit"
-                                                                    class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
-                                                                    Simpan
-                                                                </button>
+                                                    @csrf
+                                                    <div class="space-y-4">
+                                                        <div>
+                                                            <label for="question_text"
+                                                                class="block text-sm font-medium text-gray-700">Pertanyaan</label>
+                                                            <textarea id="question_text" name="question_text" rows="3"
+                                                                class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                        </div>
+                                                        <div>
+                                                            <label for="question_image"
+                                                                class="block text-sm font-medium text-gray-700">Gambar
+                                                                Soal (Opsional)</label>
+                                                            <input type="file" id="question_image"
+                                                                name="question_image" accept="image/*"
+                                                                class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                                                                onchange="previewQuestionImage(this)">
+                                                            <div id="question_image_preview" class="hidden mt-2">
+                                                                <img src="" alt="Preview"
+                                                                    class="max-w-xs rounded-md max-h-48">
                                                             </div>
                                                         </div>
-                                                    </form>
+                                                        <div>
+                                                            <label for="options"
+                                                                class="block text-sm font-medium text-gray-700">Pilihan
+                                                                Jawaban</label>
+                                                            <div id="choices-container" class="space-y-2">
+                                                                <div class="choice-item" data-choice-id="1">
+                                                                    <div class="flex items-start gap-2">
+                                                                        <div class="flex-1">
+                                                                            <textarea name="choices[1]" rows="3"
+                                                                                class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                            <div class="mt-2">
+                                                                                <label
+                                                                                    class="block text-xs font-medium text-gray-600"
+                                                                                    for="gambar">Gambar Pilihan
+                                                                                    (Opsional)</label>
+                                                                                <input type="file"
+                                                                                    name="choice_images[1]"
+                                                                                    accept="image/*"
+                                                                                    class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
+                                                                                    onchange="previewChoiceImage(this, 1)">
+                                                                                <div id="choice_image_preview_1"
+                                                                                    class="hidden mt-1">
+                                                                                    <img src="" alt="Preview"
+                                                                                        class="max-w-xs rounded-md max-h-32">
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <button type="button"
+                                                                            class="mt-1 text-red-500 remove-choice hover:text-red-700"
+                                                                            onclick="removeChoice(this)">
+                                                                            <svg class="w-4 h-4" fill="none"
+                                                                                viewBox="0 0 24 24"
+                                                                                stroke="currentColor">
+                                                                                <path stroke-linecap="round"
+                                                                                    stroke-linejoin="round"
+                                                                                    stroke-width="2"
+                                                                                    d="M6 18L18 6M6 6l12 12" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <button type="button" id="add-choice"
+                                                                class="px-3 py-1 mt-2 text-sm text-white bg-blue-500 rounded hover:bg-blue-600">
+                                                                + Add Choice
+                                                            </button>
+                                                        </div>
+
+                                                        {{-- answer --}}
+                                                        <div>
+                                                            <label for="answer_key"
+                                                                class="block text-sm font-medium text-gray-700">Kunci
+                                                                Jawaban</label>
+                                                            <div id="answer-key-container"></div>
+                                                        </div>
+
+                                                        {{--  points --}}
+                                                        <div>
+                                                            <label for="points"
+                                                                class="block text-sm font-medium text-gray-700">Point</label>
+                                                            <input type="number" name="points"
+                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                                        </div>
+
+                                                        {{--  button --}}
+                                                        <div>
+                                                            <button type="submit"
+                                                                class="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600 focus:outline-none focus:bg-blue-600">
+                                                                Simpan
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </form>
 
                                             </div>
                                         </div>
@@ -890,10 +923,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                                                            ${examstatus == 0 ? 'disabled' : ''}
-                                                                            >
-                                                                                            Tambah ke Ujian
-                                                                                        </button>`
+                                                                                                                            ${examstatus == 0 ? 'disabled' : ''}
+                                                                                                                            >
+                                                                                                                                            Tambah ke Ujian
+                                                                                                                                        </button>`
                         }
                     </td>
                 `;
@@ -1170,7 +1203,8 @@
                                     plugins: [
                                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
                                         'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
-                                        'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
+                                        'fullscreen', 'insertdatetime', 'media', 'table', 'paste',
+                                        'help',
                                         'wordcount'
                                     ],
                                     toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
@@ -1616,29 +1650,29 @@
                     // Show loading message
                     showLoadingMessage('Memproses file Word...');
 
-                    const examId = '{{ session("perexamid") }}';
-                    const route = '{{ route("admin.exams.questions.import-word", "__EXAM_ID__") }}'.replace('__EXAM_ID__', examId);
+                    const examId = '{{ session('perexamid') }}';
+                    const route = '{{ route('admin.exams.questions.import-word', '__EXAM_ID__') }}'.replace('__EXAM_ID__', examId);
 
                     fetch(route, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
-                        body: formData
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            // Show confirmation modal with questions preview
-                            showWordImportPreview(data.questions, examId);
-                        } else {
-                            alert('Error: ' + (data.message || 'Terjadi kesalahan saat memproses file'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('Terjadi kesalahan saat upload file');
-                    });
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                            },
+                            body: formData
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Show confirmation modal with questions preview
+                                showWordImportPreview(data.questions, examId);
+                            } else {
+                                alert('Error: ' + (data.message || 'Terjadi kesalahan saat memproses file'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Terjadi kesalahan saat upload file');
+                        });
                 }
 
                 function showLoadingMessage(message) {
@@ -1665,14 +1699,14 @@
                             <h2 class="text-xl font-bold mb-4">Preview Soal yang Diimport (${questions.length} soal)</h2>
                             <div class="space-y-4">
                                 ${questions.map((q, idx) => `
-                                    <div class="border-l-4 border-blue-500 pl-4 py-2">
-                                        <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
-                                        <p class="text-sm text-gray-600">
-                                            Tipe: ${getQuestionTypeName(q.question_type)} |
-                                            Pilihan: ${Object.keys(q.choices || {}).length}
-                                        </p>
-                                    </div>
-                                `).join('')}
+                                                                                    <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                                                                        <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
+                                                                                        <p class="text-sm text-gray-600">
+                                                                                            Tipe: ${getQuestionTypeName(q.question_type)} |
+                                                                                            Pilihan: ${Object.keys(q.choices || {}).length}
+                                                                                        </p>
+                                                                                    </div>
+                                                                                `).join('')}
                             </div>
                             <div class="mt-6 flex justify-end space-x-4">
                                 <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Batal</button>
@@ -1695,37 +1729,37 @@
 
                 function saveWordQuestions(examId, questionsData) {
                     const questions = JSON.parse(atob(questionsData));
-                    const route = '{{ route("admin.exams.questions.save-word-questions") }}';
+                    const route = '{{ route('admin.exams.questions.save-word-questions') }}';
 
                     showLoadingMessage('Menyimpan soal...');
 
                     fetch(route, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            exam_id: examId,
-                            questions: questions
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                exam_id: examId,
+                                questions: questions
+                            })
                         })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        hideLoadingMessage();
-                        if (data.success) {
-                            alert(data.message);
-                            // Reload page to show new questions
-                            setTimeout(() => location.reload(), 1000);
-                        } else {
-                            alert('Error: ' + (data.message || 'Terjadi kesalahan'));
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        hideLoadingMessage();
-                        alert('Terjadi kesalahan saat menyimpan soal');
-                    });
+                        .then(response => response.json())
+                        .then(data => {
+                            hideLoadingMessage();
+                            if (data.success) {
+                                alert(data.message);
+                                // Reload page to show new questions
+                                setTimeout(() => location.reload(), 1000);
+                            } else {
+                                alert('Error: ' + (data.message || 'Terjadi kesalahan'));
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            hideLoadingMessage();
+                            alert('Terjadi kesalahan saat menyimpan soal');
+                        });
                 }
 
                 // Handle form submission for TinyMCE
