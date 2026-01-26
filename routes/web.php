@@ -46,12 +46,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Exam scores export
     Route::get('/exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])->name('exam.scores.export');
 
-    // Upload exam questions via word - Direct import only (no separate pages)
-    // Route::get('/upload-questions', [UploadQuestionController::class, 'index'])->name('questions.index');
-    // Route::get('/upload-questions/create', [UploadQuestionController::class, 'create'])->name('questions.create');
+    // Upload exam questions via word - Direct import to exam only
     Route::post('/upload-questions/import', [UploadQuestionController::class, 'import'])->name('questions.import');
-    // Route::get('/upload-questions/{id}', [UploadQuestionController::class, 'show'])->name('questions.show');
-    // Route::delete('/upload-questions/{id}', [UploadQuestionController::class, 'destroy'])->name('questions.destroy');
 
     // Routing for schools management
     Route::get('schools', [SchoolController::class, 'index'])->name('schools');
