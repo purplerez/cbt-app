@@ -119,7 +119,7 @@ class UploadQuestionController extends Controller
                     'perexamstatus' => $exam->is_active
                 ]);
 
-                return redirect()->route('admin.exams.manage', ['exam' => $examId])
+                return redirect()->route('admin.exams.manage.question', ['exam' => $examId])
                     ->with('success', "Berhasil mengimport {$importedCount} soal dari file {$originalFilename} ke ujian {$exam->exam_name}");
             } else {
                 // Save to upload_questions (bank soal)

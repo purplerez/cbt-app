@@ -127,15 +127,18 @@
                                             <div class="flex items-center space-x-2">
                                                 <!-- Word Upload Button and Form -->
                                                 @if (session('perexamstatus') == 1)
-                                                    <form id="wordImportForm"
-                                                        action="{{ route('admin.exams.questions.import-word', session('perexamid')) }}"
-                                                        method="POST" enctype="multipart/form-data"
+                                                    <form id="wordImportFormNew"
+                                                        action="{{ route('admin.questions.import') }}" method="POST"
+                                                        enctype="multipart/form-data"
                                                         class="flex items-center space-x-2">
                                                         @csrf
-                                                        <input type="file" name="word_file" id="word_file"
-                                                            accept=".docx" class="hidden"
-                                                            onchange="handleWordFileUpload(event)">
-                                                        <a href="{{ route('admin.questions.create', ['exam_id' => session('perexamid')]) }}"
+                                                        <input type="hidden" name="exam_id"
+                                                            value="{{ session('perexamid') }}">
+                                                        <input type="file" name="word_file" id="word_file_new"
+                                                            accept=".doc,.docx" class="hidden"
+                                                            onchange="this.form.submit()">
+                                                        <button type="button"
+                                                            onclick="document.getElementById('word_file_new').click()"
                                                             class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
                                                                 stroke="currentColor" viewBox="0 0 24 24"
@@ -146,7 +149,7 @@
                                                                 </path>
                                                             </svg>
                                                             Import Word
-                                                        </a>
+                                                        </button>
                                                         <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
                                                             class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
                                                             <svg class="w-4 h-4 mr-1" fill="none"
@@ -923,10 +926,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                                                                                                            ${examstatus == 0 ? 'disabled' : ''}
-                                                                                                                            >
-                                                                                                                                            Tambah ke Ujian
-                                                                                                                                        </button>`
+                                                                                                                                        ${examstatus == 0 ? 'disabled' : ''}
+                                                                                                                                        >
+                                                                                                                                                        Tambah ke Ujian
+                                                                                                                                                    </button>`
                         }
                     </td>
                 `;
@@ -1699,14 +1702,14 @@
                             <h2 class="text-xl font-bold mb-4">Preview Soal yang Diimport (${questions.length} soal)</h2>
                             <div class="space-y-4">
                                 ${questions.map((q, idx) => `
-                                                                                    <div class="border-l-4 border-blue-500 pl-4 py-2">
-                                                                                        <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
-                                                                                        <p class="text-sm text-gray-600">
-                                                                                            Tipe: ${getQuestionTypeName(q.question_type)} |
-                                                                                            Pilihan: ${Object.keys(q.choices || {}).length}
-                                                                                        </p>
-                                                                                    </div>
-                                                                                `).join('')}
+                                                                                                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                                                                                    <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
+                                                                                                    <p class="text-sm text-gray-600">
+                                                                                                        Tipe: ${getQuestionTypeName(q.question_type)} |
+                                                                                                        Pilihan: ${Object.keys(q.choices || {}).length}
+                                                                                                    </p>
+                                                                                                </div>
+                                                                                            `).join('')}
                             </div>
                             <div class="mt-6 flex justify-end space-x-4">
                                 <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Batal</button>
