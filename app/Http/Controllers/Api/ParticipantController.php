@@ -129,30 +129,76 @@ class ParticipantController extends Controller
                 ], 422);
             }
 
-            // Check if user already has an active session for this exam
-            $existingSession = $user->examSessions()
-                ->where('exam_id', $examId)
-                ->where('status', 'progress')
-                ->first();
+            // Use database transaction to prevent race condition
+            return DB::transaction(function () use ($user, $examId, $exam, $duration, $totalQuest, $request) {
 
-            if ($existingSession) {
-                // Return existing session so user can continue their exam
-                $now = Carbon::now();
-                $endTime = Carbon::parse($existingSession->submited_at);
+                // Check if user already has an active session for this exam
+                // Use lockForUpdate to prevent race condition
+                $existingSession = $user->examSessions()
+                    ->where('exam_id', $examId)
+                    ->where('status', 'progress')
+                    ->lockForUpdate()
+                    ->first();
 
-                // Check if session has expired (now is AFTER end time)
-                if ($now->greaterThan($endTime)) {
-                    // Auto-submit expired session
-                    $this->autoSubmitExpiredExam($existingSession);
+                if ($existingSession) {
+                    // Return existing session so user can continue their exam
+                    $now = Carbon::now();
+                    $endTime = Carbon::parse($existingSession->submited_at);
+
+                    // Check if session has expired (now is AFTER end time)
+                    if ($now->greaterThan($endTime)) {
+                        // Auto-submit expired session
+                        $this->autoSubmitExpiredExam($existingSession);
+
+                        return response()->json([
+                            'success' => false,
+                            'message' => 'Sesi ujian Anda telah berakhir dan otomatis diselesaikan'
+                        ], 422);
+                    }
+
+                    // Calculate remaining time in seconds
+                    $timeRemaining = $now->diffInSeconds($endTime, false);
+
+                    $questions = Question::where('exam_id', $examId)
+                        ->limit($totalQuest)
+                        ->get();
 
                     return response()->json([
-                        'success' => false,
-                        'message' => 'Sesi ujian Anda telah berakhir dan otomatis diselesaikan'
-                    ], 422);
+                        'success' => true,
+                        'exam' => $questions,
+                        'session_token' => $existingSession->session_token,
+                        'exam_info' => [
+                            'title' => $exam->title,
+                            'duration' => $duration,
+                            'total_questions' => $totalQuest,
+                            'start_time' => $existingSession->started_at->toISOString(),
+                            'end_time' => $existingSession->submited_at->toISOString(),
+                            'time_remaining' => abs($timeRemaining), // Ensure positive value
+                            'is_continuing' => true
+                        ],
+                        'message' => 'Melanjutkan sesi ujian yang sudah ada'
+                    ]);
                 }
 
-                // Calculate remaining time in seconds
-                $timeRemaining = $now->diffInSeconds($endTime, false);
+                $sessionToken = bin2hex(random_bytes(16));
+                $startTime = Carbon::now();
+
+                // Use explicit integer casting and addMinutes method for safety
+                $endTime = Carbon::parse($startTime)->addMinutes(intval($duration));
+
+                $user->examSessions()->create([
+                    'user_id' => $user->id,
+                    'exam_id' => $examId,
+                    'session_token' => $sessionToken,
+                    'started_at' => $startTime,
+                    'submited_at' => $endTime,
+                    'time_remaining' => intval($duration * 60),
+                    'total_score' => 0,
+                    'status' => 'progress',
+                    'attempt_number' => 1,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                ]);
 
                 $questions = Question::where('exam_id', $examId)
                     ->limit($totalQuest)
@@ -161,56 +207,16 @@ class ParticipantController extends Controller
                 return response()->json([
                     'success' => true,
                     'exam' => $questions,
-                    'session_token' => $existingSession->session_token,
+                    'session_token' => $sessionToken,
                     'exam_info' => [
                         'title' => $exam->title,
                         'duration' => $duration,
                         'total_questions' => $totalQuest,
-                        'start_time' => $existingSession->started_at->toISOString(),
-                        'end_time' => $existingSession->submited_at->toISOString(),
-                        'time_remaining' => abs($timeRemaining), // Ensure positive value
-                        'is_continuing' => true
-                    ],
-                    'message' => 'Melanjutkan sesi ujian yang sudah ada'
+                        'start_time' => $startTime->toISOString(),
+                        'end_time' => $endTime->toISOString()
+                    ]
                 ]);
-            }
-
-            $sessionToken = bin2hex(random_bytes(16));
-            $startTime = Carbon::now();
-
-            // Use explicit integer casting and addMinutes method for safety
-            $endTime = Carbon::parse($startTime)->addMinutes(intval($duration));
-
-            $user->examSessions()->create([
-                'user_id' => $user->id,
-                'exam_id' => $examId,
-                'session_token' => $sessionToken,
-                'started_at' => $startTime,
-                'submited_at' => $endTime,
-                'time_remaining' => intval($duration * 60),
-                'total_score' => 0,
-                'status' => 'progress',
-                'attempt_number' => 1,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->header('User-Agent'),
-            ]);
-
-            $questions = Question::where('exam_id', $examId)
-                ->limit($totalQuest)
-                ->get();
-
-            return response()->json([
-                'success' => true,
-                'exam' => $questions,
-                'session_token' => $sessionToken,
-                'exam_info' => [
-                    'title' => $exam->title,
-                    'duration' => $duration,
-                    'total_questions' => $totalQuest,
-                    'start_time' => $startTime->toISOString(),
-                    'end_time' => $endTime->toISOString()
-                ]
-            ]);
+            }); // End DB::transaction
         } catch (\Exception $e) {
             Log::error('Failed to start exam', [
                 'user_id' => $request->user()->id ?? null,
