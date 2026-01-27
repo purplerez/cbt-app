@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;    
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -28,6 +28,12 @@ class AuthController extends Controller
 
         $user = Auth::user();
 
+        // Untuk siswa: selalu izinkan login dan set is_active = true (auto online status)
+        if ($user->hasRole('siswa')) {
+            $user->is_active = true;
+            $user->save();
+        }
+
         $token = $user->createToken('API Token')->plainTextToken;
 
         return response()->json([
@@ -41,6 +47,13 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $user = Auth::user();
+
+        // Set is_active menjadi false jika user adalah siswa
+        if ($user && $user->hasRole('siswa')) {
+            $user->is_active = false;
+            $user->save();
+        }
+
         $user->tokens()->delete();
 
         return response()->json([

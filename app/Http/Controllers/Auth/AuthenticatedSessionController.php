@@ -32,8 +32,10 @@ class AuthenticatedSessionController extends Controller
 
         $user = auth()->user();
 
-        if(!$user->is_active){
-            return $this->forceLogout($request, 'Akun Anda tidak aktif. Silakan hubungi administrator.');
+        // Untuk siswa: selalu izinkan login dan set is_active = true (auto online status)
+        if ($user->hasRole('siswa')) {
+            $user->is_active = true;
+            $user->save();
         }
 
         //sanctum token
@@ -45,7 +47,7 @@ class AuthenticatedSessionController extends Controller
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('guru')) {
-            try{
+            try {
                 $school_id = $user->teacher->school_id;
                 $guru_id = $user->teacher->id;
 
@@ -55,36 +57,34 @@ class AuthenticatedSessionController extends Controller
                     'guru_id' => $guru_id
                 ]);
 
-                if(!isset($school_id)){
+                if (!isset($school_id)) {
                     throw new \Exception('School ID not found');
                 }
 
                 return redirect()->route('guru.dashboard');
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
                 return $this->forceLogout($request, 'Gagal login : ' . $e->getMessage());
             }
         } elseif ($user->hasRole('siswa')) {
             return redirect()->route('siswa.dashboard');
         } elseif ($user->hasRole('kepala')) {
-            try{
-            $school_id = Headmaster::where('user_id', $user->id)->first()->school_id;
-            $kepala_id = $user->head->id;
+            try {
+                $school_id = Headmaster::where('user_id', $user->id)->first()->school_id;
+                $kepala_id = $user->head->id;
 
-            session([
-                'school_id' => $school_id,
-                'school_name' => $user->head->school->name,
-                'kepala_id' => $kepala_id
-            ]);
+                session([
+                    'school_id' => $school_id,
+                    'school_name' => $user->head->school->name,
+                    'kepala_id' => $kepala_id
+                ]);
 
-            if(!isset($school_id)){
-                throw new \Exception('School ID not found');
+                if (!isset($school_id)) {
+                    throw new \Exception('School ID not found');
+                }
+                return redirect()->route('kepala.dashboard');
+            } catch (\Exception $e) {
+                return redirect()->back()->withInput()->withErrors(['error' => 'Gagal login : ' . $e->getMessage()]);
             }
-            return redirect()->route('kepala.dashboard');
-        }
-        catch(\Exception $e) {
-            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal login : ' . $e->getMessage()]);
-        }
         } elseif ($user->hasRole('super')) {
             return redirect()->route('super.dashboard');
         }
@@ -101,6 +101,12 @@ class AuthenticatedSessionController extends Controller
         $user = $request->user();
 
         logActivity("$user->name (ID: {$user->id}) berhasil Logout");
+
+        // Set is_active menjadi false jika user adalah siswa
+        if ($user && $user->hasRole('siswa')) {
+            $user->is_active = false;
+            $user->save();
+        }
 
         $request->user()->tokens()->delete();
         Auth::guard('web')->logout();
