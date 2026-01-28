@@ -335,4 +335,28 @@ class SchoolController extends Controller
                 ->withErrors(['error' => 'Aktifkan Sekolah Failed : ' . $e->getMessage()]);
         }
     }
+
+    /**
+     * Display questions view
+     */
+    public function questions()
+    {
+        return view('admin.questions');
+    }
+
+    /**
+     * Display results view
+     */
+    public function results()
+    {
+        return view('admin.results');
+    }
+
+    /**
+     * Display settings view
+     */
+    public function settings()
+    {
+        return view('admin.settings');
+    }
 }

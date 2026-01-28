@@ -371,4 +371,25 @@ class ExamController extends Controller
         }
     }
 
+    /**
+     * Load edit modal HTML via AJAX
+     * Returns modal content for editing a question
+     */
+    public function getEditModalContent($questionId)
+    {
+        try {
+            $question = Question::findOrFail($questionId);
+
+            // Decode JSON data
+            $choices = $question->choices ? json_decode($question->choices, true) : [];
+            $choicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            $answerKey = is_array($question->answer_key) ? $question->answer_key : json_decode($question->answer_key ?? '[]', true);
+
+            // Return modal HTML
+            return view('admin.partials.edit-question-modal', compact('question', 'choices', 'choicesImages', 'answerKey'));
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Question not found'], 404);
+        }
+    }
+
 }

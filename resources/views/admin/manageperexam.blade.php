@@ -127,6 +127,17 @@
                                             <div class="flex items-center space-x-2">
                                                 <!-- Word Upload Button and Form -->
                                                 @if (session('perexamstatus') == 1)
+                                                    @php
+                                                        $importRoute = auth()->user()->hasRole('super')
+                                                            ? route('super.exams.questions.import-word', session('perexamid'))
+                                                            : route('admin.exams.questions.import-word', session('perexamid'));
+                                                        $templateRoute = auth()->user()->hasRole('super')
+                                                            ? route('super.exams.questions.template-word', session('perexamid'))
+                                                            : route('admin.exams.questions.template-word', session('perexamid'));
+                                                        $exportRoute = auth()->user()->hasRole('super')
+                                                            ? route('super.exams.questions.export', session('perexamid'))
+                                                            : route('admin.exams.questions.export', session('perexamid'));
+                                                    @endphp
                                                     <form id="wordImportFormNew"
                                                         action="{{ route('admin.questions.import') }}" method="POST"
                                                         enctype="multipart/form-data"
@@ -292,199 +303,26 @@
                                             </div>
                                         </div>
 
-                                        {{-- Render all edit modals OUTSIDE table to fix HTML structure --}}
-                                        @foreach ($questions as $q)
-                                            <div id="editSoalModal{{ $q->id }}"
-                                                class="fixed inset-0 z-50 hidden overflow-y-auto"
-                                                data-choices="{{ $q->choices }}"
-                                                data-choice-images="{{ $q->choices_images }}"
-                                                data-answer-key="{{ is_array($q->answer_key) ? json_encode($q->answer_key) : json_encode([$q->answer_key]) }}"
-                                                data-question-type="{{ $q->question_type_id }}">
-                                                <div class="min-h-screen px-4 text-center">
-                                                    <div
-                                                        class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
+                                        {{-- Single edit modal template - content loaded via AJAX --}}
+                                        <div id="editSoalModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+                                            <div class="min-h-screen px-4 text-center">
+                                                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
+                                                <div class="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                    <div class="flex items-center justify-between pb-3 border-b">
+                                                        <h3 class="text-lg font-medium text-gray-900">Ubah Soal</h3>
+                                                        <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('editSoalModal')">
+                                                            <span class="sr-only">Close</span>
+                                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            </svg>
+                                                        </button>
                                                     </div>
-                                                    <div
-                                                        class="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
-                                                        <div class="flex items-center justify-between pb-3 border-b">
-                                                            <h3 class="text-lg font-medium text-gray-900">Ubah Soal
-                                                                #{{ $q->id }}</h3>
-                                                            <button type="button"
-                                                                class="text-gray-400 hover:text-gray-500"
-                                                                onclick="closeModal('editSoalModal{{ $q->id }}')">
-                                                                <span class="sr-only">Close</span>
-                                                                <svg class="w-6 h-6" fill="none"
-                                                                    viewBox="0 0 24 24" stroke="currentColor">
-                                                                    <path stroke-linecap="round"
-                                                                        stroke-linejoin="round" stroke-width="2"
-                                                                        d="M6 18L18 6M6 6l12 12" />
-                                                                </svg>
-                                                            </button>
-                                                        </div>
-                                                        <form
-                                                            action="{{ route('admin.exams.question.update', $q->id) }}"
-                                                            method="post" enctype="multipart/form-data"
-                                                            class="mt-4 max-h-96 overflow-y-auto">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <div class="space-y-4">
-                                                                <div>
-                                                                    <label for="question_text_{{ $q->id }}"
-                                                                        class="block text-sm font-medium text-gray-700">Pertanyaan</label>
-                                                                    <textarea id="question_text_{{ $q->id }}" name="question_text" rows="3"
-                                                                        class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">{{ $q->question_text }}</textarea>
-                                                                </div>
-
-                                                                <!-- Question Image Section -->
-                                                                <div>
-                                                                    <label for="question_image_{{ $q->id }}"
-                                                                        class="block text-sm font-medium text-gray-700">
-                                                                        Gambar Soal (Opsional)
-                                                                    </label>
-                                                                    <input type="file"
-                                                                        id="question_image_{{ $q->id }}"
-                                                                        name="question_image" accept="image/*"
-                                                                        class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                                                                        onchange="previewEditQuestionImage(this, {{ $q->id }})">
-
-                                                                    <!-- Current Image Preview -->
-                                                                    @if ($q->question_image)
-                                                                        <div class="mt-2 p-2 bg-gray-100 rounded">
-                                                                            <p
-                                                                                class="text-xs font-medium text-gray-600 mb-1">
-                                                                                Gambar Saat Ini:</p>
-                                                                            <img src="{{ Storage::url($q->question_image) }}"
-                                                                                alt="Current"
-                                                                                class="max-w-xs rounded max-h-32">
-                                                                        </div>
-                                                                    @endif
-
-                                                                    <!-- New Image Preview -->
-                                                                    <div id="edit_question_image_preview_{{ $q->id }}"
-                                                                        class="hidden mt-2 p-2 bg-gray-100 rounded">
-                                                                        <p
-                                                                            class="text-xs font-medium text-gray-600 mb-1">
-                                                                            Preview Gambar Baru:</p>
-                                                                        <img src="" alt="New Preview"
-                                                                            class="max-w-xs rounded max-h-32">
-                                                                    </div>
-                                                                </div>
-
-                                                                @if ($q->question_type_id != 3)
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-gray-700">Pilihan
-                                                                            Jawaban</label>
-                                                                        <div id="edit-choices-container-{{ $q->id }}"
-                                                                            class="space-y-4">
-                                                                            @if ($q->choices)
-                                                                                @php
-                                                                                    $choices = json_decode(
-                                                                                        $q->choices,
-                                                                                        true,
-                                                                                    );
-                                                                                    $choicesImages =
-                                                                                        json_decode(
-                                                                                            $q->choices_images,
-                                                                                            true,
-                                                                                        ) ?? [];
-                                                                                @endphp
-                                                                                @foreach ($choices as $key => $choice)
-                                                                                    <div class="edit-choice-item border-l-4 border-blue-400 pl-4"
-                                                                                        data-choice-id="{{ $key }}">
-                                                                                        <div class="space-y-2">
-                                                                                            <textarea name="choices[{{ $key }}]" rows="2"
-                                                                                                class="tinymce-editor block w-full border-gray-300 rounded-md">{{ $choice }}</textarea>
-
-                                                                                            <div>
-                                                                                                <label
-                                                                                                    class="block text-xs font-medium text-gray-600">Gambar
-                                                                                                    Pilihan
-                                                                                                    (Opsional)
-                                                                                                </label>
-                                                                                                <input type="file"
-                                                                                                    name="choice_images[{{ $key }}]"
-                                                                                                    accept="image/*"
-                                                                                                    class="block w-full mt-1 text-xs text-gray-500 file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100"
-                                                                                                    onchange="previewEditChoiceImage(this, {{ $q->id }}, {{ $key }})">
-
-                                                                                                <!-- Current Image Preview -->
-                                                                                                @if (isset($choicesImages[$key]))
-                                                                                                    <div
-                                                                                                        class="mt-2 p-2 bg-gray-100 rounded">
-                                                                                                        <p
-                                                                                                            class="text-xs font-medium text-gray-600 mb-1">
-                                                                                                            Gambar Saat
-                                                                                                            Ini:</p>
-                                                                                                        <img src="{{ Storage::url($choicesImages[$key]) }}"
-                                                                                                            alt="Current"
-                                                                                                            class="max-w-xs rounded max-h-32">
-                                                                                                    </div>
-                                                                                                @endif
-
-                                                                                                <!-- New Image Preview -->
-                                                                                                <div id="edit_choice_image_preview_{{ $q->id }}_{{ $key }}"
-                                                                                                    class="hidden mt-2 p-2 bg-gray-100 rounded">
-                                                                                                    <p
-                                                                                                        class="text-xs font-medium text-gray-600 mb-1">
-                                                                                                        Preview Gambar
-                                                                                                        Baru:</p>
-                                                                                                    <img src=""
-                                                                                                        alt="New Preview"
-                                                                                                        class="max-w-xs rounded max-h-32">
-                                                                                                </div>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                    </div>
-                                                                                @endforeach
-                                                                            @endif
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-gray-700">Kunci
-                                                                            Jawaban</label>
-                                                                        <div
-                                                                            id="edit-answer-key-container-{{ $q->id }}">
-                                                                            <p class="text-sm text-gray-500">Loading...
-                                                                            </p>
-                                                                        </div>
-                                                                    </div>
-                                                                @else
-                                                                    <div>
-                                                                        <label
-                                                                            class="block text-sm font-medium text-gray-700">Kunci
-                                                                            Jawaban</label>
-                                                                        <textarea name="answer_key" rows="3" class="block w-full mt-1 border-gray-300 rounded-md">{{ $q->answer_key }}</textarea>
-                                                                    </div>
-                                                                @endif
-
-                                                                <div>
-                                                                    <label
-                                                                        class="block text-sm font-medium text-gray-700">Point</label>
-                                                                    <input type="number" name="points"
-                                                                        value="{{ $q->points }}"
-                                                                        class="block w-full mt-1 border-gray-300 rounded-md">
-                                                                </div>
-
-                                                                <div class="flex gap-2">
-                                                                    <button type="submit"
-                                                                        class="px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700">
-                                                                        Update Soal
-                                                                    </button>
-                                                                    <button type="button"
-                                                                        onclick="closeModal('editSoalModal{{ $q->id }}')"
-                                                                        class="px-4 py-2 text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300">
-                                                                        Batal
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        </form>
+                                                    <div id="modalContent" class="mt-4 max-h-96 overflow-y-auto">
+                                                        <p class="text-center text-gray-500">Loading...</p>
                                                     </div>
                                                 </div>
                                             </div>
-                                        @endforeach
+                                        </div>
 
                                     </div>
                                 </div>
@@ -1095,7 +933,7 @@
                             // Essay mode
                             editAnswerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
-                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">${answerKey || ''}</textarea>
+                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm">${answerKey || ''}</textarea>
             `;
                             return;
                         }
@@ -1199,6 +1037,7 @@
                             editContainer.appendChild(div);
                             // Re-initialize TinyMCE for the new textarea
                             setTimeout(() => {
+                                tinymce.remove();
                                 tinymce.init({
                                     selector: '.tinymce-editor:not(.tox-hidden)',
                                     license_key: 'gpl',
@@ -1236,61 +1075,103 @@
 
                 // Initialize edit form when modal is opened
                 function openEditSoalModal(questionId) {
-                    const modal = document.getElementById(`editSoalModal${questionId}`);
-                    if (modal) {
-                        modal.classList.remove('hidden');
+                    // Show modal with loading state
+                    const modal = document.getElementById('editSoalModal');
+                    const modalContent = document.getElementById('modalContent');
 
-                        // Get data from modal's dataset
-                        let choices = modal.dataset.choices;
-                        let answerKey = modal.dataset.answerKey;
-                        let questionType = modal.dataset.questionType;
+                    // Show loading
+                    modal.classList.remove('hidden');
+                    modalContent.innerHTML = '<p class="text-center text-gray-500">Loading...</p>';
 
-                        console.log('Raw modal data:', {
-                            choices: choices,
-                            answerKey: answerKey,
-                            questionType: questionType
-                        });
-
-                        try {
-                            choices = JSON.parse(choices);
-                        } catch (e) {
-                            console.error('Failed to parse choices:', e);
-                            choices = {};
+                    // Load modal content via AJAX
+                    fetch(`/exams/questions/${questionId}/modal`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'text/html',
+                            'X-Requested-With': 'XMLHttpRequest'
                         }
+                    })
+                    .then(response => {
+                        if (!response.ok) throw new Error('Failed to load modal');
+                        return response.text();
+                    })
+                    .then(html => {
+                        // Insert HTML into modal
+                        modalContent.innerHTML = html;
 
-                        try {
-                            answerKey = JSON.parse(answerKey);
-                        } catch (e) {
-                            console.log('Answer key is not JSON, treating as string:', answerKey);
-                            // Keep as is - might be a letter like "A" or empty string
-                        }
+                        // Initialize TinyMCE for newly added textarea elements
+                        if (typeof tinymce !== 'undefined') {
+                            // First remove any existing tinymce instances
+                            tinymce.remove();
 
-                        // Convert answer key letter to index if needed
-                        // e.g., "A" -> "0", "B" -> "1", ["A","C"] -> ["0","2"]
-                        if (typeof answerKey === 'string' && answerKey.match(/^[A-Z]$/)) {
-                            let index = answerKey.charCodeAt(0) - 64; // A=0, B=1, etc
-                            answerKey = [index.toString()];
-                        } else if (Array.isArray(answerKey)) {
-                            answerKey = answerKey.map(key => {
-                                if (typeof key === 'string' && key.match(/^[A-Z]$/)) {
-                                    return (key.charCodeAt(0) - 64).toString();
-                                }
-                                return key.toString();
+                            // Initialize for all tinymce-editor textareas
+                            const textareas = modalContent.querySelectorAll('.tinymce-editor');
+                            textareas.forEach(textarea => {
+                                tinymce.init({
+                                    target: textarea,
+                                    height: 280,
+                                    menubar: false,
+                                    plugins: 'lists link table code',
+                                    toolbar: 'bold italic | bullist numlist | link table | code',
+                                    branding: false,
+                                    statusbar: false
+                                });
                             });
-                        } else if (!answerKey && choices) {
-                            // Empty answer key for multiple choice
-                            answerKey = [];
                         }
 
-                        console.log('Processed modal data:', {
-                            choices: choices,
-                            answerKey: answerKey,
-                            questionType: questionType
-                        });
-
-                        initEditForm(questionId, choices, answerKey, questionType);
-                    }
+                        // Load answer key choices if not essay type
+                        loadAnswerKeyChoices(questionId);
+                    })
+                    .catch(error => {
+                        console.error('Error loading modal:', error);
+                        modalContent.innerHTML = '<p class="text-center text-red-500">Gagal memuat modal. Silakan coba lagi.</p>';
+                    });
                 }
+
+                function loadAnswerKeyChoices(questionId) {
+                    const questionTypeEl = document.getElementById('questionType');
+                    if (!questionTypeEl) return;
+
+                    const questionType = parseInt(questionTypeEl.value);
+                    if (questionType === 3) return; // Skip for essay type
+
+                    const choicesContainer = document.getElementById('edit-choices-container-modal');
+                    const answerKeyContainer = document.getElementById('edit-answer-key-container-modal');
+
+                    if (!choicesContainer || !answerKeyContainer) return;
+
+                    // Get current choices and answer key from form
+                    const choiceElements = choicesContainer.querySelectorAll('.edit-choice-item');
+                    if (choiceElements.length === 0) return;
+
+                    // Get answer key from hidden or existing form data
+                    let answerKeyInputs = document.querySelectorAll('input[name="answer_key[]"]');
+                    let selectedKeys = Array.from(answerKeyInputs).map(el => el.value);
+
+                    // Determine input type based on question type
+                    let inputType = 'radio';
+                    if (questionType === 1) {
+                        inputType = 'checkbox'; // PG Kompleks uses checkbox
+                    }
+
+                    let checkboxesHTML = '';
+                    choiceElements.forEach((choice, index) => {
+                        const choiceId = choice.dataset.choiceId.toString();
+                        const choiceText = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
+                        const isChecked = selectedKeys.includes(choiceId);
+
+                        checkboxesHTML += `
+                            <label class="flex items-center gap-2 mb-2">
+                                <input type="${inputType}" name="answer_key[]" value="${choiceId}" ${isChecked ? 'checked' : ''}>
+                                <span class="text-sm">${choiceText.substring(0, 50)}</span>
+                            </label>
+                        `;
+                    });
+
+                    answerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxesHTML}</div>`;
+                }
+
+
             </script>
             <!-- end edit js -->
 
@@ -1364,6 +1245,7 @@
                     container.appendChild(div);
                     // Re-initialize TinyMCE for the new textarea
                     setTimeout(() => {
+                        tinymce.remove();
                         tinymce.init({
                             selector: '.tinymce-editor:not(.tox-hidden)',
                             license_key: 'gpl',
@@ -1409,7 +1291,7 @@
                         // Essay mode
                         answerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
-                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
             `;
                         return;
                     }
@@ -1448,6 +1330,11 @@
 
 
             <script>
+                // Cache DOM elements for better performance
+                const tabPanes = document.querySelectorAll('.tab-pane');
+                const tabButtons = document.querySelectorAll('[data-tab]');
+                const modalButtons = document.querySelectorAll('button[data-modal-target]');
+
                 document.addEventListener('DOMContentLoaded', function() {
                     // Handle success message auto-hide
                     const successMessage = document.getElementById('successMessage');
@@ -1456,8 +1343,8 @@
                             successMessage.style.opacity = '0';
                             setTimeout(function() {
                                 successMessage.style.display = 'none';
-                            }, 500); // Wait for fade out animation to complete
-                        }, 3000); // Show message for 3 seconds
+                            }, 500);
+                        }, 3000);
                     }
 
                     // Check for tab from session and click the corresponding button
@@ -1492,7 +1379,7 @@
                     });
 
                     // Add click handler for add buttons within tabs
-                    document.querySelectorAll('button[data-modal-target]').forEach(button => {
+                    modalButtons.forEach(button => {
                         button.addEventListener('click', function(e) {
                             e.preventDefault();
                             const modalId = this.getAttribute('data-modal-target');
@@ -1500,13 +1387,11 @@
                         });
                     });
 
-                    // Add click handler for tab buttons and their associated modals
-                    document.querySelectorAll('[data-tab]').forEach(tab => {
+                    // Add click handler for tab buttons - SINGLE handler, not duplicate
+                    tabButtons.forEach(tab => {
                         tab.addEventListener('click', function(e) {
                             e.preventDefault();
                             const tabId = this.getAttribute('data-tab');
-
-                            // Show the tab content
                             showTab(tabId);
 
                             // If there's an associated modal button in the tab, enable it
@@ -1518,31 +1403,23 @@
                                 }
                             }
                         });
-                    }); // Tab functionality
+                    });
+
                     // Show first tab by default
-                    const firstTab = document.querySelector('[data-tab]');
+                    const firstTab = tabButtons[0];
                     if (firstTab) {
                         const firstTabId = firstTab.getAttribute('data-tab');
                         showTab(firstTabId);
                     }
-
-                    // Add click handlers for tabs
-                    document.querySelectorAll('[data-tab]').forEach(tab => {
-                        tab.addEventListener('click', function(e) {
-                            e.preventDefault();
-                            const tabId = this.getAttribute('data-tab');
-                            showTab(tabId);
-                        });
-                    });
                 });
 
                 function showTab(tabId) {
-                    // Hide all tabs and remove active classes
-                    document.querySelectorAll('.tab-pane').forEach(pane => {
+                    // Cache query results instead of querying multiple times
+                    tabPanes.forEach(pane => {
                         pane.classList.add('hidden');
                     });
 
-                    document.querySelectorAll('[data-tab]').forEach(tab => {
+                    tabButtons.forEach(tab => {
                         tab.classList.remove('bg-gray-100');
                         tab.classList.add('hover:bg-gray-200');
                     });
@@ -1555,33 +1432,6 @@
                         selectedTab.classList.remove('hidden');
                         tabButton.classList.add('bg-gray-100');
                         tabButton.classList.remove('hover:bg-gray-200');
-
-                        // Handle specific tab actions
-                        switch (tabId) {
-                            case 'siswa':
-                                // Ensure siswa modal button is properly configured
-                                const addSiswaBtn = selectedTab.querySelector('button[data-modal-target="addSiswaModal"]');
-                                if (addSiswaBtn) {
-                                    addSiswaBtn.onclick = () => openModal('addSiswaModal');
-                                }
-                                break;
-                            case 'guru':
-                                // Ensure guru modal button is properly configured
-                                const addGuruBtn = selectedTab.querySelector('button[data-modal-target="addGuruModal"]');
-                                if (addGuruBtn) {
-                                    addGuruBtn.onclick = () => openModal('addGuruModal');
-                                }
-                                break;
-                            case 'kepala':
-                                // No modal needed for kepala sekolah as it's inline form
-                                break;
-                            case 'subjects':
-                                const addSubjectBtn = selectedTab.querySelector('button[data-modal-target="addSubjectModal"]');
-                                if (addGuruBtn) {
-                                    addSubjectBtn.onclick = () => openModal('addSubjectModal');
-                                }
-                                break;
-                        }
                     }
                 }
                 /* function initializeForms() {
@@ -1634,13 +1484,8 @@
                     });
                 });
 
-                // Add click handlers for buttons that open modals
-                document.querySelectorAll('[data-modal-target]').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const modalId = this.getAttribute('data-modal-target');
-                        openModal(modalId);
-                    });
-                });
+                // Add click handlers for buttons that open modals - already handled above in DOMContentLoaded
+                // Removed duplicate event listeners for performance improvement
 
                 // Handle Word file upload
                 function handleWordFileUpload(event) {
@@ -1732,7 +1577,12 @@
 
                 function saveWordQuestions(examId, questionsData) {
                     const questions = JSON.parse(atob(questionsData));
-                    const route = '{{ route('admin.exams.questions.save-word-questions') }}';
+                    @php
+                        $saveRoute = auth()->user()->hasRole('super')
+                            ? route('super.exams.questions.save-word-questions')
+                            : route('admin.exams.questions.save-word-questions');
+                    @endphp
+                    const route = '{{ $saveRoute }}';
 
                     showLoadingMessage('Menyimpan soal...');
 
