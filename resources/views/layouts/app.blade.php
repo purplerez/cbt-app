@@ -61,50 +61,20 @@
             console.warn("API Token not found in session");
         }
 
-        // Initialize TinyMCE for all editors
-        tinymce.init({
+        document.addEventListener('DOMContentLoaded', function () {
+        if (document.querySelector('.tinymce-editor')) {
+            tinymce.init({
             selector: '.tinymce-editor',
-            license_key: 'gpl',
-            theme: 'silver',
-            plugins: [
-                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
-                'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
-                'wordcount'
-            ],
-            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
-            menubar: 'file edit view insert format tools table help',
+            height: 280,
+            menubar: false,
+            plugins: 'lists link table code',
+            toolbar: 'bold italic | bullist numlist | link table | code',
             branding: false,
-            height: 300,
-            body_class: 'mce-content-body',
-            content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
-            paste_as_text: false,
-            valid_elements: '+*[*]',
-            valid_children: '+*[*]'
+            statusbar: false
+            });
+        }
         });
-    </script>
 
-    <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-<script>
-  tinymce.init({
-    selector: 'textarea',
-    plugins: [
-      // Core editing features
-      'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount',
-      // Your account includes a free trial of TinyMCE premium features
-      // Try the most popular premium features until Feb 11, 2026:
-      'checklist', 'mediaembed', 'casechange', 'formatpainter', 'pageembed', 'a11ychecker', 'tinymcespellchecker', 'permanentpen', 'powerpaste', 'advtable', 'advcode', 'advtemplate', 'ai', 'uploadcare', 'mentions', 'tinycomments', 'tableofcontents', 'footnotes', 'mergetags', 'autocorrect', 'typography', 'inlinecss', 'markdown','importword', 'exportword', 'exportpdf'
-    ],
-    toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table mergetags | addcomment showcomments | spellcheckdialog a11ycheck typography uploadcare | align lineheight | checklist numlist bullist indent outdent | emoticons charmap | removeformat',
-    tinycomments_mode: 'embedded',
-    tinycomments_author: 'Author name',
-    mergetags_list: [
-      { value: 'First.Name', title: 'First Name' },
-      { value: 'Email', title: 'Email' },
-    ],
-    ai_request: (request, respondWith) => respondWith.string(() => Promise.reject('See docs to implement AI Assistant')),
-    uploadcare_public_key: '79a41e23a5e694b3385b',
-  });
 </script>
 </body>
 
