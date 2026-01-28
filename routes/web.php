@@ -125,6 +125,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::put('exams/update', [ExamController::class, 'update'])->name('exams.update');
     Route::post('exams/archive', [ExamController::class, 'archive'])->name('exams.archive');
 
+    // AJAX endpoint for loading edit modal
+    Route::get('exams/questions/{question}/modal', [ExamController::class, 'getEditModalContent'])->name('exams.questions.modal');
 
     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
     Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
@@ -402,10 +404,6 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
         return view('admin.inputsekolah');
     })->name('inputsekolah');
     Route::post('inputsekolah', [SchoolController::class, 'store'])->name('sekolahstore');
-    // Route::get('schools/{school}/edit', [SchoolController::class, 'edit'])->name('schools.edit');
-    // Route::put('schools/{school}', [SchoolController::class, 'update'])->name('schools.update');
-    // Route::delete('schools/{school}', [SchoolController::class, 'destroy'])->name('schools.destroy');
-
     Route::post('schools/{school}/manage', [SchoolController::class, 'manage'])->name('schools.manage');
     Route::get('schools/{school}/manage', [SchoolController::class, 'manageView'])->name('schools.manage.view');
     Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
@@ -421,20 +419,28 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::put('grades/{grade}', [GradeController::class, 'update'])->name('grades.update');
     Route::delete('grades/{grade}', [GradeController::class, 'destroy'])->name('grades.destroy');
 
+    // Routing for question types management
+    Route::get('question/type', [QuestionController::class, 'typeindex'])->name('questions.types');
+    Route::get('question/type/create', function () {
+        return view('admin.inputquestiontype');
+    })->name('question.type.create');
+    Route::post('question/type/create', [QuestionController::class, 'typestore'])->name('question.type.store');
+    Route::get('question/type/{type}/edit', [QuestionController::class, 'typeedit'])->name('question.type.edit');
+    Route::put('question/type/{type}/update', [QuestionController::class, 'typeupdate'])->name('question.type.update');
+    Route::delete('question/type/{type}/destroy', [QuestionController::class, 'typedestroy'])->name('question.type.destroy');
+
     // Route for exams management
     Route::get('exams', [ExamController::class, 'index'])->name('exams');
     Route::get('exams/create', [ExamController::class, 'create'])->name('exams.create');
     Route::post('exams/create', [ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
-
+    Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
+    Route::post('exams/inactive', [ExamController::class, 'inactiveExam'])->name('exam.inactive');
+    Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
     Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
     Route::put('exams/update', [ExamController::class, 'update'])->name('exams.update');
     Route::post('exams/archive', [ExamController::class, 'archive'])->name('exams.archive');
-
-    // add subject in an exam
-    Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
-
 
     // bank soal
     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
@@ -445,20 +451,30 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
 
-    // Import/Export routes for bank soal
-    Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.manage.question.template');
-    Route::get('exams/banksoal/{exam}/template-word', [QuestionController::class, 'downloadWordTemplate'])->name('exams.manage.question.template-word');
-    Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.manage.question.import');
-    Route::post('exams/banksoal/{exam}/import-word', [QuestionController::class, 'importFromWord'])->name('exams.manage.question.import-word');
-    Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.manage.question.save-word-questions');
-    Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.manage.question.export');
-
     // Import/Export Questions routes
     Route::get('exams/banksoal/{exam}/template', [QuestionController::class, 'downloadTemplate'])->name('exams.questions.template');
+    Route::get('exams/banksoal/{exam}/template-word', [QuestionController::class, 'downloadWordTemplate'])->name('exams.questions.template-word');
     Route::post('exams/banksoal/{exam}/import', [QuestionController::class, 'import'])->name('exams.questions.import');
     Route::post('exams/banksoal/{exam}/import-word', [QuestionController::class, 'importFromWord'])->name('exams.questions.import-word');
     Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.questions.save-word-questions');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
+
+    // Route for Scores
+    Route::get('exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])
+        ->name('exam.scores.export');
+
+    // Force Submit Routes
+    Route::post('exam-sessions/{examSession}/force-submit', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitSession'])
+        ->name('exam-sessions.force-submit');
+    Route::post('exam-sessions/force-submit-multiple', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitMultiple'])
+        ->name('exam-sessions.force-submit-multiple');
+    Route::get('exams/{exam}/incomplete-sessions', [\App\Http\Controllers\ForceSubmitController::class, 'getIncompleteSessions'])
+        ->name('exams.incomplete-sessions');
+
+    // Questions, Results, Settings routes
+    Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
+    Route::get('results', [SchoolController::class, 'results'])->name('results');
+    Route::get('settings', [SchoolController::class, 'settings'])->name('settings');
 
     // Berita Acara routes (View and Export only for Super)
     Route::get('berita-acara', [BeritaAcaraController::class, 'index'])->name('berita-acara.index');
