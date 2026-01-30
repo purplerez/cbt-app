@@ -3,9 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Student;
-use App\Models\User;
 use App\Models\School;
 use App\Models\Grade;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -17,7 +17,7 @@ class StudentSeeder extends Seeder
      public function run(): void
      {
           // Get users with siswa role
-          $siswaUsers = User::role('siswa')->get();
+          $siswaUsers = User::query()->role('siswa')->get();
 
           // Get available schools and grades
           $schools = School::all();
