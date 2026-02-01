@@ -15,7 +15,7 @@ class PreassignedSeeder extends Seeder
       */
      public function run(): void
      {
-          $siswaUsers = User::role('siswa')->get();
+          $siswaUsers = User::query()->role('siswa')->get();
           $exams = Exam::all();
 
           if ($siswaUsers->isEmpty()) {

@@ -16,7 +16,7 @@ class ExamSeeder extends Seeder
      public function run(): void
      {
           $examTypes = Examtype::all();
-          $adminUsers = User::role('admin')->get();
+          $adminUsers = User::query()->role('admin')->get();
 
           if ($examTypes->isEmpty()) {
                $this->command->error('No exam types found. Please run ExamTypeSeeder first.');

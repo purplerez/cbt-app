@@ -33,6 +33,7 @@ class UploadQuestionController extends Controller
             $originalFilename = $file->getClientOriginalName();
             $examId = $request->input('exam_id');
 
+
             // Save uploaded file temporarily
             $tempPath = $file->getRealPath();
 
@@ -57,12 +58,33 @@ class UploadQuestionController extends Controller
                 // Map question type: default to PG (0)
                 $questionTypeId = '0'; // PG by default (ENUM needs string)
 
-                // Create choices array
+                // Create choices array and choices_images array in parallel
                 $choices = [];
-                if (!empty($questionData['option_a'])) $choices[] = $questionData['option_a'];
-                if (!empty($questionData['option_b'])) $choices[] = $questionData['option_b'];
-                if (!empty($questionData['option_c'])) $choices[] = $questionData['option_c'];
-                if (!empty($questionData['option_d'])) $choices[] = $questionData['option_d'];
+                $choicesImages = [];
+
+                // Option A
+                if (!empty($questionData['option_a'])) {
+                    $choices[] = $questionData['option_a'];
+                    $choicesImages[] = $questionData['option_a_image'] ?? null;
+                }
+
+                // Option B
+                if (!empty($questionData['option_b'])) {
+                    $choices[] = $questionData['option_b'];
+                    $choicesImages[] = $questionData['option_b_image'] ?? null;
+                }
+
+                // Option C
+                if (!empty($questionData['option_c'])) {
+                    $choices[] = $questionData['option_c'];
+                    $choicesImages[] = $questionData['option_c_image'] ?? null;
+                }
+
+                // Option D
+                if (!empty($questionData['option_d'])) {
+                    $choices[] = $questionData['option_d'];
+                    $choicesImages[] = $questionData['option_d_image'] ?? null;
+                }
 
                 // Determine question type based on choices
                 if (count($choices) == 2) {
@@ -75,12 +97,16 @@ class UploadQuestionController extends Controller
                     $answerKey = [strtoupper($questionData['correct_answer'])];
                 }
 
+                // Prepare choices_images JSON (only if at least one image exists)
+                $hasImages = !empty(array_filter($choicesImages));
+
                 Question::create([
                     'exam_id' => $examId,
                     'question_type_id' => $questionTypeId,
                     'question_text' => $questionData['question_text'],
                     'question_image' => $questionData['image_path'] ?? null,
                     'choices' => json_encode($choices),
+                    'choices_images' => $hasImages ? json_encode($choicesImages) : null,
                     'answer_key' => json_encode($answerKey),
                     'points' => $questionData['points'] ?? 1,
                     'created_by' => Auth::id(),
