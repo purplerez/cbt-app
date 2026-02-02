@@ -123,7 +123,7 @@
                                         @endif
                                         <div class="flex items-center justify-between p-4 border-b">
                                             <h3 class="text-lg font-medium">Data Materi Ujian
-                                                {{ session('perexamname') }}</h3>
+                                                {{ session('perexamname').'-'.session('perexamstatus') }}</h3>
                                             <div class="flex items-center space-x-2">
                                                 <!-- Word Upload Button and Form -->
                                                 @if (session('perexamstatus') == 1)
@@ -317,7 +317,7 @@
                                                             </svg>
                                                         </button>
                                                     </div>
-                                                    <div id="modalContent" class="mt-4 max-h-96 overflow-y-auto">
+                                                    <div id="modalContent" class="mt-4 overflow-y-auto max-h-96">
                                                         <p class="text-center text-gray-500">Loading...</p>
                                                     </div>
                                                 </div>
@@ -364,7 +364,7 @@
                                                             <label for="question_text"
                                                                 class="block text-sm font-medium text-gray-700">Pertanyaan</label>
                                                             <textarea id="question_text" name="question_text" rows="3"
-                                                                class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                         </div>
                                                         <div>
                                                             <label for="question_image"
@@ -388,7 +388,7 @@
                                                                     <div class="flex items-start gap-2">
                                                                         <div class="flex-1">
                                                                             <textarea name="choices[1]" rows="3"
-                                                                                class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
+                                                                                class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor focus:border-blue-500 focus:ring-blue-500 sm:text-sm"></textarea>
                                                                             <div class="mt-2">
                                                                                 <label
                                                                                     class="block text-xs font-medium text-gray-600"
@@ -933,7 +933,7 @@
                             // Essay mode
                             editAnswerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
-                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm">${answerKey || ''}</textarea>
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor">${answerKey || ''}</textarea>
             `;
                             return;
                         }
@@ -1016,7 +1016,7 @@
                 <div class="flex items-start gap-2">
                     <div class="flex-1">
                         <textarea name="choices[${editChoiceCounter}]" rows="3"
-                            class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                            class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
                         <div class="mt-2">
                             <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
                             <input type="file" name="choice_images[${editChoiceCounter}]" accept="image/*"
@@ -1223,7 +1223,7 @@
             <div class="flex items-start gap-2">
                 <div class="flex-1">
                     <textarea name="choices[${choiceCounter}]" rows="3"
-                        class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                        class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
                     <div class="mt-2">
                         <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
                         <input type="file" name="choice_images[${choiceCounter}]" accept="image/*"
@@ -1291,7 +1291,7 @@
                         // Essay mode
                         answerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
-                    class="tinymce-editor block w-full mt-1 border-gray-300 rounded-md shadow-sm"></textarea>
+                    class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
             `;
                         return;
                     }
@@ -1543,11 +1543,11 @@
                     const modal = document.createElement('div');
                     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
                     modal.innerHTML = `
-                        <div class="bg-white rounded-lg shadow-xl max-w-4xl max-h-96 overflow-y-auto p-6">
-                            <h2 class="text-xl font-bold mb-4">Preview Soal yang Diimport (${questions.length} soal)</h2>
+                        <div class="max-w-4xl p-6 overflow-y-auto bg-white rounded-lg shadow-xl max-h-96">
+                            <h2 class="mb-4 text-xl font-bold">Preview Soal yang Diimport (${questions.length} soal)</h2>
                             <div class="space-y-4">
                                 ${questions.map((q, idx) => `
-                                                                                                <div class="border-l-4 border-blue-500 pl-4 py-2">
+                                                                                                <div class="py-2 pl-4 border-l-4 border-blue-500">
                                                                                                     <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
                                                                                                     <p class="text-sm text-gray-600">
                                                                                                         Tipe: ${getQuestionTypeName(q.question_type)} |
@@ -1556,9 +1556,9 @@
                                                                                                 </div>
                                                                                             `).join('')}
                             </div>
-                            <div class="mt-6 flex justify-end space-x-4">
-                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600">Batal</button>
-                                <button onclick="saveWordQuestions(${examId}, '${btoa(JSON.stringify(questions))}')" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">Simpan Semua Soal</button>
+                            <div class="flex justify-end mt-6 space-x-4">
+                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600">Batal</button>
+                                <button onclick="saveWordQuestions(${examId}, '${btoa(JSON.stringify(questions))}')" class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">Simpan Semua Soal</button>
                             </div>
                         </div>
                     `;
