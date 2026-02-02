@@ -126,7 +126,7 @@
                                                 {{ session('perexamname') }} - {{session('perexamstatus')}}</h3>
                                             <div class="flex items-center space-x-2">
                                                 <!-- Word Upload Button and Form -->
-                                                {{-- @if (session('perexamstatus') == 1) --}}
+                                                @if (session('perexamstatus') == 1)
                                                     @php
                                                         $importRoute = auth()->user()->hasRole('super')
                                                             ? route('super.exams.questions.import-word', session('perexamid'))
@@ -187,7 +187,7 @@
                                                         data-tab="soal">
                                                         + Tambah Soal
                                                     </button>
-                                                {{-- @endif --}}
+                                                @endif
                                             </div>
                                         </div>
                                         <div class="p-4">
