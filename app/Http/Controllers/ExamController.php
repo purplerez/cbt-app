@@ -237,7 +237,7 @@ class ExamController extends Controller
         try{
             $exam = Exam::findOrFail($exam);
 
-            dd($exam);
+            // dd($exam);
             $roleRoutes =  [
                 'admin' => 'admin.exams.manage.question',
                 'super' => 'super.exams.manage.question',
