@@ -123,7 +123,7 @@
                                         @endif
                                         <div class="flex items-center justify-between p-4 border-b">
                                             <h3 class="text-lg font-medium">Data Materi Ujian
-                                                {{ session('perexamname') }} - {{session('perexamstatus')}}</h3>
+                                                {{ session('perexamname') }} </h3>
                                             <div class="flex items-center space-x-2">
                                                 <!-- Word Upload Button and Form -->
                                                 @if (session('perexamstatus') == 1)
