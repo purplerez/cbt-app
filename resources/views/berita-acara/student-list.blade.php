@@ -318,7 +318,11 @@
                 @if(!empty(trim($namaPengawas)))
                 <tr>
                     <td style="border: none; padding: 10px 6px;" width="17%">
-                        Pengawas {{ $index + 1 }} :
+                        @if ( $index + 1 == 1)
+                            Pengawas
+                        @else
+                            Proktor
+                        @endif
                     </td>
                     <td style="border: none; padding: 10px 6px; width : 55%;">
                         {{ strtoupper($namaPengawas) }}

@@ -256,7 +256,14 @@
                 @foreach($beritaAcara->pengawas as $index => $namaPengawas)
                 @if(!empty(trim($namaPengawas)))
                 <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
-                    <div style="margin-bottom: 5px;">Pengawas {{ $index + 1 }}</div>
+                    <div style="margin-bottom: 5px;">
+                        @if ( $index + 1 == 1)
+                            Pengawas
+                        @else
+                            Proktor
+                        @endif
+                        {{-- Pengawas {{ $index + 1 }} --}}
+                    </div>
                     <div class="signature-space"></div>
                     <div>
                         <span class="signature-name">
