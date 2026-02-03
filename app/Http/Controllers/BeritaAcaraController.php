@@ -382,6 +382,9 @@ class BeritaAcaraController extends Controller
         if (file_exists($logoPath)) {
             $logo = base64_encode(file_get_contents($logoPath));
         }
+        else{
+            $logo = base64_encode(file_get_contents(storage_path('app/public/assets/images/school/default.png')));
+        }
 
         $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara', 'head', 'logo'))
             ->setPaper('a4', 'portrait');
