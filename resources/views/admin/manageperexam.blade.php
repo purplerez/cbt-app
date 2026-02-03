@@ -1078,21 +1078,46 @@
                     // Show modal with loading state
                     const modal = document.getElementById('editSoalModal');
                     const modalContent = document.getElementById('modalContent');
+                    if (!modal || !modalContent) {
+                        alert('Element modal tidak ditemukan di halaman.');
+                        return;
+                    }
 
                     // Show loading
                     modal.classList.remove('hidden');
                     modalContent.innerHTML = '<p class="text-center text-gray-500">Loading...</p>';
 
-                    // Load modal content via AJAX
-                    fetch(`/exams/questions/${questionId}/modal`, {
+                    //csrf token
+                    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+                    if (!csrfToken) {
+                        modalContent.innerHTML = '<p class="text-center text-red-500">Error: CSRF token tidak ditemukan. Refresh halaman dan coba lagi.</p>';
+                        return;
+                    }
+
+                    // Tentukan prefix route (admin/super) secara dinamis
+                    let prefix = '';
+                    if (window.location.pathname.includes('/admin/')) {
+                        prefix = '/admin';
+                    } else if (window.location.pathname.includes('/super/')) {
+                        prefix = '/super';
+                    }
+                    const url = `${prefix}/exams/questions/${questionId}/modal`;
+
+                    fetch(url, {
                         method: 'GET',
                         headers: {
                             'Accept': 'text/html',
-                            'X-Requested-With': 'XMLHttpRequest'
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': csrfToken
                         }
                     })
                     .then(response => {
-                        if (!response.ok) throw new Error('Failed to load modal');
+                        if (!response.ok) {
+                            return response.text().then(text => {
+                                throw new Error('Gagal load modal: ' + text);
+                            });
+                        }
                         return response.text();
                     })
                     .then(html => {
@@ -1120,11 +1145,13 @@
                         }
 
                         // Load answer key choices if not essay type
-                        loadAnswerKeyChoices(questionId);
+                        if (typeof loadAnswerKeyChoices === 'function') {
+                            loadAnswerKeyChoices(questionId);
+                        }
                     })
                     .catch(error => {
                         console.error('Error loading modal:', error);
-                        modalContent.innerHTML = '<p class="text-center text-red-500">Gagal memuat modal. Silakan coba lagi.</p>';
+                        modalContent.innerHTML = '<p class="text-center text-red-500">Gagal memuat modal. Silakan coba lagi.<br>' + error.message + '</p>';
                     });
                 }
 
