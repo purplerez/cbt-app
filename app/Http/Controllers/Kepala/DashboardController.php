@@ -72,7 +72,7 @@ class DashboardController extends Controller
     public function index()
     {
         // dd(session()->all());
-        $school = School::find(session('school_id'))->first();
+        $school = School::find($this->getSchoolId())->first();
 
         if (!$school) {
             return redirect()->route('kepala.dashboard')->with('error', 'Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
