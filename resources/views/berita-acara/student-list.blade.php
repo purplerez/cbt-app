@@ -141,7 +141,7 @@
         .summary table td:last-child {
             width: 40%;
             text-align: left;
-            border-bottom: 1px solid #000;
+            /* border-bottom: 1px solid #000; */
             padding-left: 10px;
         }
         .notes-section {
@@ -317,13 +317,13 @@
             @foreach($beritaAcara->pengawas as $index => $namaPengawas)
                 @if(!empty(trim($namaPengawas)))
                 <tr>
-                    <td style="border: none; padding: 5px 0;" width="35%">
+                    <td style="border: none; padding: 5px;" width="15%">
                         Pengawas {{ $index + 1 }} :
                     </td>
-                    <td style="border: none; padding: 5px 0; width : 50%;">
+                    <td style="border: none; padding: 5px; width : 55%;">
                         {{ strtoupper($namaPengawas) }}
                     </td>
-                    <td style="border: none; padding: 5px 0;" width="15%">
+                    <td style="border: none; padding: 5px;" width="25%">
                        ( <!-- Kolom untuk tanda tangan --> .......................... )
                     </td>
                 </tr>
