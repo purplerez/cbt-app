@@ -324,7 +324,7 @@
                         {{ strtoupper($namaPengawas) }}
                     </td>
                     <td style="border: none; border-bottom: solid 1px black; padding: 5px 0;" width="20%">
-                        <!-- Kolom untuk tanda tangan -->
+                       ( <!-- Kolom untuk tanda tangan --> ............................... )
                     </td>
                 </tr>
                 @endif
