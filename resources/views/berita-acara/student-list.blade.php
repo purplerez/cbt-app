@@ -305,7 +305,7 @@
 
     <div class="section-title" style="margin-top : 30px; margin-bottom: 10px;">Yang membuat berita acara : </div>
 
-    <table class="data-table" style="border: none; border-collapse: collapse; width: 100%;">
+    <table border=1 class="data-table" style="border: none; border-collapse: collapse; width: 100%;">
         {{-- <thead>
             <tr>
                 <th style="width: 10%; text-align: center;">No</th>
