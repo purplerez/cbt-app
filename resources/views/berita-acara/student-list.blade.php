@@ -303,7 +303,7 @@
 
     {{--  signature  --}}
 
-    <div class="section-title">Yang membuat berita acara : </div>
+    <div class="section-title" style="margin-top : 30px;">Yang membuat berita acara : </div>
 
     <table class="data-table" style="border: none; border-collapse: collapse;">
         {{-- <thead>
