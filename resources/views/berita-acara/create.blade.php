@@ -237,33 +237,33 @@
                         <h3 class="mb-4 text-lg font-medium text-gray-900">Pengawas</h3>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                 Inputkan Pengawas
+                            <label class="block mb-2 text-sm font-medium text-gray-700">
+                                 Inputkan Pengawas dan Proktor
                             </label>
                             <div class="space-y-3">
                                 <div>
-                                    <label for="pengawas_1" class="block text-xs font-medium text-gray-600 mb-1">
-                                        Pengawas 1
+                                    <label for="pengawas_1" class="block mb-1 text-xs font-medium text-gray-600">
+                                        Pengawas
                                     </label>
                                     <input
                                         type="text"
                                         name="pengawas[]"
                                         id="pengawas_1"
-                                        placeholder="Masukkan nama pengawas 1"
-                                        class="block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                        placeholder="Masukkan nama pengawas"
+                                        class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     >
                                 </div>
 
                                 <div>
-                                    <label for="pengawas_2" class="block text-xs font-medium text-gray-600 mb-1">
-                                        Pengawas 2
+                                    <label for="pengawas_2" class="block mb-1 text-xs font-medium text-gray-600">
+                                        Proktor
                                     </label>
                                     <input
                                         type="text"
                                         name="pengawas[]"
                                         id="pengawas_2"
-                                        placeholder="Masukkan nama pengawas 2"
-                                        class="block w-full border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm"
+                                        placeholder="Masukkan nama proktor"
+                                        class="block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                     >
                                 </div>
                             <x-input-error :messages="$errors->get('pengawas')" class="mt-2" />

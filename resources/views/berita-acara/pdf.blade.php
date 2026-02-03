@@ -247,37 +247,69 @@
     </div>
     @endif --}}
 
+    {{--  signature start --}}
+
+    <!-- Signatures -->
+    <div class="footer">
+        <table style="width: 100%; border: none;">
+            <tr>
+                @foreach($beritaAcara->pengawas as $index => $namaPengawas)
+                @if(!empty(trim($namaPengawas)))
+                <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
+                    <div style="margin-bottom: 5px;">Pengawas {{ $index + 1 }}</div>
+                    <div class="signature-space"></div>
+                    <div>
+                        <span class="signature-name">
+                            {{ $namaPengawas }}
+
+                        </span>
+                    </div>
+                </td>
+                {{-- <td style="width: 50%; text-align: center; vertical-align: top; border: none;">
+                    <div style="margin-bottom: 10px;">Pengawas II</div>
+                    <div class="signature-space"></div>
+                    <div>
+                        <span class="signature-name">
+                            @if($beritaAcara->pengawas_users->count() > 1)
+                                {{ $beritaAcara->pengawas_users->get(1)->name }}
+                            @else
+                                (&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)
+                            @endif
+                        </span>
+                    </div>
+                </td> --}}
+                @endif
+                @endforeach
+
+            </tr>
+            <tr>
+                <td colspan=2 style="text-align: center">
+                    <div style="text-align: center; margin-top : 3rem;">
+                        <div style="display: inline-block; text-align: center;">
+                            <div> Banyuwangi , {{ $beritaAcara->tanggal_pelaksanaan->translatedFormat('d F Y') }}</div>
+                            <div style="margin-top: 5px;">Kepala Sekolah,</div>
+                            <div class="signature-space"></div>
+                        <div>
+                    <span class="signature-name">
+                        {{ $head ? '(' . $head->name . ')' : '' }}
+
+                    </span>
+                </div>
+            </div>
+        </div>
+                </td>
+            </tr>
+        </table>
+
+
+    </div>
+
+{{-- signature end --}}
+
 
     <!-- Proctors -->
     {{-- @if($beritaAcara->pengawas_users->isNotEmpty()) --}}
-    <div class="section-title">Yang membuat berita acara : </div>
 
-    <table class="data-table" style="border: none; border-collapse: collapse;">
-        {{-- <thead>
-            <tr>
-                <th style="width: 10%; text-align: center;">No</th>
-                <th>Nama Pengawas</th>
-                <th style="width: 30%;">Email/Kontak</th>
-            </tr>
-        </thead> --}}
-        <tbody>
-            @foreach($beritaAcara->pengawas as $index => $namaPengawas)
-                @if(!empty(trim($namaPengawas)))
-                <tr>
-                    <td style="text-align: center; border: none; padding: 5px 0;" width="25%">
-                        Pengawas {{ $index + 1 }} :
-                    </td>
-                    <td style="border: none; padding: 5px 0;">
-                        {{ strtoupper($namaPengawas) }}
-                    </td>
-                    <td style="border: none; border-bottom: solid 1px black; padding: 5px 0;" width="20%">
-                        <!-- Kolom untuk tanda tangan -->
-                    </td>
-                </tr>
-                @endif
-            @endforeach
-        </tbody>
-    </table>
     {{-- @endif --}}
 
 
