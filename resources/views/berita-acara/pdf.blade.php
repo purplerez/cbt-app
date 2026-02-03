@@ -83,8 +83,8 @@
             margin-right: 10%;
         }
         .signature-space {
-            height: 80px;
-            margin: 20px 0;
+            height: 50px;
+            margin: 10px 0;
         }
         .signature-name {
             font-weight: bold;
