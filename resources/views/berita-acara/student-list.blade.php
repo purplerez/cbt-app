@@ -317,14 +317,14 @@
             @foreach($beritaAcara->pengawas as $index => $namaPengawas)
                 @if(!empty(trim($namaPengawas)))
                 <tr>
-                    <td style="text-align: center; border: none; padding: 5px 0;" width="35%">
+                    <td style="text-align: center; border: none; padding: 2px 0;" width="35%">
                         Pengawas {{ $index + 1 }} :
                     </td>
-                    <td style="border: none; padding: 5px 0; width : 50%;">
+                    <td style="border: none; padding: 2px 0; width : 50%;">
                         {{ strtoupper($namaPengawas) }}
                     </td>
-                    <td style="border: none; padding: 5px 0;" width="15%">
-                       ( <!-- Kolom untuk tanda tangan --> ............................... )
+                    <td style="border: none; padding: 2px 0;" width="15%">
+                       ( <!-- Kolom untuk tanda tangan --> .......................... )
                     </td>
                 </tr>
                 @endif
