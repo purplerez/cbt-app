@@ -138,10 +138,20 @@
                                                             ? route('super.exams.questions.export', session('perexamid'))
                                                             : route('admin.exams.questions.export', session('perexamid'));
                                                     @endphp
+
+                                                    @role('admin')
+
                                                     <form id="wordImportFormNew"
                                                         action="{{ route('admin.questions.import') }}" method="POST"
                                                         enctype="multipart/form-data"
                                                         class="flex items-center space-x-2">
+                                                    @endrole
+                                                    @role('super')
+                                                     <form id="wordImportFormNew"
+                                                        action="{{ route('super.questions.import') }}" method="POST"
+                                                        enctype="multipart/form-data"
+                                                        class="flex items-center space-x-2">
+                                                    @endrole
                                                         @csrf
                                                         <input type="hidden" name="exam_id"
                                                             value="{{ session('perexamid') }}">

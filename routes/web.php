@@ -459,6 +459,9 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('exams/banksoal/save-word-questions', [QuestionController::class, 'saveWordQuestions'])->name('exams.questions.save-word-questions');
     Route::get('exams/banksoal/{exam}/export', [QuestionController::class, 'export'])->name('exams.questions.export');
 
+    // Import Questions
+    Route::post('/upload-questions/import', [UploadQuestionController::class, 'import'])->name('questions.import');
+
     // Route for Scores
     Route::get('exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])
         ->name('exam.scores.export');

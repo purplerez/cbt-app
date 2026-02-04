@@ -123,7 +123,21 @@ class UploadQuestionController extends Controller
                 'perexamstatus' => $exam->is_active
             ]);
 
-            return redirect()->route('admin.exams.manage.question', ['exam' => $examId])
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Mengimport soal ke ujian : '.$exam->exam_name);
+
+             $roleRoutes =  [
+                'admin' => 'admin.exams.manage.question',
+                'super' => 'super.exams.manage.question',
+            ];
+
+            $role = auth()->user()->getRoleNames()->first();
+
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk mengimport soal');
+            }
+
+            return redirect()->route($roleRoutes[$role], ['exam' => $examId])
                 ->with('success', "Berhasil mengimport {$importedCount} soal dari file {$originalFilename} ke ujian {$exam->exam_name}");
         } catch (\Exception $e) {
             Log::error('Error importing questions: ' . $e->getMessage());
