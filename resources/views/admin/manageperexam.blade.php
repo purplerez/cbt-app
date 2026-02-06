@@ -282,7 +282,8 @@
                                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                                             data-modal-target="editSoalModal{{ $q->id }}"
                                                                             onclick="openEditSoalModal({{ $q->id }})"
-                                                                            @if (session('perexamstatus') == 0) disabled @endif>
+                                                                            {{-- @if (session('perexamstatus') == 0) disabled @endif --}}
+                                                                            >
                                                                             Ubah
                                                                         </button>
 
@@ -295,7 +296,8 @@
                                                                             <button type="submit"
                                                                                 class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                                                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')"
-                                                                                @if (session('perexamstatus') == 0) disabled @endif>
+                                                                                {{-- @if (session('perexamstatus') == 0) disabled @endif --}}
+                                                                                >
                                                                                 Hapus</button>
                                                                         </form>
                                                                 </tr>

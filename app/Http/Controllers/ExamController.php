@@ -17,7 +17,17 @@ class ExamController extends Controller
     //
     public function index(){
         // fetch all data
-        $exams = Examtype::where('is_global', true)->get();
+        $role = auth()->user()->getRoleNames()->first();
+
+        if($role == 'super'){
+            $exams = Examtype::where('is_global', true)
+                        ->where('is_active', true)
+                        ->get();
+        }
+        elseif ($role == 'admin'){
+            $exams = Examtype::all();
+        }
+
         $grade = Grade::all();
 
         return view('admin.view_examglobal', compact('exams', 'grade'));
