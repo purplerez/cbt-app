@@ -17,7 +17,7 @@ class ExamController extends Controller
     //
     public function index(){
         // fetch all data
-        $role = auth()->user()->role()->first();
+        $role = auth()->user()->role();
 
         if($role == 'super'){
             $exams = Examtype::where('is_global', true)
