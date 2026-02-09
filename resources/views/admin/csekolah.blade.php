@@ -61,16 +61,16 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($schools as $index => $school)
                                     <tr class="hover:bg-gray-50">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
+                                        <td class="px-4 py-3 text-sm font-medium text-gray-900 whitespace-nowrap">
                                             {{ $school->id }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                             {{ $school->name }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-wrap max-w-0 truncate">
+                                        <td class="px-4 py-3 text-sm text-gray-500 whitespace-wrap max-w-0 truncate">
                                             {{ $school->address }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-4 py-3 whitespace-nowrap">
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold leading-5 rounded-full
                                                @if ($school->status == '1')
                                                     bg-green-100 text-green-800
@@ -85,10 +85,10 @@
                                                 @endif
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                             {{ $school->code }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                        <td class="px-4 py-3 text-sm font-medium whitespace-nowrap">
                                             <div class="flex space-x-2">
                                                 @role('admin')
                                                     <form action="{{ route('admin.schools.manage', $school->id) }}" method="POST" style="display:inline;">
@@ -132,7 +132,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">
+                                        <td colspan="6" class="px-4 py-3 text-sm text-center text-gray-500">
                                             Data Kosong
                                         </td>
                                     </tr>
