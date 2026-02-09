@@ -49,13 +49,14 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Madrasah</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Alamat</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kode Madrasah</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
+                                    <th class="w-[5%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">No</th>
+                                    <th class="w-[20%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Nama Madrasah</th>
+                                    <th class="w-[35%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Alamat</th>
+                                    <th class="w-[10%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Status</th>
+                                    <th class="w-[15%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Kode Madrasah</th>
+                                    <th class="w-[15%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Aksi</th>
                                 </tr>
+
                             </thead>
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse ($schools as $index => $school)
@@ -66,7 +67,7 @@
                                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                             {{ $school->name }}
                                         </td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
+                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-wrap max-w-0 truncate">
                                             {{ $school->address }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
@@ -119,13 +120,13 @@
                                                         </svg>
                                                     </a>
                                                 @endrole
-                                                @role('super')
+                                                {{-- @role('super')
                                                     <a href="{{ route('super.schools.edit', $school->id) }}" class="text-yellow-600 hover:text-yellow-900" title="Edit">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                                         </svg>
                                                     </a>
-                                                @endrole
+                                                @endrole --}}
                                             </div>
                                         </td>
                                     </tr>
