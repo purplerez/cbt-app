@@ -21,7 +21,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 
 
-Route::middleware(['auth:sanctum', 'role:admin'])->prefix('admin')->name('api.admin.')->group(function () {
+Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('api.admin.')->group(function () {
     Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool'])
         ->name('school.students');
     Route::get('/exam/{examId}/participants', [StudentController::class, 'getExamParticipants'])
