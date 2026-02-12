@@ -125,6 +125,31 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             <div class="flex space-x-2">
+                                                @role('kepala')
+                                                <a href="{{ route('kepala.student.edit', $student->id) }}"
+                                                   class="px-3 py-1 text-xs font-semibold text-white bg-yellow-600 rounded-md hover:bg-yellow-700">
+                                                    Edit
+                                                </a>
+                                                @endrole
+                                                @role('guru')
+                                                <a href="{{ route('guru.student.edit', $student->id) }}"
+                                                   class="px-3 py-1 text-xs font-semibold text-white bg-yellow-600 rounded-md hover:bg-yellow-700">
+                                                    Edit
+                                                </a>
+                                                @endrole
+                                                @role('kepala')
+                                                <form action="{{ route('kepala.student.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa ini?');">
+                                                @endrole
+                                                @role('guru')
+                                                <form action="{{ route('guru.student.destroy', $student->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus siswa ini?');">
+                                                @endrole
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit"
+                                                            class="px-3 py-1 text-xs font-semibold text-white bg-red-600 rounded-md hover:bg-red-700">
+                                                        Hapus
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>
