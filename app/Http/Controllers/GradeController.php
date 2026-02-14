@@ -139,8 +139,11 @@ class GradeController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+
         try {
+            //grade related to schoolId,
+            //create delete grade without deleting the school. because grade is the child.
+
             $grade = Grade::findOrFail($id);
 
             $roleRoute = [
@@ -152,13 +155,15 @@ class GradeController extends Controller
             if(!isset($roleRoute[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
             }
-
-            $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Tingkat  : '.$grade->name);
-
+            //delete grade without deleting the school, because grade is the child.
+            $grade->school_id = null;
+            $grade->save();
 
             $grade->delete();
 
+
+            $user = auth()->user();
+            logActivity($user->name.' (ID: '.$user->id.') Berhasil Menghapus Tingkat  : '.$grade->name);
 
             return redirect()->route($roleRoute[$role])->with('success', 'Tingkat berhasil dihapus');
         } catch (\Exception $e) {
