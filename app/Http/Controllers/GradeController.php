@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Exam;
+use App\Models\Examtype;
 use App\Models\Grade;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class GradeController extends Controller
 {
@@ -139,11 +142,8 @@ class GradeController extends Controller
      */
     public function destroy(string $id)
     {
-
+        DB::beginTransaction();
         try {
-            //grade related to schoolId,
-            //create delete grade without deleting the school. because grade is the child.
-
             $grade = Grade::findOrFail($id);
 
             $roleRoute = [
@@ -155,11 +155,11 @@ class GradeController extends Controller
             if(!isset($roleRoute[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah tingkat');
             }
-            //delete grade without deleting the school, because grade is the child.
-            $grade->school_id = null;
-            $grade->save();
 
+            Examtype::where('grade_id', $id)->update(['grade_id' => null]);
             $grade->delete();
+
+            DB::commit();
 
 
             $user = auth()->user();
