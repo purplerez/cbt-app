@@ -107,7 +107,7 @@
                                                 @endrole
 
                                                 @role('admin')
-                                                    <form action="{{ route('admin.grades.destroy', $exam->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ujian ini?');">
+                                                    <form action="{{ route('admin.exams.destroy', $exam->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ujian ini?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
@@ -119,7 +119,7 @@
                                                 @endrole
 
                                                 @role('super')
-                                                    <form action="{{ route('super.grades.destroy', $exam->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ujian ini?');">
+                                                    <form action="{{ route('super.exams.destroy', $exam->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Apakah Anda yakin ingin menghapus ujian ini?');">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">

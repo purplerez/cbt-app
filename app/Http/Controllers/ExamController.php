@@ -6,18 +6,81 @@ use App\Models\Exam;
 use App\Models\Examtype;
 use App\Models\Grade;
 use App\Models\Question;
-use App\Models\QuestionTypes;
 use App\Models\School;
-use App\Models\User;
-use Illuminate\Foundation\Auth\User as AuthUser;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
 {
+    /**
+     * Remove the specified exam type and all related data.
+     */
+    public function destroy($id)
+    {
+        DB::beginTransaction();
+        try {
+            $roleRoutes = [
+                'admin' => 'admin.exams',
+                'super' => 'super.exams',
+            ];
+            $role = Auth::user()->getRoleNames()->first();
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menghapus ujian');
+            }
+
+            $examType = \App\Models\Examtype::findOrFail($id);
+
+            // Delete all related Exams
+            $exams = \App\Models\Exam::where('exam_type_id', $examType->id)->get();
+            foreach ($exams as $exam) {
+                // Delete all related Questions
+                \App\Models\Question::where('exam_id', $exam->id)->delete();
+
+                // Delete all related ExamSessions
+                $sessions = \App\Models\ExamSession::where('exam_id', $exam->id)->get();
+                foreach ($sessions as $session) {
+                    // Delete all related StudentAnswers
+                    \App\Models\StudentAnswer::where('session_id', $session->id)->delete();
+                    // Delete all related ExamLogs
+                    \App\Models\ExamLog::where('session_id', $session->id)->delete();
+                    $session->delete();
+                }
+
+                // Delete all related Preassigned
+                \App\Models\Preassigned::where('exam_id', $exam->id)->delete();
+
+                $exam->delete();
+            }
+
+            // Delete related BeritaAcara
+            \App\Models\BeritaAcara::where('exam_type_id', $examType->id)->delete();
+
+            // Delete related StudentRooms
+            \App\Models\StudentRooms::where('exam_type_id', $examType->id)->delete();
+
+            // Delete related Rooms
+            \App\Models\Rooms::where('exam_type_id', $examType->id)->delete();
+
+            $examType->delete();
+
+            DB::commit();
+
+            $user = Auth::user();
+            logActivity($user->name.' (ID: '.$user->id.') menghapus ujian global : '.$examType->title);
+
+            return redirect()->route($roleRoutes[$role])->with('success', 'Ujian dan seluruh data terkait berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            $user = Auth::user();
+            logActivity($user->name.' (ID: '.$user->id.') gagal menghapus ujian : '.$id);
+            return redirect()->back()->withErrors(['error' => 'Gagal menghapus ujian: '.$e->getMessage()]);
+        }
+    }
     //
     public function index(){
         // fetch all data
-        $role = auth()->user()->role();
+        $role = Auth::user()->role();
 
         if($role == 'super'){
             $exams = Examtype::where('is_global', true)
@@ -47,7 +110,7 @@ class ExamController extends Controller
                 'end' => 'required|date|after_or_equal:start',
             ]);
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') membuat ujian global : '.$validated['name']);
 
 
@@ -56,7 +119,7 @@ class ExamController extends Controller
                 'super' => 'super.exams',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -82,7 +145,7 @@ class ExamController extends Controller
         }
         catch(\Exception $e)
         {
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') gagal membuat ujian : '.$request->name);
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
@@ -98,7 +161,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.view',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -150,7 +213,7 @@ class ExamController extends Controller
             ]);
 
             $validated['exam_type_id'] = session('examid');
-            $validated['created_by'] = auth()->user()->id;
+            $validated['created_by'] = Auth::user()->id;
             $validated['is_active'] = true;
 
             $roleRoutes =  [
@@ -158,7 +221,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.view',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -166,7 +229,7 @@ class ExamController extends Controller
 
             Exam::create($validated)->save();
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Berhasil membuat mata pelajaran ujian : '.$validated['title']);
 
 
@@ -174,7 +237,7 @@ class ExamController extends Controller
                             ->with('success', 'Data Mapel Ujian berhasil ditambahkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch (\Exception $e){
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') gagal membuat mata pelajaran ujian : '.$request['title']);
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuat Ujian : '.$e->getMessage()]);
@@ -207,14 +270,14 @@ class ExamController extends Controller
             $exam = Exam::findOrFail($request->examid);
             $exam->update($validated);
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Mengubah mata pelajaran ujian : '.$validated['title']);
 
             return redirect()->route('admin.exams.manage.view', session('examid'))
                             ->with('success', 'Data Mapel Ujian berhasil diubah <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch(\Exception $e){
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Gagal Mengubah mata pelajaran ujian : '.$request['title']);
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Mengubah Ujian : '.$e->getMessage()]);
@@ -228,14 +291,14 @@ class ExamController extends Controller
             $exam->is_active = !$exam->is_active;
             $exam->save();
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Mengarsipkan mata pelajaran ujian : '.$exam->title);
 
             return redirect()->route('admin.exams.manage.view', session('examid'))
                             ->with('success', 'Data Mapel Ujian berhasil diarsipkan <script>setTimeout(function(){ showTab(\'ujian\'); }, 100);</script>');
         }
         catch(\Exception $e){
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Gagal Mengarsipkan mata pelajaran ujian : '.$exam->title);
 
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Mengarsipkan Ujian : '.$e->getMessage()]);
@@ -253,7 +316,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.question',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoutes[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -266,13 +329,13 @@ class ExamController extends Controller
                 'perexamstatus' => $exam->is_active,
             ]);
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Membuka Bank Soal  : '.$exam->title);
 
             return redirect()->route($roleRoutes[$role], $exam);
         }
         catch(\Exception $e){
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Gagal Membuka Bank Soal  : '.$exam->title);
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Membuka Ujian : '.$e->getMessage()]);
         }
@@ -299,7 +362,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.view',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoute[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -323,7 +386,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.view',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoute[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -339,7 +402,7 @@ class ExamController extends Controller
 
             // dd($exam);
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Menonaktifkan Mata Pelajaran Ujian : '.$exam->title);
 
             return redirect()->route($roleRoute[$role], session('examid'))
@@ -357,7 +420,7 @@ class ExamController extends Controller
                 'super' => 'super.exams.manage.view',
             ];
 
-            $role = auth()->user()->getRoleNames()->first();
+            $role = Auth::user()->getRoleNames()->first();
 
             if(!isset($roleRoute[$role])) {
                 throw new \Exception ('Anda tidak memiliki akses untuk menambah ujian');
@@ -371,7 +434,7 @@ class ExamController extends Controller
                 'is_active' => $exam->is_active
             ]);
 
-            $user = auth()->user();
+            $user = Auth::user();
             logActivity($user->name.' (ID: '.$user->id.') Mengaktifkan Mata Pelajaran Ujian : '.$exam->title);
 
             return redirect()->route($roleRoute[$role], session('examid'))

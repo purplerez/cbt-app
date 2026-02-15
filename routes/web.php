@@ -118,6 +118,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('exams/create', [ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
+    Route::delete('exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy');
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
     Route::post('exams/inactive', [ExamController::class, 'inactiveExam'])->name('exam.inactive');
     Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
@@ -435,6 +436,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('exams/create', [ExamController::class, 'globalstore'])->name('examsglobal.store');
     Route::post('exams/{exam}/manage', [ExamController::class, 'manage'])->name('exams.manage');
     Route::get('exams/{exam}/manage', [ExamController::class, 'manageView'])->name('exams.manage.view');
+    Route::delete('exams/{exam}', [ExamController::class, 'destroy'])->name('exams.destroy');
     Route::post('exams/exam/store', [ExamController::class, 'examstore'])->name('exam.store');
     Route::post('exams/inactive', [ExamController::class, 'inactiveExam'])->name('exam.inactive');
     Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
