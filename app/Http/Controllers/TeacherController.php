@@ -255,7 +255,7 @@ class TeacherController extends Controller
         DB::beginTransaction();
         try{
             $validated = $request->validate([
-                'h_nip' => 'required|unique:headmasters,nip',
+                'h_nip' => 'required|unique:headmasters,nip,'.$request->h_id,
                 'h_name' => 'required|string|max:255',
                 'h_gender' => 'required|in:L,P',
                 'h_address' => 'required|string',
@@ -303,7 +303,7 @@ class TeacherController extends Controller
             DB::rollBack();
 
             return redirect()->back()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()])
-                     ->with('success', 'Data kepala sekolah Gagal diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+                     ->with('success', $e->getMessage().'Data kepala sekolah Gagal diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
         }
     }
 }
