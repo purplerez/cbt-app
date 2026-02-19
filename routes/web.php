@@ -226,6 +226,8 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/school', [KepalaController::class, 'school'])->name('school');
     Route::get('/school/{school}/edit', [KepalaController::class, 'editSchool'])->name('school.edit');
     Route::put('/school/edit', [KepalaController::class, 'updateSchool'])->name('school.update');
+    Route::get('/headmaster/{school}/edit', [KepalaController::class, 'editHeadmaster'])->name('headmaster.edit');
+    Route::put('/headmaster/edit', [KepalaController::class, 'updateHeadmaster'])->name('headmaster.update');
 
     // routing for grades in kepala dashboard
     Route::get('/grades', [KepalaController::class, 'gradeAll'])->name('grades');

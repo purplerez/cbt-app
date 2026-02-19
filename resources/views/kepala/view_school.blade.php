@@ -60,10 +60,22 @@
                             </div>
 
                             <div class="flex items-start py-3 space-x-4 transition-colors rounded-md hover:bg-gray-50">
-                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Kode Sekolah</span>
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Kode Madrasah</span>
                                 <div class="flex-1 pl-2">
                                     <span class="inline-block">{{ $school->code }}</span>
                                 </div>
+                            </div>
+
+                            <div class="flex items-start py-3 space-x-4 transition-colors rounded-md hover:bg-gray-50">
+                                <span class="w-32 font-semibold text-gray-700 sm:w-40">Kepala Madrasah</span>
+                                <div class="flex-1 pl-2">
+                                    <span class="inline-block">{{ $school->headmasters->name ?? '-' }}</span>
+
+                                    <a href="{{ route('kepala.headmaster.edit', $school->id) }}" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500">
+                                        Rubah Data
+                                    </a>
+                                </div>
+
                             </div>
 
                         </div>
