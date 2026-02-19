@@ -11,6 +11,7 @@ use App\Models\Preassigned;
 use App\Models\Question;
 use App\Models\School;
 use App\Models\Student;
+use App\Models\Headmaster;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
