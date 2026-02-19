@@ -9,6 +9,7 @@ use App\Models\School;
 use App\Models\Student;
 use App\Models\Teacher;
 use App\Models\User;
+use App\Models\Headmaster;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -570,6 +571,59 @@ class DashboardController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
+        }
+    }
+
+    public function editHeadmaster($school_id)
+    {
+        try {
+            $school = School::findOrFail($school_id);
+            $headmaster = $school->headmasters;
+
+            return view('kepala.edit_kepala', compact('headmaster', 'school'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    public function updateHeadmaster(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'nip' => 'required|string|max:255|unique:headmasters,nip,' . $request->id,
+                'gender' => 'required|in:L,P',
+                'address' => 'required|string',
+                'photo' => 'nullable|image|max:2048|mimes:jpeg,jpg,gif', // max 2MB
+            ]);
+
+            $headmaster = Headmaster::findOrFail($request->id);
+            $headmaster->update([
+                'name' => $validated['name'],
+                'nip' => $validated['nip'],
+                'gender' => $validated['gender'],
+                'address' => $validated['address'],
+            ]);
+
+            if ($request->hasFile('photo')) {
+                $oldPhoto = $request->input('old_photo');
+                // Delete old photo if it exists and is not the default photo
+                if ($oldPhoto && $oldPhoto !== "assets/images/school/default.png") {
+                    Storage::disk('public')->delete($oldPhoto);
+                }
+                // Store the new photo
+                $imageName = 'kepala_' . time() . '.' . $request->file('photo')->extension();
+                $photoPath = $request->file('photo')->storeAs('assets/images/school', $imageName, 'public');
+                $headmaster->photo = $photoPath;
+                $headmaster->save();
+            }
+
+            $user = auth()->user();
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Merubah Data Kepala Madrasah : ' . $validated['name']);
+
+            return redirect()->route('kepala.school')->with('success', 'Data kepala madrasah berhasil diubah');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Update Failed : ' . $e->getMessage()]);
         }
     }
     //->route($this->getRoutePrefix() . '.berita-acara.index')
