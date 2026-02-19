@@ -170,7 +170,7 @@
 
                             <div class="info-row">
                                 <span class="info-label">Tempat&Tgl Lahir</span>
-                                <span class="email">:  {{ $student['name'] }}</span>
+                                <span class="email">:  {{ $student['tgl_lahir'] }}</span>
                             </div>
 
                             <div class="info-row">
@@ -188,7 +188,7 @@
                     <tr>
                         <td>&nbsp;</td>
                         <td style="font-family: Times New Roman; font-size: 10pt; text-align: left;">
-                            <div class="email" style="padding-left:40%;">Banyuwangi, {{ date('d F Y') }}</div>
+                            <div class="email" style="padding-left:40%;">Banyuwangi, {{ date('d-m-Y') }}</div>
                             <div class="email" style="padding-left:40%;">Kepala Sekolah </div>
                             <div class="email" style="padding-left:40%; margin-top : 10%;">{{ $headmaster->name }} </div>
                         </td>
