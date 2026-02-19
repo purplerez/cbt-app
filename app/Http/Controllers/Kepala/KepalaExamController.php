@@ -51,7 +51,9 @@ class KepalaExamController extends Controller
             }
 
             $schoolId = session('school_id');
-            $mapels = Exam::where('exam_type_id', session('exam_id'))->get();
+            $mapels = Exam::where('exam_type_id', session('exam_id'))
+                        ->where('start_date', 'like', now()->format('Y-m-d').'%')
+                        ->get();
             $grades = Grade::where('school_id', $schoolId)->get();
 
             return view('kepala.manageexam', compact('mapels', 'grades'));
@@ -448,6 +450,7 @@ class KepalaExamController extends Controller
                 return [
                     'name' => $user->name ?? 'N/A',
                     'email' => $user->email ?? '-',
+                    'tgl_lahir' => $student?->d_birth ? \Carbon\Carbon::parse($student->d_birth)->format('d F Y') : '-',
                     'password' => $student?->nis ?? '-', // Use NIS as password (was used during user creation)
                     'nis' => $student?->nis ?? '-',
                     'class' => $student?->grade?->name ?? '-',
