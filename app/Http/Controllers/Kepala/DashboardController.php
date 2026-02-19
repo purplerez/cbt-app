@@ -144,7 +144,7 @@ class DashboardController extends Controller
                 'npsn' => 'required|string|max:255',
                 'address' => 'required|string',
                 'phone' => 'required|string|max:20',
-                'email' => 'required|string|email|max:255',
+                'email' => 'nullable|string|email|max:255',
                 'code' => 'required|string|max:50',
                 'logo' => 'nullable|image|max:2048' // max 2MB
             ]);
@@ -181,7 +181,8 @@ class DashboardController extends Controller
             return redirect()->route('kepala.school')->with('success', 'Data sekolah berhasil diperbarui');
         } catch (\Exception $e) {
 
-            return redirect()->back()->with('error', $e->getMessage());
+            return redirect()->back()->withErrors(['error' => 'Gagal Merubah Data Sekolah: ' . $e->getMessage()]);
+            // return redirect()->back()->with('error', $e->getMessage());
         }
     }
 
