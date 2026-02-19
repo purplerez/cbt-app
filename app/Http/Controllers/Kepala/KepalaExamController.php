@@ -420,7 +420,7 @@ class KepalaExamController extends Controller
             // Get school info
             $school = School::findOrFail($schoolId);
 
-            $headmaster = $school->headmasters->first();
+            $headmaster = Headmaster::where('school_id', $schoolId)->first();
 
             $logoPath = storage_path('app/public/' . $school->logo);
 
