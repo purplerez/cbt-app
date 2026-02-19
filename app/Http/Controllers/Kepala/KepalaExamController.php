@@ -436,6 +436,9 @@ class KepalaExamController extends Controller
             // Get all students preassigned to any of these exams
             $preassignedUsers = Preassigned::whereIn('exam_id', $examIds)
                 ->with(['user.student.grade'])
+                ->whereHas('user.student', function ($q) use ($schoolId) {
+                    $q->where('school_id', $schoolId);  
+                })
                 ->get()
                 ->groupBy('user_id')
                 ->map(function ($group) {
