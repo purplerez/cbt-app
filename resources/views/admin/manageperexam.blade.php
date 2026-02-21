@@ -71,12 +71,12 @@
                                         <a href="{{ route('admin.exams.question.exit') }}"
                                             class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                                             title="Non-aktifkan Akun">
-                                    @endrole
-                                    @role('super')
+                                        @endrole
+                                        @role('super')
                                             <a href="{{ route('super.exams.question.exit') }}"
                                                 class="flex items-center w-full px-4 py-2 text-sm font-medium text-left text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                                                 title="Non-aktifkan Akun">
-                                    @endrole
+                                            @endrole
                                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -129,74 +129,91 @@
                                                 @if (session('perexamstatus') == 1)
                                                     @php
                                                         $importRoute = auth()->user()->hasRole('super')
-                                                            ? route('super.exams.questions.import-word', session('perexamid'))
-                                                            : route('admin.exams.questions.import-word', session('perexamid'));
+                                                            ? route(
+                                                                'super.exams.questions.import-word',
+                                                                session('perexamid'),
+                                                            )
+                                                            : route(
+                                                                'admin.exams.questions.import-word',
+                                                                session('perexamid'),
+                                                            );
                                                         $templateRoute = auth()->user()->hasRole('super')
-                                                            ? route('super.exams.questions.template-word', session('perexamid'))
-                                                            : route('admin.exams.questions.template-word', session('perexamid'));
+                                                            ? route(
+                                                                'super.exams.questions.template-word',
+                                                                session('perexamid'),
+                                                            )
+                                                            : route(
+                                                                'admin.exams.questions.template-word',
+                                                                session('perexamid'),
+                                                            );
                                                         $exportRoute = auth()->user()->hasRole('super')
-                                                            ? route('super.exams.questions.export', session('perexamid'))
-                                                            : route('admin.exams.questions.export', session('perexamid'));
+                                                            ? route(
+                                                                'super.exams.questions.export',
+                                                                session('perexamid'),
+                                                            )
+                                                            : route(
+                                                                'admin.exams.questions.export',
+                                                                session('perexamid'),
+                                                            );
                                                     @endphp
 
                                                     @role('admin')
+                                                        <form id="wordImportFormNew"
+                                                            action="{{ route('admin.questions.import') }}" method="POST"
+                                                            enctype="multipart/form-data"
+                                                            class="flex items-center space-x-2">
+                                                        @endrole
+                                                        @role('super')
+                                                            <form id="wordImportFormNew"
+                                                                action="{{ route('super.questions.import') }}"
+                                                                method="POST" enctype="multipart/form-data"
+                                                                class="flex items-center space-x-2">
+                                                            @endrole
+                                                            @csrf
+                                                            <input type="hidden" name="exam_id"
+                                                                value="{{ session('perexamid') }}">
+                                                            <input type="file" name="word_file" id="word_file_new"
+                                                                accept=".doc,.docx" class="hidden"
+                                                                onchange="this.form.submit()">
+                                                            <button type="button"
+                                                                onclick="document.getElementById('word_file_new').click()"
+                                                                class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                    </path>
+                                                                </svg>
+                                                                Import Word
+                                                            </button>
+                                                            <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
+                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                                <svg class="w-4 h-4 mr-1" fill="none"
+                                                                    stroke="currentColor" viewBox="0 0 24 24"
+                                                                    xmlns="http://www.w3.org/2000/svg">
+                                                                    <path stroke-linecap="round"
+                                                                        stroke-linejoin="round" stroke-width="2"
+                                                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                    </path>
+                                                                </svg>
+                                                                Download Template
+                                                            </a>
+                                                        </form>
 
-                                                    <form id="wordImportFormNew"
-                                                        action="{{ route('admin.questions.import') }}" method="POST"
-                                                        enctype="multipart/form-data"
-                                                        class="flex items-center space-x-2">
-                                                    @endrole
-                                                    @role('super')
-                                                     <form id="wordImportFormNew"
-                                                        action="{{ route('super.questions.import') }}" method="POST"
-                                                        enctype="multipart/form-data"
-                                                        class="flex items-center space-x-2">
-                                                    @endrole
-                                                        @csrf
-                                                        <input type="hidden" name="exam_id"
-                                                            value="{{ session('perexamid') }}">
-                                                        <input type="file" name="word_file" id="word_file_new"
-                                                            accept=".doc,.docx" class="hidden"
-                                                            onchange="this.form.submit()">
-                                                        <button type="button"
-                                                            onclick="document.getElementById('word_file_new').click()"
-                                                            class="flex items-center px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
-                                                            <svg class="w-4 h-4 mr-1" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
-                                                                </path>
-                                                            </svg>
-                                                            Import Word
-                                                        </button>
-                                                        <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
-                                                            class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
-                                                            <svg class="w-4 h-4 mr-1" fill="none"
-                                                                stroke="currentColor" viewBox="0 0 24 24"
-                                                                xmlns="http://www.w3.org/2000/svg">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2"
-                                                                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
-                                                                </path>
-                                                            </svg>
-                                                            Download Template
+                                                        <!-- Export Button -->
+                                                        <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                                                            Export
                                                         </a>
-                                                    </form>
 
-                                                    <!-- Export Button -->
-                                                    <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
-                                                        class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
-                                                        Export
-                                                    </a>
-
-                                                    <!-- Add Question Button -->
-                                                    <button type="button"
-                                                        class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-                                                        data-tab="soal">
-                                                        + Tambah Soal
-                                                    </button>
+                                                        <!-- Add Question Button -->
+                                                        <button type="button"
+                                                            class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+                                                            data-tab="soal">
+                                                            + Tambah Soal
+                                                        </button>
                                                 @endif
                                             </div>
                                         </div>
@@ -230,7 +247,7 @@
                                                                 <tr>
                                                                     <td
                                                                         class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                        {{ $q->id }}
+                                                                        {{ $loop->iteration }}
                                                                     </td>
                                                                     <td class="px-6 py-4 text-sm text-gray-800">
                                                                         <div class="whitespace-wrap">
@@ -282,8 +299,7 @@
                                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                                             data-modal-target="editSoalModal{{ $q->id }}"
                                                                             onclick="openEditSoalModal({{ $q->id }})"
-                                                                            {{-- @if (session('perexamstatus') == 0) disabled @endif --}}
-                                                                            >
+                                                                            {{-- @if (session('perexamstatus') == 0) disabled @endif --}}>
                                                                             Ubah
                                                                         </button>
 
@@ -296,8 +312,7 @@
                                                                             <button type="submit"
                                                                                 class="px-4 py-2 text-sm font-medium text-white transition bg-red-600 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
                                                                                 onclick="return confirm('Apakah Anda yakin ingin menghapus soal ini?')"
-                                                                                {{-- @if (session('perexamstatus') == 0) disabled @endif --}}
-                                                                                >
+                                                                                {{-- @if (session('perexamstatus') == 0) disabled @endif --}}>
                                                                                 Hapus</button>
                                                                         </form>
                                                                 </tr>
@@ -318,14 +333,21 @@
                                         {{-- Single edit modal template - content loaded via AJAX --}}
                                         <div id="editSoalModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
                                             <div class="min-h-screen px-4 text-center">
-                                                <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75"></div>
-                                                <div class="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
+                                                <div
+                                                    class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75">
+                                                </div>
+                                                <div
+                                                    class="inline-block w-full max-w-2xl p-6 my-8 text-left align-middle transition-all transform bg-white rounded-lg shadow-xl">
                                                     <div class="flex items-center justify-between pb-3 border-b">
                                                         <h3 class="text-lg font-medium text-gray-900">Ubah Soal</h3>
-                                                        <button type="button" class="text-gray-400 hover:text-gray-500" onclick="closeModal('editSoalModal')">
+                                                        <button type="button"
+                                                            class="text-gray-400 hover:text-gray-500"
+                                                            onclick="closeModal('editSoalModal')">
                                                             <span class="sr-only">Close</span>
-                                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24"
+                                                                stroke="currentColor">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                                             </svg>
                                                         </button>
                                                     </div>
@@ -776,10 +798,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                                                                                                                        ${examstatus == 0 ? 'disabled' : ''}
-                                                                                                                                        >
-                                                                                                                                                        Tambah ke Ujian
-                                                                                                                                                    </button>`
+                                                                                                                                                    ${examstatus == 0 ? 'disabled' : ''}
+                                                                                                                                                    >
+                                                                                                                                                                    Tambah ke Ujian
+                                                                                                                                                                </button>`
                         }
                     </td>
                 `;
@@ -1103,7 +1125,8 @@
                     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
 
                     if (!csrfToken) {
-                        modalContent.innerHTML = '<p class="text-center text-red-500">Error: CSRF token tidak ditemukan. Refresh halaman dan coba lagi.</p>';
+                        modalContent.innerHTML =
+                            '<p class="text-center text-red-500">Error: CSRF token tidak ditemukan. Refresh halaman dan coba lagi.</p>';
                         return;
                     }
 
@@ -1117,54 +1140,56 @@
                     const url = `${prefix}/exams/questions/${questionId}/modal`;
 
                     fetch(url, {
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'text/html',
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'X-CSRF-TOKEN': csrfToken
-                        }
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => {
-                                throw new Error('Gagal load modal: ' + text);
-                            });
-                        }
-                        return response.text();
-                    })
-                    .then(html => {
-                        // Insert HTML into modal
-                        modalContent.innerHTML = html;
-
-                        // Initialize TinyMCE for newly added textarea elements
-                        if (typeof tinymce !== 'undefined') {
-                            // First remove any existing tinymce instances
-                            tinymce.remove();
-
-                            // Initialize for all tinymce-editor textareas
-                            const textareas = modalContent.querySelectorAll('.tinymce-editor');
-                            textareas.forEach(textarea => {
-                                tinymce.init({
-                                    target: textarea,
-                                    height: 280,
-                                    menubar: false,
-                                    plugins: 'lists link table code',
-                                    toolbar: 'bold italic | bullist numlist | link table | code',
-                                    branding: false,
-                                    statusbar: false
+                            method: 'GET',
+                            headers: {
+                                'Accept': 'text/html',
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'X-CSRF-TOKEN': csrfToken
+                            }
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                return response.text().then(text => {
+                                    throw new Error('Gagal load modal: ' + text);
                                 });
-                            });
-                        }
+                            }
+                            return response.text();
+                        })
+                        .then(html => {
+                            // Insert HTML into modal
+                            modalContent.innerHTML = html;
 
-                        // Load answer key choices if not essay type
-                        if (typeof loadAnswerKeyChoices === 'function') {
-                            loadAnswerKeyChoices(questionId);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading modal:', error);
-                        modalContent.innerHTML = '<p class="text-center text-red-500">Gagal memuat modal. Silakan coba lagi.<br>' + error.message + '</p>';
-                    });
+                            // Initialize TinyMCE for newly added textarea elements
+                            if (typeof tinymce !== 'undefined') {
+                                // First remove any existing tinymce instances
+                                tinymce.remove();
+
+                                // Initialize for all tinymce-editor textareas
+                                const textareas = modalContent.querySelectorAll('.tinymce-editor');
+                                textareas.forEach(textarea => {
+                                    tinymce.init({
+                                        target: textarea,
+                                        height: 280,
+                                        menubar: false,
+                                        plugins: 'lists link table code',
+                                        toolbar: 'bold italic | bullist numlist | link table | code',
+                                        branding: false,
+                                        statusbar: false
+                                    });
+                                });
+                            }
+
+                            // Load answer key choices if not essay type
+                            if (typeof loadAnswerKeyChoices === 'function') {
+                                loadAnswerKeyChoices(questionId);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading modal:', error);
+                            modalContent.innerHTML =
+                                '<p class="text-center text-red-500">Gagal memuat modal. Silakan coba lagi.<br>' + error
+                                .message + '</p>';
+                        });
                 }
 
                 function loadAnswerKeyChoices(questionId) {
@@ -1209,8 +1234,6 @@
 
                     answerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxesHTML}</div>`;
                 }
-
-
             </script>
             <!-- end edit js -->
 
@@ -1586,14 +1609,14 @@
                             <h2 class="mb-4 text-xl font-bold">Preview Soal yang Diimport (${questions.length} soal)</h2>
                             <div class="space-y-4">
                                 ${questions.map((q, idx) => `
-                                                                                                <div class="py-2 pl-4 border-l-4 border-blue-500">
-                                                                                                    <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
-                                                                                                    <p class="text-sm text-gray-600">
-                                                                                                        Tipe: ${getQuestionTypeName(q.question_type)} |
-                                                                                                        Pilihan: ${Object.keys(q.choices || {}).length}
-                                                                                                    </p>
-                                                                                                </div>
-                                                                                            `).join('')}
+                                                                                                            <div class="py-2 pl-4 border-l-4 border-blue-500">
+                                                                                                                <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
+                                                                                                                <p class="text-sm text-gray-600">
+                                                                                                                    Tipe: ${getQuestionTypeName(q.question_type)} |
+                                                                                                                    Pilihan: ${Object.keys(q.choices || {}).length}
+                                                                                                                </p>
+                                                                                                            </div>
+                                                                                                        `).join('')}
                             </div>
                             <div class="flex justify-end mt-6 space-x-4">
                                 <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600">Batal</button>
@@ -1617,9 +1640,7 @@
                 function saveWordQuestions(examId, questionsData) {
                     const questions = JSON.parse(atob(questionsData));
                     @php
-                        $saveRoute = auth()->user()->hasRole('super')
-                            ? route('super.exams.questions.save-word-questions')
-                            : route('admin.exams.questions.save-word-questions');
+                        $saveRoute = auth()->user()->hasRole('super') ? route('super.exams.questions.save-word-questions') : route('admin.exams.questions.save-word-questions');
                     @endphp
                     const route = '{{ $saveRoute }}';
 
