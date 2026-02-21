@@ -51,7 +51,7 @@
                                 <tr>
                                     <th class="w-[5%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">No</th>
                                     <th class="w-[25%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Nama Madrasah</th>
-                                    <th class="w-[30%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Alamat</th>
+                                    <th class="w-[25%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Alamat</th>
                                     <th class="w-[10%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Status</th>
                                     <th class="w-[15%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Kode Madrasah</th>
                                     <th class="w-[15%] px-4 py-3 text-xs font-medium text-left text-gray-500 uppercase">Aksi</th>
