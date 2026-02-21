@@ -250,12 +250,32 @@
                                                                         {{ $loop->iteration }}
                                                                     </td>
                                                                     <td class="px-6 py-4 text-sm text-gray-800">
-                                                                        <div class="whitespace-wrap">
-                                                                            {{ $q->question_text }}</div>
+                                                                        <div class="mb-2 whitespace-wrap">
+                                                                            {!! $q->question_text !!}
+                                                                        </div>
                                                                         @if ($q->question_image)
                                                                             <img src="{{ Storage::url($q->question_image) }}"
                                                                                 alt="Question"
                                                                                 class="max-w-xs mt-2 rounded-md max-h-32">
+                                                                        @endif
+                                                                        @if ($q->option_a || $q->option_b)
+                                                                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                                                                @if ($q->option_a)
+                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">A.</span><span>{!! $q->option_a !!}</span></div>
+                                                                                @endif
+                                                                                @if ($q->option_b)
+                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">B.</span><span>{!! $q->option_b !!}</span></div>
+                                                                                @endif
+                                                                                @if ($q->option_c)
+                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">C.</span><span>{!! $q->option_c !!}</span></div>
+                                                                                @endif
+                                                                                @if ($q->option_d)
+                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">D.</span><span>{!! $q->option_d !!}</span></div>
+                                                                                @endif
+                                                                                @if ($q->option_e)
+                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">E.</span><span>{!! $q->option_e !!}</span></div>
+                                                                                @endif
+                                                                            </div>
                                                                         @endif
                                                                     </td>
                                                                     <td

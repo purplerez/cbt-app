@@ -11,34 +11,26 @@ class WordParserService
 {
     public function parseWordDocument($filePath)
     {
-        // Try simple text extraction first
-        $allText = $this->extractAllTextSimple($filePath);
+        $structured = $this->extractStructuredContent($filePath);
 
         $this->log('========================================');
         $this->log('STARTING WORD DOCUMENT PARSING');
         $this->log('========================================');
         $this->log('File: ' . basename($filePath));
-        $this->log('Total text length: ' . strlen($allText) . ' characters');
+        $this->log('Structured elements: ' . count($structured));
 
-        if (empty($allText)) {
-            $this->log('ERROR: No text extracted from Word document', 'error');
+        if (empty($structured)) {
+            $this->log('ERROR: No content extracted', 'error');
             return [];
         }
 
-        // Save full extracted text to file for debugging
-        $debugFile = storage_path('logs/word_extracted_text.txt');
-        file_put_contents($debugFile, $allText);
-        $this->log("Full extracted text saved to: $debugFile");
+        $debugLines = array_map(fn($e) => "[{$e['type']}] " . ($e['text'] ?? ''), $structured);
+        file_put_contents(storage_path('logs/word_extracted_text.txt'), implode("\n", $debugLines));
 
-        $questions = [];
-        $currentQuestion = null;
-        $inOptionsSection = false;
+        $questions     = [];
+        $currentQ      = null;
+        $lastOptLetter = null;
 
-        // Split by lines
-        $lines = explode("\n", $allText);
-        $this->log('Total lines to process: ' . count($lines));
-
-        // Question indicator keywords
         $questionKeywords = [
             'bacalah',
             'perhatikan',
@@ -46,717 +38,525 @@ class WordParserService
             'cermatilah',
             'pilihlah',
             'manakah',
-            'berikut',
             'kutipan',
             'tentukan',
             'carilah',
             'arti',
-            'topik',    // e.g. "Topik Karya Tulis Ilmiah : ..."
+            'topik',
         ];
 
-        // Track the last letter-option parsed so numbered continuation lines
-        // (e.g. "10) Lengkapi biodata...") can be appended to that option
-        $lastOptionLetter = null;
+        $endsWithMarker = function (string $text): bool {
+            $text = rtrim($text);
+            if ($text === '') return false;
+            $last = mb_substr($text, -1);
+            if ($last === '…' || $last === '?') return true;
+            if (preg_match('/adalah[\s\.…]*$/iu', $text))  return true;
+            if (preg_match('/yaitu[\s\.…]*$/iu', $text))   return true;
+            if (preg_match('/berikut[\s\.…]*$/iu', $text)) return true;
+            if (preg_match('/kecuali[\s\.…]*$/iu', $text)) return true;
+            if (preg_match('/disebut[\s\.…]*$/iu', $text)) return true;
+            if (preg_match('/\.\.\.$/', $text))             return true;
+            return false;
+        };
 
-        for ($i = 0; $i < count($lines); $i++) {
-            $line = trim($lines[$i]);
+        $hasKeyword = function (string $text) use ($questionKeywords): bool {
+            $lower = mb_strtolower($text);
+            foreach ($questionKeywords as $kw) {
+                $pos = mb_strpos($lower, $kw);
+                if ($pos !== false && $pos < 80) return true;
+            }
+            return false;
+        };
 
-            if (empty($line)) {
+        $saveCurrentQ = function () use (&$questions, &$currentQ) {
+            if ($currentQ === null) return;
+            $optCount = 0;
+            foreach (['option_a', 'option_b', 'option_c', 'option_d', 'option_e'] as $opt) {
+                if (!empty($currentQ[$opt])) $optCount++;
+            }
+            if ($optCount >= 2) {
+                $questions[] = $currentQ;
+                $this->log("✓ Saved Q#{$currentQ['question_number']} with $optCount options");
+            } else {
+                $this->log("✗ Discarded Q#{$currentQ['question_number']}: only $optCount options");
+            }
+            $currentQ = null;
+        };
+
+        $inQuestionBody = false;
+        $questionDone   = false;
+        $lastQNumber    = 0;
+        $n              = count($structured);
+
+        for ($i = 0; $i < $n; $i++) {
+            $el   = $structured[$i];
+            $type = $el['type'];
+
+            // ── IMAGE ─────────────────────────────────────────────────────
+            if ($type === 'image') {
+                if ($currentQ !== null) {
+                    $savedPath = $el['saved_path'] ?? null;
+                    if ($savedPath) {
+                        if (!$questionDone && $lastOptLetter === null) {
+                            $currentQ['image_path'] = $savedPath;
+                            $this->log("  Image → question body");
+                        } elseif ($lastOptLetter !== null) {
+                            $currentQ['option_' . $lastOptLetter . '_image'] = $savedPath;
+                            $this->log("  Image → option " . strtoupper($lastOptLetter));
+                        }
+                    }
+                }
                 continue;
             }
 
-            // Check if this line starts a NEW QUESTION
-            // A new question has: number + (dot/paren) + (long text OR keyword OR ends with question marker)
-            if (preg_match('/^(\d+)[\.\)]\s+(.+)/s', $line, $matches)) {
-                $number = intval($matches[1]);
-                $text = trim($matches[2]);
-                $textLength = strlen($text);
+            // ── TEXT ──────────────────────────────────────────────────────
+            $rawText  = $el['text'] ?? '';
+            $htmlText = $el['html'] ?? htmlspecialchars($rawText, ENT_QUOTES, 'UTF-8');
+            $line     = trim($rawText);
 
-                // Skip point lines
-                if (preg_match('/^(poin|nilai|score|bobot|skor|point)/i', $text)) {
+            if ($line === '') continue;
+
+            // ── FIX SOAL 12: Concatenated options in ONE paragraph ────────
+            // e.g. "a.(1)-(2)-(4)b.(2)-(1)c.(2)-(3)d.(2)-(4)e.(2)-(6)"
+            // Options may be separated by \n (from w:br), so use /s flag for dot-all
+            if (
+                $currentQ !== null
+                && preg_match('/^[aA][.\)]/u', $line)
+                && preg_match('/[bB][.\)].*[cC][.\)]/su', $line)
+            ) {
+                $splitOpts = $this->splitConcatenatedOptions($line);
+                if (count($splitOpts) >= 2) {
+                    foreach ($splitOpts as $letter => $optPlain) {
+                        $currentQ['option_' . $letter] = htmlspecialchars($optPlain, ENT_QUOTES, 'UTF-8');
+                        $lastOptLetter = $letter;
+                        $this->log("  Option (split) " . strtoupper($letter) . ": " . substr($optPlain, 0, 60));
+                    }
+                    $questionDone   = true;
+                    $inQuestionBody = false;
+                    continue;
+                }
+            }
+
+            // ── LETTER OPTION (a. / b. / … / e.) ─────────────────────────
+            if (preg_match('/^([A-Ea-e])[.\)]\s*(.+)/su', $line, $m)) {
+                $letter  = strtolower($m[1]);
+                $optText = trim($m[2]);
+                $optHtml = trim(preg_replace('/^[A-Ea-e][.\)]\s*/u', '', $htmlText));
+
+                if ($currentQ !== null && in_array($letter, ['a', 'b', 'c', 'd', 'e']) && $optText !== '') {
+                    $currentQ['option_' . $letter] = $optHtml;
+                    $lastOptLetter  = $letter;
+                    $questionDone   = true;
+                    $inQuestionBody = false;
+                    $this->log("  Option " . strtoupper($letter) . ": " . substr($optText, 0, 60));
+                    continue;
+                }
+            }
+
+            // ── QUESTION NUMBER LINE ──────────────────────────────────────
+            if (preg_match('/^(\d+)[.\)]\s+(.+)/su', $line, $m)) {
+                $number  = (int) $m[1];
+                $text    = trim($m[2]);
+                $htmlRaw = trim(preg_replace('/^\d+[.\)]\s*/u', '', $htmlText));
+
+                if (preg_match('/^(poin|nilai|score|bobot|skor|point)\b/iu', $text)) continue;
+
+                // Sub-item / procedure step inside question body
+                if (
+                    $inQuestionBody && $number >= 1 && $number <= 20
+                    && !$hasKeyword($text) && !$endsWithMarker($text)
+                ) {
+                    $currentQ['question_text'] .= "\n" . $htmlRaw;
+                    $this->log("  Step → question body: " . substr($text, 0, 50));
                     continue;
                 }
 
-                // Check if this looks like a QUESTION (not an option)
-                $hasKeyword = false;
-                foreach ($questionKeywords as $keyword) {
-                    if (stripos($text, $keyword) !== false && stripos($text, $keyword) < 80) {
-                        $hasKeyword = true;
-                        break;
-                    }
-                }
+                $isNewQuestion = ($number > $lastQNumber)
+                    || $hasKeyword($text)
+                    || $endsWithMarker($text)
+                    || (!$questionDone && strlen($text) > 80);
 
-                $endsWithMarker = (
-                    substr($line, -1) === '…' ||
-                    substr($line, -1) === '?' ||
-                    preg_match('/adalah[\.…\s]*$/iu', $line) ||
-                    preg_match('/yaitu[\.…\s]*$/iu', $line) ||
-                    preg_match('/\.\.\.$/', $line) ||           // ends with ...
-                    preg_match('/tersebut adalah/i', $line) ||  // tambahan ini
-                    preg_match('/berikut (adalah|ini)/i', $line) // tambahan ini
-                );
+                if ($isNewQuestion) {
+                    $saveCurrentQ();
+                    $lastQNumber    = $number;
+                    $lastOptLetter  = null;
+                    $questionDone   = false;
+                    $inQuestionBody = false;
+                    $fullHtml       = $htmlRaw;
 
-                // DECISION: Is this a QUESTION start or an OPTION?
-                $isNewQuestion = false;
+                    if (!$endsWithMarker($text)) {
+                        $inQuestionBody = true;
+                        $j = $i + 1;
+                        while ($j < $n) {
+                            $nxt     = $structured[$j];
+                            $nxtRaw  = trim($nxt['text'] ?? '');
+                            $nxtHtml = $nxt['html'] ?? htmlspecialchars($nxtRaw, ENT_QUOTES, 'UTF-8');
 
-                if ($inOptionsSection && $textLength < 100 && !$hasKeyword && $number >= 2 && $number <= 6) {
-                    // We're in options section, short text, no keyword, number 2-6 = OPTION
-                    if ($currentQuestion !== null) {
-                        $optionLetter = chr(96 + ($number - 1)); // 2→a, 3→b, 4→c, 5→d, 6→e
-                        if ($optionLetter >= 'a' && $optionLetter <= 'e') {
-                            $currentQuestion['option_' . $optionLetter] = $text;
-                            $this->log("  Option " . strtoupper($optionLetter) . " (from #$number): " . substr($text, 0, 50));
-                        }
-                    }
-                } else if ($textLength > 80 || $hasKeyword || $endsWithMarker || !$inOptionsSection) {
-                    // This looks like a NEW QUESTION
-                    $isNewQuestion = true;
-                    $inOptionsSection = false;
-                    $lastOptionLetter = null;
-
-                    // Save previous question if it has enough options
-                    if ($currentQuestion !== null) {
-                        $optCount = 0;
-                        foreach (['option_a', 'option_b', 'option_c', 'option_d', 'option_e'] as $opt) {
-                            if (!empty($currentQuestion[$opt])) $optCount++;
-                        }
-
-                        if ($optCount >= 2) {
-                            $questions[] = $currentQuestion;
-                            $this->log("✓ Saved Q#" . $currentQuestion['question_number'] . " with $optCount options");
-                        } else {
-                            $this->log("✗ Discarded Q#" . $currentQuestion['question_number'] . ": only $optCount options");
-                        }
-                    }
-
-                    // Start new question - read ALL lines until we hit question marker
-                    $this->log("→ NEW QUESTION #$number");
-                    $fullQuestionText = $text;
-
-                    // Keep reading lines until we find the question marker (ends with … or ?)
-                    if (!$endsWithMarker) {
-                        for ($j = $i + 1; $j < count($lines); $j++) {
-                            $nextLine = trim($lines[$j]);
-                            if (empty($nextLine)) continue;
-
-                            // Check if next line is an option (letter-based), allow no space after period
-                            if (preg_match('/^([A-Ea-e])[\.\)]\s*\S/', $nextLine)) {
-                                // Found options, stop here
-                                break;
+                            if ($nxt['type'] === 'image') break;
+                            if ($nxtRaw === '') {
+                                $j++;
+                                continue;
                             }
 
-                            // Check if next line is a numbered line that could be another question
-                            if (preg_match('/^(\d+)[\.\)]\s+(.+)/', $nextLine, $nextMatch)) {
-                                $nextNum = intval($nextMatch[1]);
-                                $nextText = trim($nextMatch[2]);
-                                $nextHasKeyword = false;
-                                foreach ($questionKeywords as $kw) {
-                                    if (stripos($nextText, $kw) !== false && stripos($nextText, $kw) < 80) {
-                                        $nextHasKeyword = true;
-                                        break;
-                                    }
-                                }
+                            if (preg_match('/^[A-Ea-e][.\)]\s*\S/u', $nxtRaw)) break;
 
-                                // If it's a big number with keyword, it's probably next question
-                                if (strlen($nextText) > 100 || $nextHasKeyword) {
+                            if (preg_match('/^(\d+)[.\)]\s+(.+)/su', $nxtRaw, $nm)) {
+                                $nxtNum = (int) $nm[1];
+                                $nxtTxt = trim($nm[2]);
+                                if (
+                                    $nxtNum > $number
+                                    && ($hasKeyword($nxtTxt) || strlen($nxtTxt) > 80 || $endsWithMarker($nxtTxt))
+                                ) {
                                     break;
                                 }
                             }
 
-                            // Append this line to question text
-                            $fullQuestionText .= "\n" . $nextLine;
-                            $i = $j; // Move index forward
+                            $fullHtml .= "\n" . $nxtHtml;
+                            $i = $j;
 
-                            // Check if we found the marker
-                            if (
-                                substr($nextLine, -1) === '…' || substr($nextLine, -1) === '?' ||
-                                preg_match('/adalah[\.…\s]*$/i', $nextLine) ||
-                                preg_match('/yaitu[\.…\s]*$/i', $nextLine)
-                            ) {
-                                $inOptionsSection = true;
+                            if ($endsWithMarker($nxtRaw)) {
+                                $questionDone   = true;
+                                $inQuestionBody = false;
+                                $j++;
                                 break;
                             }
+                            $j++;
                         }
                     } else {
-                        $inOptionsSection = true;
+                        $questionDone   = true;
+                        $inQuestionBody = false;
                     }
 
-                    $currentQuestion = [
+                    $currentQ = [
                         'question_number' => $number,
-                        'question_text' => $fullQuestionText,
-                        'option_a' => null,
+                        'question_text'   => $fullHtml,
+                        'option_a'        => null,
                         'option_a_image' => null,
-                        'option_b' => null,
+                        'option_b'        => null,
                         'option_b_image' => null,
-                        'option_c' => null,
+                        'option_c'        => null,
                         'option_c_image' => null,
-                        'option_d' => null,
+                        'option_d'        => null,
                         'option_d_image' => null,
-                        'option_e' => null,
+                        'option_e'        => null,
                         'option_e_image' => null,
-                        'correct_answer' => null,
-                        'points' => 1,
-                        'image_path' => null,
+                        'correct_answer'  => null,
+                        'points'          => 1,
+                        'image_path'      => null,
                     ];
+                    $this->log("→ NEW Q#$number: " . substr($text, 0, 60));
+                    continue;
+                }
+            }
 
-                    $this->log("  Question text length: " . strlen($fullQuestionText));
-                } else {
-                    // Numbered line that is neither a sub-option (2-6) nor a clear new question.
-                    // Treat it as a continuation of the last parsed letter-option (e.g. "10) ..."
-                    // that follows "a. 4) ..." in multi-part option format).
-                    if ($inOptionsSection && $currentQuestion !== null && $lastOptionLetter !== null) {
-                        $currentQuestion['option_' . $lastOptionLetter] .= "\n" . $text;
-                        $this->log("  Continued Option " . strtoupper($lastOptionLetter) . ": " . substr($text, 0, 50));
+            // ── PLAIN TEXT: append to active context ─────────────────────
+            if ($currentQ !== null) {
+                if ($questionDone && $lastOptLetter !== null) {
+                    $currentQ['option_' . $lastOptLetter] .= "\n" . $htmlText;
+                } elseif ($inQuestionBody || !$questionDone) {
+                    $currentQ['question_text'] .= "\n" . $htmlText;
+                    if ($endsWithMarker($line)) {
+                        $questionDone   = true;
+                        $inQuestionBody = false;
                     }
                 }
             }
-            // Check for LETTER-based options (a., b., c., d., e.)
-            elseif (preg_match('/^([A-Ea-e])[\.\.\)]\s*(.+)/i', $line, $matches)) {
-                if ($currentQuestion !== null) {
-                    $optionLetter = strtolower($matches[1]);
-                    $optionText = trim($matches[2]);
 
-                    // Check if multiple options are concatenated on one line (e.g., "a.text1b.text2c.text3")
-                    if (!empty($optionText) && preg_match('/[B-Eb-e][\.\.\)]/i', $optionText)) {
-                        // Split concatenated options
-                        preg_match_all('/([A-Ea-e])[\.\.\)]\s*(.*?)(?=[A-Ea-e][\.\.\)]|$)/is', $line, $allOpts, PREG_SET_ORDER);
-                        if (count($allOpts) >= 2) {
-                            foreach ($allOpts as $opt) {
-                                $letter = strtolower($opt[1]);
-                                $text = trim($opt[2]);
-                                if (in_array($letter, ['a', 'b', 'c', 'd', 'e']) && !empty($text)) {
-                                    $currentQuestion['option_' . $letter] = $text;
-                                    $inOptionsSection = true;
-                                    $lastOptionLetter = $letter;
-                                    $this->log("  Option (split) " . strtoupper($letter) . ": " . substr($text, 0, 50));
-                                }
-                            }
-                        } else {
-                            // Fallback: single option
-                            if (in_array($optionLetter, ['a', 'b', 'c', 'd', 'e']) && !empty($optionText)) {
-                                $currentQuestion['option_' . $optionLetter] = $optionText;
-                                $inOptionsSection = true;
-                                $lastOptionLetter = $optionLetter;
-                                $this->log("  Option " . strtoupper($optionLetter) . ": " . substr($optionText, 0, 50));
-                            }
-                        }
-                    } else {
-                        if (in_array($optionLetter, ['a', 'b', 'c', 'd', 'e']) && !empty($optionText)) {
-                            $currentQuestion['option_' . $optionLetter] = $optionText;
-                            $inOptionsSection = true;
-                            $lastOptionLetter = $optionLetter;
-                            $this->log("  Option " . strtoupper($optionLetter) . ": " . substr($optionText, 0, 50));
-                        }
-                    }
-                }
+            if (preg_match('/(jawaban|answer|kunci):\s*([A-Ea-e])/iu', $line, $am)) {
+                if ($currentQ !== null) $currentQ['correct_answer'] = strtoupper($am[2]);
             }
-            // Check for answer key
-            elseif (preg_match('/(jawaban|answer|kunci):\s*([A-Ea-e])/i', $line, $matches)) {
-                if ($currentQuestion !== null) {
-                    $currentQuestion['correct_answer'] = strtoupper($matches[2]);
-                    $this->log("  Answer: " . $matches[2]);
-                }
-            }
-            // Check for points
-            elseif (preg_match('/(poin|nilai|score|bobot|skor|point):\s*(\d+)/i', $line, $matches)) {
-                if ($currentQuestion !== null) {
-                    $currentQuestion['points'] = intval($matches[2]);
-                }
+            if (preg_match('/(poin|nilai|score|bobot|skor|point):\s*(\d+)/iu', $line, $pm)) {
+                if ($currentQ !== null) $currentQ['points'] = (int) $pm[2];
             }
         }
 
-        // Save last question
-        if ($currentQuestion !== null) {
-            $optCount = 0;
-            foreach (['option_a', 'option_b', 'option_c', 'option_d', 'option_e'] as $opt) {
-                if (!empty($currentQuestion[$opt])) $optCount++;
-            }
+        $saveCurrentQ();
 
-            if ($optCount >= 2) {
-                $questions[] = $currentQuestion;
-                $this->log("✓ Saved last Q#" . $currentQuestion['question_number'] . " with $optCount options");
-            }
-        }
+        usort($questions, fn($a, $b) => ($a['question_number'] ?? 0) - ($b['question_number'] ?? 0));
 
-        // Sort by question number
-        usort($questions, function ($a, $b) {
-            return ($a['question_number'] ?? 0) - ($b['question_number'] ?? 0);
-        });
+        $this->log('PARSING COMPLETE — Total: ' . count($questions));
+        $this->log('Numbers: ' . implode(', ', array_column($questions, 'question_number')));
 
-        $this->log('========================================');
-        $this->log('PARSING COMPLETE');
-        $this->log('Total questions: ' . count($questions));
-
-        $questionNumbers = array_map(function ($q) {
-            return $q['question_number'] ?? '?';
-        }, $questions);
-        $this->log('Question numbers: ' . implode(', ', $questionNumbers));
-        $this->log('========================================');
-
-        // Remove question_number field
-        foreach ($questions as &$question) {
-            unset($question['question_number']);
-        }
-
-        // Extract and assign images
-        try {
-            $this->extractAndAssignImages($filePath, $questions);
-        } catch (\Exception $e) {
-            $this->log('Error extracting images: ' . $e->getMessage(), 'error');
+        foreach ($questions as &$q) {
+            unset($q['question_number']);
         }
 
         return $questions;
     }
 
-    /**
-     * Extract document structure with text and images in order
-     */
-    private function extractDocumentStructure($filePath)
+    // =========================================================================
+    // Split concatenated options from one paragraph's plain text
+    // Options may be on one line OR separated by \n (w:br line breaks)
+    // e.g. "a.(1)-(2)-(4)b.(2)-(1)c.(2)-(3)d.(2)-(4)e.(2)-(6)"
+    // OR:  "a.(1)-(2)-(4)\nb.(2)-(1)\nc.(2)-(3)\nd.(2)-(4)\ne.(2)-(6)"
+    // Returns ['a' => 'text', 'b' => 'text', ...]
+    // =========================================================================
+    private function splitConcatenatedOptions(string $plainLine): array
     {
-        $structure = [];
+        $result    = [];
+        $positions = [];
+
+        // Normalize: collapse \n that appear between letter markers
+        // Find all [a-e]. or [a-e]) positions in the full string (including across newlines)
+        // Use /s flag is not needed here since we search full string
+        preg_match_all('/(?<![a-zA-Z])([a-eA-E])[.\)]/u', $plainLine, $matches, PREG_OFFSET_CAPTURE);
+
+        foreach ($matches[1] as $match) {
+            $letter = strtolower($match[0]);
+            $offset = $match[1]; // byte offset
+            if (in_array($letter, ['a', 'b', 'c', 'd', 'e'])) {
+                $positions[] = ['letter' => $letter, 'offset' => $offset];
+            }
+        }
+
+        if (count($positions) < 2) return [];
+
+        for ($k = 0; $k < count($positions); $k++) {
+            $letter = $positions[$k]['letter'];
+            $start  = $positions[$k]['offset'];
+            $end    = isset($positions[$k + 1]) ? $positions[$k + 1]['offset'] : strlen($plainLine);
+            // Use substr (byte-based) to match PREG_OFFSET_CAPTURE byte offsets
+            $chunk   = substr($plainLine, $start, $end - $start);
+            // Strip leading "a." or "a)" prefix and trim whitespace/newlines
+            $optText = trim(preg_replace('/^[a-eA-E][.\)]\s*/u', '', $chunk));
+            if ($optText !== '') {
+                $result[$letter] = $optText;
+            }
+        }
+
+        return $result;
+    }
+
+    // =========================================================================
+    // Extract structured content: text (with HTML bold/italic) + images in order
+    // =========================================================================
+    private function extractStructuredContent(string $filePath): array
+    {
+        $elements = [];
 
         try {
             $zip = new ZipArchive();
+            if ($zip->open($filePath) !== true) return $elements;
 
-            if ($zip->open($filePath) !== true) {
-                return $structure;
-            }
-
-            // Get document.xml content
-            $documentXml = $zip->getFromName('word/document.xml');
+            $documentXml  = $zip->getFromName('word/document.xml');
+            $numberingXml = $zip->getFromName('word/numbering.xml');
+            $relsXml      = $zip->getFromName('word/_rels/document.xml.rels');
 
             if (!$documentXml) {
                 $zip->close();
-                return $structure;
+                return $elements;
             }
 
-            // Parse XML
-            $dom = new \DOMDocument();
-            $dom->loadXML($documentXml);
-            $xpath = new \DOMXPath($dom);
-
-            // Register namespaces
-            $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-            $xpath->registerNamespace('a', 'http://schemas.openxmlformats.org/drawingml/2006/main');
-            $xpath->registerNamespace('pic', 'http://schemas.openxmlformats.org/drawingml/2006/picture');
-            $xpath->registerNamespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships');
-
-            // Get document relationships to map images
-            $relsXml = $zip->getFromName('word/_rels/document.xml.rels');
+            // ── Image map ─────────────────────────────────────────────────
             $imageMap = [];
-
             if ($relsXml) {
                 $relsDom = new \DOMDocument();
                 $relsDom->loadXML($relsXml);
-                $relsXpath = new \DOMXPath($relsDom);
-                $relationships = $relsXpath->query('//Relationship[@Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"]');
-
-                foreach ($relationships as $rel) {
-                    $id = $rel->getAttribute('Id');
-                    $target = $rel->getAttribute('Target');
-                    $imageMap[$id] = 'word/' . $target;
+                foreach ($relsDom->getElementsByTagName('Relationship') as $rel) {
+                    if (str_contains($rel->getAttribute('Type'), '/image')) {
+                        $imageMap[$rel->getAttribute('Id')] = 'word/' . $rel->getAttribute('Target');
+                    }
                 }
             }
 
-            // Get all paragraphs in order
-            $paragraphs = $xpath->query('//w:p');
+            // ── Numbering format map ──────────────────────────────────────
+            $numFmtMap = [];
+            if ($numberingXml) {
+                $numDom = new \DOMDocument();
+                $numDom->loadXML($numberingXml);
+                $numXp  = new \DOMXPath($numDom);
+                $numXp->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
 
-            foreach ($paragraphs as $paragraph) {
-                // Check for text
-                $textNodes = $xpath->query('.//w:t', $paragraph);
-                $text = '';
-                foreach ($textNodes as $textNode) {
-                    $text .= $textNode->textContent;
+                $absFormats = [];
+                foreach ($numXp->query('//w:abstractNum') as $absNum) {
+                    $absId = $absNum->getAttribute('w:abstractNumId');
+                    $absFormats[$absId] = [];
+                    foreach ($numXp->query('.//w:lvl', $absNum) as $lvl) {
+                        $ilvl    = $lvl->getAttribute('w:ilvl');
+                        $fmtEl   = $numXp->query('.//w:numFmt',  $lvl);
+                        $txtEl   = $numXp->query('.//w:lvlText', $lvl);
+                        $fmt     = $fmtEl->length > 0 ? $fmtEl->item(0)->getAttribute('w:val') : '';
+                        $lvlText = $txtEl->length  > 0 ? $txtEl->item(0)->getAttribute('w:val') : '';
+                        $absFormats[$absId][$ilvl] = ['fmt' => $fmt, 'lvlText' => $lvlText];
+                    }
                 }
 
-                if (!empty(trim($text))) {
-                    $structure[] = [
-                        'type' => 'text',
-                        'content' => $text,
+                foreach ($numXp->query('//w:num') as $num) {
+                    $numId  = $num->getAttribute('w:numId');
+                    $absRef = $numXp->query('.//w:abstractNumId', $num);
+                    if ($absRef->length > 0) {
+                        $absId = $absRef->item(0)->getAttribute('w:val');
+                        $numFmtMap[$numId] = $absFormats[$absId] ?? [];
+                    }
+                }
+            }
+
+            // ── Parse document XML ────────────────────────────────────────
+            $dom = new \DOMDocument();
+            $dom->loadXML($documentXml);
+            $xp  = new \DOMXPath($dom);
+            $xp->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
+            $xp->registerNamespace('a', 'http://schemas.openxmlformats.org/drawingml/2006/main');
+            $xp->registerNamespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships');
+
+            // Auto-detect question numIds (decimal '%1.' with >= 5 occurrences)
+            $numIdCounts = [];
+            foreach ($xp->query('//w:p') as $p) {
+                $numIdEl = $xp->query('.//w:numPr/w:numId', $p);
+                $ilvlEl  = $xp->query('.//w:numPr/w:ilvl',  $p);
+                if ($numIdEl->length === 0) continue;
+                $nid  = $numIdEl->item(0)->getAttribute('w:val');
+                $ilvl = $ilvlEl->length > 0 ? $ilvlEl->item(0)->getAttribute('w:val') : '0';
+                $fmt  = $numFmtMap[$nid][$ilvl]['fmt']     ?? '';
+                $lvlT = $numFmtMap[$nid][$ilvl]['lvlText'] ?? '';
+                if ($fmt === 'decimal' && $lvlT === '%1.') {
+                    $numIdCounts[$nid] = ($numIdCounts[$nid] ?? 0) + 1;
+                }
+            }
+            $questionNumIds = array_keys(array_filter($numIdCounts, fn($c) => $c >= 5));
+            $this->log('Question numIds: ' . implode(', ', $questionNumIds));
+
+            // Process paragraphs in document order
+            $globalQCounter = 0;
+            $numIdCounters  = [];
+            $optCounters    = [];
+
+            foreach ($xp->query('//w:p') as $para) {
+
+                // Images inside paragraph
+                foreach ($xp->query('.//a:blip', $para) as $blip) {
+                    $embedId = $blip->getAttribute('r:embed');
+                    if (!isset($imageMap[$embedId])) continue;
+                    $imgPath    = $imageMap[$embedId];
+                    $imgContent = $zip->getFromName($imgPath);
+                    if (!$imgContent) continue;
+                    preg_match('/\.(png|jpg|jpeg|gif|bmp|webp)$/i', $imgPath, $extM);
+                    $ext       = $extM[1] ?? 'png';
+                    $savedPath = $this->saveImage($imgContent, $ext);
+                    $elements[] = [
+                        'type'       => 'image',
+                        'content'    => $imgContent,
+                        'extension'  => $ext,
+                        'saved_path' => $savedPath,
                     ];
                 }
 
-                // Check for images in this paragraph
-                $drawings = $xpath->query('.//w:drawing', $paragraph);
+                // Numbering
+                $numIdEl = $xp->query('.//w:numPr/w:numId', $para);
+                $ilvlEl  = $xp->query('.//w:numPr/w:ilvl',  $para);
+                $numId   = $numIdEl->length > 0 ? $numIdEl->item(0)->getAttribute('w:val') : null;
+                $ilvl    = $ilvlEl->length  > 0 ? $ilvlEl->item(0)->getAttribute('w:val')  : '0';
+                $fmt     = $numId ? ($numFmtMap[$numId][$ilvl]['fmt']     ?? '') : '';
+                $lvlText = $numId ? ($numFmtMap[$numId][$ilvl]['lvlText'] ?? '') : '';
 
-                foreach ($drawings as $drawing) {
-                    $blips = $xpath->query('.//a:blip', $drawing);
-
-                    foreach ($blips as $blip) {
-                        $embed = $blip->getAttribute('r:embed');
-
-                        if (isset($imageMap[$embed])) {
-                            $imagePath = str_replace('\\', '/', $imageMap[$embed]);
-                            $imageContent = $zip->getFromName($imagePath);
-
-                            if ($imageContent) {
-                                // Get extension from path
-                                preg_match('/\.(png|jpg|jpeg|gif|bmp)$/i', $imagePath, $matches);
-                                $extension = $matches[1] ?? 'png';
-
-                                $structure[] = [
-                                    'type' => 'image',
-                                    'content' => $imageContent,
-                                    'extension' => $extension,
-                                ];
-
-                                $this->log("Found image: " . $imagePath);
-                            }
-                        }
+                $prefix = '';
+                if ($numId !== null) {
+                    if (in_array($numId, $questionNumIds)) {
+                        $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
+                        $globalQCounter++;
+                        $prefix = $globalQCounter . '. ';
+                    } elseif ($fmt === 'lowerLetter') {
+                        $optCounters[$numId] = ($optCounters[$numId] ?? 0) + 1;
+                        $prefix = chr(96 + $optCounters[$numId]) . '. ';
+                    } elseif ($fmt === 'decimal' && str_contains($lvlText, '(')) {
+                        $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
+                        $prefix = '(' . $numIdCounters[$numId] . ') ';
+                    } elseif ($fmt === 'decimal') {
+                        $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
+                        $prefix = $numIdCounters[$numId] . '. ';
                     }
                 }
+
+                // Build plain + HTML from runs
+                $plainText = '';
+                $htmlText  = '';
+
+                foreach ($xp->query('.//w:r', $para) as $run) {
+                    $rPrQ = $xp->query('.//w:rPr', $run);
+                    $tEl  = $xp->query('.//w:t',   $run);
+                    if ($tEl->length === 0) continue;
+                    $t = $tEl->item(0)->textContent;
+                    if ($t === '') continue;
+
+                    $isBold   = false;
+                    $isItalic = false;
+
+                    if ($rPrQ->length > 0) {
+                        $rPrNode = $rPrQ->item(0);
+                        // Use direct child 'w:b' (not descendant './/w:b') to avoid false positives
+                        // w:b present + val not "0"/"false" = bold ON
+                        // w:b absent = not bold
+                        $bNodes = $xp->query('w:b', $rPrNode);
+                        if ($bNodes->length > 0) {
+                            $bVal   = $bNodes->item(0)->getAttribute('w:val');
+                            $isBold = ($bVal !== '0' && $bVal !== 'false');
+                        }
+                        $iNodes = $xp->query('w:i', $rPrNode);
+                        if ($iNodes->length > 0) {
+                            $iVal     = $iNodes->item(0)->getAttribute('w:val');
+                            $isItalic = ($iVal !== '0' && $iVal !== 'false');
+                        }
+                    }
+
+                    $plainText .= $t;
+                    $escaped    = htmlspecialchars($t, ENT_QUOTES, 'UTF-8');
+
+                    if ($isBold && $isItalic) {
+                        $htmlText .= "<strong><em>$escaped</em></strong>";
+                    } elseif ($isBold) {
+                        $htmlText .= "<strong>$escaped</strong>";
+                    } elseif ($isItalic) {
+                        $htmlText .= "<em>$escaped</em>";
+                    } else {
+                        $htmlText .= $escaped;
+                    }
+                }
+
+                // Explicit line-breaks inside paragraph
+                foreach ($xp->query('.//w:br', $para) as $br) {
+                    $brType = $br->getAttribute('w:type');
+                    if ($brType === '' || $brType === 'textWrapping') {
+                        $htmlText  .= '<br>';
+                        $plainText .= "\n";
+                    }
+                }
+
+                $plainFull = trim($prefix . $plainText);
+                $htmlFull  = trim(htmlspecialchars($prefix, ENT_QUOTES, 'UTF-8') . $htmlText);
+
+                if ($plainFull === '') continue;
+
+                $elements[] = [
+                    'type' => 'text',
+                    'text' => $plainFull,
+                    'html' => $htmlFull,
+                ];
             }
 
             $zip->close();
         } catch (\Exception $e) {
-            $this->log('Error extracting document structure: ' . $e->getMessage(), 'error');
+            $this->log('Error in extractStructuredContent: ' . $e->getMessage(), 'error');
         }
 
-        return $structure;
+        return $elements;
     }
 
-    /**
-     * Save image to storage
-     */
-    private function saveImage($imageContent, $extension)
+    private function saveImage(string $imageContent, string $extension): string
     {
-        $fileName = 'question_' . time() . '_' . Str::random(10) . '.' . $extension;
+        $fileName        = 'question_' . time() . '_' . Str::random(10) . '.' . $extension;
         $destinationPath = 'questions/images/' . $fileName;
-
         Storage::disk('public')->put($destinationPath, $imageContent);
-
-        $this->log("Saved image: " . $destinationPath);
-
+        $this->log("Saved image: $destinationPath");
         return $destinationPath;
     }
 
-    /**
-     * Extract images from DOCX and intelligently assign to questions/options
-     */
-    private function extractAndAssignImages($filePath, &$questions)
+    private function log(string $message, string $level = 'info'): void
     {
-        if (count($questions) === 0) {
-            return;
-        }
-
-        $zip = new ZipArchive();
-
-        if ($zip->open($filePath) !== true) {
-            $this->log('Cannot open ZIP file for image extraction', 'error');
-            return;
-        }
-
-        try {
-            // Read document.xml and document.xml.rels to map images
-            $documentXml = $zip->getFromName('word/document.xml');
-            $relsXml = $zip->getFromName('word/_rels/document.xml.rels');
-
-            if (!$documentXml || !$relsXml) {
-                $this->log('Cannot read document XML or relationships', 'error');
-                $zip->close();
-                return;
-            }
-
-            // Parse relationships to build image ID map
-            $imageMap = [];
-            $relsDoc = new \DOMDocument();
-            $relsDoc->loadXML($relsXml);
-
-            $relationships = $relsDoc->getElementsByTagName('Relationship');
-            foreach ($relationships as $rel) {
-                $type = $rel->getAttribute('Type');
-                if (strpos($type, '/image') !== false) {
-                    $id = $rel->getAttribute('Id');
-                    $target = $rel->getAttribute('Target');
-                    $imageMap[$id] = 'word/' . $target;
-                }
-            }
-
-            $this->log('Found ' . count($imageMap) . ' image relationships');
-
-            if (count($imageMap) === 0) {
-                $zip->close();
-                return;
-            }
-
-            // Parse document.xml to find images
-            $doc = new \DOMDocument();
-            $doc->loadXML($documentXml);
-            $xpath = new \DOMXPath($doc);
-            $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-            $xpath->registerNamespace('a', 'http://schemas.openxmlformats.org/drawingml/2006/main');
-            $xpath->registerNamespace('r', 'http://schemas.openxmlformats.org/officeDocument/2006/relationships');
-
-            // Extract all text and image references in order
-            $elements = [];
-            $paragraphs = $xpath->query('//w:p');
-
-            foreach ($paragraphs as $paragraph) {
-                // Get text
-                $textNodes = $xpath->query('.//w:t', $paragraph);
-                $text = '';
-                foreach ($textNodes as $textNode) {
-                    $text .= $textNode->textContent;
-                }
-
-                if (!empty(trim($text))) {
-                    $elements[] = ['type' => 'text', 'content' => trim($text)];
-                }
-
-                // Get images in this paragraph
-                $blips = $xpath->query('.//a:blip', $paragraph);
-                foreach ($blips as $blip) {
-                    $embedId = $blip->getAttribute('r:embed');
-                    if (isset($imageMap[$embedId])) {
-                        $imagePath = $imageMap[$embedId];
-                        $imageContent = $zip->getFromName($imagePath);
-
-                        if ($imageContent) {
-                            preg_match('/\.(png|jpg|jpeg|gif|bmp)$/i', $imagePath, $matches);
-                            $extension = $matches[1] ?? 'png';
-
-                            $elements[] = [
-                                'type' => 'image',
-                                'content' => $imageContent,
-                                'extension' => $extension,
-                            ];
-                        }
-                    }
-                }
-            }
-
-            $this->log('Extracted ' . count($elements) . ' elements (text + images)');
-
-            // Now assign images to questions based on proximity
-            $currentQuestionIndex = -1;
-            $lastOption = null;
-
-            foreach ($elements as $element) {
-                if ($element['type'] === 'text') {
-                    $text = $element['content'];
-
-                    // Check if this is a new question
-                    if (preg_match('/^(\d+)\.?\s+/', $text)) {
-                        $currentQuestionIndex++;
-                        $lastOption = null;
-                    }
-                    // Check if this is an option
-                    elseif (preg_match('/^([A-D])\.?\s+/i', $text, $matches)) {
-                        $lastOption = strtolower($matches[1]);
-                    }
-                } elseif ($element['type'] === 'image' && $currentQuestionIndex >= 0 && $currentQuestionIndex < count($questions)) {
-                    // Save image
-                    $imagePath = $this->saveImage($element['content'], $element['extension']);
-
-                    // Assign to the appropriate location
-                    if ($lastOption !== null && isset($questions[$currentQuestionIndex]['option_' . $lastOption])) {
-                        $questions[$currentQuestionIndex]['option_' . $lastOption . '_image'] = $imagePath;
-                        $this->log("Assigned image to Q" . ($currentQuestionIndex + 1) . " option " . strtoupper($lastOption));
-                    } elseif ($lastOption === null) {
-                        $questions[$currentQuestionIndex]['image_path'] = $imagePath;
-                        $this->log("Assigned image to Q" . ($currentQuestionIndex + 1) . " question");
-                    }
-                }
-            }
-
-            $zip->close();
-        } catch (\Exception $e) {
-            $this->log('Error in extractAndAssignImages: ' . $e->getMessage(), 'error');
-            $zip->close();
-        }
-    }
-
-    /**
-     * Log helper function
-     */
-    private function log($message, $level = 'info')
-    {
-        // Use proper Log facade calls
-        switch ($level) {
-            case 'error':
-                Log::error($message);
-                break;
-            case 'warning':
-                Log::warning($message);
-                break;
-            case 'debug':
-                Log::debug($message);
-                break;
-            default:
-                Log::info($message);
-                break;
-        }
-    }
-
-    private function extractAllTextSimple($filePath)
-    {
-        $text = '';
-
-        try {
-            $zip = new ZipArchive();
-
-            if ($zip->open($filePath) === true) {
-                $content = $zip->getFromName('word/document.xml');
-                $numberingXml = $zip->getFromName('word/numbering.xml');
-
-                if ($content && $numberingXml) {
-                    // ====================================================
-                    // STEP 1: Parse numbering.xml untuk mendapatkan format
-                    // ====================================================
-                    $numDom = new \DOMDocument();
-                    $numDom->loadXML($numberingXml);
-                    $numXpath = new \DOMXPath($numDom);
-                    $numXpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-
-                    // Build abstractNumId -> {ilvl -> {fmt, lvlText}}
-                    $abstractNumFormats = [];
-                    $abstractNums = $numXpath->query('//w:abstractNum');
-                    foreach ($abstractNums as $abstractNum) {
-                        $absId = $abstractNum->getAttribute('w:abstractNumId');
-                        $abstractNumFormats[$absId] = [];
-                        $levels = $numXpath->query('.//w:lvl', $abstractNum);
-                        foreach ($levels as $lvl) {
-                            $ilvl = $lvl->getAttribute('w:ilvl');
-                            $numFmt = $numXpath->query('.//w:numFmt', $lvl);
-                            $lvlText = $numXpath->query('.//w:lvlText', $lvl);
-                            $fmt = $numFmt->length > 0 ? $numFmt->item(0)->getAttribute('w:val') : '';
-                            $txt = $lvlText->length > 0 ? $lvlText->item(0)->getAttribute('w:val') : '';
-                            $abstractNumFormats[$absId][$ilvl] = ['fmt' => $fmt, 'lvlText' => $txt];
-                        }
-                    }
-
-                    // Build numId -> abstractNumId
-                    $numIdToAbsId = [];
-                    $nums = $numXpath->query('//w:num');
-                    foreach ($nums as $num) {
-                        $numId = $num->getAttribute('w:numId');
-                        $absRef = $numXpath->query('.//w:abstractNumId', $num);
-                        if ($absRef->length > 0) {
-                            $numIdToAbsId[$numId] = $absRef->item(0)->getAttribute('w:val');
-                        }
-                    }
-
-                    // Helper: dapatkan format untuk numId+ilvl
-                    $getFormat = function ($numId, $ilvl) use ($numIdToAbsId, $abstractNumFormats) {
-                        $absId = $numIdToAbsId[$numId] ?? null;
-                        if ($absId === null) return ['fmt' => '', 'lvlText' => ''];
-                        return $abstractNumFormats[$absId][$ilvl] ?? ['fmt' => '', 'lvlText' => ''];
-                    };
-
-                    // ====================================================
-                    // STEP 2: Tentukan numId mana yang merupakan soal utama
-                    // Soal utama = numId=1 (decimal, %1.)
-                    // Kita deteksi secara otomatis: numId dengan fmt=decimal
-                    // dan lvlText=%1. yang memiliki jumlah count terbesar
-                    // (atau hardcode numId=1 jika dokumen selalu sama)
-                    // ====================================================
-                    $QUESTION_NUM_ID = '1'; // numId untuk soal utama
-
-                    // ====================================================
-                    // STEP 3: Parse document.xml dengan numbering-aware
-                    // ====================================================
-                    $dom = new \DOMDocument();
-                    $dom->loadXML($content);
-                    $xpath = new \DOMXPath($dom);
-                    $xpath->registerNamespace('w', 'http://schemas.openxmlformats.org/wordprocessingml/2006/main');
-
-                    $paragraphs = $xpath->query('//w:p');
-                    $paragraphTexts = [];
-
-                    // Counters per-numId untuk tracking urutan
-                    $numIdCounters = []; // numId -> counter (untuk soal)
-                    $optionCounters = []; // numId -> counter huruf (untuk pilihan)
-
-                    $currentQuestionNumId = null; // numId aktif soal terakhir
-
-                    foreach ($paragraphs as $paragraph) {
-                        $paragraphText = '';
-
-                        // Cek apakah ada numbering
-                        $numPrNodes = $xpath->query('.//w:numPr', $paragraph);
-                        $hasNumbering = $numPrNodes->length > 0;
-
-                        $numId = null;
-                        $ilvl = null;
-                        $fmt = '';
-                        $lvlText = '';
-
-                        if ($hasNumbering) {
-                            $ilvlNodes = $xpath->query('.//w:numPr/w:ilvl', $paragraph);
-                            $numIdNodes = $xpath->query('.//w:numPr/w:numId', $paragraph);
-
-                            if ($ilvlNodes->length > 0 && $numIdNodes->length > 0) {
-                                $ilvl = $ilvlNodes->item(0)->getAttribute('w:val');
-                                $numId = $numIdNodes->item(0)->getAttribute('w:val');
-                                $formatInfo = $getFormat($numId, $ilvl);
-                                $fmt = $formatInfo['fmt'];
-                                $lvlText = $formatInfo['lvlText'];
-                            }
-                        }
-
-                        if ($numId !== null) {
-                            if ($numId === $QUESTION_NUM_ID) {
-                                // === INI ADALAH SOAL ===
-                                if (!isset($numIdCounters[$numId])) {
-                                    $numIdCounters[$numId] = 0;
-                                }
-                                $numIdCounters[$numId]++;
-                                $questionNumber = $numIdCounters[$numId];
-                                $paragraphText = $questionNumber . '. ';
-                                $currentQuestionNumId = null; // reset option tracking
-
-                            } elseif ($fmt === 'lowerLetter') {
-                                // === INI ADALAH PILIHAN JAWABAN (a, b, c, d, e) ===
-                                if (!isset($optionCounters[$numId])) {
-                                    $optionCounters[$numId] = 0;
-                                }
-                                $optionCounters[$numId]++;
-                                $letterIndex = $optionCounters[$numId];
-                                $optionLetter = chr(96 + $letterIndex); // 1→a, 2→b, dst
-                                $paragraphText = $optionLetter . '. ';
-                            } elseif ($fmt === 'decimal' && strpos($lvlText, '(') !== false) {
-                                // === INI ADALAH SUB-ITEM BACAAN (1), (2), (3)... ===
-                                if (!isset($numIdCounters[$numId])) {
-                                    $numIdCounters[$numId] = 0;
-                                }
-                                $numIdCounters[$numId]++;
-                                $itemNumber = $numIdCounters[$numId];
-                                $paragraphText = '(' . $itemNumber . ') ';
-                            } elseif ($fmt === 'decimal') {
-                                // === DECIMAL LAIN (sub-numbering lainnya) ===
-                                if (!isset($numIdCounters[$numId])) {
-                                    $numIdCounters[$numId] = 0;
-                                }
-                                $numIdCounters[$numId]++;
-                                $itemNumber = $numIdCounters[$numId];
-                                $paragraphText = $itemNumber . '. ';
-                            }
-                        }
-
-                        // Ambil teks paragraf
-                        $textNodes = $xpath->query('.//w:t', $paragraph);
-                        foreach ($textNodes as $textNode) {
-                            $paragraphText .= $textNode->textContent;
-                        }
-
-                        $paragraphText = trim($paragraphText);
-                        if (!empty($paragraphText)) {
-                            $paragraphTexts[] = $paragraphText;
-                        }
-                    }
-
-                    $text = implode("\n", $paragraphTexts);
-                    $text = html_entity_decode($text);
-
-                    $this->log('Extracted ' . count($paragraphTexts) . ' paragraphs');
-                }
-
-                $zip->close();
-            }
-        } catch (\Exception $e) {
-            $this->log('Error: ' . $e->getMessage(), 'error');
-        }
-
-        return $text;
+        match ($level) {
+            'error'   => Log::error($message),
+            'warning' => Log::warning($message),
+            'debug'   => Log::debug($message),
+            default   => Log::info($message),
+        };
     }
 }

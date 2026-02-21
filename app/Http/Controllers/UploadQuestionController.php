@@ -86,6 +86,12 @@ class UploadQuestionController extends Controller
                     $choicesImages[] = $questionData['option_d_image'] ?? null;
                 }
 
+                // Option E
+                if (!empty($questionData['option_e'])) {
+                    $choices[] = $questionData['option_e'];
+                    $choicesImages[] = $questionData['option_e_image'] ?? null;
+                }
+
                 // Determine question type based on choices
                 if (count($choices) == 2) {
                     $questionTypeId = '2'; // True/False (ENUM needs string)
@@ -124,9 +130,9 @@ class UploadQuestionController extends Controller
             ]);
 
             $user = auth()->user();
-            logActivity($user->name.' (ID: '.$user->id.') Mengimport soal ke ujian : '.$exam->exam_name);
+            logActivity($user->name . ' (ID: ' . $user->id . ') Mengimport soal ke ujian : ' . $exam->exam_name);
 
-             $roleRoutes =  [
+            $roleRoutes =  [
                 'admin' => 'admin.exams.manage.question',
                 'super' => 'super.exams.manage.question',
             ];

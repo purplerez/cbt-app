@@ -148,6 +148,40 @@ class Question extends Model
         return json_last_error() === JSON_ERROR_NONE;
     }
 
+    /**
+     * Decode the choices JSON column into an array.
+     */
+    private function getChoicesArray(): array
+    {
+        $raw = $this->attributes['choices'] ?? null;
+        if (empty($raw)) {
+            return [];
+        }
+        $decoded = is_string($raw) ? json_decode($raw, true) : $raw;
+        return is_array($decoded) ? array_values($decoded) : [];
+    }
+
+    public function getOptionAAttribute(): ?string
+    {
+        return $this->getChoicesArray()[0] ?? null;
+    }
+    public function getOptionBAttribute(): ?string
+    {
+        return $this->getChoicesArray()[1] ?? null;
+    }
+    public function getOptionCAttribute(): ?string
+    {
+        return $this->getChoicesArray()[2] ?? null;
+    }
+    public function getOptionDAttribute(): ?string
+    {
+        return $this->getChoicesArray()[3] ?? null;
+    }
+    public function getOptionEAttribute(): ?string
+    {
+        return $this->getChoicesArray()[4] ?? null;
+    }
+
     public function getQuestionTypeLabelAttribute()
     {
         $arrJenis = [
