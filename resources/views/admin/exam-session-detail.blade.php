@@ -87,9 +87,9 @@
                                                     @if(!empty($answer['choices']))
                                                         <div class="mt-2 text-sm text-gray-500">
                                                             {{-- show available choices (optional) --}}
-                                                            @foreach($answer['choices'] as $key => $choice)
+                                                            {{-- @foreach($answer['choices'] as $key => $choice)
                                                                 <div><strong>{{ $key }}.</strong> {!! nl2br($choice) !!}</div>
-                                                            @endforeach
+                                                            @endforeach --}}
                                                         </div>
                                                     @endif
                                                 @else
