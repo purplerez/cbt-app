@@ -140,10 +140,6 @@ document.addEventListener('DOMContentLoaded', function() {
         firstBtn.click();
     }
 
-    // Real-time polling for login status (every 5 seconds)
-    setInterval(() => {
-        if (currentExamId) fetchScores(currentExamId);
-    }, 5000);
 
     function fetchScores(examId) {
         currentExamId = examId;
