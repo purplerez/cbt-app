@@ -3,7 +3,6 @@
 use App\Http\Controllers\Api\Admin\DashboardStatisticsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
-use App\Http\Controllers\Api\ExamlogController;
 use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
@@ -14,7 +13,6 @@ use App\Http\Controllers\Api\StudentAnswerBackupController;
 
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
@@ -50,13 +48,15 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
     Route::get('/exam/{exam}/scores', [ExamScoreController::class, 'getScores']);
 
     Route::get('/schools/{schoolId}/grades', [StudentController::class, 'getGradesBySchool'])
-    ->name('school.grades');
-
+        ->name('school.grades');
 });
 
 
 // peserta routes - API endpoints
 Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.siswa.')->group(function () {
+    // Heartbeat: frontend memanggil ini setiap 2-3 menit agar siswa tetap is_active = 1
+    Route::post('/heartbeat', [AuthController::class, 'heartbeat'])->name('heartbeat');
+
     Route::get('/dashboard', [ParticipantController::class, 'index'])->name('dashboard');
     Route::post('/exams/{examId}/start', [ParticipantController::class, 'start'])->name('exam.start');
     Route::post('/exams/{examId}/submit', [ParticipantController::class, 'submit'])->name('exam.submit');
@@ -103,7 +103,7 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     //dashboard api starts
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         // Get overview statistics
-        Route::get('/stats',[KepalaApiDashboardController::class, 'getStats'])
+        Route::get('/stats', [KepalaApiDashboardController::class, 'getStats'])
             ->name('stats');
 
         // Get statistics grouped by grade

@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 
 
@@ -58,6 +56,25 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Logout Berhasil',
+        ]);
+    }
+
+    /**
+     * Heartbeat endpoint — dipanggil frontend setiap 2-3 menit
+     * agar siswa tidak dianggap offline oleh scheduler.
+     */
+    public function heartbeat(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user && $user->hasRole('siswa')) {
+            $user->is_active = true;
+            $user->save();
+        }
+
+        return response()->json([
+            'message' => 'OK',
+            'timestamp' => now()->toISOString(),
         ]);
     }
 }
