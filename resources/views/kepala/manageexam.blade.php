@@ -61,7 +61,8 @@
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Siswa</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nilai</th>
-                                                        <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Persentase</th>
+                                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Skor</th>
+                                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Persentase</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
                                                 </tr>
                                             </thead>
@@ -140,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
         firstBtn.click();
     }
 
-
     function fetchScores(examId) {
         currentExamId = examId;
         const gradeId = document.getElementById('gradeFilter').value;
@@ -164,19 +164,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 scoresBody.innerHTML = '';
                 sessions.forEach((s, idx) => {
-                        const tr = document.createElement('tr');
-                        tr.innerHTML = `
-                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${idx+1}</td>
-                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${s.nis ?? '-'}</td>
-                            <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${s.student_name ?? '-'}</td>
-                            <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
-                            <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                ${((s.is_active) === 0)
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${idx+1}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${s.nis ?? '-'}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${s.student_name ?? '-'}</td>
+                        <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${s.total_score ?? '-'}</td>
+                        <td class="px-6 py-4 text-sm text-center text-gray-900 whitespace-nowrap">${s.total_score ?? '-'}/${s.total_possible ?? '-'}</td>
+                        <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
+                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                                Detail
+                            </button>
+                            ${(s.is_active === 0)
                                     ? `<button onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</button>`
                                     : ''}
-                            </td>
-                        `;
-                        scoresBody.appendChild(tr);
+                        </td>
+                    `;
+                    scoresBody.appendChild(tr);
                 });
             })
             .catch(err => {
@@ -190,30 +195,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Define showDetail function globally
 function showDetail(sessionId) {
     window.location.href = `/kepala/exam-sessions/${sessionId}/detail`;
-}
-
-// Define resetLogin function globally
-function resetLogin(sessionId) {
-    if (confirm('Apakah Anda yakin ingin mereset login siswa ini?')) {
-        fetch(`/kepala/exam-sessions/${sessionId}/reset-login`, {
-            method: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(resp => resp.json())
-        .then(data => {
-            if (data.success) {
-                alert('Login siswa berhasil direset.');
-                if (currentExamId) fetchScores(currentExamId);
-            } else {
-                alert(data.error || 'Gagal mereset login.');
-            }
-        })
-        .catch(() => alert('Gagal mereset login.'));
-    }
 }
 </script>
 @endpush
