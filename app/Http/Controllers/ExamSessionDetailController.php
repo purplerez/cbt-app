@@ -22,18 +22,7 @@ class ExamSessionDetailController extends Controller
             $essayAnswers = (array)($examSession->studentAnswer->essay_answers ?? new \stdClass());
 
             // Get all questions for this exam with their types
-            /* $questions = Question::where('exam_id', $examSession->exam_id)
-                ->orderBy('id')
-                ->get();
-            */
-
-            $answeredQuestionIds = array_merge(
-                array_keys($mcAnswers),
-                array_keys($essayAnswers)
-            );
-
             $questions = Question::where('exam_id', $examSession->exam_id)
-                ->whereIn('id', $answeredQuestionIds)
                 ->orderBy('id')
                 ->get();
 
