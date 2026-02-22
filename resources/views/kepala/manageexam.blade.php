@@ -60,7 +60,7 @@
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Siswa</th>
-                                                    {{-- <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nilai</th> --}}
+                                                    
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Skor</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Persentase</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 Detail
                             </button>
                             ${(Number(s.is_active) === 0)
-                                    ? `<a href="/kepala/exam-sessions/${s.nis}/reset"  class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</a>`
+                                    ? `<a href="/kepala/exam-sessions/${s.nis}/reset" onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</a>`
                                     : ''}
                         </td>
                     `;
