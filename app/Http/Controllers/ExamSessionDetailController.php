@@ -134,4 +134,27 @@ class ExamSessionDetailController extends Controller
 
         ]);
     }
+
+    public function resetLogin($studentNis) 
+    {
+        try {
+            $student = Student::where('nis', $studentNis)->firstOrFail();
+            $user = $student->user;
+
+            // Reset login status
+            $user->is_active = 1; // Set to active
+            $user->save();
+
+            // Log the activity
+            $usrAktif = auth()->user();
+            logActivity($usrAktif->name.' (ID: '.$usrAktif->id.') Reset login untuk siswa '. $student->name);
+
+            return redirect()->route('kepala.exam-sessions.detail', $student->examSessions()->latest()->first()->id)
+                ->with('success', 'Login siswa berhasil direset.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat mereset login siswa: ' . $e->getMessage());
+        }
+        
+    }
 }
+
