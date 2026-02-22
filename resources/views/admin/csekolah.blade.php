@@ -67,7 +67,7 @@
                                         <td class="px-4 py-3 text-sm text-gray-500 whitespace-nowrap">
                                             {{ $school->name }}
                                         </td>
-                                        <td class="px-4 py-3 text-sm text-gray-500 whitespace-normal max-w-0 truncate">
+                                        <td class="px-4 py-3 text-sm text-gray-500 break-words">
                                             {{ $school->address }}
                                         </td>
                                         <td class="px-4 py-3 whitespace-nowrap">
