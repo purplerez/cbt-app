@@ -88,7 +88,18 @@ class KepalaExamController extends Controller
                     $q->where('grade_id', $gradeId);
                 }
             })
-            ->get();
+            ->get()
+            ->sort(function ($a, $b) {
+                // Sort by is_active ascending (0 first), then by name ascending
+                $isActiveA = $a->user?->is_active ?? 1;
+                $isActiveB = $b->user?->is_active ?? 1;
+                if ($isActiveA !== $isActiveB) {
+                    return $isActiveA - $isActiveB;
+                }
+                $nameA = strtolower($a->user?->name ?? '');
+                $nameB = strtolower($b->user?->name ?? '');
+                return $nameA <=> $nameB;
+            });
 
         $data = $sessions->map(function ($s) use ($totalPossibleScore) {
             $totalScore = (float) ($s->total_score ?? 0);
@@ -101,6 +112,7 @@ class KepalaExamController extends Controller
                 'total_score' => number_format($totalScore, 2),
                 'total_possible' => number_format($totalPossibleScore, 2),
                 'percentage' => number_format($percentage, 2),
+                'is_active' => $s->user?->is_active ?? 1,
                 'status' => $s->status,
                 'started_at' => $s->started_at?->toDateTimeString(),
                 'submited_at' => $s->submited_at?->toDateTimeString(),

@@ -341,45 +341,51 @@ class QuestionController extends Controller
 
     public function destroy($exam)
     {
+        $roleRoutes = [
+            'admin' => 'admin.exams.manage.question',
+            'super' => 'super.exams.manage.question',
+        ];
+
+        $role = auth()->user()->getRoleNames()->first();
+
         try {
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menghapus soal');
+            }
+
             $question = Question::findOrFail($exam);
 
             // Delete question image if exists
-            if ($question->question_image) {
+            if (!empty($question->question_image)) {
                 Storage::disk('public')->delete($question->question_image);
             }
 
             // Delete choice images if exist
-            if ($question->choices_images) {
+            if (!empty($question->choices_images)) {
                 $choicesImages = json_decode($question->choices_images, true);
                 if (is_array($choicesImages)) {
                     foreach ($choicesImages as $imagePath) {
-                        Storage::disk('public')->delete($imagePath);
+                        if (!empty($imagePath)) {
+                            Storage::disk('public')->delete($imagePath);
+                        }
                     }
                 }
             }
 
             $question->delete();
 
-            $roleRoutes =  [
-                'admin' => 'admin.exams.manage.question',
-                'super' => 'super.exams.manage.question',
-            ];
-
-            $role = auth()->user()->getRoleNames()->first();
-
-            if (!isset($roleRoutes[$role])) {
-                throw new \Exception('Anda tidak memiliki akses untuk menghapus soal');
-            }
-
             $user = auth()->user();
-            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil menghapus soal  ' . session('perexamname'));
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil menghapus soal ' . session('perexamname'));
 
-            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+            return redirect()->route($roleRoutes[$role], session('perexamid'))
+                ->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+
         } catch (\Exception $e) {
-            return redirect()->route($roleRoutes[$role], session('perexamid'))->withErrors(['error' => 'Gagal menghapus soal : ' . $e->getMessage()]);
+            return redirect()->route($roleRoutes[$role], session('perexamid'))
+                ->withErrors(['error' => 'Gagal menghapus soal : ' . $e->getMessage()]);
         }
     }
+    
 
     /**
      * Show the form for creating a new resource.
