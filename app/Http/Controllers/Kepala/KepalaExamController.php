@@ -99,8 +99,7 @@ class KepalaExamController extends Controller
                 $nameA = strtolower($a->user?->name ?? '');
                 $nameB = strtolower($b->user?->name ?? '');
                 return $nameA <=> $nameB;
-            })
-            ->values();
+            });
 
         $data = $sessions->map(function ($s) use ($totalPossibleScore) {
             $totalScore = (float) ($s->total_score ?? 0);
@@ -118,14 +117,13 @@ class KepalaExamController extends Controller
                 'started_at' => $s->started_at?->toDateTimeString(),
                 'submited_at' => $s->submited_at?->toDateTimeString(),
             ];
-        });
+        })->values();
 
         return response()->json([
             'exam' => $exam->title,
             'total_possible_score' => number_format($totalPossibleScore, 2),
             'sessions' => $data,
-        ])
-        ->values();
+        ]);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
