@@ -177,7 +177,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 Detail
                             </button>
                             ${(Number(s.is_active) === 0)
-                                    ? `<button onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</button>`
+                                    ? `<a href="/kepala/exam-sessions/${s.id}/reset" onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</a>`
                                     : ''}
                         </td>
                     `;
