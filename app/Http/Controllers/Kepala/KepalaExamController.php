@@ -67,7 +67,7 @@ class KepalaExamController extends Controller
      * Return JSON list of exam sessions (scores) for a given exam filtered by current school in session
      */
     public function scores(Request $request, Exam $exam)
-{
+    {
     try {
         $schoolId = session('school_id');
         $gradeId = $request->query('grade_id');
@@ -99,7 +99,8 @@ class KepalaExamController extends Controller
                 $nameA = strtolower($a->user?->name ?? '');
                 $nameB = strtolower($b->user?->name ?? '');
                 return $nameA <=> $nameB;
-            });
+            })
+            ->values();
 
         $data = $sessions->map(function ($s) use ($totalPossibleScore) {
             $totalScore = (float) ($s->total_score ?? 0);
@@ -123,7 +124,8 @@ class KepalaExamController extends Controller
             'exam' => $exam->title,
             'total_possible_score' => number_format($totalPossibleScore, 2),
             'sessions' => $data,
-        ]);
+        ])
+        ->values();
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
