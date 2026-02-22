@@ -69,7 +69,7 @@
                                                 {{ $index + 1 }}
                                             </td>
                                             <td class="px-6 py-4 text-sm">
-                                                {!! nl2br(e($answer['question_text'])) !!}
+                                                {!! nl2br($answer['question_text']) !!}
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 @php
@@ -88,7 +88,7 @@
                                                         <div class="mt-2 text-sm text-gray-500">
                                                             {{-- show available choices (optional) --}}
                                                             @foreach($answer['choices'] as $key => $choice)
-                                                                <div><strong>{{ $key }}.</strong> {!! nl2br(e($choice)) !!}</div>
+                                                                <div><strong>{{ $key }}.</strong> {!! nl2br($choice) !!}</div>
                                                             @endforeach
                                                         </div>
                                                     @endif
