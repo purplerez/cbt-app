@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ExamSession;
 use App\Models\StudentAnswer;
 use App\Models\Question;
-use App\Models\Student:
+use App\Models\Student;
 use App\Helpers\AnswerKeyHelper;
 use Illuminate\Http\Request;
 
