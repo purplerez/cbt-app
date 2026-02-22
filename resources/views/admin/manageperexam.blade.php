@@ -259,21 +259,32 @@
                                                                                 class="max-w-xs mt-2 rounded-md max-h-32">
                                                                         @endif
                                                                         @if ($q->option_a || $q->option_b)
-                                                                            <div class="mt-2 space-y-1 text-xs text-gray-600">
+                                                                            <div
+                                                                                class="mt-2 space-y-1 text-xs text-gray-600">
                                                                                 @if ($q->option_a)
-                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">A.</span><span>{!! $q->option_a !!}</span></div>
+                                                                                    <div class="flex gap-1"><span
+                                                                                            class="font-semibold text-gray-500 shrink-0">A.</span><span>{!! $q->option_a !!}</span>
+                                                                                    </div>
                                                                                 @endif
                                                                                 @if ($q->option_b)
-                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">B.</span><span>{!! $q->option_b !!}</span></div>
+                                                                                    <div class="flex gap-1"><span
+                                                                                            class="font-semibold text-gray-500 shrink-0">B.</span><span>{!! $q->option_b !!}</span>
+                                                                                    </div>
                                                                                 @endif
                                                                                 @if ($q->option_c)
-                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">C.</span><span>{!! $q->option_c !!}</span></div>
+                                                                                    <div class="flex gap-1"><span
+                                                                                            class="font-semibold text-gray-500 shrink-0">C.</span><span>{!! $q->option_c !!}</span>
+                                                                                    </div>
                                                                                 @endif
                                                                                 @if ($q->option_d)
-                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">D.</span><span>{!! $q->option_d !!}</span></div>
+                                                                                    <div class="flex gap-1"><span
+                                                                                            class="font-semibold text-gray-500 shrink-0">D.</span><span>{!! $q->option_d !!}</span>
+                                                                                    </div>
                                                                                 @endif
                                                                                 @if ($q->option_e)
-                                                                                    <div class="flex gap-1"><span class="font-semibold text-gray-500 shrink-0">E.</span><span>{!! $q->option_e !!}</span></div>
+                                                                                    <div class="flex gap-1"><span
+                                                                                            class="font-semibold text-gray-500 shrink-0">E.</span><span>{!! $q->option_e !!}</span>
+                                                                                    </div>
                                                                                 @endif
                                                                             </div>
                                                                         @endif
@@ -818,10 +829,10 @@
                         ${student.is_assigned ?
                             '<span class="text-green-600">Sudah Terdaftar</span>' :
                             `<button onclick="addStudentToExam(${student.id})" class="text-blue-600 hover:text-blue-900"
-                                                                                                                                                    ${examstatus == 0 ? 'disabled' : ''}
-                                                                                                                                                    >
-                                                                                                                                                                    Tambah ke Ujian
-                                                                                                                                                                </button>`
+                                                                                                                                                                ${examstatus == 0 ? 'disabled' : ''}
+                                                                                                                                                                >
+                                                                                                                                                                                Tambah ke Ujian
+                                                                                                                                                                            </button>`
                         }
                     </td>
                 `;
@@ -1228,9 +1239,31 @@
                     const choiceElements = choicesContainer.querySelectorAll('.edit-choice-item');
                     if (choiceElements.length === 0) return;
 
-                    // Get answer key from hidden or existing form data
-                    let answerKeyInputs = document.querySelectorAll('input[name="answer_key[]"]');
-                    let selectedKeys = Array.from(answerKeyInputs).map(el => el.value);
+                    // Read answer key letters from the hidden input injected by the modal partial.
+                    // Convert letters (A/B/C/D/E) to 0-based indices (0/1/2/3/4) so they match
+                    // each choice's data-choice-id attribute.
+                    const letterToIdx = {
+                        'A': 0,
+                        'B': 1,
+                        'C': 2,
+                        'D': 3,
+                        'E': 4
+                    };
+                    let selectedIndices = [];
+                    const answerKeyDataEl = document.getElementById('modal-answer-key-data');
+                    if (answerKeyDataEl) {
+                        try {
+                            const letters = JSON.parse(answerKeyDataEl.value);
+                            if (Array.isArray(letters)) {
+                                selectedIndices = letters.map(l => {
+                                    const idx = letterToIdx[l.toUpperCase()];
+                                    return idx !== undefined ? idx.toString() : null;
+                                }).filter(v => v !== null);
+                            }
+                        } catch (e) {
+                            console.warn('loadAnswerKeyChoices: failed to parse modal-answer-key-data', e);
+                        }
+                    }
 
                     // Determine input type based on question type
                     let inputType = 'radio';
@@ -1242,7 +1275,7 @@
                     choiceElements.forEach((choice, index) => {
                         const choiceId = choice.dataset.choiceId.toString();
                         const choiceText = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
-                        const isChecked = selectedKeys.includes(choiceId);
+                        const isChecked = selectedIndices.includes(choiceId);
 
                         checkboxesHTML += `
                             <label class="flex items-center gap-2 mb-2">
@@ -1629,14 +1662,14 @@
                             <h2 class="mb-4 text-xl font-bold">Preview Soal yang Diimport (${questions.length} soal)</h2>
                             <div class="space-y-4">
                                 ${questions.map((q, idx) => `
-                                                                                                            <div class="py-2 pl-4 border-l-4 border-blue-500">
-                                                                                                                <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
-                                                                                                                <p class="text-sm text-gray-600">
-                                                                                                                    Tipe: ${getQuestionTypeName(q.question_type)} |
-                                                                                                                    Pilihan: ${Object.keys(q.choices || {}).length}
-                                                                                                                </p>
-                                                                                                            </div>
-                                                                                                        `).join('')}
+                                                                                                                        <div class="py-2 pl-4 border-l-4 border-blue-500">
+                                                                                                                            <p class="font-semibold">${idx + 1}. ${q.question_text.substring(0, 100)}...</p>
+                                                                                                                            <p class="text-sm text-gray-600">
+                                                                                                                                Tipe: ${getQuestionTypeName(q.question_type)} |
+                                                                                                                                Pilihan: ${Object.keys(q.choices || {}).length}
+                                                                                                                            </p>
+                                                                                                                        </div>
+                                                                                                                    `).join('')}
                             </div>
                             <div class="flex justify-end mt-6 space-x-4">
                                 <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600">Batal</button>

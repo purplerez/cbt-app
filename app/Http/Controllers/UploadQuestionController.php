@@ -92,15 +92,26 @@ class UploadQuestionController extends Controller
                     $choicesImages[] = $questionData['option_e_image'] ?? null;
                 }
 
-                // Determine question type based on choices
-                if (count($choices) == 2) {
-                    $questionTypeId = '2'; // True/False (ENUM needs string)
-                }
-
-                // Create answer key array
+                // Create answer key array first (needed for type detection)
+                // correct_answer from parser: "C" (single) or "B,C,E" (multiple)
+                // Split by comma so multi-answers are stored as separate letters.
+                $letterOrder = ['A', 'B', 'C', 'D', 'E'];
                 $answerKey = [];
                 if (!empty($questionData['correct_answer'])) {
-                    $answerKey = [strtoupper($questionData['correct_answer'])];
+                    $answerKey = array_values(array_filter(
+                        array_map(
+                            fn($l) => strtoupper(trim($l)),
+                            explode(',', $questionData['correct_answer'])
+                        ),
+                        fn($l) => in_array($l, $letterOrder)
+                    ));
+                }
+
+                // Determine question type based on choices and answer key
+                if (count($choices) == 2) {
+                    $questionTypeId = '2'; // True/False
+                } elseif (count($answerKey) > 1) {
+                    $questionTypeId = '1'; // PG Kompleks (multiple correct answers)
                 }
 
                 // Prepare choices_images JSON (only if at least one image exists)

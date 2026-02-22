@@ -249,6 +249,29 @@ class WordParserService
                 }
             }
 
+            // ── Answer key ────────────────────────────────────────────────
+            // Must be checked BEFORE plain-text append so "Jawaban: C" is
+            // not accidentally appended to the last option's text.
+            // Supports single answer ("Jawaban: C") and multiple ("Jawaban: B,C,E")
+            if (preg_match('/^(jawaban|answer|kunci)\s*:\s*([A-Ea-e](?:[,\s]+[A-Ea-e])*)/iu', $line, $am)) {
+                if ($currentQ !== null) {
+                    // Normalize to uppercase, comma-separated, no spaces
+                    $raw    = preg_replace('/\s+/', '', strtoupper($am[2]));
+                    $currentQ['correct_answer'] = $raw; // e.g. "C" or "B,C,E"
+                    $this->log("  Answer: " . $raw);
+                }
+                continue; // Do NOT fall through to plain-text append
+            }
+
+            // ── Points ────────────────────────────────────────────────────
+            if (preg_match('/^(poin|nilai|score|bobot|skor|point)\s*:\s*(\d+)/iu', $line, $pm)) {
+                if ($currentQ !== null) {
+                    $currentQ['points'] = (int) $pm[2];
+                    $this->log("  Points: " . $pm[2]);
+                }
+                continue; // Do NOT fall through to plain-text append
+            }
+
             // ── PLAIN TEXT: append to active context ─────────────────────
             if ($currentQ !== null) {
                 if ($questionDone && $lastOptLetter !== null) {
@@ -260,13 +283,6 @@ class WordParserService
                         $inQuestionBody = false;
                     }
                 }
-            }
-
-            if (preg_match('/(jawaban|answer|kunci):\s*([A-Ea-e])/iu', $line, $am)) {
-                if ($currentQ !== null) $currentQ['correct_answer'] = strtoupper($am[2]);
-            }
-            if (preg_match('/(poin|nilai|score|bobot|skor|point):\s*(\d+)/iu', $line, $pm)) {
-                if ($currentQ !== null) $currentQ['points'] = (int) $pm[2];
             }
         }
 
