@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td class="px-6 py-4 text-sm text-gray-900 whitespace-nowrap">${s.student_name ?? '-'}</td>
                             <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
                             <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                                ${(Number(s.is_active) === 0)
+                                ${((s.is_active) === 0)
                                     ? `<button onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</button>`
                                     : ''}
                             </td>
