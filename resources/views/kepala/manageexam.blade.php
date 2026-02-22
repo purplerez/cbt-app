@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 const sessions = data.sessions || [];
                 currentSessions = sessions; // Store for export
-                if (!sessions.length) {
+                if (!Array.isArray(sessions) || sessions.length === 0) {
                     scoresBody.innerHTML = `<tr><td colspan="7" class="px-6 py-4 text-center text-gray-500">Belum ada sesi untuk mata pelajaran ini.</td></tr>`;
                     return;
                 }
@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                                 Detail
                             </button>
-                            ${(s.is_active === 0)
+                            ${(Number(s.is_active) === 0)
                                     ? `<button onclick="resetLogin('${s.id}')" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</button>`
                                     : ''}
                         </td>
