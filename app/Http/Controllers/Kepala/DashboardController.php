@@ -244,7 +244,7 @@ class DashboardController extends Controller
             }
 
             // Check if email already exists
-            $email = $request->nis . '@student.test';
+            $email = $request->nis;
             $existingUser = User::where('email', $email)->first();
             if ($existingUser) {
                 throw new \Exception('A user with this NIS already exists in the system');
@@ -262,7 +262,7 @@ class DashboardController extends Controller
             // Create user account for student
             $user = User::create([
                 'name' => $request->name,
-                'email' => $request->nis . '@student.test',
+                'email' => $request->nis,
                 'password' => Hash::make($request->nis),
                 'role' => 'siswa', // Let the seeder explicitly set this to match Spatie role
                 // 'school_id' => $request->school_id
@@ -353,7 +353,7 @@ class DashboardController extends Controller
 
             $updateUser = User::where('id', $student->user_id)->first();
             $updateUser->name = $validatedData['name'];
-            $updateUser->email = $validatedData['nis'] . '@student.test';
+            $updateUser->email = $validatedData['nis'];
             $updateUser->password = Hash::make($validatedData['nis']);
             $updateUser->save();
 
