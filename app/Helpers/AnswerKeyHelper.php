@@ -17,7 +17,10 @@ class AnswerKeyHelper
           }
 
           $index = (int)$index;
-          return chr(64 + $index); // 65 is ASCII for 'A'
+          //perubahan terakhir tanggal 28/02/2026
+          // karena index array pada saat update selalu berkurang 1 poin
+          // jadi merubah dari 64 ke 65 karena A dimulai dari index ke 0 bukan ke 1
+          return chr(65 + $index); // 65 is ASCII for 'A'
      }
 
      /**
