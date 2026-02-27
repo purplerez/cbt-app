@@ -1276,11 +1276,13 @@
                         const choiceId = choice.dataset.choiceId.toString();
                         const choiceText = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
                         const isChecked = selectedIndices.includes(choiceId);
+                        // strip text dari tag html untuk ditampilkan di answer key
+                         let displayText = choiceText.replace(/<[^>]*>?/gm, '').trim() || `Pilihan ${index+1}`;
 
                         checkboxesHTML += `
                             <label class="flex items-center gap-2 mb-2">
                                 <input type="${inputType}" name="answer_key[]" value="${choiceId}" ${isChecked ? 'checked' : ''}>
-                                <span class="text-sm">${choiceText.substring(0, 50)}</span>
+                                <span class="text-sm">${displayText.substring(0, 100)}</span>
                             </label>
                         `;
                     });
@@ -1419,10 +1421,13 @@
                         let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
                         let isChecked = selectedAnswerKeys.includes(id.toString()) ? 'checked' : '';
 
+                        //strip html dari text untuk ditampilkan di answer key
+                        let displayText = text.replace(/<[^>]*>?/gm, '').trim() || `Pilihan ${index+1}`;
+
                         checkboxes += `
                 <label class="flex items-center gap-2">
                     <input type="checkbox" name="answer_key[]" value="${id}" ${isChecked}>
-                    ${text}
+                    ${displayText}
                 </label>
             `;
                     });
