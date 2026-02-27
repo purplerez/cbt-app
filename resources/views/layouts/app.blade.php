@@ -22,7 +22,7 @@
     {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
     <!-- Place the first <script> tag in your HTML's <head> -->
-<script src="https://cdn.tiny.cloud/1/m74oj0scxb80ztto8ggadpnlq1qir1584o16gx5mev19xo4u/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+<script src="https://cdn.tiny.cloud/1/eso9axupoonw3lceemtkaw5mpn9lz62tx369lo49hmza0bzh/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 
 
 </head>
