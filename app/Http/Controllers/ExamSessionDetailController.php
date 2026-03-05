@@ -136,26 +136,56 @@ class ExamSessionDetailController extends Controller
         ]);
     }
 
-    public function resetLogin($studentNis) 
+    public function resetLogin(Request $request, $studentNis)
     {
         try {
             $student = Student::where('nis', $studentNis)->firstOrFail();
-            $user = $student->user;
+            $user    = $student->user;
 
-            // Reset login status
-            $user->is_active = 1; // Set to active
+            // Reactivate the user account
+            $user->is_active = 1;
             $user->save();
 
-            // Log the activity
-            $usrAktif = auth()->user();
-            logActivity($usrAktif->name.' (ID: '.$usrAktif->id.') Reset login untuk siswa '. $student->name);
+            // Revoke all Sanctum tokens so student gets a fresh login
+            $user->tokens()->delete();
 
-            return redirect()->route('kepala.exam-sessions.detail', $student->examSessions()->latest()->first()->id)
-                ->with('success', 'Login siswa berhasil direset.');
+            // Log who performed the reset
+            $actor = auth()->user();
+            logActivity(
+                $actor->name . ' (ID: ' . $actor->id . ') Reset login untuk siswa ' .
+                $student->name . ' (NIS: ' . $student->nis . ')'
+            );
+
+            // Return JSON for AJAX calls from dashboard monitoring panel
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Login siswa ' . $student->name . ' berhasil direset.',
+                    'student_name' => $student->name,
+                    'nis' => $student->nis,
+                ]);
+            }
+
+            // Fallback redirect for non-AJAX (e.g. from exam detail page)
+            $latestSession = $student->user->examSessions()->latest()->first();
+            if ($latestSession) {
+                $routePrefix = auth()->user()->hasRole('kepala') ? 'kepala' : 'guru';
+                return redirect()
+                    ->route($routePrefix . '.exam-sessions.detail', $latestSession->id)
+                    ->with('success', 'Login siswa berhasil direset.');
+            }
+
+            return redirect()->back()->with('success', 'Login siswa berhasil direset.');
+
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Terjadi kesalahan saat mereset login siswa: ' . $e->getMessage());
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal reset login: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal reset login: ' . $e->getMessage());
         }
-        
     }
 }
 

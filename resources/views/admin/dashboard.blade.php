@@ -1,223 +1,382 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Dashboard') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard Admin</h2>
+            <div class="flex items-center gap-3 text-sm text-gray-500">
+                <span id="last-updated">—</span>
+                <button onclick="refreshAll()" class="flex items-center gap-1 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs hover:bg-indigo-700 transition">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    Refresh
+                </button>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                        <!-- Statistik Overview -->
-            <div class="grid grid-cols-1 gap-4 mb-6 md:grid-cols-2 lg:grid-cols-4">
-                <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Total Siswa</h3>
-                    <p class="text-2xl font-semibold text-gray-900" id="totalStudents">-</p>
-                    <div class="flex items-center mt-2 text-sm">
-                        <span class="text-gray-600" id="activeSchoolCount">- Sekolah</span>
-                    </div>
+    <div class="py-6">
+        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+
+            {{-- ── STAT CARDS ── --}}
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500">
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Sekolah</p>
+                    <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-schools">—</p>
+                    <p class="text-xs text-gray-400 mt-1" id="stat-active-schools">— aktif</p>
                 </div>
-                <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Siswa Online</h3>
-                    <p class="text-2xl font-semibold text-gray-900" id="onlineStudents">-</p>
-                    <div class="flex items-center mt-2 text-sm">
-                        <span class="text-gray-600" id="onlinePercentage">-%</span>
-                        <span class="ml-2 text-xs text-gray-500">dari total siswa</span>
-                    </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Siswa</p>
+                    <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-students">—</p>
+                    <p class="text-xs text-gray-400 mt-1" id="stat-online-pct">— sedang ujian</p>
                 </div>
-                <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Ujian Aktif</h3>
-                    <div class="flex items-center justify-between">
-                        <p class="text-2xl font-semibold text-gray-900" id="activeExams">-</p>
-                        <span class="px-2 py-1 text-xs font-semibold rounded-full" id="examStatus">-</span>
-                    </div>
-                    <div class="flex items-center mt-2 text-sm">
-                        <span class="text-gray-600" id="participantCount">- peserta</span>
-                    </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-green-500">
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Ujian Berlangsung</p>
+                    <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-active-exams">—</p>
+                    <p class="text-xs text-gray-400 mt-1" id="stat-in-exam">— siswa aktif</p>
                 </div>
-                <div class="p-6 bg-white rounded-lg shadow-sm">
-                    <h3 class="text-sm font-medium text-gray-500">Beban Server</h3>
-                    <p class="text-2xl font-semibold text-gray-900" id="serverLoad">-</p>
-                    <div class="flex items-center mt-2 text-sm">
-                        <span class="text-gray-600" id="avgResponseTime">- ms</span>
-                        <span class="ml-2 text-xs text-gray-500">rata-rata respons</span>
-                    </div>
+                <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-orange-500">
+                    <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Submit Hari Ini</p>
+                    <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-submitted-today">—</p>
+                    <p class="text-xs text-gray-400 mt-1">sesi selesai hari ini</p>
                 </div>
             </div>
 
-            <!-- Statistik per Sekolah -->
-            <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h2 class="mb-4 text-lg font-semibold text-gray-900">Statistik per Sekolah</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sekolah</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Siswa</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Siswa Online</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Progress</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="schoolStats">
-                                <tr>
-                                    <td colspan="5" class="px-6 py-4 text-center text-gray-500">Memuat data...</td>
-                                </tr>
-                            </tbody>
-                        </table>
+            {{-- ── LIVE MONITORING PANEL ── --}}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                        </span>
+                        <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
                     </div>
+                    <div class="flex items-center gap-3">
+                        <select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+                            <option value="">— Pilih Ujian —</option>
+                        </select>
+                        {{-- Count badges --}}
+                        <span class="hidden sm:flex items-center gap-2 text-xs" id="monitor-counts">
+                            <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium" id="cnt-progress">0 Live</span>
+                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium" id="cnt-submited">0 Submit</span>
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium" id="cnt-not-started">0 Belum</span>
+                        </span>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-100">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Siswa</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Kelas</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sekolah</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sisa Waktu</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nilai</th>
+                                <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="monitor-body" class="bg-white divide-y divide-gray-50">
+                            <tr>
+                                <td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Pilih ujian untuk memulai monitoring</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Ujian Aktif -->
-            <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h2 class="mb-4 text-lg font-semibold text-gray-900">Ujian Sedang Berlangsung</h2>
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200" id="activeExamsTable">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Ujian</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Kelas</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Peserta</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Sisa Waktu</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Status</th>
-                                    <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200" id="activeExamsBody">
-                                <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">Memuat data...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+            {{-- ── RECENT ACTIVITY LOG ── --}}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-100">
+                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru</h3>
+                </div>
+                <div class="divide-y divide-gray-50" id="activity-log">
+                    <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
                 </div>
             </div>
 
-            <!-- Log Aktivitas -->
-            <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                <div class="p-6">
-                    <h2 class="mb-4 text-lg font-semibold text-gray-900">Log Aktivitas Terbaru</h2>
-                    <div class="space-y-4" id="activityLogs">
-                        <div class="text-center text-gray-500">Memuat log aktivitas...</div>
-                    </div>
-                </div>
+        </div>
+    </div>
+
+    {{-- ── RESET LOGIN MODAL ── --}}
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h4 class="text-base font-semibold text-gray-800 mb-2">Reset Login Siswa</h4>
+            <p class="text-sm text-gray-600 mb-1">Yakin ingin mereset login untuk:</p>
+            <p class="text-sm font-semibold text-gray-900 mb-1" id="modal-student-name">—</p>
+            <p class="text-xs text-gray-500 mb-4">Semua token login siswa akan dihapus. Siswa harus login ulang, namun jawaban ujian tetap tersimpan.</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeResetModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button onclick="confirmReset()" id="confirm-reset-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Reset Login</button>
             </div>
         </div>
     </div>
-</x-app-layout>
+
+    {{-- ── FORCE SUBMIT MODAL ── --}}
+    <div id="force-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h4 class="text-base font-semibold text-gray-800 mb-2">Force Submit Ujian</h4>
+            <p class="text-sm text-gray-600 mb-1">Yakin ingin paksa submit ujian untuk:</p>
+            <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-force-name">—</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeForceModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button onclick="confirmForce()" id="confirm-force-btn" class="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Force Submit</button>
+            </div>
+        </div>
+    </div>
 
 @push('scripts')
-    <script>
-        function fetchDashboardStats() {
-            if (!window.apiToken) {
-                console.error("API Token not found");
-                return;
-            }
+<script>
+const API = window.apiToken;
+const headers = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
+const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
 
-            // Fetch Overview Statistics
-            fetch("/api/admin/dashboard/stats", {
-                headers: {
-                    "Authorization": "Bearer " + window.apiToken,
-                    "Accept": "application/json"
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                // Update statistics
-                document.getElementById('totalStudents').textContent = data.total_students.toLocaleString();
-                document.getElementById('activeSchoolCount').textContent = `${data.active_school_count} Sekolah`;
-                document.getElementById('onlineStudents').textContent = data.online_students.toLocaleString();
-                document.getElementById('onlinePercentage').textContent = `${data.online_percentage}%`;
-                document.getElementById('activeExams').textContent = data.active_exams;
-                document.getElementById('participantCount').textContent = `${data.participant_count.toLocaleString()} peserta`;
-                document.getElementById('serverLoad').textContent = `${data.server_load}%`;
-                document.getElementById('avgResponseTime').textContent = `${data.avg_response_time} ms`;
+let currentStudentNis = null;
+let currentSessionId  = null;
+let currentStudentName = '';
+let monitorInterval = null;
 
-                // Update exam status indicator
-                const examStatus = document.getElementById('examStatus');
-                examStatus.textContent = data.exam_status.text;
-                examStatus.className = `px-2 py-1 text-xs font-semibold rounded-full ${data.exam_status.color}`;
-            })
-            .catch(error => {
-                console.error("Stats API Error:", error);
-            });
+// ── STATS ──────────────────────────────────────────────────────────
+async function fetchStats() {
+    try {
+        const r = await fetch('/api/admin/dashboard/stats', { headers });
+        const d = await r.json();
+        if (d.error) return;
+        document.getElementById('stat-schools').textContent       = d.total_schools ?? '—';
+        document.getElementById('stat-active-schools').textContent = (d.active_school_count ?? '—') + ' aktif';
+        document.getElementById('stat-students').textContent      = (d.total_students ?? '—').toLocaleString();
+        document.getElementById('stat-online-pct').textContent    = (d.students_in_exam ?? '—') + ' sedang ujian';
+        document.getElementById('stat-active-exams').textContent  = d.active_exams ?? '—';
+        document.getElementById('stat-in-exam').textContent       = (d.students_in_exam ?? '—') + ' siswa aktif';
+        document.getElementById('stat-submitted-today').textContent = d.submitted_today ?? '—';
+        document.getElementById('last-updated').textContent       = 'Update: ' + new Date().toLocaleTimeString('id-ID');
+    } catch(e) { console.error('Stats error:', e); }
+}
 
-            // Fetch Active Exams
-            fetch("/api/admin/dashboard/active-exams", {
-                headers: {
-                    "Authorization": "Bearer " + window.apiToken,
-                    "Accept": "application/json"
-                }
-            })
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById('activeExamsBody');
-                tbody.innerHTML = '';
+// ── EXAM DROPDOWN ──────────────────────────────────────────────────
+async function fetchActiveExams() {
+    try {
+        const r = await fetch('/api/admin/dashboard/active-exams', { headers });
+        const list = await r.json();
+        const sel = document.getElementById('exam-select');
+        const cur = sel.value;
+        sel.innerHTML = '<option value="">— Pilih Ujian —</option>';
+        (list || []).forEach(e => {
+            const opt = document.createElement('option');
+            opt.value = e.exam_id;
+            opt.textContent = e.name;
+            sel.appendChild(opt);
+        });
+        if (cur) sel.value = cur;
+    } catch(e) { console.error('Exams error:', e); }
+}
 
-                if (data.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="6" class="px-6 py-4 text-center text-gray-500">
-                                Tidak ada ujian yang sedang berlangsung
-                            </td>
-                        </tr>
-                    `;
-                    return;
-                }
+// ── MONITOR TABLE ──────────────────────────────────────────────────
+function loadMonitor() {
+    const examId = document.getElementById('exam-select').value;
+    if (!examId) {
+        document.getElementById('monitor-body').innerHTML =
+            '<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Pilih ujian untuk memulai monitoring</td></tr>';
+        return;
+    }
+    clearInterval(monitorInterval);
+    fetchMonitor(examId);
+    monitorInterval = setInterval(() => fetchMonitor(examId), 30000);
+}
 
-                data.forEach(exam => {
-                    const row = `
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap">${exam.name}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">${exam.grade}</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                ${exam.active_participants}/${exam.total_participants}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">${exam.remaining_time} menit</td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
-                                    ${exam.status === 'in_progress' ? 'bg-green-100 text-green-800' :
-                                      exam.status === 'waiting' ? 'bg-yellow-100 text-yellow-800' :
-                                      'bg-gray-100 text-gray-800'}">
-                                    ${exam.status === 'in_progress' ? 'Sedang Berlangsung' :
-                                      exam.status === 'waiting' ? 'Menunggu' : 'Selesai'}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <button onclick="stopExam(${exam.exam_id})"
-                                        class="text-red-600 hover:text-red-900">
-                                    Stop Ujian
-                                </button>
-                            </td>
-                        </tr>
-                    `;
-                    tbody.innerHTML += row;
-                });
-            })
-            .catch(error => {
-                console.error("Active Exams API Error:", error);
-                document.getElementById('activeExamsBody').innerHTML = `
-                    <tr>
-                        <td colspan="6" class="px-6 py-4 text-center text-red-500">
-                            Gagal memuat data ujian aktif
-                        </td>
-                    </tr>
-                `;
-            });
+async function fetchMonitor(examId) {
+    try {
+        document.getElementById('monitor-body').innerHTML =
+            '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
+        const r = await fetch(`/api/admin/monitor/exam/${examId}/participants`, { headers });
+        const res = await r.json();
+        if (!res.success) throw new Error(res.error);
+
+        // Update count badges
+        document.getElementById('cnt-progress').textContent    = (res.counts.progress ?? 0) + ' Live';
+        document.getElementById('cnt-submited').textContent    = (res.counts.submited ?? 0) + ' Submit';
+        document.getElementById('cnt-not-started').textContent = (res.counts.not_started ?? 0) + ' Belum';
+
+        const tbody = document.getElementById('monitor-body');
+        if (!res.data || res.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta terdaftar.</td></tr>';
+            return;
         }
 
-        // Refresh data every 30 seconds
-        fetchDashboardStats();
-        setInterval(fetchDashboardStats, 30000);
+        tbody.innerHTML = res.data.map(p => {
+            const statusBadge = {
+                'progress':    '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>',
+                'submited':    '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">✓ Submit</span>',
+                'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>',
+            }[p.status] ?? `<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">${p.status}</span>`;
 
-        // Function to stop exam (to be implemented)
-        function stopExam(examId) {
-            if (confirm('Apakah Anda yakin ingin menghentikan ujian ini?')) {
-                // TODO: Implement exam stop functionality
-                console.log('Stopping exam:', examId);
-            }
+            const timeDisplay = p.status === 'progress'
+                ? `<span class="font-mono text-sm text-orange-600" data-seconds="${p.time_remaining}">${formatTime(p.time_remaining)}</span>`
+                : (p.status === 'submited' ? '<span class="text-blue-500 text-xs">—</span>' : '<span class="text-gray-400 text-xs">Belum mulai</span>');
+
+            const score = p.score !== null ? `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` : '—';
+
+            const actions = `
+                <div class="flex gap-1.5">
+                    ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
+                    <button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
+                        class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>
+                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}'))"
+                        class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
+                </div>`;
+
+            return `<tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-3">
+                    <div class="font-medium text-gray-800 text-sm">${escHtml(p.name)}</div>
+                    <div class="text-xs text-gray-400">${escHtml(p.nis)}</div>
+                </td>
+                <td class="px-4 py-3 text-sm text-gray-600">${escHtml(p.grade)}</td>
+                <td class="px-4 py-3 text-xs text-gray-500">${escHtml(p.school || '—')}</td>
+                <td class="px-4 py-3">${statusBadge}</td>
+                <td class="px-4 py-3">${timeDisplay}</td>
+                <td class="px-4 py-3">${score}</td>
+                <td class="px-4 py-3">${actions}</td>
+            </tr>`;
+        }).join('');
+
+        // Tick down timers every second
+        startTimerTick();
+    } catch(e) {
+        document.getElementById('monitor-body').innerHTML =
+            `<tr><td colspan="7" class="px-4 py-6 text-center text-red-400 text-sm">Gagal memuat: ${e.message}</td></tr>`;
+    }
+}
+
+// ── TIMER TICK ─────────────────────────────────────────────────────
+let timerTick = null;
+function startTimerTick() {
+    clearInterval(timerTick);
+    timerTick = setInterval(() => {
+        document.querySelectorAll('[data-seconds]').forEach(el => {
+            let s = parseInt(el.dataset.seconds) - 1;
+            if (s < 0) s = 0;
+            el.dataset.seconds = s;
+            el.textContent = formatTime(s);
+            if (s === 0) el.classList.replace('text-orange-600', 'text-red-600');
+        });
+    }, 1000);
+}
+
+function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+// ── ACTIVITY LOG ───────────────────────────────────────────────────
+async function fetchActivityLog() {
+    // Placeholder — show if ActivityLog model/table exists
+    try {
+        const r = await fetch('/api/admin/activity-log', { headers });
+        if (!r.ok) throw new Error();
+        const logs = await r.json();
+        const el = document.getElementById('activity-log');
+        if (!logs.length) {
+            el.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">Belum ada aktivitas.</div>';
+            return;
         }
-    </script>
+        el.innerHTML = logs.slice(0,10).map(l => `
+            <div class="px-5 py-3 flex items-start gap-3">
+                <div class="w-2 h-2 mt-1.5 rounded-full bg-indigo-400 flex-shrink-0"></div>
+                <div>
+                    <p class="text-sm text-gray-700">${escHtml(l.activity)}</p>
+                    <p class="text-xs text-gray-400 mt-0.5">${l.created_at ?? ''}</p>
+                </div>
+            </div>`).join('');
+    } catch(e) {
+        document.getElementById('activity-log').innerHTML =
+            '<div class="px-5 py-8 text-center text-gray-400 text-sm">Log tidak tersedia.</div>';
+    }
+}
+
+// ── RESET LOGIN ────────────────────────────────────────────────────
+function openResetModal(nis, name) {
+    currentStudentNis  = nis;
+    currentStudentName = name;
+    document.getElementById('modal-student-name').textContent = name + ' (NIS: ' + nis + ')';
+    document.getElementById('reset-modal').classList.remove('hidden');
+}
+function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
+
+async function confirmReset() {
+    const btn = document.getElementById('confirm-reset-btn');
+    btn.disabled = true; btn.textContent = 'Mereset...';
+    try {
+        const r = await fetch(`/kepala/exam-sessions/${currentStudentNis}/reset`, {
+            method: 'POST',
+            headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' }
+        });
+        const res = await r.json();
+        closeResetModal();
+        showToast(res.success ? 'success' : 'error', res.message);
+    } catch(e) {
+        showToast('error', 'Gagal mereset login.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Reset Login';
+    }
+}
+
+// ── FORCE SUBMIT ───────────────────────────────────────────────────
+function openForceModal(sessionId, name) {
+    currentSessionId   = sessionId;
+    currentStudentName = name;
+    document.getElementById('modal-force-name').textContent = name;
+    document.getElementById('force-modal').classList.remove('hidden');
+}
+function closeForceModal() { document.getElementById('force-modal').classList.add('hidden'); }
+
+async function confirmForce() {
+    const btn = document.getElementById('confirm-force-btn');
+    btn.disabled = true; btn.textContent = 'Memproses...';
+    try {
+        const r = await fetch('/kepala/force-submit', {
+            method: 'POST',
+            headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ exam_session_id: currentSessionId })
+        });
+        const res = await r.json();
+        closeForceModal();
+        showToast(res.success ? 'success' : 'error', res.message);
+        if (res.success) loadMonitor();
+    } catch(e) {
+        showToast('error', 'Gagal force submit.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Force Submit';
+    }
+}
+
+// ── HELPERS ────────────────────────────────────────────────────────
+function escHtml(str) {
+    if (!str) return '—';
+    return str.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(type, msg) {
+    const colors = { success: 'bg-green-500', error: 'bg-red-500' };
+    const t = document.createElement('div');
+    t.className = `fixed bottom-4 right-4 z-50 px-4 py-3 text-white rounded-lg shadow-lg text-sm ${colors[type] ?? 'bg-gray-700'} transition-opacity`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
+}
+
+function refreshAll() {
+    fetchStats();
+    fetchActiveExams();
+    const examId = document.getElementById('exam-select').value;
+    if (examId) fetchMonitor(examId);
+    fetchActivityLog();
+}
+
+// ── INIT ───────────────────────────────────────────────────────────
+fetchStats();
+fetchActiveExams();
+fetchActivityLog();
+setInterval(() => { fetchStats(); fetchActiveExams(); }, 30000);
+</script>
 @endpush
+</x-app-layout>

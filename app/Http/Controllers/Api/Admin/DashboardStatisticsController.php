@@ -5,128 +5,90 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamSession;
+use App\Models\School;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
-use Carbon\Carbon;
 
 class DashboardStatisticsController extends Controller
 {
     /**
-     * Get dashboard overview statistics
+     * Get dashboard overview statistics (admin/super)
      */
     public function getOverviewStats(): JsonResponse
     {
-        // Cache statistics for 1 minute to maintain real-time monitoring while reducing load
-        $stats = Cache::remember('dashboard_stats', 60, function () {
-            $now = Carbon::now();
-            
-            $totalStudents = Student::count();
-            $activeSchools = School::has('students')->count();
-            $activeExamSessions = ExamSession::whereDate('start_time', '<=', $now)
-                ->whereDate('end_time', '>=', $now)
-                ->get();
-            
-            $onlineStudents = ExamSession::where('status', 'active')
-                ->whereDate('start_time', '<=', $now)
-                ->whereDate('end_time', '>=', $now)
-                ->distinct('student_id')
-                ->count();
+        try {
+            $stats = Cache::remember('admin_dashboard_stats', 30, function () {
+                $totalStudents   = Student::count();
+                $totalSchools    = School::count();
+                $activeSchools   = School::has('students')->count();
 
-            // Calculate server load (simplified version)
-            $last5MinLoad = ExamSession::where('updated_at', '>=', $now->subMinutes(5))
-                ->count();
-            
-            return [
-                'total_students' => $totalStudents,
-                'active_school_count' => $activeSchools,
-                'online_students' => $onlineStudents,
-                'online_percentage' => $totalStudents > 0 ? round(($onlineStudents / $totalStudents) * 100, 1) : 0,
-                'active_exams' => $activeExamSessions->unique('exam_id')->count(),
-                'participant_count' => $activeExamSessions->count(),
-                'server_load' => min(100, round(($last5MinLoad / 1500) * 100)), // Assuming max capacity 1500 concurrent
-                'avg_response_time' => rand(50, 200), // Placeholder - implement actual monitoring
-                'exam_status' => $this->getSystemStatus($onlineStudents, $last5MinLoad),
-            ];
-        });
+                // Students currently in exam (active sessions)
+                $studentsInExam = ExamSession::where('status', 'progress')
+                    ->distinct('user_id')
+                    ->count('user_id');
 
-        return response()->json($stats);
-    }
+                // Active unique exams right now
+                $activeExams = ExamSession::where('status', 'progress')
+                    ->distinct('exam_id')
+                    ->count('exam_id');
 
-    private function getSystemStatus($onlineStudents, $last5MinLoad): array
-    {
-        // Define thresholds
-        $loadWarningThreshold = 1000; // 66% of max capacity
-        $loadCriticalThreshold = 1350; // 90% of max capacity
+                // Submitted today
+                $submittedToday = ExamSession::where('status', 'submited')
+                    ->whereDate('updated_at', Carbon::today())
+                    ->count();
 
-        if ($last5MinLoad >= $loadCriticalThreshold) {
-            return [
-                'status' => 'critical',
-                'text' => 'Beban Tinggi',
-                'color' => 'bg-red-100 text-red-800'
-            ];
-        }
+                // Recent 5-min activity load (how many sessions updated)
+                $recentActivity = ExamSession::where('updated_at', '>=', Carbon::now()->subMinutes(5))->count();
 
-        if ($last5MinLoad >= $loadWarningThreshold) {
-            return [
-                'status' => 'warning',
-                'text' => 'Beban Sedang',
-                'color' => 'bg-yellow-100 text-yellow-800'
-            ];
-        }
+                $onlinePercentage = $totalStudents > 0
+                    ? round(($studentsInExam / $totalStudents) * 100, 1)
+                    : 0;
 
-        return [
-            'status' => 'normal',
-            'text' => 'Normal',
-            'color' => 'bg-green-100 text-green-800'
-        ];
-    }    /**
-     * Get currently active exams with details
-     */
-    public function getActiveExams(): JsonResponse
-    {
-        $now = Carbon::now();
-
-        $activeExams = ExamSession::with(['exam', 'student', 'student.grade'])
-            ->whereDate('start_time', '<=', $now)
-            ->whereDate('end_time', '>=', $now)
-            ->get()
-            ->groupBy('exam_id')
-            ->map(function ($sessions) use ($now) {
-                $firstSession = $sessions->first();
-                $exam = $firstSession->exam;
+                $examStatusText  = $activeExams > 0 ? 'Ujian Berlangsung' : 'Tidak Ada Ujian';
+                $examStatusColor = $activeExams > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
 
                 return [
-                    'exam_id' => $exam->id,
-                    'name' => $exam->name,
-                    'grade' => $firstSession->student->grade->name,
-                    'total_participants' => $sessions->count(),
-                    'active_participants' => $sessions->where('status', 'active')->count(),
-                    'end_time' => $firstSession->end_time,
-                    'remaining_time' => $now->diffInMinutes($firstSession->end_time),
-                    'status' => $this->getExamStatus($firstSession),
+                    'total_students'      => $totalStudents,
+                    'total_schools'       => $totalSchools,
+                    'active_school_count' => $activeSchools,
+                    'students_in_exam'    => $studentsInExam,
+                    'online_percentage'   => $onlinePercentage,
+                    'active_exams'        => $activeExams,
+                    'submitted_today'     => $submittedToday,
+                    'recent_activity'     => $recentActivity,
+                    'exam_status'         => [
+                        'text'  => $examStatusText,
+                        'color' => $examStatusColor,
+                    ],
                 ];
-            })
-            ->values();
+            });
 
-        return response()->json($activeExams);
+            return response()->json($stats);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 
     /**
-     * Calculate exam status based on session times
+     * Get list of active exams (for monitoring dropdown)
      */
-    private function getExamStatus($session): string
+    public function getActiveExams(): JsonResponse
     {
-        $now = Carbon::now();
+        try {
+            $activeExamIds = ExamSession::where('status', 'progress')
+                ->distinct('exam_id')
+                ->pluck('exam_id');
 
-        if ($now < $session->start_time) {
-            return 'waiting';
+            $exams = Exam::whereIn('id', $activeExamIds)
+                ->select('id', 'title')
+                ->get()
+                ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
+
+            return response()->json($exams);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
         }
-
-        if ($now > $session->end_time) {
-            return 'finished';
-        }
-
-        return 'in_progress';
     }
 }

@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\DB;
 class KepalaApiDashboardController extends Controller
 {
     /**
-     * Get school_id from Headmaster table
+     * Get school_id from Headmaster (kepala) or Teacher (guru) table
      */
     private function getSchoolId()
     {
@@ -28,8 +28,11 @@ class KepalaApiDashboardController extends Controller
         }
 
         if ($user->hasRole('kepala')) {
-            $schoolId = Headmaster::where('user_id', $user->id)->value('school_id');
-            return $schoolId;
+            return Headmaster::where('user_id', $user->id)->value('school_id');
+        }
+
+        if ($user->hasRole('guru')) {
+            return \App\Models\Teacher::where('user_id', $user->id)->value('school_id');
         }
 
         return null;
@@ -215,6 +218,79 @@ class KepalaApiDashboardController extends Controller
             })->values();
 
             return response()->json($data);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get live participant status for a specific exam (school-scoped)
+     * Used by the kepala/guru live monitoring panel.
+     */
+    public function getMonitorParticipants(int $examId)
+    {
+        try {
+            $schoolId = $this->getSchoolId();
+            if (!$schoolId) {
+                return response()->json(['error' => 'School not found for this user'], 400);
+            }
+
+            $sessions = ExamSession::with(['user.student.grade'])
+                ->where('exam_id', $examId)
+                ->whereIn('status', ['progress', 'submited'])
+                ->whereHas('user.student', fn($q) => $q->where('school_id', $schoolId))
+                ->get()
+                ->map(function ($session) {
+                    $now      = \Carbon\Carbon::now();
+                    $endTime  = \Carbon\Carbon::parse($session->submited_at);
+                    $timeLeft = ($session->status === 'progress' && $now->lessThan($endTime))
+                        ? max(0, $now->diffInSeconds($endTime, false)) : 0;
+                    return [
+                        'session_id'     => $session->id,
+                        'user_id'        => $session->user_id,
+                        'nis'            => $session->user?->student?->nis ?? '-',
+                        'name'           => $session->user?->student?->name ?? $session->user?->name ?? 'N/A',
+                        'grade'          => $session->user?->student?->grade?->name ?? '-',
+                        'status'         => $session->status,
+                        'time_remaining' => (int) $timeLeft,
+                        'started_at'     => $session->started_at?->format('H:i:s'),
+                        'score'          => $session->status === 'submited' ? $session->total_score : null,
+                        'ip_address'     => $session->ip_address,
+                        'is_active'      => $session->user?->is_active ?? 0,
+                    ];
+                });
+
+            $startedUserIds = $sessions->pluck('user_id')->toArray();
+            $notStarted = Student::with(['user', 'grade'])
+                ->where('school_id', $schoolId)
+                ->whereHas('user.preassigned', fn($q) => $q->where('exam_id', $examId))
+                ->whereNotIn('user_id', $startedUserIds)
+                ->get()
+                ->map(fn($student) => [
+                    'session_id'     => null,
+                    'user_id'        => $student->user_id,
+                    'nis'            => $student->nis,
+                    'name'           => $student->name,
+                    'grade'          => $student->grade?->name ?? '-',
+                    'status'         => 'not_started',
+                    'time_remaining' => 0,
+                    'started_at'     => null,
+                    'score'          => null,
+                    'ip_address'     => null,
+                    'is_active'      => $student->user?->is_active ?? 0,
+                ]);
+
+            $all = $sessions->concat($notStarted)->sortBy('name')->values();
+            return response()->json([
+                'success' => true,
+                'data'    => $all,
+                'counts'  => [
+                    'progress'    => $sessions->where('status', 'progress')->count(),
+                    'submited'    => $sessions->where('status', 'submited')->count(),
+                    'not_started' => $notStarted->count(),
+                    'total'       => $all->count(),
+                ],
+            ]);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

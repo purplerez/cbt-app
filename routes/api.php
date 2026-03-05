@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Admin\DashboardStatisticsController;
+use App\Http\Controllers\Api\Admin\DashboardMonitorController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\KepalaExamApiController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\ExamScoreController;
 use App\Http\Controllers\Api\Kepala\KepalaApiDashboardController;
-// use App\Http\Controllers\Api\KepalaApiDashboardController as KepalaDashboard1;
 use App\Http\Controllers\Api\StudentAnswerBackupController;
 
 
@@ -32,7 +32,10 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
         ->name('dashboard.stats');
     Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
         ->name('dashboard.active-exams');
-    // ->name('exam.stats');
+
+    // Live monitoring routes
+    Route::get('/monitor/exam/{examId}/participants', [DashboardMonitorController::class, 'participants'])
+        ->name('monitor.participants');
 
     Route::apiResource('exams', ExamController::class);
 
@@ -96,6 +99,12 @@ Route::get('/user', function (Request $request) {
 Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name('api.kepala.')->group(function () {
     Route::get('/exams/{examId}/participants', [KepalaExamApiController::class, 'participants'])
         ->name('exam.participants');
+
+    // Live monitoring routes (school-scoped)
+    Route::get('/monitor/active-exams', [KepalaApiDashboardController::class, 'getActiveExams'])
+        ->name('monitor.active-exams');
+    Route::get('/monitor/exam/{examId}/participants', [KepalaApiDashboardController::class, 'getMonitorParticipants'])
+        ->name('monitor.participants');
 
     // Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
     //     ->name('dashboard.stats');
