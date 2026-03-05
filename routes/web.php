@@ -372,8 +372,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
 
     // Route for user login reset
-    Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
-
+    Route::get('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
