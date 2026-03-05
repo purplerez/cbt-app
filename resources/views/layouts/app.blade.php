@@ -5,8 +5,17 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <!-- API Token: set early so dashboard scripts can access it before @stack('scripts') -->
     @auth
+        @php
+            // Auto-generate API token in session if missing (e.g. existing sessions before token-on-login was added)
+            if (!session('api_token') && auth()->check()) {
+                $freshToken = auth()->user()->createToken('dashboard-token')->plainTextToken;
+                session(['api_token' => $freshToken]);
+            }
+        @endphp
         <meta name="api_token" content="{{ session('api_token', '') }}">
+        <script>window.apiToken = "{{ session('api_token', '') }}";</script>
     @endauth
 
     <title>{{ config('app.name', 'Online Assessment ') }}</title>
@@ -56,26 +65,24 @@
 
     @stack('scripts')
     <script>
-        window.apiToken = "{{ session('api_token', '') }}";
+        // Verify token is available (apiToken already defined in <head>)
         if (!window.apiToken) {
-            console.warn("API Token not found in session");
+            console.warn('API Token missing from session. Please re-login if dashboard does not load.');
         }
-
         document.addEventListener('DOMContentLoaded', function () {
-        if (document.querySelector('.tinymce-editor')) {
-            tinymce.init({
-            selector: '.tinymce-editor',
-            height: 280,
-            menubar: false,
-            plugins: 'lists link table code',
-            toolbar: 'bold italic | bullist numlist | link table | code',
-            branding: false,
-            statusbar: false
-            });
-        }
+            if (document.querySelector('.tinymce-editor')) {
+                tinymce.init({
+                    selector: '.tinymce-editor',
+                    height: 280,
+                    menubar: false,
+                    plugins: 'lists link table code',
+                    toolbar: 'bold italic | bullist numlist | link table | code',
+                    branding: false,
+                    statusbar: false
+                });
+            }
         });
-
-</script>
+    </script>
 </body>
 
 </html>

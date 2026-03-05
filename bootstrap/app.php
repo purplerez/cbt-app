@@ -14,11 +14,14 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         //Tambahan Middleware untuk spatie
         $middleware->alias([
-            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'role'                => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission'          => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission'  => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'ensure.kepala.session' => \App\Http\Middleware\EnsureKepalaSession::class,
         ]);
+
+        // Append EnsureApiToken to the default web middleware group
+        $middleware->appendToGroup('web', \App\Http\Middleware\EnsureApiToken::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
