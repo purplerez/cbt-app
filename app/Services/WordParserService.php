@@ -49,13 +49,14 @@ class WordParserService
             $text = rtrim($text);
             if ($text === '') return false;
             $last = mb_substr($text, -1);
-            if ($last === '…' || $last === '?') return true;
-            if (preg_match('/adalah[\s\.…]*$/iu', $text))  return true;
-            if (preg_match('/yaitu[\s\.…]*$/iu', $text))   return true;
-            if (preg_match('/berikut[\s\.…]*$/iu', $text)) return true;
-            if (preg_match('/kecuali[\s\.…]*$/iu', $text)) return true;
-            if (preg_match('/disebut[\s\.…]*$/iu', $text)) return true;
-            if (preg_match('/\.\.\.$/', $text))             return true;
+            if ($last === '…' || $last === '?' || $last === ')') return true;
+            if (preg_match('/adalah[\s\.…]*$/iu', $text))   return true;
+            if (preg_match('/yaitu[\s\.…]*$/iu', $text))    return true;
+            if (preg_match('/berikut[\s\.…]*$/iu', $text))  return true;
+            if (preg_match('/kecuali[\s\.…]*$/iu', $text))  return true;
+            if (preg_match('/disebut[\s\.…]*$/iu', $text))  return true;
+            if (preg_match('/termasuk[\s\.…]*$/iu', $text)) return true;
+            if (preg_match('/\.\.\.$/', $text))              return true;
             return false;
         };
 
@@ -87,6 +88,35 @@ class WordParserService
         $questionDone   = false;
         $lastQNumber    = 0;
         $n              = count($structured);
+
+        // Accumulator for plain-text choices (used when document has no list-numbering style)
+        $pendingPlainChoices = [];
+
+        // Flush any accumulated plain choices into the current question
+        $flushPlainChoices = function () use (&$currentQ, &$pendingPlainChoices, &$lastOptLetter, &$questionDone) {
+            if (empty($pendingPlainChoices) || $currentQ === null) {
+                return;
+            }
+            $letters = ['a', 'b', 'c', 'd', 'e'];
+            foreach (array_values($pendingPlainChoices) as $idx => $choiceHtml) {
+                if ($idx >= count($letters)) break;
+                $key = 'option_' . $letters[$idx];
+                if (empty($currentQ[$key])) {
+                    $currentQ[$key] = $choiceHtml;
+                    $lastOptLetter  = $letters[$idx];
+                }
+            }
+            $questionDone        = true;
+            $pendingPlainChoices = [];
+        };
+
+        // Track the first option letter seen for each question, so we can
+        // normalize continued letter sequences (f,g,h,i,j → a,b,c,d,e)
+        $optionLetterStart = -1; // -1 = not yet seen any option for this question
+
+        // Track which Word list numId is being used for answer options in the current question.
+        // Any letter-list item with a DIFFERENT numId is treated as question body content.
+        $optionNumId = null;
 
         for ($i = 0; $i < $n; $i++) {
             $el   = $structured[$i];
@@ -137,19 +167,63 @@ class WordParserService
                 }
             }
 
-            // ── LETTER OPTION (a. / b. / … / e.) ─────────────────────────
-            if (preg_match('/^([A-Ea-e])[.\)]\s*(.+)/su', $line, $m)) {
-                $letter  = strtolower($m[1]);
-                $optText = trim($m[2]);
-                $optHtml = trim(preg_replace('/^[A-Ea-e][.\)]\s*/u', '', $htmlText));
+            // ── LETTER OPTION (a. / b. / … / any lowercase letter up to z) ──
+            // Word's auto-numbering may continue letter sequence across questions
+            // (e.g. Q1: a-e, Q2: f-j, Q3: k-o). We normalise to option_a…option_e
+            // by tracking where this question's first option letter starts.
+            //
+            // KEY DISTINCTION: if a lowerLetter list uses a DIFFERENT numId from the
+            // one already established as the answer-option list for this question, it
+            // is a body sub-list (e.g. embedded choices in the stem). Treat it as
+            // question body content, preserving its HTML prefix.
+            if (preg_match('/^([A-Za-z])[.\)]\s*(.+)/su', $line, $m)) {
+                $rawLetter  = strtolower($m[1]);
+                $optText    = trim($m[2]);
+                $optHtml    = trim(preg_replace('/^[A-Za-z][.\)]\s*/u', '', $htmlText));
+                $elNumId    = $el['numId']  ?? null;
+                $elNumFmt   = $el['numFmt'] ?? '';
 
-                if ($currentQ !== null && in_array($letter, ['a', 'b', 'c', 'd', 'e']) && $optText !== '') {
-                    $currentQ['option_' . $letter] = $optHtml;
-                    $lastOptLetter  = $letter;
-                    $questionDone   = true;
-                    $inQuestionBody = false;
-                    $this->log("  Option " . strtoupper($letter) . ": " . substr($optText, 0, 60));
-                    continue;
+                if ($currentQ !== null && $optText !== '') {
+                    $letterIdx = ord($rawLetter) - ord('a'); // 0=a,1=b,…
+
+                    // Record the starting letter of options for this question
+                    if ($optionLetterStart < 0) {
+                        $optionLetterStart = $letterIdx;
+                    }
+
+                    // Compute normalised slot (0→a, 1→b, …)
+                    $pos       = $letterIdx - $optionLetterStart;
+                    $slotNames = ['a', 'b', 'c', 'd', 'e'];
+
+                    $isValidSlot = ($pos >= 0 && $pos < count($slotNames));
+
+                    // Decide whether this is an answer option or a body sub-list item.
+                    // Rule: if $optionNumId is already established and this element's
+                    // numId differs, it's a body item — append to question_text.
+                    $isBodyItem = false;
+                    if ($elNumId !== null && $optionNumId !== null && $elNumId !== $optionNumId) {
+                        $isBodyItem = true;
+                    }
+
+                    if (!$isBodyItem && $isValidSlot) {
+                        // First option seen: lock in this numId as the option numId
+                        if ($optionNumId === null) {
+                            $optionNumId = $elNumId;
+                        }
+                        $slot = $slotNames[$pos];
+                        $currentQ['option_' . $slot] = $optHtml;
+                        $lastOptLetter  = $slot;
+                        $questionDone   = true;
+                        $inQuestionBody = false;
+                        $this->log("  Option " . strtoupper($slot) . " (raw:{$rawLetter}): " . substr($optText, 0, 60));
+                        continue;
+                    } elseif ($isBodyItem) {
+                        // Body sub-list item: append with its HTML prefix to question_text
+                        $currentQ['question_text'] .= '<br>' . $htmlText;
+                        $this->log("  BodyList (numId:{$elNumId}≠opt:{$optionNumId}): " . substr($line, 0, 60));
+                        continue;
+                    }
+                    // If $isValidSlot is false but not a body item, fall through to plain-text handling
                 }
             }
 
@@ -166,7 +240,7 @@ class WordParserService
                     $inQuestionBody && $number >= 1 && $number <= 20
                     && !$hasKeyword($text) && !$endsWithMarker($text)
                 ) {
-                    $currentQ['question_text'] .= "\n" . $htmlRaw;
+                    $currentQ['question_text'] .= '<br>' . $htmlRaw;
                     $this->log("  Step → question body: " . substr($text, 0, 50));
                     continue;
                 }
@@ -177,7 +251,12 @@ class WordParserService
                     || (!$questionDone && strlen($text) > 80);
 
                 if ($isNewQuestion) {
+                    // Before starting a new question, flush any accumulated plain choices
+                    $flushPlainChoices();
                     $saveCurrentQ();
+                    $pendingPlainChoices = [];
+                    $optionLetterStart = -1; // reset option letter tracking for new question
+                    $optionNumId       = null; // reset option list numId for new question
                     $lastQNumber    = $number;
                     $lastOptLetter  = null;
                     $questionDone   = false;
@@ -198,7 +277,7 @@ class WordParserService
                                 continue;
                             }
 
-                            if (preg_match('/^[A-Ea-e][.\)]\s*\S/u', $nxtRaw)) break;
+                            if (preg_match('/^[A-Za-z][.\)]\s*\S/u', $nxtRaw)) break;
 
                             if (preg_match('/^(\d+)[.\)]\s+(.+)/su', $nxtRaw, $nm)) {
                                 $nxtNum = (int) $nm[1];
@@ -211,7 +290,7 @@ class WordParserService
                                 }
                             }
 
-                            $fullHtml .= "\n" . $nxtHtml;
+                            $fullHtml .= '<br>' . $nxtHtml;
                             $i = $j;
 
                             if ($endsWithMarker($nxtRaw)) {
@@ -252,15 +331,16 @@ class WordParserService
             // ── Answer key ────────────────────────────────────────────────
             // Must be checked BEFORE plain-text append so "Jawaban: C" is
             // not accidentally appended to the last option's text.
-            // Supports single answer ("Jawaban: C") and multiple ("Jawaban: B,C,E")
             if (preg_match('/^(jawaban|answer|kunci)\s*:\s*([A-Ea-e](?:[,\s]+[A-Ea-e])*)/iu', $line, $am)) {
                 if ($currentQ !== null) {
-                    // Normalize to uppercase, comma-separated, no spaces
+                    // Flush any pending plain choices BEFORE storing the answer key
+                    $flushPlainChoices();
+
                     $raw    = preg_replace('/\s+/', '', strtoupper($am[2]));
-                    $currentQ['correct_answer'] = $raw; // e.g. "C" or "B,C,E"
+                    $currentQ['correct_answer'] = $raw;
                     $this->log("  Answer: " . $raw);
                 }
-                continue; // Do NOT fall through to plain-text append
+                continue;
             }
 
             // ── Points ────────────────────────────────────────────────────
@@ -275,17 +355,31 @@ class WordParserService
             // ── PLAIN TEXT: append to active context ─────────────────────
             if ($currentQ !== null) {
                 if ($questionDone && $lastOptLetter !== null) {
-                    $currentQ['option_' . $lastOptLetter] .= "\n" . $htmlText;
+                    // Continuation of last lettered option
+                    $currentQ['option_' . $lastOptLetter] .= '<br>' . $htmlText;
                 } elseif ($inQuestionBody || !$questionDone) {
-                    $currentQ['question_text'] .= "\n" . $htmlText;
-                    if ($endsWithMarker($line)) {
-                        $questionDone   = true;
-                        $inQuestionBody = false;
+                    // Check if this might be a plain-text choice (no A./B. prefix was ever set)
+                    // Heuristic: question body is done (endsWithMarker was seen or first para ended)
+                    // AND we have not yet collected any lettered option.
+                    $hasAnyOption = !empty($currentQ['option_a']) || !empty($currentQ['option_b']);
+
+                    if (!$inQuestionBody && $questionDone && !$hasAnyOption) {
+                        // Accumulate as plain-text choice
+                        $pendingPlainChoices[] = $htmlText;
+                        $this->log("  PlainChoice[" . count($pendingPlainChoices) . "]: " . substr($line, 0, 60));
+                    } else {
+                        $currentQ['question_text'] .= "\n" . $htmlText;
+                        if ($endsWithMarker($line)) {
+                            $questionDone   = true;
+                            $inQuestionBody = false;
+                        }
                     }
                 }
             }
         }
 
+        // Flush remaining plain choices and save last question
+        $flushPlainChoices();
         $saveCurrentQ();
 
         usort($questions, fn($a, $b) => ($a['question_number'] ?? 0) - ($b['question_number'] ?? 0));
@@ -471,15 +565,24 @@ class WordParserService
                         $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
                         $globalQCounter++;
                         $prefix = $globalQCounter . '. ';
-                    } elseif ($fmt === 'lowerLetter') {
+                    } elseif ($fmt === 'lowerLetter' || $fmt === 'upperLetter') {
                         $optCounters[$numId] = ($optCounters[$numId] ?? 0) + 1;
-                        $prefix = chr(96 + $optCounters[$numId]) . '. ';
+                        $letter = $fmt === 'upperLetter'
+                            ? chr(64 + $optCounters[$numId])
+                            : chr(96 + $optCounters[$numId]);
+                        $prefix = $letter . '. ';
                     } elseif ($fmt === 'decimal' && str_contains($lvlText, '(')) {
                         $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
                         $prefix = '(' . $numIdCounters[$numId] . ') ';
                     } elseif ($fmt === 'decimal') {
                         $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
                         $prefix = $numIdCounters[$numId] . '. ';
+                    } elseif ($fmt === 'lowerRoman' || $fmt === 'upperRoman') {
+                        $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
+                        $prefix = $numIdCounters[$numId] . '. ';
+                    } else {
+                        // Bullet or other symbol list
+                        $prefix = '• ';
                     }
                 }
 
@@ -543,9 +646,11 @@ class WordParserService
                 if ($plainFull === '') continue;
 
                 $elements[] = [
-                    'type' => 'text',
-                    'text' => $plainFull,
-                    'html' => $htmlFull,
+                    'type'    => 'text',
+                    'text'    => $plainFull,
+                    'html'    => $htmlFull,
+                    'numId'   => $numId,      // Word list numId (null for plain paragraphs)
+                    'numFmt'  => $fmt,         // e.g. 'lowerLetter', 'decimal', 'bullet', ''
                 ];
             }
 
