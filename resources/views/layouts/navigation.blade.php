@@ -4,7 +4,7 @@
         <div class="flex justify-between h-16">
             <div class="flex">
                 <!-- Logo -->
-                <!-- <div-- class="flex items-center shrink-0">
+                <!-- <div class="flex items-center shrink-0">
                     @if(auth()->user()->hasRole('admin'))
                         <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                             {{ __('Dashboard') }}

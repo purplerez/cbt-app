@@ -1100,30 +1100,32 @@
                 </div>
             `;
                             editContainer.appendChild(div);
-                            // Re-initialize TinyMCE for the new textarea
+                            // Re-initialize TinyMCE ONLY for the new textarea (avoid global remove)
                             setTimeout(() => {
-                                tinymce.remove();
-                                tinymce.init({
-                                    selector: '.tinymce-editor:not(.tox-hidden)',
-                                    license_key: 'gpl',
-                                    theme: 'silver',
-                                    plugins: [
-                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                                        'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
-                                        'fullscreen', 'insertdatetime', 'media', 'table', 'paste',
-                                        'help',
-                                        'wordcount'
-                                    ],
-                                    toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
-                                    menubar: 'file edit view insert format tools table help',
-                                    branding: false,
-                                    height: 300,
-                                    body_class: 'mce-content-body',
-                                    content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
-                                    paste_as_text: false,
-                                    valid_elements: '+*[*]',
-                                    valid_children: '+*[*]'
-                                });
+                                const newEditTextarea = div.querySelector('.tinymce-editor');
+                                if (newEditTextarea && typeof tinymce !== 'undefined') {
+                                    tinymce.init({
+                                        target: newEditTextarea,
+                                        license_key: 'gpl',
+                                        theme: 'silver',
+                                        plugins: [
+                                            'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                            'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                                            'fullscreen', 'insertdatetime', 'media', 'table', 'paste',
+                                            'help',
+                                            'wordcount'
+                                        ],
+                                        toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
+                                        menubar: 'file edit view insert format tools table help',
+                                        branding: false,
+                                        height: 300,
+                                        body_class: 'mce-content-body',
+                                        content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
+                                        paste_as_text: false,
+                                        valid_elements: '+*[*]',
+                                        valid_children: '+*[*]'
+                                    });
+                                }
                             }, 100);
                             renderEditAnswerKey();
                         });
@@ -1330,13 +1332,15 @@
                 const container = document.getElementById('choices-container');
                 const answerKeyContainer = document.getElementById('answer-key-container');
 
-                // Add choice
-                document.getElementById('add-choice').addEventListener('click', function() {
-                    choiceCounter++;
-                    let div = document.createElement('div');
-                    div.classList.add('choice-item');
-                    div.dataset.choiceId = choiceCounter;
-                    div.innerHTML = `
+                // Add choice — guard against missing button (when exam is inactive)
+                const addChoiceBtn = document.getElementById('add-choice');
+                if (addChoiceBtn) {
+                    addChoiceBtn.addEventListener('click', function() {
+                        choiceCounter++;
+                        let div = document.createElement('div');
+                        div.classList.add('choice-item');
+                        div.dataset.choiceId = choiceCounter;
+                        div.innerHTML = `
             <div class="flex items-start gap-2">
                 <div class="flex-1">
                     <textarea name="choices[${choiceCounter}]" rows="3"
@@ -1359,33 +1363,36 @@
                 </button>
             </div>
         `;
-                    container.appendChild(div);
-                    // Re-initialize TinyMCE for the new textarea
-                    setTimeout(() => {
-                        tinymce.remove();
-                        tinymce.init({
-                            selector: '.tinymce-editor:not(.tox-hidden)',
-                            license_key: 'gpl',
-                            theme: 'silver',
-                            plugins: [
-                                'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
-                                'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
-                                'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
-                                'wordcount'
-                            ],
-                            toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
-                            menubar: 'file edit view insert format tools table help',
-                            branding: false,
-                            height: 300,
-                            body_class: 'mce-content-body',
-                            content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
-                            paste_as_text: false,
-                            valid_elements: '+*[*]',
-                            valid_children: '+*[*]'
-                        });
-                    }, 100);
-                    renderAnswerKey();
-                });
+                        container.appendChild(div);
+                        // Re-initialize TinyMCE ONLY for the new textarea (avoid global remove)
+                        setTimeout(() => {
+                            const newTextarea = div.querySelector('.tinymce-editor');
+                            if (newTextarea && typeof tinymce !== 'undefined') {
+                                tinymce.init({
+                                    target: newTextarea,
+                                    license_key: 'gpl',
+                                    theme: 'silver',
+                                    plugins: [
+                                        'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
+                                        'preview', 'anchor', 'searchreplace', 'visualblocks', 'code',
+                                        'fullscreen', 'insertdatetime', 'media', 'table', 'paste', 'help',
+                                        'wordcount'
+                                    ],
+                                    toolbar: 'undo redo | formatselect | bold italic underline strikethrough | alignleft aligncenter alignright | bullist numlist outdent indent | link image media | code fullscreen help',
+                                    menubar: 'file edit view insert format tools table help',
+                                    branding: false,
+                                    height: 300,
+                                    body_class: 'mce-content-body',
+                                    content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
+                                    paste_as_text: false,
+                                    valid_elements: '+*[*]',
+                                    valid_children: '+*[*]'
+                                });
+                            }
+                        }, 100);
+                        renderAnswerKey();
+                    });
+                }
 
                 // Keep track of selected answer keys
                 let selectedAnswerKeys = [];
@@ -1450,12 +1457,16 @@
 
 
             <script>
-                // Cache DOM elements for better performance
-                const tabPanes = document.querySelectorAll('.tab-pane');
-                const tabButtons = document.querySelectorAll('[data-tab]');
-                const modalButtons = document.querySelectorAll('button[data-modal-target]');
+                // Declare vars at outer scope so showTab() can access them,
+                // but assign inside DOMContentLoaded to guarantee DOM is ready.
+                let tabPanes, tabButtons, modalButtons;
 
                 document.addEventListener('DOMContentLoaded', function() {
+                    // Initialise cached DOM queries here, after DOM is fully parsed
+                    tabPanes = document.querySelectorAll('.tab-pane');
+                    tabButtons = document.querySelectorAll('[data-tab]');
+                    modalButtons = document.querySelectorAll('button[data-modal-target]');
+
                     // Handle success message auto-hide
                     const successMessage = document.getElementById('successMessage');
                     if (successMessage) {
