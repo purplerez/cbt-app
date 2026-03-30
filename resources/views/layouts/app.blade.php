@@ -30,7 +30,7 @@
     <!-- TinyMCE Editor -->
     {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
-    <!-- Place the first <script> tag in your HTML's <head> -->
+    <!-- Place the first <script> tag in your HTML's head -->
 <script src="https://cdn.tiny.cloud/1/eso9axupoonw3lceemtkaw5mpn9lz62tx369lo49hmza0bzh/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 
 

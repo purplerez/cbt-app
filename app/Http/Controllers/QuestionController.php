@@ -144,7 +144,7 @@ class QuestionController extends Controller
             logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Membuat Soal Baru' . session('perexamname'));
 
 
-            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil ditambahkan. <script>setTimeout(function(){ showTab(\'soal\'); }, 100);</script>');
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil ditambahkan.')->with('tab', 'soal');
         } catch (\Exception $e) {
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal menambahkan soal : ' . $e->getMessage()]);
         }
@@ -332,7 +332,7 @@ class QuestionController extends Controller
 
             DB::commit();
 
-            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dirubah. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+            return redirect()->route($roleRoutes[$role], session('perexamid'))->with('success', 'Soal berhasil dirubah.')->with('tab', 'banksoal');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Merubah soal :' . $e->getMessage()]);
@@ -378,7 +378,7 @@ class QuestionController extends Controller
             logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil menghapus soal ' . session('perexamname'));
 
             return redirect()->route($roleRoutes[$role], session('perexamid'))
-                ->with('success', 'Soal berhasil dihapus. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+                ->with('success', 'Soal berhasil dihapus.')->with('tab', 'banksoal');
 
         } catch (\Exception $e) {
             return redirect()->route($roleRoutes[$role], session('perexamid'))
@@ -433,7 +433,7 @@ class QuestionController extends Controller
 
     //         return redirect()
     //             ->route('admin.exams.manage.question', session('perexamid'))
-    //             ->with('success', 'Soal berhasil diimport. <script>setTimeout(function(){ showTab(\'banksoal\'); }, 100);</script>');
+    //             ->with('success', 'Soal berhasil diimport.')->with('tab', 'banksoal');
 
     //     } catch (ValidationException $e) {
     //         DB::rollBack();
