@@ -28,6 +28,38 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Fallback route to serve storage files on shared hosting where symlinks may not work.
+// This route only activates when public/storage symlink does NOT exist.
+Route::get('/storage/{path}', function (string $path) {
+    $symlinkExists = is_link(public_path('storage'));
+    if ($symlinkExists) {
+        abort(404); // Let the web server handle it via the symlink
+    }
+
+    $fullPath = storage_path('app/public/' . $path);
+
+    if (!file_exists($fullPath) || !is_file($fullPath)) {
+        abort(404);
+    }
+
+    $mimeTypes = [
+        'jpg'  => 'image/jpeg',
+        'jpeg' => 'image/jpeg',
+        'png'  => 'image/png',
+        'gif'  => 'image/gif',
+        'webp' => 'image/webp',
+        'svg'  => 'image/svg+xml',
+        'pdf'  => 'application/pdf',
+        'doc'  => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    ];
+
+    $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+    $mimeType = $mimeTypes[$ext] ?? mime_content_type($fullPath) ?? 'application/octet-stream';
+
+    return response()->file($fullPath, ['Content-Type' => $mimeType]);
+})->where('path', '.*');
+
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
 // })->middleware(['auth', 'verified'])->name('dashboard');
@@ -171,6 +203,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
+    Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
 
     // Route for users management
     Route::get('users', [UserManagementController::class, 'index'])->name('users');
@@ -372,7 +405,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
 
     // Route for user login reset
-    Route::get('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
     
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
@@ -485,6 +518,10 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
         ->name('exam-sessions.force-submit-multiple');
     Route::get('exams/{exam}/incomplete-sessions', [\App\Http\Controllers\ForceSubmitController::class, 'getIncompleteSessions'])
         ->name('exams.incomplete-sessions');
+        
+    // Route for exam session details
+    Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
+    Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
 
     // Questions, Results, Settings routes
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
