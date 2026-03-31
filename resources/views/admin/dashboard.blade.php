@@ -50,8 +50,11 @@
                         <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+                        <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]">
                             <option value="">— Pilih Ujian —</option>
+                        </select>
+                        <select id="school-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]" disabled>
+                            <option value="">— Semua Sekolah —</option>
                         </select>
                         {{-- Count badges --}}
                         <span class="hidden sm:flex items-center gap-2 text-xs" id="monitor-counts">
@@ -170,7 +173,36 @@ async function fetchActiveExams() {
     } catch(e) { console.error('Exams error:', e); }
 }
 
-// ── MONITOR TABLE ──────────────────────────────────────────────────
+function onExamSelectChange() {
+    const examId = document.getElementById('exam-select').value;
+    const schoolSel = document.getElementById('school-select');
+    
+    // Reset school select content & load new
+    schoolSel.innerHTML = '<option value="">— Semua Sekolah —</option>';
+    if (!examId) {
+        schoolSel.disabled = true;
+        loadMonitor();
+        return;
+    }
+    schoolSel.disabled = false;
+    fetchSchoolsForExam(examId);
+    loadMonitor();
+}
+
+async function fetchSchoolsForExam(examId) {
+    try {
+        const r = await fetch(`/api/admin/dashboard/exams/${examId}/schools`, { headers });
+        const list = await r.json();
+        const sel = document.getElementById('school-select');
+        (list || []).forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.id;
+            opt.textContent = s.name;
+            sel.appendChild(opt);
+        });
+    } catch(e) { console.error('Schools fetch error:', e); }
+}
+
 function loadMonitor() {
     const examId = document.getElementById('exam-select').value;
     if (!examId) {
@@ -187,7 +219,8 @@ async function fetchMonitor(examId) {
     try {
         document.getElementById('monitor-body').innerHTML =
             '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
-        const r = await fetch(`/api/admin/monitor/exam/${examId}/participants`, { headers });
+        const schoolQuery = document.getElementById('school-select').value ? `?school_id=${document.getElementById('school-select').value}` : '';
+        const r = await fetch(`/api/admin/monitor/exam/${examId}/participants${schoolQuery}`, { headers });
         const res = await r.json();
         if (!res.success) throw new Error(res.error);
 

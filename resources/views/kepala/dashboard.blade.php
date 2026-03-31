@@ -121,18 +121,7 @@
         </div>
     </div>
 
-    {{-- ── FORCE SUBMIT MODAL ── --}}
-    <div id="force-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
-        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
-            <h4 class="text-base font-semibold text-gray-800 mb-2">Force Submit Ujian</h4>
-            <p class="text-sm text-gray-600 mb-1">Yakin ingin paksa submit ujian untuk:</p>
-            <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-force-name">—</p>
-            <div class="flex gap-3 justify-end">
-                <button onclick="closeForceModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
-                <button onclick="confirmForce()" id="confirm-force-btn" class="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Force Submit</button>
-            </div>
-        </div>
-    </div>
+
 
 @push('scripts')
 <script>
@@ -200,10 +189,8 @@ async function fetchMonitor(examId) {
                 <td class="px-4 py-3">${badge}</td>
                 <td class="px-4 py-3">${timeD}</td>
                 <td class="px-4 py-3">${score}</td>
-                <td class="px-4 py-3"><div class="flex gap-1.5">
-                    ${p.session_id ? `<a href="/kepala/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${parseInt(p.is_active) === 0 ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
-                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForce(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
+                <td class="px-4 py-3"><div class="flex gap-1.5 cursor-default">
+                    ${parseInt(p.is_active) === 0 ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition cursor-pointer">Reset</button>` : ''}
                 </div></td>
             </tr>`;
         }).join('');
@@ -244,8 +231,6 @@ function fmtTime(s) { return `${String(Math.floor(s/60)).padStart(2,'0')}:${Stri
 // ── MODALS ─────────────────────────────────────────────────────────
 function openReset(nis, name)      { currentNis=nis; document.getElementById('modal-student-name').textContent=name+' (NIS: '+nis+')'; document.getElementById('reset-modal').classList.remove('hidden'); }
 function closeResetModal()          { document.getElementById('reset-modal').classList.add('hidden'); }
-function openForce(sid, name)       { currentSessionId=sid; document.getElementById('modal-force-name').textContent=name; document.getElementById('force-modal').classList.remove('hidden'); }
-function closeForceModal()          { document.getElementById('force-modal').classList.add('hidden'); }
 
 async function confirmReset() {
     const btn = document.getElementById('confirm-reset-btn'); btn.disabled=true; btn.textContent='Mereset...';
@@ -255,14 +240,7 @@ async function confirmReset() {
     } catch(e) { toast('error','Gagal mereset login.'); } finally { btn.disabled=false; btn.textContent='Reset Login'; }
 }
 
-async function confirmForce() {
-    const btn = document.getElementById('confirm-force-btn'); btn.disabled=true; btn.textContent='Memproses...';
-    try {
-        const r = await fetch('/kepala/force-submit', { method:'POST', headers:{...HEADERS,'X-CSRF-TOKEN':CSRF,'Content-Type':'application/json'}, body:JSON.stringify({exam_session_id:currentSessionId}) });
-        const res = await r.json(); closeForceModal(); toast(res.success?'success':'error', res.message);
-        if (res.success) loadMonitor();
-    } catch(e) { toast('error','Gagal force submit.'); } finally { btn.disabled=false; btn.textContent='Force Submit'; }
-}
+
 
 // ── HELPERS ────────────────────────────────────────────────────────
 function esc(str) { if(!str) return '—'; return str.toString().replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
