@@ -58,7 +58,10 @@ Route::get('/storage/{path}', function (string $path) {
 
 // Route utility to force recreate the symlink on hosting (bypass terminal)
 Route::get('/force-symlink', function () {
-    $link = public_path('storage');
+    // Karena aplikasi jalan di /home/user/repositories/cbt-app
+    // Tapi web domain mengarah ke /home/user/public_html/cbt-app/public
+    // Kita arahkan target symlink ke public_html
+    $link = base_path('../../public_html/cbt-app/public/storage');
     $target = storage_path('app/public');
     
     // Remove if exists (handle both file/symlink and actual directory cases)
@@ -73,9 +76,9 @@ Route::get('/force-symlink', function () {
     // Create new
     try {
         symlink($target, $link);
-        return "SUKSES! Symlink berhasil dibuat otomatis menuju storage/app/public.";
+        return "SUKSES SUPER! Symlink berhasil dibuat tepat di jantung cPanel Anda: {$link}";
     } catch (\Exception $e) {
-        return "GAGAL Membuat symlink: " . $e->getMessage() . "<br>Silakan lanjutkan saja menggunakan fallback route (otomatis).";
+        return "GAGAL Membuat symlink: " . $e->getMessage() . "<br>Periksa ulang hak akses.";
     }
 });
 
