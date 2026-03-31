@@ -159,7 +159,7 @@
                     <tr>
                         <td colspan=2 style="font-family: Times New Roman; font-size: 9pt; padding-top : 10px; border-top : solid 1px black;">
                             <div class="info-row">
-                                <span class="info-label">NISN</span>
+                                <span class="info-label">User/Password</span>
                                 <span class="email">: {{ $student['email'] }}</span>
                             </div>
 
