@@ -40,7 +40,11 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Kita ganti root storage-nya langsung ke menembak arah fisik `public_html` hosting
+            // karena cPanel melarang symlink Nginx/Apache.
+            'root' => env('APP_ENV') === 'production' 
+                        ? base_path('../../public_html/cbt-app/public/storage') 
+                        : storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
             'throw' => false,
