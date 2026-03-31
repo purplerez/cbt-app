@@ -29,13 +29,9 @@ Route::get('/', function () {
 });
 
 // Fallback route to serve storage files on shared hosting where symlinks may not work.
-// This route only activates when public/storage symlink does NOT exist.
+// If this route is hit, it means the web server (Nginx/Apache) couldn't find the file, 
+// likely due to a missing or broken symlink. We'll simply try to serve it directly.
 Route::get('/storage/{path}', function (string $path) {
-    $symlinkExists = is_link(public_path('storage'));
-    if ($symlinkExists) {
-        abort(404); // Let the web server handle it via the symlink
-    }
-
     $fullPath = storage_path('app/public/' . $path);
 
     if (!file_exists($fullPath) || !is_file($fullPath)) {
@@ -59,6 +55,25 @@ Route::get('/storage/{path}', function (string $path) {
 
     return response()->file($fullPath, ['Content-Type' => $mimeType]);
 })->where('path', '.*');
+
+// Route utility to force recreate the symlink on hosting (bypass terminal)
+Route::get('/force-symlink', function () {
+    $link = public_path('storage');
+    $target = storage_path('app/public');
+    
+    // Remove if exists
+    if (file_exists($link) || is_link($link)) {
+        unlink($link);
+    }
+    
+    // Create new
+    try {
+        symlink($target, $link);
+        return "SUKSES! Symlink berhasil dibuat otomatis menuju storage/app/public.";
+    } catch (\Exception $e) {
+        return "GAGAL Membuat symlink: " . $e->getMessage() . "<br>Silakan lanjutkan saja menggunakan fallback route (otomatis).";
+    }
+});
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
