@@ -23,6 +23,8 @@
 
                         </div>
 
+                        {{-- test --}}
+
                         <div class="grid grid-cols-1 gap-4">
                             <div class="flex items-start py-3 space-x-4 transition-colors border-b border-gray-100 rounded-md hover:bg-gray-50">
                                 <span class="w-32 font-semibold text-gray-700 sm:w-40">Nama Madrasah</span>
