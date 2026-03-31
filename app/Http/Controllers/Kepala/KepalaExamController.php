@@ -435,8 +435,8 @@ class KepalaExamController extends Controller
 
             $headmaster = Headmaster::where('school_id', $schoolId)->first();
 
-            $logoPath = storage_path('app/public/' . $school->logo);
-
+            $logoPath = storage_path('public/' . $school->logo);
+            //public/assets/images/school/default.png
             $logo = null;
             if (file_exists($logoPath)) {
                 $logo = base64_encode(file_get_contents($logoPath));
