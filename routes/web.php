@@ -61,9 +61,13 @@ Route::get('/force-symlink', function () {
     $link = public_path('storage');
     $target = storage_path('app/public');
     
-    // Remove if exists
+    // Remove if exists (handle both file/symlink and actual directory cases)
     if (file_exists($link) || is_link($link)) {
-        unlink($link);
+        if (is_link($link) || is_file($link)) {
+            unlink($link);
+        } elseif (is_dir($link)) {
+            \Illuminate\Support\Facades\File::deleteDirectory($link);
+        }
     }
     
     // Create new
