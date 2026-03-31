@@ -791,7 +791,15 @@
 
         @push('scripts')
             <script>
+                @if(auth()->user()->hasRole('super'))
+                window.examSessionDetailUrl = "{{ route('super.exam-sessions.detail', ['examSession' => ':id']) }}";
+                window.forceSubmitBaseUrl   = "{{ url('/super/exam-sessions') }}";
+                window.resetLoginBaseUrl    = "{{ url('/super/exam-sessions') }}";
+                @else
                 window.examSessionDetailUrl = "{{ route('admin.exam-sessions.detail', ['examSession' => ':id']) }}";
+                window.forceSubmitBaseUrl   = "{{ url('/admin/exam-sessions') }}";
+                window.resetLoginBaseUrl    = "{{ url('/admin/exam-sessions') }}";
+                @endif
             </script>
             <!-- Participant Logs Management -->
             <script src="{{ asset('js/participant-logs.js') }}"></script>

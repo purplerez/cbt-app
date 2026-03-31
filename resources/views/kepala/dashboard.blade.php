@@ -202,7 +202,7 @@ async function fetchMonitor(examId) {
                 <td class="px-4 py-3">${score}</td>
                 <td class="px-4 py-3"><div class="flex gap-1.5">
                     ${p.session_id ? `<a href="/kepala/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    <button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>
+                    ${parseInt(p.is_active) === 0 ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
                     ${p.session_id && p.status === 'progress' ? `<button onclick="openForce(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
                 </div></td>
             </tr>`;

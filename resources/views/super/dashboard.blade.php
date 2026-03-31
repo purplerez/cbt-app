@@ -154,8 +154,9 @@ async function fetchMonitor(examId) {
                 <td class="px-4 py-3 text-xs text-gray-500">${escHtml(p.school||'—')}</td>
                 <td class="px-4 py-3">${badge}</td>
                 <td class="px-4 py-3">${timeD}</td>
-                <td class="px-4 py-3">${p.score !== null ? `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` : '—'}</td>
-                <td class="px-4 py-3"><button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button></td>
+                <td class="px-4 py-3">
+                    ${parseInt(p.is_active) === 0 ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
+                </td>
             </tr>`;
         }).join('');
         startTimerTick();

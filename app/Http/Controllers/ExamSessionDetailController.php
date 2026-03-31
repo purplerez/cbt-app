@@ -142,27 +142,26 @@ class ExamSessionDetailController extends Controller
             $student = Student::where('nis', $studentNis)->firstOrFail();
             $user    = $student->user;
 
-            // Reactivate the user account
-            $user->is_active = 1;
+            // Lock the user account so the student cannot log in again
+            // (is_active = 0 means locked; admin must manually re-enable via the Reset Login button)
+            $user->is_active = 0;
             $user->save();
-
-            // Revoke all Sanctum tokens so student gets a fresh login
-            $user->tokens()->delete();
 
             // Log who performed the reset
             $actor = auth()->user();
             logActivity(
-                $actor->name . ' (ID: ' . $actor->id . ') Reset login untuk siswa ' .
+                $actor->name . ' (ID: ' . $actor->id . ') Kunci login untuk siswa ' .
                 $student->name . ' (NIS: ' . $student->nis . ')'
             );
 
             // Return JSON for AJAX calls from dashboard monitoring panel
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
-                    'success' => true,
-                    'message' => 'Login siswa ' . $student->name . ' berhasil direset.',
+                    'success'      => true,
+                    'message'      => 'Akun siswa ' . $student->name . ' berhasil dikunci (is_active = 0).',
                     'student_name' => $student->name,
-                    'nis' => $student->nis,
+                    'nis'          => $student->nis,
+                    'is_active'    => 0,
                 ]);
             }
 
@@ -172,19 +171,19 @@ class ExamSessionDetailController extends Controller
                 $routePrefix = auth()->user()->hasRole('kepala') ? 'kepala' : 'guru';
                 return redirect()
                     ->route($routePrefix . '.exam-sessions.detail', $latestSession->id)
-                    ->with('success', 'Login siswa berhasil direset.');
+                    ->with('success', 'Akun siswa berhasil dikunci.');
             }
 
-            return redirect()->back()->with('success', 'Login siswa berhasil direset.');
+            return redirect()->back()->with('success', 'Akun siswa berhasil dikunci.');
 
         } catch (\Exception $e) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal reset login: ' . $e->getMessage(),
+                    'message' => 'Gagal mengunci akun: ' . $e->getMessage(),
                 ], 500);
             }
-            return redirect()->back()->with('error', 'Gagal reset login: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal mengunci akun: ' . $e->getMessage());
         }
     }
 }
