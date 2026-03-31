@@ -24,13 +24,21 @@ class DashboardStatisticsController extends Controller
                 $totalSchools    = School::count();
                 $activeSchools   = School::has('students')->count();
 
-                // Students currently in exam (active sessions)
+                // Students currently in exam (active sessions, valid today)
                 $studentsInExam = ExamSession::where('status', 'progress')
+                    ->whereHas('exam', function ($q) {
+                        $q->whereDate('start_date', '<=', Carbon::today())
+                          ->whereDate('end_date', '>=', Carbon::today());
+                    })
                     ->distinct('user_id')
                     ->count('user_id');
 
                 // Active unique exams right now
                 $activeExams = ExamSession::where('status', 'progress')
+                    ->whereHas('exam', function ($q) {
+                        $q->whereDate('start_date', '<=', Carbon::today())
+                          ->whereDate('end_date', '>=', Carbon::today());
+                    })
                     ->distinct('exam_id')
                     ->count('exam_id');
 
@@ -82,11 +90,29 @@ class DashboardStatisticsController extends Controller
                 ->pluck('exam_id');
 
             $exams = Exam::whereIn('id', $activeExamIds)
+                ->whereDate('start_date', '<=', Carbon::today())
+                ->whereDate('end_date', '>=', Carbon::today())
                 ->select('id', 'title')
                 ->get()
                 ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
 
             return response()->json($exams);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Get list of schools that have participants for a specific exam
+     */
+    public function getSchoolsByExam(int $examId): JsonResponse
+    {
+        try {
+            $schools = School::whereHas('students.user.preassigned', function ($query) use ($examId) {
+                $query->where('exam_id', $examId);
+            })->select('id', 'name')->orderBy('name')->get();
+
+            return response()->json($schools);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

@@ -51,7 +51,7 @@ class DashboardMonitorController extends Controller
                     'started_at'   => $session->started_at?->format('H:i:s'),
                     'score'        => $session->status === 'submited' ? $session->total_score : null,
                     'ip_address'   => $session->ip_address,
-                    'is_active'    => $session->user?->is_active ?? 0,
+                    'is_active'    => (isset($session->user) && $session->user->is_active !== 1 && $session->user->is_active !== true) ? 0 : 1,
                 ];
             });
 
@@ -78,7 +78,7 @@ class DashboardMonitorController extends Controller
                 'started_at'     => null,
                 'score'          => null,
                 'ip_address'     => null,
-                'is_active'      => $student->user?->is_active ?? 0,
+                'is_active'      => (isset($student->user) && $student->user->is_active !== 1 && $student->user->is_active !== true) ? 0 : 1,
             ]);
 
             $all = $sessions->concat($notStarted)->sortBy('name')->values();

@@ -68,8 +68,12 @@ class KepalaApiDashboardController extends Controller
             // Get total grades
             $totalGrades = Grade::where('school_id', $schoolId)->count();
 
-            // Get active exams (exam_sessions with progress status for this school)
+            // Get active exams (exam_sessions with progress status for this school, only valid for today)
             $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
+                ->whereHas('exam', function ($q) {
+                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
+                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+                })
                 ->whereHas('user.student', function ($q) use ($schoolId) {
                     $q->where('school_id', $schoolId);
                 })
@@ -78,6 +82,10 @@ class KepalaApiDashboardController extends Controller
 
             // Get active participant count
             $activeParticipants = ExamSession::where('status', 'progress')
+                ->whereHas('exam', function ($q) {
+                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
+                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+                })
                 ->whereHas('user.student', function ($q) use ($schoolId) {
                     $q->where('school_id', $schoolId);
                 })
@@ -185,6 +193,10 @@ class KepalaApiDashboardController extends Controller
             // Get exam sessions that are in progress for this school
             $sessions = ExamSession::with(['exam', 'user.student.grade'])
                 ->where('status', 'progress')
+                ->whereHas('exam', function ($q) {
+                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
+                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+                })
                 ->whereHas('user.student', function ($q) use ($schoolId) {
                     $q->where('school_id', $schoolId);
                 })
@@ -256,7 +268,7 @@ class KepalaApiDashboardController extends Controller
                         'started_at'     => $session->started_at?->format('H:i:s'),
                         'score'          => $session->status === 'submited' ? $session->total_score : null,
                         'ip_address'     => $session->ip_address,
-                        'is_active'      => $session->user?->is_active ?? 0,
+                        'is_active'      => (isset($session->user) && $session->user->is_active !== 1 && $session->user->is_active !== true) ? 0 : 1,
                     ];
                 });
 
@@ -277,7 +289,7 @@ class KepalaApiDashboardController extends Controller
                     'started_at'     => null,
                     'score'          => null,
                     'ip_address'     => null,
-                    'is_active'      => $student->user?->is_active ?? 0,
+                    'is_active'      => (isset($student->user) && $student->user->is_active !== 1 && $student->user->is_active !== true) ? 0 : 1,
                 ]);
 
             $all = $sessions->concat($notStarted)->sortBy('name')->values();

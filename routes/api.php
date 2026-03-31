@@ -32,6 +32,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
         ->name('dashboard.stats');
     Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
         ->name('dashboard.active-exams');
+    Route::get('/dashboard/exams/{examId}/schools', [DashboardStatisticsController::class, 'getSchoolsByExam'])
+        ->name('dashboard.exam-schools');
 
     // Live monitoring routes
     Route::get('/monitor/exam/{examId}/participants', [DashboardMonitorController::class, 'participants'])
