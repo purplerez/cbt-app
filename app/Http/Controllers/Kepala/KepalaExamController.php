@@ -432,11 +432,12 @@ class KepalaExamController extends Controller
 
             // Get school info
             $school = School::findOrFail($schoolId);
-
             $headmaster = Headmaster::where('school_id', $schoolId)->first();
 
-            $logoPath = storage_path('public/' . $school->logo);
-            //public/assets/images/school/default.png
+            // Gunakan fungsi path asli bawaan Storage agar dia secara otomatis 
+            // menembak ke public_html saat di server, dan ke app/public saat di lokal.
+            $logoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($school->logo);
+
             $logo = null;
             if (file_exists($logoPath)) {
                 $logo = base64_encode(file_get_contents($logoPath));
