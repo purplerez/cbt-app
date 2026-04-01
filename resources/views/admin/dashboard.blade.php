@@ -251,9 +251,9 @@ async function fetchMonitor(examId) {
             const actions = `
                 <div class="flex gap-1.5">
                     ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${parseInt(p.is_active) === 0 ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
+                    ${parseInt(p.is_active) === 1 ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
                         class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
-                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}'))"
+                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
                         class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
                 </div>`;
 
@@ -339,7 +339,7 @@ async function confirmReset() {
     const btn = document.getElementById('confirm-reset-btn');
     btn.disabled = true; btn.textContent = 'Mereset...';
     try {
-        const r = await fetch(`/kepala/exam-sessions/${currentStudentNis}/reset`, {
+        const r = await fetch(`/admin/exam-sessions/${currentStudentNis}/reset`, {
             method: 'POST',
             headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' }
         });
@@ -366,10 +366,9 @@ async function confirmForce() {
     const btn = document.getElementById('confirm-force-btn');
     btn.disabled = true; btn.textContent = 'Memproses...';
     try {
-        const r = await fetch('/kepala/force-submit', {
+        const r = await fetch(`/admin/exam-sessions/${currentSessionId}/force-submit`, {
             method: 'POST',
-            headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ exam_session_id: currentSessionId })
+            headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' }
         });
         const res = await r.json();
         closeForceModal();
