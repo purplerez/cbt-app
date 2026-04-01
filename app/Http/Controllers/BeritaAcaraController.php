@@ -376,14 +376,18 @@ class BeritaAcaraController extends Controller
 
         $head = Headmaster::where('school_id', session('school_id'))->first();
 
-        $logoPath = storage_path('app/public/' . $beritaAcara->school->logo);
+        $logoPath = $beritaAcara->school?->logo 
+            ? storage_path('app/public/' . $beritaAcara->school->logo) 
+            : null;
 
         $logo = null;
-        if (file_exists($logoPath)) {
+        if ($logoPath && is_file($logoPath)) {
             $logo = base64_encode(file_get_contents($logoPath));
-        }
-        else{
-            $logo = base64_encode(file_get_contents(storage_path('app/public/assets/images/school/default.png')));
+        } else {
+            $defaultLogoPath = storage_path('app/public/assets/images/school/default.png');
+            if (is_file($defaultLogoPath)) {
+                $logo = base64_encode(file_get_contents($defaultLogoPath));
+            }
         }
 
         $pdf = Pdf::loadView('berita-acara.pdf', compact('beritaAcara', 'head', 'logo'))
@@ -450,11 +454,18 @@ class BeritaAcaraController extends Controller
         // Get students from the room, grouped by grade
         $studentsByGrade = [];
 
-        $logoPath = storage_path('app/public/' . $beritaAcara->school->logo);
+        $logoPath = $beritaAcara->school?->logo 
+            ? storage_path('app/public/' . $beritaAcara->school->logo) 
+            : null;
 
         $logo = null;
-        if (file_exists($logoPath)) {
+        if ($logoPath && is_file($logoPath)) {
             $logo = base64_encode(file_get_contents($logoPath));
+        } else {
+            $defaultLogoPath = storage_path('app/public/assets/images/school/default.png');
+            if (is_file($defaultLogoPath)) {
+                $logo = base64_encode(file_get_contents($defaultLogoPath));
+            }
         }
 
         if ($beritaAcara->room_id) {
@@ -479,11 +490,11 @@ class BeritaAcaraController extends Controller
             $studentsByGrade = $students->groupBy('grade_name');
         } else {
             // If no room specified, get all students registered for this exam
-            $students = DB::table('preassigned')
-                ->join('students', 'preassigned.student_id', '=', 'students.id')
+            $students = DB::table('preassigneds')
+                ->join('students', 'preassigneds.user_id', '=', 'students.user_id')
                 ->join('grades', 'students.grade_id', '=', 'grades.id')
-                ->where('preassigned.exam_id', $beritaAcara->exam_id)
-                ->where('preassigned.school_id', $beritaAcara->school_id)
+                ->where('preassigneds.exam_id', $beritaAcara->exam_id)
+                ->where('students.school_id', $beritaAcara->school_id)
                 ->select(
                     'students.id',
                     'students.nis',
