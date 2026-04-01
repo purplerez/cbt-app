@@ -80,11 +80,15 @@ class BeritaAcaraController extends Controller
 
         $examTypes = Examtype::where('is_active', '1')->get();
         $exams = Exam::where('is_active', '1')->get();
-       $rooms = Rooms::join('exam_types', 'rooms.exam_type_id', '=', 'exam_types.id')
+        $roomsQuery = Rooms::join('exam_types', 'rooms.exam_type_id', '=', 'exam_types.id')
                 ->select('rooms.*')
-                ->where('rooms.school_id', $defaultSchoolId)
-                ->where('exam_types.is_active', '1')
-                ->get();
+                ->where('exam_types.is_active', '1');
+                
+        if ($defaultSchoolId) {
+            $roomsQuery->where('rooms.school_id', $defaultSchoolId);
+        }
+        
+        $rooms = $roomsQuery->get();
 
         // Get teachers for pengawas
         //$teachers = User::role(['guru', 'kepala'])->get();

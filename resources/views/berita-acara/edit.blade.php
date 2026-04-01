@@ -49,7 +49,7 @@
                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">Pilih Mata Pelajaran (Optional)</option>
                                     @foreach($exams as $exam)
-                                        <option value="{{ $exam->id }}" {{ (old('exam_id') ?? $beritaAcara->exam_id) == $exam->id ? 'selected' : '' }}>
+                                        <option value="{{ $exam->id }}" data-exam-type="{{ $exam->exam_type_id }}" {{ (old('exam_id') ?? $beritaAcara->exam_id) == $exam->id ? 'selected' : '' }}>
                                             {{ $exam->title }}
                                         </option>
                                     @endforeach
@@ -84,7 +84,7 @@
                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
                                     <option value="">Pilih Ruangan (Optional)</option>
                                     @foreach($rooms as $room)
-                                        <option value="{{ $room->id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
+                                        <option value="{{ $room->id }}" data-exam-type="{{ $room->exam_type_id }}" data-school="{{ $room->school_id }}" {{ old('room_id') == $room->id ? 'selected' : '' }}>
                                             {{ $room->nama_ruangan }}
                                         </option>
                                     @endforeach
@@ -335,6 +335,50 @@
                 document.getElementById('jumlah_peserta_tidak_hadir').value = Math.max(0, terdaftar - hadir);
             });
         });
+
+        // Dependent Dropdowns Logic
+        const examTypeSelect = document.getElementById('exam_type_id');
+        const examSelect = document.getElementById('exam_id');
+        const schoolSelect = document.getElementById('school_id');
+        const roomSelect = document.getElementById('room_id');
+
+        const allExams = Array.from(examSelect.querySelectorAll('option'));
+        const allRooms = Array.from(roomSelect.querySelectorAll('option'));
+
+        function updateDropdowns() {
+            const selectedExamType = examTypeSelect.value;
+            const selectedSchool = schoolSelect.value;
+
+            const currentExam = examSelect.value;
+            const currentRoom = roomSelect.value;
+
+            examSelect.innerHTML = '';
+            roomSelect.innerHTML = '';
+
+            allExams.forEach(opt => {
+                if (!opt.value || opt.dataset.examType === selectedExamType) {
+                    examSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+
+            allRooms.forEach(opt => {
+                if (!opt.value || (opt.dataset.examType === selectedExamType && opt.dataset.school === selectedSchool)) {
+                    roomSelect.appendChild(opt.cloneNode(true));
+                }
+            });
+
+            examSelect.value = currentExam;
+            if(!examSelect.value) examSelect.value = '';
+            
+            roomSelect.value = currentRoom;
+            if(!roomSelect.value) roomSelect.value = '';
+        }
+
+        examTypeSelect.addEventListener('change', updateDropdowns);
+        schoolSelect.addEventListener('change', updateDropdowns);
+
+        // Run on load
+        updateDropdowns();
     </script>
     @endpush
 </x-app-layout>
