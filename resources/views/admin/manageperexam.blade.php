@@ -1775,76 +1775,86 @@
                 });
 
                 // Bulk deletion logic
-                const selectAllBtn = document.getElementById('selectAllQuestions');
-                const questionCheckboxes = document.querySelectorAll('.question-checkbox');
-                const btnHapusTerpilih = document.getElementById('btnHapusTerpilih');
-                const deleteCountSpan = document.getElementById('deleteCount');
+                document.addEventListener('DOMContentLoaded', function() {
+                    const selectAllBtn = document.getElementById('selectAllQuestions');
+                    const questionCheckboxes = document.querySelectorAll('.question-checkbox');
+                    const btnHapusTerpilih = document.getElementById('btnHapusTerpilih');
+                    const deleteCountSpan = document.getElementById('deleteCount');
 
-                function updateBulkDeleteButton() {
-                    if (!btnHapusTerpilih) return;
-                    const checkedCount = document.querySelectorAll('.question-checkbox:checked').length;
-                    deleteCountSpan.textContent = checkedCount;
-                    if (checkedCount > 0) {
-                        btnHapusTerpilih.classList.remove('hidden');
-                    } else {
-                        btnHapusTerpilih.classList.add('hidden');
+                    function updateBulkDeleteButton() {
+                        if (!btnHapusTerpilih) return;
+                        const checkedCount = document.querySelectorAll('.question-checkbox:checked').length;
+                        if (deleteCountSpan) {
+                            deleteCountSpan.textContent = checkedCount;
+                        }
+                        if (checkedCount > 0) {
+                            btnHapusTerpilih.classList.remove('hidden');
+                        } else {
+                            btnHapusTerpilih.classList.add('hidden');
+                        }
                     }
-                }
 
-                if (selectAllBtn) {
-                    selectAllBtn.addEventListener('change', function() {
-                        questionCheckboxes.forEach(cb => cb.checked = this.checked);
-                        updateBulkDeleteButton();
-                    });
-                }
-
-                if (questionCheckboxes.length > 0) {
-                    questionCheckboxes.forEach(cb => {
-                        cb.addEventListener('change', function() {
-                            const allChecked = document.querySelectorAll('.question-checkbox:checked').length === questionCheckboxes.length;
-                            if (selectAllBtn) selectAllBtn.checked = allChecked;
+                    if (selectAllBtn) {
+                        selectAllBtn.addEventListener('change', function() {
+                            questionCheckboxes.forEach(cb => cb.checked = this.checked);
                             updateBulkDeleteButton();
                         });
-                    });
-                }
+                    }
 
-                if (btnHapusTerpilih) {
-                    btnHapusTerpilih.addEventListener('click', function() {
-                        const checkedIds = Array.from(document.querySelectorAll('.question-checkbox:checked')).map(cb => cb.value);
-                        if (checkedIds.length === 0) return;
-
-                        if (confirm(`Anda yakin ingin menghapus ${checkedIds.length} soal yang dipilih? Aksi ini tidak dapat dibatalkan.`)) {
-                            const route = '{{ auth()->user()->hasRole("super") ? route("super.exams.questions.destroy-multiple") : route("admin.exams.questions.destroy-multiple") }}';
-                            
-                            showLoadingMessage('Menghapus soal...');
-                            
-                            fetch(route, {
-                                method: 'DELETE',
-                                headers: {
-                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                    'Content-Type': 'application/json',
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify({ question_ids: checkedIds })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                hideLoadingMessage();
-                                if (data.success) {
-                                    alert(data.message);
-                                    location.reload();
-                                } else {
-                                    alert('Error: ' + (data.message || 'Terjadi kesalahan saat menghapus soal'));
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error:', error);
-                                hideLoadingMessage();
-                                alert('Terjadi kesalahan saat menghubungi server');
+                    if (questionCheckboxes.length > 0) {
+                        questionCheckboxes.forEach(cb => {
+                            cb.addEventListener('change', function() {
+                                const allChecked = document.querySelectorAll('.question-checkbox:checked').length === questionCheckboxes.length;
+                                if (selectAllBtn) selectAllBtn.checked = allChecked;
+                                updateBulkDeleteButton();
                             });
-                        }
-                    });
-                }
+                        });
+                    }
+
+                    if (btnHapusTerpilih) {
+                        btnHapusTerpilih.addEventListener('click', function() {
+                            const checkedIds = Array.from(document.querySelectorAll('.question-checkbox:checked')).map(cb => cb.value);
+                            if (checkedIds.length === 0) return;
+
+                            if (confirm(`Anda yakin ingin menghapus ${checkedIds.length} soal yang dipilih? Aksi ini tidak dapat dibatalkan.`)) {
+                                const route = '{{ auth()->user()->hasRole("super") ? route("super.exams.questions.destroy-multiple") : route("admin.exams.questions.destroy-multiple") }}';
+                                
+                                if (typeof showLoadingMessage === 'function') {
+                                    showLoadingMessage('Menghapus soal...');
+                                }
+                                
+                                fetch(route, {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                        'Content-Type': 'application/json',
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify({ question_ids: checkedIds })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (typeof hideLoadingMessage === 'function') {
+                                        hideLoadingMessage();
+                                    }
+                                    if (data.success) {
+                                        alert(data.message);
+                                        location.reload();
+                                    } else {
+                                        alert('Error: ' + (data.message || 'Terjadi kesalahan saat menghapus soal'));
+                                    }
+                                })
+                                .catch(error => {
+                                    console.error('Error:', error);
+                                    if (typeof hideLoadingMessage === 'function') {
+                                        hideLoadingMessage();
+                                    }
+                                    alert('Terjadi kesalahan saat menghubungi server');
+                                });
+                            }
+                        });
+                    }
+                });
             </script>
         @endpush
 
