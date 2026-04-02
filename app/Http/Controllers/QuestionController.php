@@ -385,7 +385,71 @@ class QuestionController extends Controller
                 ->withErrors(['error' => 'Gagal menghapus soal : ' . $e->getMessage()]);
         }
     }
-    
+
+    public function destroyMultiple(Request $request)
+    {
+        $roleRoutes = [
+            'admin' => 'admin.exams.manage.question',
+            'super' => 'super.exams.manage.question',
+        ];
+
+        $role = auth()->user()->getRoleNames()->first();
+
+        try {
+            if (!isset($roleRoutes[$role])) {
+                throw new \Exception('Anda tidak memiliki akses untuk menghapus soal');
+            }
+
+            $questionIds = $request->input('question_ids');
+
+            if (empty($questionIds) || !is_array($questionIds)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada soal yang dipilih untuk dihapus.'
+                ], 400);
+            }
+
+            $questions = Question::whereIn('id', $questionIds)->get();
+            $deletedCount = 0;
+
+            foreach ($questions as $question) {
+                // Delete question image if exists
+                if (!empty($question->question_image)) {
+                    Storage::disk('public')->delete($question->question_image);
+                }
+
+                // Delete choice images if exist
+                if (!empty($question->choices_images)) {
+                    $choicesImages = json_decode($question->choices_images, true);
+                    if (is_array($choicesImages)) {
+                        foreach ($choicesImages as $imagePath) {
+                            if (!empty($imagePath)) {
+                                Storage::disk('public')->delete($imagePath);
+                            }
+                        }
+                    }
+                }
+
+                $question->delete();
+                $deletedCount++;
+            }
+
+            $user = auth()->user();
+            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil menghapus ' . $deletedCount . ' soal pada ' . session('perexamname'));
+
+            return response()->json([
+                'success' => true,
+                'message' => $deletedCount . ' soal berhasil dihapus.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus soal : ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
 
     /**
      * Show the form for creating a new resource.

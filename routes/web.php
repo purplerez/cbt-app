@@ -189,6 +189,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
+    Route::delete('exams/banksoal/questions/destroy-multiple', [QuestionController::class, 'destroyMultiple'])->name('exams.questions.destroy-multiple');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
 
     // Import/Export Questions routes
@@ -519,6 +520,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
+    Route::delete('exams/banksoal/questions/destroy-multiple', [QuestionController::class, 'destroyMultiple'])->name('exams.questions.destroy-multiple');
     Route::get('exams/banksoal/exit', [ExamController::class, 'exitbanksoal'])->name('exams.question.exit');
 
     // Import/Export Questions routes
