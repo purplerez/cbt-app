@@ -30,14 +30,29 @@ class ForceSubmitController extends Controller
      */
     public function forceSubmitSession(Request $request)
     {
-        $validated = $request->validate([
-            'exam_session_id' => 'required|integer|exists:exam_sessions,id'
-        ]);
+        // Support pulling examSession from route param (which might be an object or int) OR from request body
+        $routeParam = $request->route('examSession');
+        $sessionId = null;
+        
+        if ($routeParam instanceof ExamSession) {
+            $sessionId = $routeParam->id;
+        } elseif (is_numeric($routeParam)) {
+            $sessionId = $routeParam;
+        } else {
+            $sessionId = $request->input('exam_session_id');
+        }
+
+        if (!$sessionId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'The exam session id field is required.'
+            ], 422);
+        }
 
         try {
             DB::beginTransaction();
 
-            $examSession = ExamSession::findOrFail($validated['exam_session_id']);
+            $examSession = ExamSession::findOrFail($sessionId);
 
             // Check if already submitted
             if ($examSession->status === 'submited') {
