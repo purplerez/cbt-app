@@ -336,7 +336,7 @@
 
                                                                         {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
                                                                         <form
-                                                                            action="{{ route('admin.exams.questions.destroy', $q->id) }}"
+                                                                            action="{{ auth()->user()->hasRole('super') ? route('super.exams.questions.destroy', $q->id) : route('admin.exams.questions.destroy', $q->id) }}"
                                                                             method="POST" class="inline-block">
                                                                             @csrf
                                                                             @method('DELETE')
@@ -417,7 +417,7 @@
 
 
                                                 <form
-                                                    action="{{ route('admin.exams.question.store', session('perexamid')) }}"
+                                                    action="{{ auth()->user()->hasRole('super') ? route('super.exams.question.store', session('perexamid')) : route('admin.exams.question.store', session('perexamid')) }}"
                                                     method="post" enctype="multipart/form-data"
                                                     class="mb-4 question-form">
 
@@ -722,7 +722,7 @@
                                                     <option value="">Semua Kelas</option>
                                                 </select>
                                                 <form method="GET"
-                                                    action="{{ route('admin.exam.scores.export', ['exam' => $exam->id]) }}"
+                                                    action="{{ auth()->user()->hasRole('super') ? route('super.exam.scores.export', ['exam' => $exam->id]) : route('admin.exam.scores.export', ['exam' => $exam->id]) }}"
                                                     class="inline">
                                                     <input type="hidden" name="school_id" id="export_school_id">
                                                     <input type="hidden" name="grade_id" id="export_grade_id">
@@ -1638,7 +1638,7 @@
                     showLoadingMessage('Memproses file Word...');
 
                     const examId = '{{ session('perexamid') }}';
-                    const route = '{{ route('admin.exams.questions.import-word', '__EXAM_ID__') }}'.replace('__EXAM_ID__', examId);
+                    const route = '{{ auth()->user()->hasRole("super") ? route("super.exams.questions.import-word", "__EXAM_ID__") : route("admin.exams.questions.import-word", "__EXAM_ID__") }}'.replace('__EXAM_ID__', examId);
 
                     fetch(route, {
                             method: 'POST',
