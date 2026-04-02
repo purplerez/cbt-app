@@ -115,7 +115,9 @@ class StudentController extends Controller
     {
         try {
             $schoolId = request()->query('school_id');
-            $perPage = max(1, (int) request()->query('per_page', 60));
+            // Default to a large number since the frontend does not send pagination parameters for the participant table
+            $perPage = max(1, (int) request()->query('per_page', 5000));
+
 
             // --- 1️⃣ Dapatkan siswa dari preassigneds (belum mulai ujian)
             $preassignedQuery = Student::with(['grade', 'user'])
@@ -196,26 +198,38 @@ class StudentController extends Controller
         try {
             $schoolId = request()->query('school_id');
 
-            $query = Preassigned::where('exam_id', $examId)
-                ->join('users', 'preassigneds.user_id', '=', 'users.id')
-                ->join('students', 'users.id', '=', 'students.user_id');
+            // --- 1. Get ALL student user IDs associated with this exam (either Preassigned or ExamSession) ---
+            $preassignedUserIds = Preassigned::where('exam_id', $examId)->pluck('user_id')->toArray();
+            $sessionUserIds = ExamSession::where('exam_id', $examId)->pluck('user_id')->toArray();
+            
+            $allUserIds = array_unique(array_merge($preassignedUserIds, $sessionUserIds));
 
+            // --- 2. Filter by school if necessary ---
             if ($schoolId) {
-                $query->where('students.school_id', $schoolId);
+                // Keep only user_ids that belong to students in this school
+                $allUserIds = Student::whereIn('user_id', $allUserIds)
+                    ->where('school_id', $schoolId)
+                    ->pluck('user_id')
+                    ->toArray();
             }
 
-            $totalParticipants = $query->count();
+            // --- 3. Compute stats ---
+            $totalParticipants = count($allUserIds);
+            
+            $activeParticipants = ExamSession::where('exam_id', $examId)
+                ->where('status', 'progress')
+                ->whereIn('user_id', $allUserIds)
+                ->count();
+                
+            $submittedParticipants = ExamSession::where('exam_id', $examId)
+                ->where('status', 'submited')
+                ->whereIn('user_id', $allUserIds)
+                ->count();
 
             $stats = [
                 'total_participants' => $totalParticipants,
-                'active_participants' => ExamSession::where('exam_id', $examId)
-                    ->where('status', 'progress')
-                    ->whereIn('user_id', $query->pluck('users.id'))
-                    ->count(),
-                'submitted_participants' => ExamSession::where('exam_id', $examId)
-                    ->where('status', 'submited')
-                    ->whereIn('user_id', $query->pluck('users.id'))
-                    ->count()
+                'active_participants' => $activeParticipants,
+                'submitted_participants' => $submittedParticipants
             ];
 
             return response()->json([
