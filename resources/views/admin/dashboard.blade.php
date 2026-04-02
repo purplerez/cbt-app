@@ -127,6 +127,20 @@
         </div>
     </div>
 
+    {{-- ── DELETE SESSION MODAL ── --}}
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h4 class="text-base font-semibold text-gray-800 mb-2">Hapus Sesi Ujian</h4>
+            <p class="text-sm text-gray-600 mb-1">Yakin ingin menghapus sesi ujian untuk:</p>
+            <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-delete-name">—</p>
+            <p class="text-xs text-red-500 mb-4 bg-red-50 p-2 rounded border border-red-100">Peringatan: Seluruh data jawaban siswa pada sesi ini akan ikut terhapus.</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeDeleteModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button onclick="confirmDelete()" id="confirm-delete-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Hapus Sesi</button>
+            </div>
+        </div>
+    </div>
+
 @push('scripts')
 <script>
 const API = window.apiToken;
@@ -269,6 +283,8 @@ async function fetchMonitor(examId) {
                         class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
                     ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
                         class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
+                    ${p.session_id ? `<button onclick="openDeleteModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
+                        class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Delete</button>` : ''}
                 </div>`;
 
             return `<tr class="hover:bg-gray-50 transition">
@@ -392,6 +408,34 @@ async function confirmForce() {
         showToast('error', 'Gagal force submit.');
     } finally {
         btn.disabled = false; btn.textContent = 'Force Submit';
+    }
+}
+
+// ── DELETE SESSION ─────────────────────────────────────────────────
+function openDeleteModal(sessionId, name) {
+    currentSessionId   = sessionId;
+    currentStudentName = name;
+    document.getElementById('modal-delete-name').textContent = name;
+    document.getElementById('delete-modal').classList.remove('hidden');
+}
+function closeDeleteModal() { document.getElementById('delete-modal').classList.add('hidden'); }
+
+async function confirmDelete() {
+    const btn = document.getElementById('confirm-delete-btn');
+    btn.disabled = true; btn.textContent = 'Menghapus...';
+    try {
+        const r = await fetch(`/admin/exam-sessions/${currentSessionId}`, {
+            method: 'DELETE',
+            headers: { ...headers, 'X-CSRF-TOKEN': csrfToken, 'Content-Type': 'application/json' }
+        });
+        const res = await r.json();
+        closeDeleteModal();
+        showToast(res.success ? 'success' : 'error', res.message);
+        if (res.success) loadMonitor();
+    } catch(e) {
+        showToast('error', 'Gagal menghapus sesi.');
+    } finally {
+        btn.disabled = false; btn.textContent = 'Hapus Sesi';
     }
 }
 

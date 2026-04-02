@@ -186,5 +186,43 @@ class ExamSessionDetailController extends Controller
             return redirect()->back()->with('error', 'Gagal mengunci akun: ' . $e->getMessage());
         }
     }
+
+    public function destroy(Request $request, $sessionId)
+    {
+        try {
+            $session = ExamSession::findOrFail($sessionId);
+
+            // Log who performed the delete
+            $actor = auth()->user();
+            logActivity(
+                $actor->name . ' (ID: ' . $actor->id . ') Menghapus sesi ujian ' .
+                $session->id . ' untuk user ID: ' . $session->user_id
+            );
+
+            // Delete associated student answer explicitly if not cascaded
+            if ($session->studentAnswer) {
+                $session->studentAnswer->delete();
+            }
+
+            $session->delete();
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Sesi ujian berhasil dihapus.',
+                ]);
+            }
+
+            return redirect()->back()->with('success', 'Sesi ujian berhasil dihapus.');
+        } catch (\Exception $e) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal menghapus sesi: ' . $e->getMessage(),
+                ], 500);
+            }
+            return redirect()->back()->with('error', 'Gagal menghapus sesi: ' . $e->getMessage());
+        }
+    }
 }
 

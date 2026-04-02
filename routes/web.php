@@ -226,6 +226,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
 
     // Route for users management
     Route::get('users', [UserManagementController::class, 'index'])->name('users');
@@ -351,6 +352,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
 
     // Route for user login reset
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
 
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
@@ -428,6 +430,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
 
     // Route for user login reset
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
     
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
@@ -544,6 +547,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+    Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
 
     // Questions, Results, Settings routes
     Route::get('questions', [SchoolController::class, 'questions'])->name('questions');
