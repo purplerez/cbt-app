@@ -134,9 +134,12 @@ let currentNis = null, currentSessionId = null, monitorInterval = null, timerTic
 async function fetchStats() {
     try {
         const r = await fetch('/api/kepala/dashboard/stats', { headers: HEADERS });
-        const d = await r.json();
-        if (d.error) return;
+        const text = await r.text();
+        let d;
+        try { d = JSON.parse(text); } catch(e) { console.error('Stats Error:', text.substring(0,100)); return; }
+        if (d && d.error) return;
         document.getElementById('school-subtitle').textContent     = d.school_name ?? '—';
+
         document.getElementById('stat-students').textContent       = d.total_students ?? '—';
         document.getElementById('stat-grades').textContent         = (d.total_grades ?? '—') + ' kelas';
         document.getElementById('stat-online').textContent         = d.online_students ?? '—';
@@ -153,7 +156,9 @@ async function fetchStats() {
 async function fetchActiveExams() {
     try {
         const r = await fetch('/api/kepala/monitor/active-exams', { headers: HEADERS });
-        const d = await r.json();
+        const text = await r.text();
+        let d;
+        try { d = JSON.parse(text); } catch(e) { console.error('Active Exams Error:', text.substring(0,100)); return; }
         const list = Array.isArray(d) ? d : (d.data ?? []);
         const sel = document.getElementById('exam-select'), cur = sel.value;
         sel.innerHTML = '<option value="">— Pilih Ujian —</option>';
@@ -173,9 +178,12 @@ async function fetchMonitor(examId) {
     try {
         document.getElementById('monitor-body').innerHTML = '<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
         const r = await fetch(`/api/kepala/monitor/exam/${examId}/participants`, { headers: HEADERS });
-        const res = await r.json();
+        const text = await r.text();
+        let res;
+        try { res = JSON.parse(text); } catch(e) { throw new Error('Data server tidak valid (Bukan JSON).'); }
         if (!res.success) throw new Error(res.error);
         document.getElementById('cnt-progress').textContent    = (res.counts.progress ?? 0) + ' Live';
+
         document.getElementById('cnt-submited').textContent    = (res.counts.submited ?? 0) + ' Submit';
         document.getElementById('cnt-not-started').textContent = (res.counts.not_started ?? 0) + ' Belum';
         if (!res.data || !res.data.length) { document.getElementById('monitor-body').innerHTML = '<tr><td colspan="6" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta terdaftar.</td></tr>'; return; }
@@ -202,8 +210,11 @@ async function fetchMonitor(examId) {
 async function fetchRecentScores() {
     try {
         const r = await fetch('/api/kepala/dashboard/recent-scores', { headers: HEADERS });
-        const d = await r.json();
+        const text = await r.text();
+        let d;
+        try { d = JSON.parse(text); } catch(e) { console.error('Scores error:', text.substring(0,100)); return; }
         const list = Array.isArray(d) ? d : [];
+
         const tbody = document.getElementById('scores-body');
         if (!list.length) { tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-8 text-center text-gray-400 text-sm">Belum ada ujian yang selesai.</td></tr>'; return; }
         tbody.innerHTML = list.slice(0,8).map(s => `

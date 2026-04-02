@@ -159,7 +159,12 @@ async function fetchStats() {
 async function fetchActiveExams() {
     try {
         const r = await fetch('/api/admin/dashboard/active-exams', { headers });
-        const list = await r.json();
+        const text = await r.text();
+        let list;
+        try { list = JSON.parse(text); } catch(e) { console.error('Active Exams JSON Error:', text.substring(0, 150)); return; }
+        if (list && list.error) return;
+        if (!Array.isArray(list)) list = Object.values(list || {});
+
         const sel = document.getElementById('exam-select');
         const cur = sel.value;
         sel.innerHTML = '<option value="">— Pilih Ujian —</option>';
@@ -192,7 +197,12 @@ function onExamSelectChange() {
 async function fetchSchoolsForExam(examId) {
     try {
         const r = await fetch(`/api/admin/dashboard/exams/${examId}/schools`, { headers });
-        const list = await r.json();
+        const text = await r.text();
+        let list;
+        try { list = JSON.parse(text); } catch(e) { console.error('Schools JSON Error:', text.substring(0, 150)); return; }
+        if (list && list.error) return;
+        if (!Array.isArray(list)) list = [];
+
         const sel = document.getElementById('school-select');
         (list || []).forEach(s => {
             const opt = document.createElement('option');
@@ -221,7 +231,11 @@ async function fetchMonitor(examId) {
             '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
         const schoolQuery = document.getElementById('school-select').value ? `?school_id=${document.getElementById('school-select').value}` : '';
         const r = await fetch(`/api/admin/monitor/exam/${examId}/participants${schoolQuery}`, { headers });
-        const res = await r.json();
+        const text = await r.text();
+        let res;
+        try { res = JSON.parse(text); } catch(e) { throw new Error('Data server tidak valid (Gagal parse JSON). Cek logs koneksi server.'); }
+        
+
         if (!res.success) throw new Error(res.error);
 
         // Update count badges
