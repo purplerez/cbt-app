@@ -188,7 +188,7 @@
                                                                 </svg>
                                                                 Import Word
                                                             </button>
-                                                            <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
+                                                            <!-- <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
                                                                 class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
                                                                 <svg class="w-4 h-4 mr-1" fill="none"
                                                                     stroke="currentColor" viewBox="0 0 24 24"
@@ -199,14 +199,14 @@
                                                                     </path>
                                                                 </svg>
                                                                 Download Template
-                                                            </a>
+                                                            </a> -->
                                                         </form>
 
                                                         <!-- Export Button -->
-                                                        <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                        <!-- <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export
-                                                        </a>
+                                                        </a> -->
 
                                                         <!-- Add Question Button -->
                                                         <button type="button"
