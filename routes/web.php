@@ -29,7 +29,7 @@ Route::get('/', function () {
 });
 
 // Fallback route to serve storage files on shared hosting where symlinks may not work.
-// If this route is hit, it means the web server (Nginx/Apache) couldn't find the file, 
+// If this route is hit, it means the web server (Nginx/Apache) couldn't find the file,
 // likely due to a missing or broken symlink. We'll simply try to serve it directly.
 Route::get('/storage/{path}', function (string $path) {
     $fullPath = storage_path('app/public/' . $path);
@@ -63,7 +63,7 @@ Route::get('/force-symlink', function () {
     // Kita arahkan target symlink ke public_html
     $link = base_path('../../public_html/cbt-app/public/storage');
     $target = storage_path('app/public');
-    
+
     // Remove if exists (handle both file/symlink and actual directory cases)
     if (file_exists($link) || is_link($link)) {
         if (is_link($link) || is_file($link)) {
@@ -72,7 +72,7 @@ Route::get('/force-symlink', function () {
             \Illuminate\Support\Facades\File::deleteDirectory($link);
         }
     }
-    
+
     // Create new
     try {
         symlink($target, $link);
@@ -432,7 +432,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     // Route for user login reset
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
     Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
-    
+
     // Room Assignment routes (Assign students to rooms for exams)
     Route::get('/room-assignment', [RoomAssignmentController::class, 'index'])->name('room-assignment.index');
     Route::post('/room-assignment/assign', [RoomAssignmentController::class, 'assignStudents'])->name('room-assignment.assign');
@@ -517,6 +517,9 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('exams/banksoal/{exam}/manage', [ExamController::class, 'examquestion'])->name('exams.question');
     Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
 
+    // AJAX endpoint for loading edit modal
+    Route::get('exams/questions/{question}/modal', [ExamController::class, 'getEditModalContent'])->name('exams.questions.modal');
+
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
@@ -545,7 +548,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
         ->name('exam-sessions.force-submit-multiple');
     Route::get('exams/{exam}/incomplete-sessions', [\App\Http\Controllers\ForceSubmitController::class, 'getIncompleteSessions'])
         ->name('exams.incomplete-sessions');
-        
+
     // Route for exam session details
     Route::get('/exam-sessions/{examSession}/detail', [ExamSessionDetailController::class, 'show'])->name('exam-sessions.detail');
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
