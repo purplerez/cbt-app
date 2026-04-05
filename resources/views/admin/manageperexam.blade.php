@@ -1352,6 +1352,12 @@
                 const container = document.getElementById('choices-container');
                 const answerKeyContainer = document.getElementById('answer-key-container');
 
+                // Guard: jika form tambah soal tidak ada (ujian tidak aktif), hentikan script ini
+                if (!container || !answerKeyContainer) {
+                    // Tidak ada form, tidak perlu render
+                    // Tapi fungsi harus tetap tersedia agar tidak error jika dipanggil dari tempat lain
+                }
+
                 // Add choice — guard against missing button (when exam is inactive)
                 const addChoiceBtn = document.getElementById('add-choice');
                 if (addChoiceBtn) {
@@ -1428,6 +1434,7 @@
 
                 // Render Answer Key automatically
                 function renderAnswerKey() {
+                    if (!answerKeyContainer || !container) return;
                     answerKeyContainer.innerHTML = '';
                     let choices = container.querySelectorAll('.choice-item');
 
@@ -1469,8 +1476,10 @@
                     });
                 }
 
-                // Initial render
-                renderAnswerKey();
+                // Initial render - hanya jika container ada
+                if (answerKeyContainer) {
+                    renderAnswerKey();
+                }
             </script>
 
 
@@ -1690,9 +1699,12 @@
                 function showWordImportPreview(questions, examId) {
                     hideLoadingMessage();
 
+                    // Simpan sementara di variabel global agar tidak error saat encode string Unicode yang panjang
+                    window.currentWordQuestionsPreview = questions;
+
                     // Create modal for preview
                     const modal = document.createElement('div');
-                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+                    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 word-import-preview-modal';
                     modal.innerHTML = `
                         <div class="max-w-4xl p-6 overflow-y-auto bg-white rounded-lg shadow-xl max-h-96">
                             <h2 class="mb-4 text-xl font-bold">Preview Soal yang Diimport (${questions.length} soal)</h2>
@@ -1708,8 +1720,8 @@
                                                                                                                     `).join('')}
                             </div>
                             <div class="flex justify-end mt-6 space-x-4">
-                                <button onclick="this.closest('.fixed').remove()" class="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600">Batal</button>
-                                <button onclick="saveWordQuestions(${examId}, '${btoa(JSON.stringify(questions))}')" class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">Simpan Semua Soal</button>
+                                <button onclick="this.closest('.word-import-preview-modal').remove()" class="px-4 py-2 text-white bg-gray-500 rounded hover:bg-gray-600">Batal</button>
+                                <button onclick="saveWordQuestions(${examId})" class="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700">Simpan Semua Soal</button>
                             </div>
                         </div>
                     `;
@@ -1726,8 +1738,12 @@
                     return types[type] || 'Tidak diketahui';
                 }
 
-                function saveWordQuestions(examId, questionsData) {
-                    const questions = JSON.parse(atob(questionsData));
+                function saveWordQuestions(examId) {
+                    const questions = window.currentWordQuestionsPreview;
+                    if (!questions) {
+                        alert('Tidak ada soal yang diproses.');
+                        return;
+                    }
                     @php
                         $saveRoute = auth()->user()->hasRole('super') ? route('super.exams.questions.save-word-questions') : route('admin.exams.questions.save-word-questions');
                     @endphp
