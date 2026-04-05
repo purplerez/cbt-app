@@ -257,10 +257,6 @@ class WordParserService
                     $pendingPlainChoices = [];
                     $optionLetterStart = -1; // reset option letter tracking for new question
                     $optionNumId       = null; // reset option list numId for new question
-                    // Reset per-question option counter agar huruf selalu mulai dari 'a'
-                    foreach (array_keys($optCounters) as $k) {
-                        if (str_contains($k, '_')) unset($optCounters[$k]);
-                    }
                     $lastQNumber    = $number;
                     $lastOptLetter  = null;
                     $questionDone   = false;
@@ -568,6 +564,7 @@ class WordParserService
                     if (in_array($numId, $questionNumIds)) {
                         if ($ilvl === '0') {
                             // Question stem
+                            $optCounters[$numId . '_1'] = 0;
                             $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
                             $globalQCounter++;
                             $prefix = $globalQCounter . '. ';
