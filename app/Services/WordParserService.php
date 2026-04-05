@@ -562,9 +562,17 @@ class WordParserService
                 $prefix = '';
                 if ($numId !== null) {
                     if (in_array($numId, $questionNumIds)) {
-                        $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
-                        $globalQCounter++;
-                        $prefix = $globalQCounter . '. ';
+                        if ($ilvl === '0') {
+                            // Question stem
+                            $numIdCounters[$numId] = ($numIdCounters[$numId] ?? 0) + 1;
+                            $globalQCounter++;
+                            $prefix = $globalQCounter . '. ';
+                        } else {
+                            // Answer option yang berbagi numId dengan question stem
+                            $optCounters[$numId . '_' . $ilvl] = ($optCounters[$numId . '_' . $ilvl] ?? 0) + 1;
+                            $letter = chr(96 + $optCounters[$numId . '_' . $ilvl]);
+                            $prefix = $letter . '. ';
+                        }
                     } elseif ($fmt === 'lowerLetter' || $fmt === 'upperLetter') {
                         $optCounters[$numId] = ($optCounters[$numId] ?? 0) + 1;
                         $letter = $fmt === 'upperLetter'
