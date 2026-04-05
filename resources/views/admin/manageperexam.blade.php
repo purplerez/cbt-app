@@ -944,9 +944,9 @@
                 }
 
                 // Global variable to store current answer keys
-                let currentAnswerKeys = {};
-                // Global variable to store current answer keys
-                // let currentAnswerKeys = {};
+                if (typeof currentAnswerKeys === 'undefined') {
+                    var currentAnswerKeys = {};
+                }
 
                 function updateAnswerKey(input, questionId) {
                     if (!currentAnswerKeys[questionId]) {
@@ -1348,7 +1348,7 @@
                     }
                 }
 
-                let choiceCounter = 1;
+                if (typeof choiceCounter === 'undefined') var choiceCounter = 1;
                 const container = document.getElementById('choices-container');
                 const answerKeyContainer = document.getElementById('answer-key-container');
 
@@ -1488,7 +1488,7 @@
             <script>
                 // Declare vars at outer scope so showTab() can access them,
                 // but assign inside DOMContentLoaded to guarantee DOM is ready.
-                let tabPanes, tabButtons, modalButtons;
+                if (typeof tabPanes === 'undefined') var tabPanes, tabButtons, modalButtons;
 
                 document.addEventListener('DOMContentLoaded', function() {
                     // Initialise cached DOM queries here, after DOM is fully parsed
