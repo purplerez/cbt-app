@@ -22,10 +22,10 @@ declare -a TOKENS
 # Function to generate test data
 generate_test_users() {
     echo "📋 Generating test user credentials..."
-    
+
     # Get real users from database
     mysql -h 127.0.0.1 -u root cbtdb -e 'SELECT email, password FROM users WHERE roles LIKE "%siswa%" LIMIT '"$NUM_USERS"';' > /tmp/users.txt 2>/dev/null
-    
+
     if [ ! -f /tmp/users.txt ] || [ ! -s /tmp/users.txt ]; then
         echo "⚠️  Could not read from database. Using demo mode."
         # Generate demo users
@@ -42,7 +42,7 @@ generate_test_users() {
             ((i++))
         done < /tmp/users.txt
     fi
-    
+
     echo "✓ Generated ${#EMAILS[@]} test users"
 }
 
@@ -50,18 +50,18 @@ generate_test_users() {
 login_user() {
     local email=$1
     local password=$2
-    
+
     local response=$(curl -s -X POST "$APP_URL/login" \
         -H "Content-Type: application/json" \
         -d "{\"email\": \"$email\", \"password\": \"$password\"}")
-    
+
     echo "$response" | grep -o '"token":"[^"]*' | cut -d'"' -f4
 }
 
 # Function to heartbeat
 send_heartbeat() {
     local token=$1
-    
+
     curl -s -X POST "$APP_URL/siswa/heartbeat" \
         -H "Authorization: Bearer $token" \
         -H "Content-Type: application/json" | grep -c "OK"
@@ -70,7 +70,7 @@ send_heartbeat() {
 # Function to get dashboard stats
 fetch_dashboard_stats() {
     local token=$1
-    
+
     curl -s -X GET "$APP_URL/kepala/dashboard/stats" \
         -H "Authorization: Bearer $token" \
         -H "Content-Type: application/json" | grep -c "success"
@@ -92,12 +92,12 @@ for i in $(seq 1 $NUM_USERS); do
     else
         ((FAILED_REQUESTS++))
     fi
-    
+
     # Show progress every 50 users
     if [ $((i % 50)) -eq 0 ]; then
         echo "  ✓ Authenticated $i users..."
     fi
-    
+
     ((TOTAL_REQUESTS++))
 done
 
@@ -113,7 +113,7 @@ while [ $(date +%s) -lt $END_TIME ]; do
     # Randomly select users to send heartbeats
     for i in $(seq 1 $((NUM_USERS > 20 ? 20 : NUM_USERS))); do
         user_idx=$((RANDOM % NUM_USERS + 1))
-        
+
         if [ ! -z "${TOKENS[$user_idx]}" ]; then
             result=$(send_heartbeat "${TOKENS[$user_idx]}")
             if [ "$result" = "1" ]; then
@@ -125,11 +125,11 @@ while [ $(date +%s) -lt $END_TIME ]; do
             ((TOTAL_REQUESTS++))
         fi
     done
-    
+
     # Dashboard stats requests (from some users)
     for i in $(seq 1 5); do
         user_idx=$((RANDOM % NUM_USERS + 1))
-        
+
         if [ ! -z "${TOKENS[$user_idx]}" ]; then
             result=$(fetch_dashboard_stats "${TOKENS[$user_idx]}")
             if [ "$result" = "1" ]; then
@@ -140,7 +140,7 @@ while [ $(date +%s) -lt $END_TIME ]; do
             ((TOTAL_REQUESTS++))
         fi
     done
-    
+
     sleep 1
 done
 
