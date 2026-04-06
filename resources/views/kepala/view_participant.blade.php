@@ -82,9 +82,12 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             @if($student->preassigned->isNotEmpty())
-                                                <span class="inline-flex px-2 py-1 text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800">
+                                                <button type="button" data-student-id="{{ $student->id }}" class="delete-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-red-600 border border-transparent rounded-md hover:bg-red-700">
+                                                    Batalkan Daftar
+                                                </button>
+                                                {{-- <span class="inline-flex px-2 py-1 text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800">
                                                     Sudah Terdaftar
-                                                </span>
+                                                </span> --}}
                                             @else
                                                 <button type="button" data-student-id="{{ $student->id }}" class="single-register-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-green-600 border border-transparent rounded-md hover:bg-green-700">
                                                     Daftarkan
@@ -314,7 +317,11 @@
                             const tr = document.createElement('tr');
                             tr.className = 'hover:bg-gray-50';
                             const actionCell = s.registered
-                                        ? `<span class="inline-flex px-2 py-1 text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800">Sudah Terdaftar</span>`
+                                        ? `<button type="button"
+                                                data-student-id="${s.id}"
+                                                class="delete-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-red-600 border border-transparent rounded-md hover:bg-red-700">
+                                            Batalkan Daftar
+                                        </button>`
                                         : `<button type="button"
                                                 data-student-id="${s.id}"
                                                 class="single-register-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-green-600 border border-transparent rounded-md hover:bg-green-700">
