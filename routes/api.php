@@ -27,17 +27,19 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
     Route::get('/exam/{examId}/stats', [StudentController::class, 'getExamStats'])
         ->name('exam.stats');
 
-    // Dashboard Statistics Routes
-    Route::get('/dashboard/stats', [DashboardStatisticsController::class, 'getOverviewStats'])
-        ->name('dashboard.stats');
-    Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
-        ->name('dashboard.active-exams');
-    Route::get('/dashboard/exams/{examId}/schools', [DashboardStatisticsController::class, 'getSchoolsByExam'])
-        ->name('dashboard.exam-schools');
+    // Dashboard Statistics Routes - throttled to prevent CPU spike
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::get('/dashboard/stats', [DashboardStatisticsController::class, 'getOverviewStats'])
+            ->name('dashboard.stats');
+        Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
+            ->name('dashboard.active-exams');
+        Route::get('/dashboard/exams/{examId}/schools', [DashboardStatisticsController::class, 'getSchoolsByExam'])
+            ->name('dashboard.exam-schools');
 
-    // Live monitoring routes
-    Route::get('/monitor/exam/{examId}/participants', [DashboardMonitorController::class, 'participants'])
-        ->name('monitor.participants');
+        // Live monitoring routes
+        Route::get('/monitor/exam/{examId}/participants', [DashboardMonitorController::class, 'participants'])
+            ->name('monitor.participants');
+    });
 
     Route::apiResource('exams', ExamController::class);
 
@@ -68,7 +70,7 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.si
     Route::post('/exams/{examId}/status', [ParticipantController::class, 'getSessionStatus'])->name('exam.status');
 
     // Student Answer Backup & Restore Routes
-    Route::prefix('exam-session')->group(function () {
+    Route::prefix('exam-session')->middleware('throttle:30,1')->group(function () {
         Route::post('/save-answers', [StudentAnswerBackupController::class, 'saveAnswers'])->name('answers.save');
 
         // Update single answer for real-time auto-save
@@ -112,7 +114,7 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     //     ->name('dashboard.stats');
 
     //dashboard api starts
-    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+    Route::prefix('dashboard')->middleware('throttle:20,1')->name('dashboard.')->group(function () {
         // Get overview statistics
         Route::get('/stats', [KepalaApiDashboardController::class, 'getStats'])
             ->name('stats');

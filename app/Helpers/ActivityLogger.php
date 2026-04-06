@@ -39,7 +39,7 @@ if (! function_exists('logActivity')) {
             'created_at' => now(),
         ];
 
-        // 1) Write to DB
+        // 1) Write to DB using 'logs' table (configured in ActivityLog model)
         try {
             ActivityLog::create($dbPayload);
         } catch (\Throwable $e) {
