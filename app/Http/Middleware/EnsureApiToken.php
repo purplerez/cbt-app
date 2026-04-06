@@ -15,9 +15,24 @@ class EnsureApiToken
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Only create token once per session, not on every request
         if (auth()->check() && !$request->session()->has('api_token')) {
-            $token = auth()->user()->createToken('dashboard-token')->plainTextToken;
-            $request->session()->put('api_token', $token);
+            try {
+                // Check if user already has an active token to avoid duplicate creation
+                $user = auth()->user();
+                if ($user->tokens()->exists()) {
+                    // Use existing token instead of creating new one
+                    $existingToken = $user->tokens()->first();
+                    $request->session()->put('api_token', $existingToken->plainTextToken ?? null);
+                } else {
+                    // Only create if no token exists
+                    $token = $user->createToken('dashboard-token')->plainTextToken;
+                    $request->session()->put('api_token', $token);
+                }
+            } catch (\Exception $e) {
+                // Silently fail - API token is optional for web
+                \Log::error('EnsureApiToken failed: ' . $e->getMessage());
+            }
         }
 
         return $next($request);
