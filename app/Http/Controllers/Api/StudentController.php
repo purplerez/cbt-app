@@ -200,7 +200,7 @@ class StudentController extends Controller
             // --- 1. Get ALL student user IDs associated with this exam (either Preassigned or ExamSession) ---
             $preassignedUserIds = Preassigned::where('exam_id', $examId)->pluck('user_id')->toArray();
             $sessionUserIds = ExamSession::where('exam_id', $examId)->pluck('user_id')->toArray();
-            
+
             $allUserIds = array_unique(array_merge($preassignedUserIds, $sessionUserIds));
 
             // --- 2. Filter by school if necessary ---
@@ -214,12 +214,12 @@ class StudentController extends Controller
 
             // --- 3. Compute stats ---
             $totalParticipants = count($allUserIds);
-            
+
             $activeParticipants = ExamSession::where('exam_id', $examId)
                 ->where('status', 'progress')
                 ->whereIn('user_id', $allUserIds)
                 ->count();
-                
+
             $submittedParticipants = ExamSession::where('exam_id', $examId)
                 ->where('status', 'submited')
                 ->whereIn('user_id', $allUserIds)
