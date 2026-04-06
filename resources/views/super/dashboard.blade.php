@@ -1,5 +1,5 @@
 <x-app-layout>
-    <x-slot name="header">
+    {{-- <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard Super</h2>
             <div class="flex items-center gap-3 text-sm text-gray-500">
@@ -10,10 +10,10 @@
                 </button>
             </div>
         </div>
-    </x-slot>
+    </x-slot> --}}
 
     <div class="py-6">
-        <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
+        {{-- <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
             <div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700 flex items-center gap-2">
                 <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/></svg>
@@ -81,11 +81,11 @@
                 </div>
             </div>
 
-        </div>
+        </div> --}}
     </div>
 
     <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
-        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+        {{-- <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <h4 class="text-base font-semibold text-gray-800 mb-2">Reset Login Siswa</h4>
             <p class="text-sm text-gray-600 mb-1">Yakin ingin mereset login untuk:</p>
             <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-student-name">—</p>
@@ -93,7 +93,7 @@
                 <button onclick="closeResetModal()" class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
                 <button onclick="confirmReset()" id="confirm-reset-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Reset Login</button>
             </div>
-        </div>
+        </div> --}}
     </div>
 
 @push('scripts')
