@@ -33,12 +33,17 @@ class KepalaExamApiController extends Controller
             })
             ->get();
 
-        $data = $users->map(function ($u) use ($examId) {
-            $registered = Preassigned::where('user_id', $u->id)->where('exam_id', $examId)->exists();
+        // Pre-load all preassigned assignments for this exam to avoid N+1 queries
+        $registeredUserIds = Preassigned::where('exam_id', $examId)
+            ->pluck('user_id')
+            ->toArray();
+        $registeredSet = array_flip($registeredUserIds); // O(1) lookup
+
+        $data = $users->map(function ($u) use ($registeredSet) {
             return [
                 'id' => $u->id,
                 'name' => $u->student->name ?? $u->name,
-                'registered' => $registered,
+                'registered' => isset($registeredSet[$u->id]),
             ];
         });
 

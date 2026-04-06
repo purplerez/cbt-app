@@ -34,20 +34,19 @@ class StudentController extends Controller
                 ->orderBy('name')
                 ->get();
 
-            $studentsData = $students->map(function ($student) use ($examId) {
-                $isAssigned = false;
-                if ($student->user) {
-                    $isAssigned = Preassigned::where('user_id', $student->user->id)
-                        ->where('exam_id', $examId)
-                        ->exists();
-                }
+            // Pre-load all preassigned assignments for this exam to avoid N+1 queries
+            $assignedUserIds = Preassigned::where('exam_id', $examId)
+                ->pluck('user_id')
+                ->toArray();
+            $assignedSet = array_flip($assignedUserIds); // O(1) lookup
 
+            $studentsData = $students->map(function ($student) use ($assignedSet) {
                 return [
                     'id' => $student->id,
                     'nis' => $student->nis,
                     'name' => $student->name,
                     'grade' => $student->grade ? ['name' => $student->grade->name] : null,
-                    'is_assigned' => $isAssigned
+                    'is_assigned' => isset($assignedSet[$student->user_id ?? -1])
                 ];
             });
 

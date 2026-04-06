@@ -133,7 +133,7 @@ class KepalaApiDashboardController extends Controller
     }
 
     /**
-     * Get statistics grouped by grade
+     * Get statistics grouped by grade - OPTIMIZED (no N+1 queries)
      */
     public function getGradeStats()
     {
@@ -144,22 +144,29 @@ class KepalaApiDashboardController extends Controller
                 return response()->json(['error' => 'School not found for this user'], 400);
             }
 
+            // Get all grades with student counts in ONE query
+            $gradeStats = Student::where('school_id', $schoolId)
+                ->selectRaw('grade_id, COUNT(*) as total_students')
+                ->groupBy('grade_id')
+                ->pluck('total_students', 'grade_id');
+
+            // Get online students per grade in ONE query
+            $onlineStats = DB::table('exam_sessions')
+                ->selectRaw('students.grade_id, COUNT(DISTINCT exam_sessions.user_id) as online_students')
+                ->join('users', 'exam_sessions.user_id', '=', 'users.id')
+                ->join('students', 'users.id', '=', 'students.user_id')
+                ->where('exam_sessions.status', 'progress')
+                ->where('students.school_id', $schoolId)
+                ->groupBy('students.grade_id')
+                ->pluck('online_students', 'grade_id');
+
+            // Now just format the data
             $grades = Grade::where('school_id', $schoolId)->get();
 
-            $data = $grades->map(function ($grade) {
-                // Total students in grade
-                $totalStudents = Student::where('grade_id', $grade->id)->count();
-
-                // Online students in grade (from active exam sessions)
-                $onlineStudents = ExamSession::where('status', 'progress')
-                    ->whereHas('user.student', function ($q) use ($grade) {
-                        $q->where('grade_id', $grade->id);
-                    })
-                    ->distinct('user_id')
-                    ->count('user_id');
-
+            $data = $grades->map(function ($grade) use ($gradeStats, $onlineStats) {
+                $totalStudents = $gradeStats[$grade->id] ?? 0;
+                $onlineStudents = $onlineStats[$grade->id] ?? 0;
                 $percentage = $totalStudents > 0 ? round(($onlineStudents / $totalStudents) * 100, 2) : 0;
-
                 $status = $percentage >= 80 ? 'Baik' : ($percentage >= 50 ? 'Cukup' : 'Kurang');
 
                 return [
@@ -333,7 +340,13 @@ class KepalaApiDashboardController extends Controller
                     return $session->exam_id . '-' . $session->user->student->grade_id;
                 });
 
-            $data = $completedSessions->map(function ($grouped) {
+            // Pre-calculate exam total scores in ONE query (not per exam in the loop)
+            $examTotals = Question::whereIn('exam_id', $completedSessions->map(fn($g) => $g->first()->exam_id)->unique())
+                ->groupBy('exam_id')
+                ->selectRaw('exam_id, SUM(CAST(points as DECIMAL(10,2))) as total_score')
+                ->pluck('total_score', 'exam_id');
+
+            $data = $completedSessions->map(function ($grouped) use ($examTotals) {
                 $firstSession = $grouped->first();
                 $exam = $firstSession->exam;
                 $grade = $firstSession->user->student->grade;
@@ -341,9 +354,8 @@ class KepalaApiDashboardController extends Controller
                 // Calculate average score from this group
                 $averageScore = $grouped->avg('total_score');
 
-                // Get total possible score for percentage
-                $totalPossibleScore = Question::where('exam_id', $exam->id)
-                    ->sum(DB::raw('CAST(points as DECIMAL(10,2))'));
+                // Use pre-calculated totals (no query per item)
+                $totalPossibleScore = $examTotals[$exam->id] ?? 0;
 
                 $percentage = $totalPossibleScore > 0 ? ($averageScore / $totalPossibleScore) * 100 : 0;
 

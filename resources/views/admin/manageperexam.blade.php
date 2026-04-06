@@ -203,7 +203,7 @@
                                                         </form>
 
                                                         <!-- Export Button -->
-                                                        <!-- <a href="{{ route('admin.exams.questions.export', session('perexamid')) }}"
+                                                        <!-- <a href="{{-- route('admin.exams.questions.export', session('perexamid')) --}}"
                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
                                                             Export
                                                         </a> -->
@@ -1834,11 +1834,11 @@
 
                             if (confirm(`Anda yakin ingin menghapus ${checkedIds.length} soal yang dipilih? Aksi ini tidak dapat dibatalkan.`)) {
                                 const route = '{{ auth()->user()->hasRole("super") ? route("super.exams.questions.destroy-multiple") : route("admin.exams.questions.destroy-multiple") }}';
-                                
+
                                 if (typeof showLoadingMessage === 'function') {
                                     showLoadingMessage('Menghapus soal...');
                                 }
-                                
+
                                 fetch(route, {
                                     method: 'DELETE',
                                     headers: {
