@@ -62,7 +62,7 @@ class AuthController extends Controller
     /**
      * Heartbeat endpoint — dipanggil frontend setiap 2-3 menit
      * agar siswa tidak dianggap offline oleh scheduler.
-     * 
+     *
      * OPTIMIZATION: Hanya update database jika is_active bukan true
      * atau jika last_activity sudah lebih dari 5 menit lalu.
      * Ini mengurangi database writes dari N per heartbeat ke ~N/10 atau lebih.
