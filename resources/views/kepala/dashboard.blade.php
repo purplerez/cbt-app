@@ -125,7 +125,9 @@
 
 
 @push('scripts')
+{{-- ALL JAVASCRIPT COMMENTED OUT TO REDUCE CPU USAGE --}}
 <script>
+/*
 const API = window.apiToken;
 const HEADERS = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -262,6 +264,7 @@ function toast(type, msg) { const t=document.createElement('div'); t.className=`
 function refreshAll() { fetchStats(); fetchActiveExams(); const id=document.getElementById('exam-select').value; if(id) fetchMonitor(id); fetchRecentScores(); }
 fetchStats(); fetchActiveExams(); fetchRecentScores();
 setInterval(()=>{ fetchStats(); fetchActiveExams(); }, 30000);
+*/
 </script>
 @endpush
 </x-app-layout>

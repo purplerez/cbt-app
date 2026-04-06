@@ -142,7 +142,9 @@
     </div>
 
 @push('scripts')
+{{-- ALL JAVASCRIPT COMMENTED OUT TO REDUCE CPU USAGE --}}
 <script>
+/*
 const API = window.apiToken;
 const headers = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -466,7 +468,6 @@ function refreshAll() {
 fetchStats();
 fetchActiveExams();
 fetchActivityLog();
-setInterval(() => { fetchStats(); fetchActiveExams(); }, 30000);
-</script>
+setInterval(() => { fetchStats(); fetchActiveExams(); }, 30000);*/</script>
 @endpush
 </x-app-layout>
