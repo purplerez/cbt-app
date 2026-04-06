@@ -20,6 +20,9 @@ return Application::configure(basePath: dirname(__DIR__))
             'ensure.kepala.session' => \App\Http\Middleware\EnsureKepalaSession::class,
         ]);
 
+        // Add security monitoring to API routes
+        $middleware->appendToGroup('api', \App\Http\Middleware\LogApiRequests::class);
+
         // DISABLED: Append EnsureApiToken to the default web middleware group
         // This middleware creates Sanctum tokens on every request, causing CPU spikes on shared hosting
         // If you need API tokens, only use them for dedicated API routes, not web routes
