@@ -1,5 +1,5 @@
 <x-app-layout>
-    {{-- <x-slot name="header">
+    <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard Admin</h2>
             <div class="flex items-center gap-3 text-sm text-gray-500">
@@ -10,13 +10,13 @@
                 </button>
             </div>
         </div>
-    </x-slot> --}}
+    </x-slot>
 
     <div class="py-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
             {{-- ── STAT CARDS ── --}}
-            {{-- <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-indigo-500">
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Sekolah</p>
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-schools">—</p>
@@ -37,11 +37,11 @@
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-submitted-today">—</p>
                     <p class="text-xs text-gray-400 mt-1">sesi selesai hari ini</p>
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ── LIVE MONITORING PANEL ── --}}
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                {{-- <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center gap-2">
                         <span class="relative flex h-2.5 w-2.5">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
@@ -63,9 +63,9 @@
                             <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full font-medium" id="cnt-not-started">0 Belum</span>
                         </span>
                     </div>
-                </div> --}}
+                </div>
 
-                {{-- <div class="overflow-x-auto">
+                <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-gray-100">
                         <thead class="bg-gray-50">
                             <tr>
@@ -84,18 +84,18 @@
                             </tr>
                         </tbody>
                     </table>
-                </div> --}}
+                </div>
             </div>
 
             {{-- ── RECENT ACTIVITY LOG ── --}}
-            {{-- <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100">
                     <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru</h3>
                 </div>
                 <div class="divide-y divide-gray-50" id="activity-log">
                     <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
                 </div>
-            </div> --}}
+            </div>
 
         </div>
     </div>
@@ -142,9 +142,7 @@
     </div>
 
 @push('scripts')
-{{-- ALL JAVASCRIPT COMMENTED OUT TO REDUCE CPU USAGE --}}
 <script>
-/*
 const API = window.apiToken;
 const headers = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
 const csrfToken = document.querySelector('meta[name="csrf-token"]').content;
@@ -468,6 +466,7 @@ function refreshAll() {
 fetchStats();
 fetchActiveExams();
 fetchActivityLog();
-setInterval(() => { fetchStats(); fetchActiveExams(); }, 30000);*/</script>
+setInterval(() => { fetchStats(); fetchActiveExams(); }, 30000);
+</script>
 @endpush
 </x-app-layout>
