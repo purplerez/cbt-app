@@ -1349,23 +1349,23 @@
                 }
 
                 if (typeof choiceCounter === 'undefined') var choiceCounter = 1;
-                const container = document.getElementById('choices-container');
-                const answerKeyContainer = document.getElementById('answer-key-container');
+                let selectedAnswerKeys = [];
 
-                // Guard: jika form tambah soal tidak ada (ujian tidak aktif), hentikan script ini
-                if (!container || !answerKeyContainer) {
-                    // Tidak ada form, tidak perlu render
-                    // Tapi fungsi harus tetap tersedia agar tidak error jika dipanggil dari tempat lain
-                }
+                function initChoiceHandlers() {
+                    const container = document.getElementById('choices-container');
+                    const answerKeyContainer = document.getElementById('answer-key-container');
+                    const addChoiceBtn = document.getElementById('add-choice');
 
-                // Add choice — guard against missing button (when exam is inactive)
-                const addChoiceBtn = document.getElementById('add-choice');
-                if (addChoiceBtn) {
-                    addChoiceBtn.addEventListener('click', function() {
-                        if (!container) {
-                            console.error('Container not found. Exam may not be active.');
-                            return;
-                        }
+                    if (!container || !answerKeyContainer || !addChoiceBtn) {
+                        console.warn('Choice elements not found in DOM');
+                        return false;
+                    }
+
+                    console.log('✅ Initializing choice handlers');
+
+                    addChoiceBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        console.log('Add choice button clicked');
 
                         choiceCounter++;
                         let div = document.createElement('div');
@@ -1374,7 +1374,7 @@
                         div.innerHTML = `
             <div class="flex items-start gap-2">
                 <div class="flex-1">
-                    <textarea id="choice_${choiceCounter}" name="choices[${choiceCounter}]" rows="3"
+                    <textarea name="choices[${choiceCounter}]" rows="3"
                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
                     <div class="mt-2">
                         <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
@@ -1396,12 +1396,20 @@
         `;
                         container.appendChild(div);
 
-                        // Re-initialize TinyMCE ONLY for the new textarea (avoid global remove)
+                        // Add input listener to new textarea for immediate answer key updates
+                        const newTextarea = div.querySelector('textarea');
+                        if (newTextarea) {
+                            newTextarea.addEventListener('input', function() {
+                                renderAnswerKey(container, answerKeyContainer);
+                            });
+                        }
+
+                        // Re-initialize TinyMCE ONLY for the new textarea
                         setTimeout(() => {
-                            const newTextarea = div.querySelector('.tinymce-editor');
-                            if (newTextarea && typeof tinymce !== 'undefined') {
+                            const textarea = div.querySelector('.tinymce-editor');
+                            if (textarea && typeof tinymce !== 'undefined') {
                                 tinymce.init({
-                                    target: newTextarea,
+                                    target: textarea,
                                     license_key: 'gpl',
                                     theme: 'silver',
                                     plugins: [
@@ -1418,51 +1426,35 @@
                                     content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
                                     paste_as_text: false,
                                     valid_elements: '+*[*]',
-                                    valid_children: '+*[*]',
-                                    setup: function(editor) {
-                                        editor.on('change', function() {
-                                            renderAnswerKey();
-                                        });
-                                        editor.on('init', function() {
-                                            setTimeout(() => {
-                                                renderAnswerKey();
-                                            }, 100);
-                                        });
-                                    }
+                                    valid_children: '+*[*]'
                                 });
-                            } else {
-                                setTimeout(() => {
-                                    renderAnswerKey();
-                                }, 200);
                             }
-                        }, 150);
+                        }, 100);
+
+                        console.log(`Choice ${choiceCounter} added`);
+                        renderAnswerKey(container, answerKeyContainer);
                     });
+
+                    // Initialize input listeners on existing choices
+                    container.querySelectorAll('textarea').forEach(textarea => {
+                        textarea.addEventListener('input', function() {
+                            renderAnswerKey(container, answerKeyContainer);
+                        });
+                    });
+
+                    // Initial render
+                    renderAnswerKey(container, answerKeyContainer);
+                    return true;
                 }
 
-                // Keep track of selected answer keys
-                let selectedAnswerKeys = [];
-
-                // Remove choice
-                function removeChoice(button) {
-                    if (!answerKeyContainer) {
-                        button.closest('.choice-item').remove();
-                        return;
-                    }
-                    // Save current selections before removing
-                    selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb =>
-                        cb.value);
-                    button.closest('.choice-item').remove();
-                    renderAnswerKey();
-                }
-
-                // Render Answer Key automatically
-                function renderAnswerKey() {
+                // Define renderAnswerKey function globally
+                function renderAnswerKey(container, answerKeyContainer) {
                     if (!answerKeyContainer || !container) return;
+
                     answerKeyContainer.innerHTML = '';
                     let choices = container.querySelectorAll('.choice-item');
 
                     if (choices.length === 0) {
-                        // Essay mode
                         answerKeyContainer.innerHTML = `
                 <textarea name="answer_key" rows="3"
                     class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
@@ -1470,35 +1462,14 @@
                         return;
                     }
 
-                    // Multiple-choice mode → render checkboxes
                     let checkboxes = '';
                     choices.forEach((choice, index) => {
                         let id = choice.dataset.choiceId || index + 1;
-
-                        // Get text from textarea
                         const textarea = choice.querySelector('textarea');
                         let text = textarea ? textarea.value.trim() : '';
 
-                        // If TinyMCE has content, try to get it (but don't worry if it fails)
-                        if (!text && textarea && typeof tinymce !== 'undefined') {
-                            try {
-                                // Get all TinyMCE editors and find the one for this textarea
-                                const editors = tinymce.editors;
-                                for (let i = 0; i < editors.length; i++) {
-                                    if (editors[i].targetElm === textarea || editors[i].getElement() === textarea) {
-                                        text = editors[i].getContent({format: 'text'}).trim();
-                                        break;
-                                    }
-                                }
-                            } catch (e) {
-                                // Silent fail - use textarea value
-                            }
-                        }
-
                         text = text || `Pilihan ${index + 1}`;
                         let isChecked = selectedAnswerKeys.includes(id.toString()) ? 'checked' : '';
-
-                        // Strip HTML and truncate for display
                         let displayText = text.replace(/<[^>]*>?/gm, '').trim() || `Pilihan ${index + 1}`;
                         displayText = displayText.substring(0, 80) + (displayText.length > 80 ? '...' : '');
 
@@ -1520,16 +1491,26 @@
                     });
                 }
 
-                // Initial render - hanya jika container ada
-                if (answerKeyContainer && container) {
-                    renderAnswerKey();
+                // Define removeChoice function globally
+                function removeChoice(button) {
+                    const container = document.getElementById('choices-container');
+                    const answerKeyContainer = document.getElementById('answer-key-container');
 
-                    // Listen for input changes on existing textareas
-                    container.addEventListener('input', function(e) {
-                        if (e.target.tagName === 'TEXTAREA') {
-                            renderAnswerKey();
-                        }
-                    });
+                    if (!answerKeyContainer || !container) {
+                        button.closest('.choice-item').remove();
+                        return;
+                    }
+
+                    selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+                    button.closest('.choice-item').remove();
+                    renderAnswerKey(container, answerKeyContainer);
+                }
+
+                // Initialize when DOM is ready or immediately if already loaded
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initChoiceHandlers);
+                } else {
+                    initChoiceHandlers();
                 }
             </script>
 
