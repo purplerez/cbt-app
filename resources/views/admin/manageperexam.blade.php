@@ -1362,6 +1362,11 @@
                 const addChoiceBtn = document.getElementById('add-choice');
                 if (addChoiceBtn) {
                     addChoiceBtn.addEventListener('click', function() {
+                        if (!container) {
+                            console.error('Container not found. Exam may not be active.');
+                            return;
+                        }
+
                         choiceCounter++;
                         let div = document.createElement('div');
                         div.classList.add('choice-item');
@@ -1369,7 +1374,7 @@
                         div.innerHTML = `
             <div class="flex items-start gap-2">
                 <div class="flex-1">
-                    <textarea name="choices[${choiceCounter}]" rows="3"
+                    <textarea id="choice_${choiceCounter}" name="choices[${choiceCounter}]" rows="3"
                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm tinymce-editor"></textarea>
                     <div class="mt-2">
                         <label class="block text-xs font-medium text-gray-600">Gambar Pilihan (Opsional)</label>
@@ -1390,6 +1395,7 @@
             </div>
         `;
                         container.appendChild(div);
+
                         // Re-initialize TinyMCE ONLY for the new textarea (avoid global remove)
                         setTimeout(() => {
                             const newTextarea = div.querySelector('.tinymce-editor');
@@ -1412,11 +1418,19 @@
                                     content_style: 'body { font-family:Segoe UI,Tahoma,Geneva,Verdana,sans-serif; font-size:14px; line-height:1.6; }',
                                     paste_as_text: false,
                                     valid_elements: '+*[*]',
-                                    valid_children: '+*[*]'
+                                    valid_children: '+*[*]',
+                                    setup: function(editor) {
+                                        // After init, update answer key rendering
+                                        editor.on('init', function() {
+                                            renderAnswerKey();
+                                        });
+                                    }
                                 });
+                            } else {
+                                // TinyMCE not available, render anyway after timeout
+                                renderAnswerKey();
                             }
-                        }, 100);
-                        renderAnswerKey();
+                        }, 150);
                     });
                 }
 
@@ -1451,8 +1465,21 @@
                     let checkboxes = '';
                     choices.forEach((choice, index) => {
                         let id = choice.dataset.choiceId || index + 1;
-                        // correspond the text I input in textarea in answer options
-                        let text = choice.querySelector('textarea').value.trim() || `Pilihan ${index+1}`;
+
+                        // Get text from either TinyMCE editor or textarea
+                        let text = '';
+                        const textarea = choice.querySelector('textarea');
+                        if (textarea) {
+                            const editorId = textarea.id;
+                            // Check if this textarea has a TinyMCE editor
+                            if (editorId && typeof tinymce !== 'undefined' && tinymce.get(editorId)) {
+                                text = tinymce.get(editorId).getContent({format: 'text'});
+                            } else {
+                                text = textarea.value;
+                            }
+                        }
+
+                        text = text.trim() || `Pilihan ${index+1}`;
                         let isChecked = selectedAnswerKeys.includes(id.toString()) ? 'checked' : '';
 
                         //strip html dari text untuk ditampilkan di answer key
