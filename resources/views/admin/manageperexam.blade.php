@@ -1420,15 +1420,20 @@
                                     valid_elements: '+*[*]',
                                     valid_children: '+*[*]',
                                     setup: function(editor) {
-                                        // After init, update answer key rendering
-                                        editor.on('init', function() {
+                                        editor.on('change', function() {
                                             renderAnswerKey();
+                                        });
+                                        editor.on('init', function() {
+                                            setTimeout(() => {
+                                                renderAnswerKey();
+                                            }, 100);
                                         });
                                     }
                                 });
                             } else {
-                                // TinyMCE not available, render anyway after timeout
-                                renderAnswerKey();
+                                setTimeout(() => {
+                                    renderAnswerKey();
+                                }, 200);
                             }
                         }, 150);
                     });
@@ -1439,6 +1444,10 @@
 
                 // Remove choice
                 function removeChoice(button) {
+                    if (!answerKeyContainer) {
+                        button.closest('.choice-item').remove();
+                        return;
+                    }
                     // Save current selections before removing
                     selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb =>
                         cb.value);
@@ -1461,29 +1470,37 @@
                         return;
                     }
 
-                    // Multiple-choice mode → render checkboxes (for multiple correct answers)
+                    // Multiple-choice mode → render checkboxes
                     let checkboxes = '';
                     choices.forEach((choice, index) => {
                         let id = choice.dataset.choiceId || index + 1;
 
-                        // Get text from either TinyMCE editor or textarea
-                        let text = '';
+                        // Get text from textarea
                         const textarea = choice.querySelector('textarea');
-                        if (textarea) {
-                            const editorId = textarea.id;
-                            // Check if this textarea has a TinyMCE editor
-                            if (editorId && typeof tinymce !== 'undefined' && tinymce.get(editorId)) {
-                                text = tinymce.get(editorId).getContent({format: 'text'});
-                            } else {
-                                text = textarea.value;
+                        let text = textarea ? textarea.value.trim() : '';
+
+                        // If TinyMCE has content, try to get it (but don't worry if it fails)
+                        if (!text && textarea && typeof tinymce !== 'undefined') {
+                            try {
+                                // Get all TinyMCE editors and find the one for this textarea
+                                const editors = tinymce.editors;
+                                for (let i = 0; i < editors.length; i++) {
+                                    if (editors[i].targetElm === textarea || editors[i].getElement() === textarea) {
+                                        text = editors[i].getContent({format: 'text'}).trim();
+                                        break;
+                                    }
+                                }
+                            } catch (e) {
+                                // Silent fail - use textarea value
                             }
                         }
 
-                        text = text.trim() || `Pilihan ${index+1}`;
+                        text = text || `Pilihan ${index + 1}`;
                         let isChecked = selectedAnswerKeys.includes(id.toString()) ? 'checked' : '';
 
-                        //strip html dari text untuk ditampilkan di answer key
-                        let displayText = text.replace(/<[^>]*>?/gm, '').trim() || `Pilihan ${index+1}`;
+                        // Strip HTML and truncate for display
+                        let displayText = text.replace(/<[^>]*>?/gm, '').trim() || `Pilihan ${index + 1}`;
+                        displayText = displayText.substring(0, 80) + (displayText.length > 80 ? '...' : '');
 
                         checkboxes += `
                 <label class="flex items-center gap-2">
@@ -1492,20 +1509,27 @@
                 </label>
             `;
                     });
+
                     answerKeyContainer.innerHTML = `<div class="flex flex-col gap-1">${checkboxes}</div>`;
 
                     // Update selected keys when checkboxes change
                     answerKeyContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
                         cb.addEventListener('change', function() {
-                            selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll(
-                                'input[type="checkbox"]:checked')).map(cb => cb.value);
+                            selectedAnswerKeys = Array.from(answerKeyContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
                         });
                     });
                 }
 
                 // Initial render - hanya jika container ada
-                if (answerKeyContainer) {
+                if (answerKeyContainer && container) {
                     renderAnswerKey();
+
+                    // Listen for input changes on existing textareas
+                    container.addEventListener('input', function(e) {
+                        if (e.target.tagName === 'TEXTAREA') {
+                            renderAnswerKey();
+                        }
+                    });
                 }
             </script>
 
