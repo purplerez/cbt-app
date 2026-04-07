@@ -150,6 +150,52 @@ class QuestionController extends Controller
         }
     }
 
+    /**
+     * Show the form for editing the specified question
+     */
+    public function edit($question)
+    {
+        try {
+            $question = Question::findOrFail($question);
+
+            // Decode choices and answer key
+            $choices = $question->choices ? json_decode($question->choices, true) : [];
+            $answerKey = $question->answer_key;
+
+            // If answer_key is JSON string, decode it
+            if (is_string($answerKey) && $this->isJsonString($answerKey)) {
+                $answerKey = json_decode($answerKey, true);
+            } elseif (is_string($answerKey)) {
+                // Single answer (essay or letter format)
+                $answerKey = [$answerKey];
+            }
+
+            // Convert letter answers back to numeric indices for form
+            $answerKey = array_map(function($answer) {
+                if (preg_match('/^[A-Z]$/', (string)$answer)) {
+                    return ord(strtoupper($answer)) - ord('A');
+                }
+                return intval($answer);
+            }, (array)$answerKey);
+
+            $choicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+
+            return view('admin.edit-question', compact('question', 'choices', 'answerKey', 'choicesImages'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Soal tidak ditemukan: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Check if string is JSON
+     */
+    private function isJsonString($string)
+    {
+        if (!is_string($string)) return false;
+        json_decode($string);
+        return json_last_error() === JSON_ERROR_NONE;
+    }
+
     public function update(Request $request, $exam)
     {
         // dd($request->all());

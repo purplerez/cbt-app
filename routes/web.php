@@ -187,6 +187,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('exams/banksoal/{exam}/manage', [ExamController::class, 'banksoal'])->name('exams.manage.question');
 
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
+    Route::get('exams/banksoal/{question}/edit', [QuestionController::class, 'edit'])->name('exams.question.edit');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::delete('exams/banksoal/questions/destroy-multiple', [QuestionController::class, 'destroyMultiple'])->name('exams.questions.destroy-multiple');
@@ -521,6 +522,7 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::get('exams/questions/{question}/modal', [ExamController::class, 'getEditModalContent'])->name('exams.questions.modal');
 
     Route::post('exams/banksoal/{exam}/store', [QuestionController::class, 'store'])->name('exams.question.store');
+    Route::get('exams/banksoal/{question}/edit', [QuestionController::class, 'edit'])->name('exams.question.edit');
     Route::put('exams/banksoal/{exam}/update', [QuestionController::class, 'update'])->name('exams.question.update');
     Route::delete('exams/banksoal/{exam}/destroy', [QuestionController::class, 'destroy'])->name('exams.questions.destroy');
     Route::delete('exams/banksoal/questions/destroy-multiple', [QuestionController::class, 'destroyMultiple'])->name('exams.questions.destroy-multiple');
