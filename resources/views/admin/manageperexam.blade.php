@@ -329,7 +329,15 @@
                                                                     </td>
                                                                     <td
                                                                         class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
-                                                                        {{ $q->points }}
+                                                                        <div>{{ $q->points }} pts</div>
+                                                                        <div class="text-xs text-gray-600 mt-1">
+                                                                            Kunci: 
+                                                                            @if(is_array($q->answer_key))
+                                                                                {{ implode(', ', $q->answer_key) }}
+                                                                            @else
+                                                                                {{ $q->answer_key ?: '-' }}
+                                                                            @endif
+                                                                        </div>
                                                                     </td>
                                                                     {{-- <td class="px-6 py-4 text-sm text-gray-800 whitespace-nowrap">
                                                                 {{$exam->is_active}}
