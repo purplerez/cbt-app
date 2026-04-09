@@ -240,40 +240,6 @@ class QuestionController extends Controller
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
 
-            // Strip HTML tags from choices (TinyMCE returns HTML content)
-            if (is_array($choices)) {
-                $choices = array_map(function($choice) {
-                    // Remove HTML tags and decode entities
-                    $text = strip_tags($choice ?? '');
-                    $text = html_entity_decode($text, ENT_QUOTES, 'UTF-8');
-                    // Remove extra whitespace
-                    $text = trim(preg_replace('/\s+/', ' ', $text));
-                    return $text;
-                }, $choices);
-                $request->merge(['choices' => $choices]);
-            }
-
-            // Strip HTML from question_text if it has TinyMCE content
-            $questionText = $request->input('question_text', '');
-            if (!empty($questionText)) {
-                $questionText = strip_tags($questionText);
-                $questionText = html_entity_decode($questionText, ENT_QUOTES, 'UTF-8');
-                $questionText = trim(preg_replace('/\s+/', ' ', $questionText));
-                $request->merge(['question_text' => $questionText]);
-            }
-
-            // Strip HTML from answer_key if it's an essay (uses TinyMCE)
-            $answerKey = $request->input('answer_key', []);
-            if (is_string($answerKey) && !empty($answerKey)) {
-                $answerKey = strip_tags($answerKey);
-                $answerKey = html_entity_decode($answerKey, ENT_QUOTES, 'UTF-8');
-                $answerKey = trim(preg_replace('/\s+/', ' ', $answerKey));
-                $request->merge(['answer_key' => $answerKey]);
-            }
-
-            // Re-fetch answer_key after HTML stripping for further processing
-            $answerKey = $request->input('answer_key', []);
-
             // Cast answer_key values to integers ONLY if it's an array (multiple choice)
             if (is_array($answerKey)) {
                 $answerKey = array_map('intval', $answerKey);
