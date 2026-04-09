@@ -373,7 +373,7 @@
                                                                             @endif
                                                                         @endcannot
 
-                                                                        {{-- Delete button --}}
+                                                                        {{-- <a href="route('admin.siswa.edit', $student->id)" class="text-blue-600 hover:underline">Edit</a> --}}
                                                                         <form
                                                                             action="{{ auth()->user()->hasRole('super') ? route('super.exams.questions.destroy', $q->id) : route('admin.exams.questions.destroy', $q->id) }}"
                                                                             method="POST" class="inline-block">
@@ -1842,8 +1842,8 @@
                         });
                 }
 
-                // Handle form submission for TinyMCE (both add and edit forms)
-                document.querySelectorAll('.question-form, .edit-question-form').forEach(form => {
+                // Handle form submission for TinyMCE
+                document.querySelectorAll('.question-form').forEach(form => {
                     form.addEventListener('submit', function(e) {
                         // Trigger TinyMCE to save content to textarea
                         if (typeof tinymce !== 'undefined') {
