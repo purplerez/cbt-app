@@ -207,7 +207,7 @@ class QuestionController extends Controller
             // Convert letter answers back to numeric indices for form
             $answerKey = array_map(function($answer) {
                 if (preg_match('/^[A-Z]$/', (string)$answer)) {
-                    return ord(strtoupper($answer)) - ord('A');
+                    return ord(strtoupper($answer)) - ord('A') + 1;
                 }
                 return intval($answer);
             }, (array)$answerKey);

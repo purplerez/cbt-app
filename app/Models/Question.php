@@ -56,9 +56,9 @@ class Question extends Model
                     return strtoupper(trim($item));
                 }
 
-                // For True/False (type 2), convert 0 to T, 1 to F
+                // For True/False (type 2), convert 1 to T, 2 to F
                 if ($questionType == '2') {
-                    return $item == 0 ? 'T' : 'F';
+                    return $item == 1 ? 'T' : 'F';
                 }
 
                 // For other types, convert index to letter (0->A, 1->B, etc)
@@ -76,9 +76,9 @@ class Question extends Model
             $questionType = $this->question_type_id ?? $this->attributes['question_type_id'] ?? null;
 
             if (is_numeric($value)) {
-                // For True/False (type 2), convert 0 to T, 1 to F
+                // For True/False (type 2), convert 1 to T, 2 to F
                 if ($questionType == '2') {
-                    $this->attributes['answer_key'] = $value == 0 ? 'T' : 'F';
+                    $this->attributes['answer_key'] = $value == 1 ? 'T' : 'F';
                 } else {
                     $this->attributes['answer_key'] = AnswerKeyHelper::indexToLetter((int)$value);
                 }
@@ -123,7 +123,7 @@ class Question extends Model
             $questionType = $this->question_type_id ?? $this->attributes['question_type_id'] ?? null;
 
             if ($questionType == '2') {
-                return $value == 0 ? 'T' : 'F';
+                return $value == 1 ? 'T' : 'F';
             }
 
             return AnswerKeyHelper::indexToLetter((int)$value);

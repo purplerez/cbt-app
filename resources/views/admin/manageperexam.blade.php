@@ -1295,11 +1295,11 @@
                     // Convert letters (A/B/C/D/E) to 0-based indices (0/1/2/3/4) so they match
                     // each choice's data-choice-id attribute.
                     const letterToIdx = {
-                        'A': 0,
-                        'B': 1,
-                        'C': 2,
-                        'D': 3,
-                        'E': 4
+                        'A': 1,
+                        'B': 2,
+                        'C': 3,
+                        'D': 4,
+                        'E': 5
                     };
                     let selectedIndices = [];
                     const answerKeyDataEl = document.getElementById('modal-answer-key-data');

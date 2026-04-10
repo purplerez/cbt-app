@@ -17,10 +17,9 @@ class AnswerKeyHelper
           }
 
           $index = (int)$index;
-          //perubahan terakhir tanggal 28/02/2026
-          // karena index array pada saat update selalu berkurang 1 poin
-          // jadi merubah dari 64 ke 65 karena A dimulai dari index ke 0 bukan ke 1
-          return chr(65 + $index); // 65 is ASCII for 'A'
+          // Updated to 64 because choice IDs start from 1 in frontend and Word import
+          // 64 + 1 = 65 ('A')
+          return chr(64 + $index);
      }
 
      /**
@@ -33,12 +32,12 @@ class AnswerKeyHelper
      {
           $letter = strtoupper(trim($letter));
 
-          // Handle True/False
+          // Handle True/False (1-based index)
           if ($letter === 'T') {
-               return 0;
+               return 1;
           }
           if ($letter === 'F') {
-               return 1;
+               return 2;
           }
 
           //return ord($letter) - 65; // 65 is ASCII for 'A'
@@ -104,9 +103,9 @@ class AnswerKeyHelper
                $normalized = [];
                foreach ($answerKey as $key) {
                     if (is_numeric($key)) {
-                         // For True/False (type 2), convert 0 to T, 1 to F
+                         // For True/False (type 2), convert 1 to T, 2 to F
                          if ($questionType == 2) {
-                              $normalized[] = $key == 0 ? 'T' : 'F';
+                              $normalized[] = $key == 1 ? 'T' : 'F';
                          } else {
                               $normalized[] = self::indexToLetter((int)$key);
                          }
@@ -127,9 +126,9 @@ class AnswerKeyHelper
 
           // Handle single value (string or number)
           if (is_numeric($answerKey)) {
-               // For True/False (type 2), convert 0 to T, 1 to F
+               // For True/False (type 2), convert 1 to T, 2 to F
                if ($questionType == 2) {
-                    return $answerKey == 0 ? 'T' : 'F';
+                    return $answerKey == 1 ? 'T' : 'F';
                }
                return self::indexToLetter((int)$answerKey);
           }

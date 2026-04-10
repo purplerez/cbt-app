@@ -83,7 +83,7 @@
                                         <div class="flex items-start gap-4 p-4 border border-gray-300 rounded-lg bg-gray-50">
                                             <div class="flex-1">
                                                 <label class="block text-xs font-medium text-gray-600 mb-2">
-                                                    Pilihan {{ chr(65 + $key) }}
+                                                    Pilihan {{ chr(64 + $key) }}
                                                 </label>
                                                 <textarea name="choices[{{ $key }}]" rows="2" class="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" placeholder="Masukkan teks pilihan">{{ $choice }}</textarea>
                                             </div>
