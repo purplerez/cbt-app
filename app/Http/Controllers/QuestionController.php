@@ -119,7 +119,15 @@ class QuestionController extends Controller
                 ];
 
                 $validated = $request->validate($rules, $messages);
-                $validated['choices'] = json_encode($validated['choices']);
+                
+                // Force 1-based indexing for choices before saving
+                $choicesRaw = $validated['choices'];
+                $choicesStandardized = [];
+                $i = 1;
+                foreach ($choicesRaw as $c) {
+                    $choicesStandardized[(string)$i++] = $c;
+                }
+                $validated['choices'] = json_encode($choicesStandardized);
 
                 // Sort answer_key numerically to maintain consistent order regardless of checkbox click order
                 $answerKeyArray = $validated['answer_key'];
@@ -246,43 +254,58 @@ class QuestionController extends Controller
                 $request->merge(['answer_key' => $answerKey]);
             }
 
-            // Preserve existing choice text if not provided in update
-            $existingChoices = $question->choices ? json_decode($question->choices, true) : [];
-            foreach ($choices as $key => $choice) {
-                if (empty($choice) && isset($existingChoices[$key])) {
-                    $choices[$key] = $existingChoices[$key];
-                }
+            // Ensure existing choices are decoded into an array
+            $existingChoicesRaw = $question->choices ? json_decode($question->choices, true) : [];
+            // Re-index existing choices to 1-based to match the new standard
+            $existingChoices = [];
+            $i = 1;
+            foreach ($existingChoicesRaw as $c) {
+                $existingChoices[$i++] = $c;
             }
 
-            // Normalize choice keys from letter (A, B, C, D) to numeric (1, 2, 3, 4) if needed
+            // Normalize choices from request to be 1-indexed numeric keys
             $normalizedChoices = [];
-            $keyMapping = []; // Map old key to new key for answer_key update
+            $keyMapping = []; 
             $index = 1;
+            
             foreach ($choices as $oldKey => $choiceText) {
-                // If key is a letter (A, B, C, etc), convert to numeric index
-                if (preg_match('/^[A-Z]$/', $oldKey)) {
-                    $numericKey = ord($oldKey) - ord('A') + 1; // A=1, B=2, C=3, etc
-                    $keyMapping[$oldKey] = $numericKey;
-                    $normalizedChoices[$numericKey] = $choiceText;
+                // Determine the numeric key (1-based)
+                if (preg_match('/^[A-Z]$/i', (string)$oldKey)) {
+                    // If key is a letter (A, B, etc)
+                    $numericKey = ord(strtoupper($oldKey)) - ord('A') + 1;
                 } else {
-                    // Key is already numeric
-                    $keyMapping[$oldKey] = (int)$oldKey;
-                    $normalizedChoices[(int)$oldKey] = $choiceText;
+                    // If key is numeric or something else, we use the sequence index
+                    // this ensures that Choice 1 (index 0 in PHP array if numerically indexed)
+                    // becomes index 1 in the database.
+                    $numericKey = $index;
                 }
+                
+                // Map the old key to the new numeric key for answer_key update
+                $keyMapping[$oldKey] = $numericKey;
+                
+                // Use input choice text or fall back to existing if empty
+                $finalText = !empty($choiceText) ? $choiceText : ($existingChoices[$numericKey] ?? '');
+                $normalizedChoices[$numericKey] = $finalText;
+                
+                $index++;
             }
 
             // Ensure choice keys are strings for consistency with form input names
-            $choices = array_combine(
-                array_map('strval', array_keys($normalizedChoices)),
-                array_values($normalizedChoices)
-            );
+            $choices = [];
+            foreach ($normalizedChoices as $k => $v) {
+                $choices[(string)$k] = $v;
+            }
 
-            // Update answer_key to use normalized keys
+            // Re-fetch answer_key if it's an array and map it using keyMapping
             if (is_array($answerKey)) {
                 $answerKey = array_map(function($key) use ($keyMapping) {
-                    // If answer_key is letter, map it to numeric
-                    if (preg_match('/^[A-Z]$/', (string)$key)) {
-                        return $keyMapping[$key] ?? intval($key);
+                    // Try mapping through keyMapping first
+                    if (isset($keyMapping[$key])) {
+                        return $keyMapping[$key];
+                    }
+                    // If key is a letter (A-E), map to 1-5
+                    if (preg_match('/^[A-E]$/i', (string)$key)) {
+                        return ord(strtoupper($key)) - ord('A') + 1;
                     }
                     return intval($key);
                 }, $answerKey);

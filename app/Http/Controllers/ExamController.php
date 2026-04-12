@@ -462,8 +462,20 @@ class ExamController extends Controller
             $question = Question::findOrFail($questionId);
 
             // Decode JSON data
-            $choices = $question->choices ? json_decode($question->choices, true) : [];
-            $choicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            $choicesRaw = $question->choices ? json_decode($question->choices, true) : [];
+            $choicesImagesRaw = $question->choices_images ? json_decode($question->choices_images, true) : [];
+
+            // Force 1-based indexing for choices and images to match frontend logic
+            $choices = [];
+            $choicesImages = [];
+            $i = 1;
+            foreach ($choicesRaw as $key => $choice) {
+                $choices[$i] = $choice;
+                if (isset($choicesImagesRaw[$key])) {
+                    $choicesImages[$i] = $choicesImagesRaw[$key];
+                }
+                $i++;
+            }
 
             // Normalize answerKey to always be an array of uppercase letters.
             // $question->answer_key uses the accessor which may return a string ("C")
