@@ -52,9 +52,12 @@ class KepalaExamController extends Controller
             }
 
             $schoolId = session('school_id');
+            // $mapels = Exam::where('exam_type_id', session('exam_id'))
+            //             ->where('start_date', 'like', now()->format('Y-m-d').'%')
+            //             ->get();
             $mapels = Exam::where('exam_type_id', session('exam_id'))
-                        ->where('start_date', 'like', now()->format('Y-m-d').'%')
-                        ->get();
+                        // ->where('start_date', 'like', now()->format('Y-m-d').'%')
+                            ->get();
             $grades = Grade::where('school_id', $schoolId)->get();
 
             return view('kepala.manageexam', compact('mapels', 'grades'));
