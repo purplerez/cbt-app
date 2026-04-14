@@ -178,6 +178,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('exam/{exam}/active', [ExamController::class, 'activeExam'])->name('exam.active');
     Route::get('exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
     Route::put('exams/update', [ExamController::class, 'update'])->name('exams.update');
+    Route::get('examsglobal/{id}/edit', [ExamController::class, 'editglobal'])->name('examsglobal.edit');
+    Route::put('examsglobal/{id}/update', [ExamController::class, 'updateglobal'])->name('examsglobal.update');
     Route::post('exams/archive', [ExamController::class, 'archive'])->name('exams.archive');
 
     // AJAX endpoint for loading edit modal
