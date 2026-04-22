@@ -199,7 +199,7 @@ async function fetchMonitor(examId) {
                 <td class="px-4 py-3">${timeD}</td>
                 <td class="px-4 py-3">${score}</td>
                 <td class="px-4 py-3"><div class="flex gap-1.5 cursor-default">
-                    ${parseInt(p.is_active) === 0 ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition cursor-pointer">Reset</button>` : ''}
+${ (p.is_logout === 0 || parseInt(p.is_logout) === 0) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition cursor-pointer">Reset</button>` : ''}
                 </div></td>
             </tr>`;
         }).join('');

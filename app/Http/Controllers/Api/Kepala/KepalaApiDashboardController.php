@@ -69,16 +69,18 @@ class KepalaApiDashboardController extends Controller
             $totalGrades = Grade::where('school_id', $schoolId)->count();
 
             // Get active exams (exam_sessions with progress status for this school, only valid for today)
-            $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
-                ->whereHas('exam', function ($q) {
-                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
-                })
-                ->whereHas('user.student', function ($q) use ($schoolId) {
-                    $q->where('school_id', $schoolId);
-                })
-                ->distinct('exam_id')
-                ->count('exam_id');
+// $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
+                //     ->whereHas('exam', function ($q) {
+                //         $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
+                //           ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+                //     })
+                //     ->whereHas('user.student', function ($q) use ($schoolId) {
+                //         $q->where('school_id', $schoolId);
+                //     })
+                //     ->distinct('exam_id')
+                //     ->count('exam_id');
+                $activeExams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
+                    ->count();
 
             // Get active participant count
             $activeParticipants = ExamSession::where('status', 'progress')
@@ -197,46 +199,13 @@ class KepalaApiDashboardController extends Controller
                 return response()->json(['error' => 'School not found for this user'], 400);
             }
 
-            // Get exam sessions that are in progress for this school
-            $sessions = ExamSession::with(['exam', 'user.student.grade'])
-                ->where('status', 'progress')
-                ->whereHas('exam', function ($q) {
-                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
-                })
-                ->whereHas('user.student', function ($q) use ($schoolId) {
-                    $q->where('school_id', $schoolId);
-                })
-                ->get()
-                ->groupBy('exam_id');
+            // Get all exams with preassigned from this school
+            $exams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
+                ->select('id', 'title as name')
+                ->orderBy('title')
+                ->get();
 
-            $data = $sessions->map(function ($examSessions, $examId) {
-                $firstSession = $examSessions->first();
-                $exam = $firstSession->exam;
-
-                $totalParticipants = $examSessions->count();
-                $activeParticipants = $examSessions->where('status', 'progress')->count();
-                $completedParticipants = $examSessions->where('status', 'submited')->count();
-
-                // Get remaining time from first session
-                $remainingTime = $firstSession->time_remaining ?? 0;
-
-                // Get grade names from participants
-                $grades = $examSessions->pluck('user.student.grade.name')->unique()->join(', ');
-
-                return [
-                    'exam_id' => $examId,
-                    'name' => $exam->title ?? 'N/A',
-                    'grade' => $grades,
-                    'total_participants' => $totalParticipants,
-                    'active_participants' => $activeParticipants,
-                    'completed_participants' => $completedParticipants,
-                    'remaining_time' => (int) ceil($remainingTime / 60),
-                    'status' => 'in_progress'
-                ];
-            })->values();
-
-            return response()->json($data);
+            return response()->json($exams);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

@@ -46,8 +46,11 @@ class AuthController extends Controller
     {
         $user = Auth::user();
 
-        // Set is_active menjadi false jika user adalah siswa
         if ($user && $user->hasRole('siswa')) {
+            $doSetLogout = $request->input('is_logout', 0);
+            if ($doSetLogout) {
+                $user->is_logout = true;
+            }
             $user->is_active = false;
             $user->save();
         }

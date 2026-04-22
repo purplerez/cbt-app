@@ -47,7 +47,7 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                         </span>
-                        <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
+<h3 class="text-base font-semibold text-gray-800">Monitoring Ujian (Semua Exam)</h3>
                     </div>
                     <div class="flex items-center gap-3">
                         <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]">
@@ -279,7 +279,7 @@ async function fetchMonitor(examId) {
             const actions = `
                 <div class="flex gap-1.5">
                     ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${parseInt(p.is_active) === 1 ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
+${ (p.is_logout === 0 || parseInt(p.is_logout) === 0) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
                         class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
                     ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
                         class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}

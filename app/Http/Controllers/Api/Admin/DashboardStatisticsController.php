@@ -85,14 +85,10 @@ class DashboardStatisticsController extends Controller
     public function getActiveExams(): JsonResponse
     {
         try {
-            $activeExamIds = ExamSession::where('status', 'progress')
-                ->distinct('exam_id')
-                ->pluck('exam_id');
-
-            $exams = Exam::whereIn('id', $activeExamIds)
-                ->whereDate('start_date', '<=', Carbon::today())
-                ->whereDate('end_date', '>=', Carbon::today())
-                ->select('id', 'title')
+            // All exams with preassigned participants (not just active/progress)
+            $exams = Exam::whereHas('preassigneds')
+                ->select('id', 'title as name')
+                ->orderBy('title')
                 ->get()
                 ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
 

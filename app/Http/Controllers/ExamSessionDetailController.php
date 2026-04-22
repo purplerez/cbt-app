@@ -142,8 +142,23 @@ class ExamSessionDetailController extends Controller
             $student = Student::where('nis', $studentNis)->firstOrFail();
             $user    = $student->user;
 
-            // Lock the user account so the student cannot log in again
-            // (is_active = 0 means locked; admin must manually re-enable via the Reset Login button)
+            // Check conditions for reset: is_logout == 0 AND ongoing session (time_remaining > 0 OR status = 'progress')
+            $ongoingSessions = $user->examSessions()
+                ->where('status', 'progress')
+                ->orWhere('time_remaining', '>', 0)
+                ->exists();
+
+            if ($user->is_logout == 1 || !$ongoingSessions) {
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Reset tidak diperlukan: is_logout sudah 1 atau tidak ada sesi ongoing.',
+                    ], 400);
+                }
+                return redirect()->back()->with('info', 'Reset tidak diperlukan: is_logout sudah 1 atau tidak ada sesi ongoing.');
+            }
+
+            // Lock the user account
             $user->is_active = 0;
             $user->save();
 
@@ -151,39 +166,40 @@ class ExamSessionDetailController extends Controller
             $actor = auth()->user();
             logActivity(
                 $actor->name . ' (ID: ' . $actor->id . ') Kunci login untuk siswa ' .
-                $student->name . ' (NIS: ' . $student->nis . ')'
+                $student->name . ' (NIS: ' . $student->nis . ') - ongoing session detected'
             );
 
             // Return JSON for AJAX calls from dashboard monitoring panel
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success'      => true,
-                    'message'      => 'Akun siswa ' . $student->name . ' berhasil dikunci (is_active = 0).',
+                    'message'      => 'Akun siswa ' . $student->name . ' berhasil direset (is_active = 0, ongoing session).',
                     'student_name' => $student->name,
                     'nis'          => $student->nis,
                     'is_active'    => 0,
+                    'is_logout'    => $user->is_logout,
                 ]);
             }
 
-            // Fallback redirect for non-AJAX (e.g. from exam detail page)
+            // Fallback redirect for non-AJAX
             $latestSession = $student->user->examSessions()->latest()->first();
             if ($latestSession) {
-                $routePrefix = auth()->user()->hasRole('kepala') ? 'kepala' : 'guru';
+                $routePrefix = auth()->user()->hasRole('kepala') ? 'kepala' : 'admin';
                 return redirect()
                     ->route($routePrefix . '.exam-sessions.detail', $latestSession->id)
-                    ->with('success', 'Akun siswa berhasil dikunci.');
+                    ->with('success', 'Akun siswa berhasil direset.');
             }
 
-            return redirect()->back()->with('success', 'Akun siswa berhasil dikunci.');
+            return redirect()->back()->with('success', 'Akun siswa berhasil direset.');
 
         } catch (\Exception $e) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Gagal mengunci akun: ' . $e->getMessage(),
+                    'message' => 'Gagal reset akun: ' . $e->getMessage(),
                 ], 500);
             }
-            return redirect()->back()->with('error', 'Gagal mengunci akun: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal reset akun: ' . $e->getMessage());
         }
     }
 
