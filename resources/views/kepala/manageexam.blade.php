@@ -71,10 +71,10 @@
                                                     <td colspan="7" class="px-6 py-4 text-center text-gray-500">Pilih mata pelajaran di sebelah kiri untuk menampilkan daftar nilai.</td>
                                                 </tr>
                                             </tbody>
-                                            {{-- untuk detail button:
+                                            untuk detail button:
                                             <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                                                 Detail
-                                            </button --}}
+                                            </button>
                                         </table>
                                     </div>
                                 </div>
