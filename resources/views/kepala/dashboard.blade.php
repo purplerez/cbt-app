@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    {{-- <x-slot name="header">
+    <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard Kepala Madrasah</h2>
@@ -14,13 +14,13 @@
                 </button>
             </div>
         </div>
-    </x-slot> --}}
+    </x-slot>
 
     <div class="py-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
             {{-- ── STAT CARDS ── --}}
-            {{-- <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Siswa</p>
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-students">—</p>
@@ -41,10 +41,10 @@
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-total-exams">—</p>
                     <p class="text-xs text-gray-400 mt-1" id="stat-preassigned">— terdaftar</p>
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ── LIVE MONITORING PANEL ── --}}
-            {{-- <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center gap-2">
                         <span class="relative flex h-2.5 w-2.5">
@@ -81,10 +81,10 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ── RECENT SCORES ── --}}
-            {{-- <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100">
                     <h3 class="text-base font-semibold text-gray-800">Ringkasan Nilai Ujian Terbaru</h3>
                 </div>
@@ -103,13 +103,13 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
+            </div>
 
         </div>
     </div>
 
     {{-- ── RESET LOGIN MODAL ── --}}
-    {{-- <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
         <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <h4 class="text-base font-semibold text-gray-800 mb-2">Reset Login Siswa</h4>
             <p class="text-sm text-gray-600 mb-1">Yakin ingin mereset login untuk:</p>
@@ -120,14 +120,12 @@
                 <button onclick="confirmReset()" id="confirm-reset-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Reset Login</button>
             </div>
         </div>
-    </div> --}}
+    </div>
 
 
 
 @push('scripts')
-{{-- ALL JAVASCRIPT COMMENTED OUT TO REDUCE CPU USAGE --}}
 <script>
-/*
 const API = window.apiToken;
 const HEADERS = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -264,7 +262,6 @@ function toast(type, msg) { const t=document.createElement('div'); t.className=`
 function refreshAll() { fetchStats(); fetchActiveExams(); const id=document.getElementById('exam-select').value; if(id) fetchMonitor(id); fetchRecentScores(); }
 fetchStats(); fetchActiveExams(); fetchRecentScores();
 setInterval(()=>{ fetchStats(); fetchActiveExams(); }, 30000);
-*/
 </script>
 @endpush
 </x-app-layout>
