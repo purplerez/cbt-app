@@ -70,6 +70,15 @@
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 {!! nl2br($answer['question_text']) !!}
+                                                {{-- choiches --}}
+                                                    @if(!empty($answer['choices']))
+                                                            <div class="mt-2 text-sm text-gray-500">
+                                                                {{-- show available choices --}}
+                                                                @foreach($answer['choices'] as $key => $choice)
+                                                                    <div><strong>{{ $key }}.</strong> {!! nl2br($choice) !!}</div>
+                                                                @endforeach
+                                                            </div>
+                                                    @endif
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 @php
