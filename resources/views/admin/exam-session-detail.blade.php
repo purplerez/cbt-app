@@ -70,7 +70,13 @@
                                             </td>
                                             <td class="px-6 py-4 text-sm">
                                                 {!! nl2br($answer['question_text']) !!}
-                                                {{-- choiches --}}
+                                                {{-- show question image if exist --}}
+                                                @if(!empty($answer['question_image']))
+                                                    <div class="mt-2">
+                                                        <img src="{{ asset('storage/' . $answer['question_image']) }}" alt="Gambar Soal" class="max-w-xs border rounded">
+                                                    </div>
+                                                @endif
+
                                                     @if(!empty($answer['choices']))
                                                             <div class="mt-2 text-sm text-gray-500">
                                                                 {{-- show available choices --}}
