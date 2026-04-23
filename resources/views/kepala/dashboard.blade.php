@@ -54,7 +54,7 @@
                         <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+<select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900">
                             <option value="">— Pilih Ujian —</option>
                         </select>
                         <span class="hidden sm:flex items-center gap-2 text-xs">
