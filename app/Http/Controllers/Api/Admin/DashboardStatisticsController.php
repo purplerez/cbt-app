@@ -87,7 +87,7 @@ class DashboardStatisticsController extends Controller
         try {
             // All exams with preassigned participants (not just active/progress)
             $exams = Exam::whereHas('preassigneds')
-                ->select('id', 'title as name')
+                ->select('id', 'title')
                 ->orderBy('title')
                 ->get()
                 ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
