@@ -50,10 +50,10 @@
 <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian (Semua Exam)</h3>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]">
+                        <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]">
                             <option value="">— Pilih Ujian —</option>
                         </select>
-                        <select id="school-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]" disabled>
+                        <select id="school-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]" disabled>
                             <option value="">— Semua Sekolah —</option>
                         </select>
 
