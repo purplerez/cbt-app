@@ -120,19 +120,30 @@ class QuestionController extends Controller
 
                 $validated = $request->validate($rules, $messages);
                 
-                // Force 1-based indexing for choices before saving
+                // Force 0-based indexing for choices before saving to match word import
                 $choicesRaw = $validated['choices'];
                 $choicesStandardized = [];
-                $i = 1;
-                foreach ($choicesRaw as $c) {
-                    $choicesStandardized[(string)$i++] = $c;
+                $keyMapping = [];
+                $i = 0;
+                foreach ($choicesRaw as $oldKey => $c) {
+                    $choicesStandardized[(string)$i] = $c;
+                    $keyMapping[$oldKey] = $i;
+                    $i++;
                 }
                 $validated['choices'] = json_encode($choicesStandardized);
 
                 // Sort answer_key numerically to maintain consistent order regardless of checkbox click order
                 $answerKeyArray = $validated['answer_key'];
-                sort($answerKeyArray, SORT_NUMERIC);
-                $validated['answer_key'] = json_encode($answerKeyArray);
+                $mappedAnswerKey = [];
+                foreach($answerKeyArray as $ak) {
+                    if (isset($keyMapping[$ak])) {
+                        $mappedAnswerKey[] = $keyMapping[$ak];
+                    } else {
+                        $mappedAnswerKey[] = $ak;
+                    }
+                }
+                sort($mappedAnswerKey, SORT_NUMERIC);
+                $validated['answer_key'] = json_encode($mappedAnswerKey);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
@@ -155,8 +166,9 @@ class QuestionController extends Controller
             if ($request->hasFile('choice_images')) {
                 foreach ($request->file('choice_images') as $choiceId => $image) {
                     if ($image) {
+                        $mappedId = isset($keyMapping[$choiceId]) ? (string)$keyMapping[$choiceId] : (string)$choiceId;
                         $choiceImagePath = $image->store('choice_images', 'public');
-                        $choicesImages[$choiceId] = $choiceImagePath;
+                        $choicesImages[$mappedId] = $choiceImagePath;
                     }
                 }
             }
@@ -256,27 +268,27 @@ class QuestionController extends Controller
 
             // Ensure existing choices are decoded into an array
             $existingChoicesRaw = $question->choices ? json_decode($question->choices, true) : [];
-            // Re-index existing choices to 1-based to match the new standard
+            // Re-index existing choices to 0-based to match the new standard
             $existingChoices = [];
-            $i = 1;
+            $i = 0;
             foreach ($existingChoicesRaw as $c) {
                 $existingChoices[$i++] = $c;
             }
 
-            // Normalize choices from request to be 1-indexed numeric keys
+            // Normalize choices from request to be 0-indexed numeric keys
             $normalizedChoices = [];
             $keyMapping = []; 
-            $index = 1;
+            $index = 0;
             
             foreach ($choices as $oldKey => $choiceText) {
-                // Determine the numeric key (1-based)
+                // Determine the numeric key (0-based)
                 if (preg_match('/^[A-Z]$/i', (string)$oldKey)) {
                     // If key is a letter (A, B, etc)
-                    $numericKey = ord(strtoupper($oldKey)) - ord('A') + 1;
+                    $numericKey = ord(strtoupper($oldKey)) - ord('A');
                 } else {
                     // If key is numeric or something else, we use the sequence index
                     // this ensures that Choice 1 (index 0 in PHP array if numerically indexed)
-                    // becomes index 1 in the database.
+                    // becomes index 0 in the database.
                     $numericKey = $index;
                 }
                 
@@ -303,9 +315,9 @@ class QuestionController extends Controller
                     if (isset($keyMapping[$key])) {
                         return $keyMapping[$key];
                     }
-                    // If key is a letter (A-E), map to 1-5
+                    // If key is a letter (A-E), map to 0-4
                     if (preg_match('/^[A-E]$/i', (string)$key)) {
-                        return ord(strtoupper($key)) - ord('A') + 1;
+                        return ord(strtoupper($key)) - ord('A');
                     }
                     return intval($key);
                 }, $answerKey);
@@ -398,15 +410,21 @@ class QuestionController extends Controller
             }
 
             // Handle choice images upload
-            $existingChoicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
-            $choicesImages = $existingChoicesImages;
+            $existingChoicesImagesRaw = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            
+            $choicesImages = [];
+            foreach ($existingChoicesImagesRaw as $oldImgKey => $imgPath) {
+                 $newKey = isset($keyMapping[$oldImgKey]) ? (string)$keyMapping[$oldImgKey] : (string)$oldImgKey;
+                 $choicesImages[$newKey] = $imgPath;
+            }
 
             // Handle removal of choice images
             if ($request->has('remove_choice_images')) {
                 foreach ($request->input('remove_choice_images') as $choiceId) {
-                    if (isset($choicesImages[$choiceId])) {
-                        Storage::disk('public')->delete($choicesImages[$choiceId]);
-                        unset($choicesImages[$choiceId]);
+                    $mappedId = isset($keyMapping[$choiceId]) ? (string)$keyMapping[$choiceId] : (string)$choiceId;
+                    if (isset($choicesImages[$mappedId])) {
+                        Storage::disk('public')->delete($choicesImages[$mappedId]);
+                        unset($choicesImages[$mappedId]);
                     }
                 }
             }
@@ -415,12 +433,13 @@ class QuestionController extends Controller
             if ($request->hasFile('choice_images')) {
                 foreach ($request->file('choice_images') as $choiceId => $image) {
                     if ($image) {
+                        $mappedId = isset($keyMapping[$choiceId]) ? (string)$keyMapping[$choiceId] : (string)$choiceId;
                         // Delete old image if exists
-                        if (isset($choicesImages[$choiceId])) {
-                            Storage::disk('public')->delete($choicesImages[$choiceId]);
+                        if (isset($choicesImages[$mappedId])) {
+                            Storage::disk('public')->delete($choicesImages[$mappedId]);
                         }
                         $choiceImagePath = $image->store('choice_images', 'public');
-                        $choicesImages[$choiceId] = $choiceImagePath;
+                        $choicesImages[$mappedId] = $choiceImagePath;
                     }
                 }
             }

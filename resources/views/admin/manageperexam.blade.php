@@ -1066,7 +1066,7 @@
                             if (typeof answerKey === 'string') {
                                 // If it's a letter (A, B, C, D), convert to index (0, 1, 2, 3)
                                 if (answerKey.match(/^[A-Z]$/)) {
-                                    let index = answerKey.charCodeAt(0) - 64; // A=0, B=1, etc
+                                    let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
                                     normalizedAnswerKey = [index];
                                 } else {
                                     normalizedAnswerKey = [parseInt(answerKey) || answerKey];
@@ -1295,11 +1295,11 @@
                     // Convert letters (A/B/C/D/E) to 0-based indices (0/1/2/3/4) so they match
                     // each choice's data-choice-id attribute.
                     const letterToIdx = {
-                        'A': 1,
-                        'B': 2,
-                        'C': 3,
-                        'D': 4,
-                        'E': 5
+                        'A': 0,
+                        'B': 1,
+                        'C': 2,
+                        'D': 3,
+                        'E': 4
                     };
                     let selectedIndices = [];
                     const answerKeyDataEl = document.getElementById('modal-answer-key-data');
@@ -1308,8 +1308,11 @@
                             const letters = JSON.parse(answerKeyDataEl.value);
                             if (Array.isArray(letters)) {
                                 selectedIndices = letters.map(l => {
-                                    const idx = letterToIdx[l.toUpperCase()];
-                                    return idx !== undefined ? idx.toString() : null;
+                                    if (typeof l === 'string' && l.match(/^[A-E]$/i)) {
+                                        const idx = letterToIdx[l.toUpperCase()];
+                                        return idx !== undefined ? idx.toString() : null;
+                                    }
+                                    return l !== null && l !== undefined ? l.toString() : null;
                                 }).filter(v => v !== null);
                             }
                         } catch (e) {
