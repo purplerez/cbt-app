@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\Admin\DashboardStatisticsController;
 use App\Http\Controllers\Api\Admin\DashboardMonitorController;
+use App\Http\Controllers\Api\Admin\LogsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\KepalaExamApiController;
@@ -56,6 +57,10 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
 
     Route::get('/schools/{schoolId}/grades', [StudentController::class, 'getGradesBySchool'])
         ->name('school.grades');
+
+    // Activity Logs Routes
+    Route::get('/logs', [LogsController::class, 'getLogs'])->name('logs');
+    Route::get('/logs/recent', [LogsController::class, 'getRecentLogs'])->name('logs.recent');
 });
 
 

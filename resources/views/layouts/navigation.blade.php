@@ -52,7 +52,7 @@
                         <x-nav-link :href="route('admin.users')" :active="request()->routeIs('admin.users')">
                             {{ __('Data User') }}
                         </x-nav-link>
-                        <x-nav-link :href="route('admin.schools')" :active="request()->routeIs('admin.subjects')">
+                        <x-nav-link :href="route('admin.logs')" :active="request()->routeIs('admin.subjects')">
                             {{ __('Log Aktifitas') }}
                         </x-nav-link>
                     @elseif (auth()->user()->hasRole('guru'))

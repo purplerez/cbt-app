@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\DashboardController as AdminController;
 use App\Http\Controllers\Admin\UserManagementController;
+use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\ExamScoreController;
 use App\Http\Controllers\ExamController;
 use App\Http\Controllers\GradeController;
@@ -98,6 +99,7 @@ Route::middleware('auth')->group(function () {
 // super admin page
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'index'])->name('dashboard');
+    Route::get('/logs', [LogsController::class, 'index'])->name('logs');
 
     // Exam scores export
     Route::get('/exam/{exam}/scores/export', [ExamScoreController::class, 'exportPDF'])->name('exam.scores.export');

@@ -89,8 +89,11 @@
 
             {{-- ── RECENT ACTIVITY LOG ── --}}
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-5 border-b border-gray-100">
-                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru</h3>
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru (10 Log Terakhir)</h3>
+                    <a href="{{ route('admin.logs') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                        Lihat Semua →
+                    </a>
                 </div>
                 <div class="divide-y divide-gray-50" id="activity-log">
                     <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
@@ -332,25 +335,33 @@ function formatTime(seconds) {
 
 // ── ACTIVITY LOG ───────────────────────────────────────────────────
 async function fetchActivityLog() {
-    // Placeholder — show if ActivityLog model/table exists
+    // Fetch recent activity logs from the new API endpoint
     try {
-        const r = await fetch('/api/admin/activity-log', { headers });
+        const r = await fetch('/api/admin/logs/recent', { headers });
         if (!r.ok) throw new Error();
-        const logs = await r.json();
+        const result = await r.json();
+        if (!result.success) throw new Error(result.message || 'Failed to load logs');
+
+        const logs = result.data;
         const el = document.getElementById('activity-log');
-        if (!logs.length) {
+        if (!logs || logs.length === 0) {
             el.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">Belum ada aktivitas.</div>';
             return;
         }
-        el.innerHTML = logs.slice(0,10).map(l => `
-            <div class="px-5 py-3 flex items-start gap-3">
+        el.innerHTML = logs.map(l => `
+            <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50">
                 <div class="w-2 h-2 mt-1.5 rounded-full bg-indigo-400 flex-shrink-0"></div>
-                <div>
-                    <p class="text-sm text-gray-700">${escHtml(l.activity)}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">${l.created_at ?? ''}</p>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-700">${escHtml(l.log_desc)}</p>
+                    <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                        <span>${escHtml(l.user_name)}</span>
+                        <span>•</span>
+                        <span title="${l.created_at}">${l.created_at_human || l.created_at}</span>
+                    </div>
                 </div>
             </div>`).join('');
     } catch(e) {
+        console.error('Activity log error:', e);
         document.getElementById('activity-log').innerHTML =
             '<div class="px-5 py-8 text-center text-gray-400 text-sm">Log tidak tersedia.</div>';
     }
