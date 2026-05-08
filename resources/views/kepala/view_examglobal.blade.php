@@ -49,6 +49,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             <div class="flex flex-wrap gap-2">
+                                                {{-- DISABLED: Daftarkan Siswa & Ruang feature disabled (to be re-enabled later)
                                                 @role('kepala')
                                                     <a href="{{ route('kepala.exams.participant', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
@@ -80,6 +81,7 @@
                                                         Ruang
                                                     </a>
                                                 @endrole
+                                                --}}
 
                                                 @role('kepala')
                                                     <a href="{{ route('kepala.exams.print-participants', $exam->id) }}"

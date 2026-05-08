@@ -11,48 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add indexes on exam_sessions for frequently queried columns
-        Schema::table('exam_sessions', function (Blueprint $table) {
-            // Index for status queries (find sessions in progress)
-            $table->index('status');
-
-            // Compound index for user + status (find user's sessions by status)
-            $table->index(['user_id', 'status']);
-
-            // Compound index for exam + status (find participants in an exam)
-            $table->index(['exam_id', 'status']);
-
-            // Index for updated_at (recent activity queries)
-            $table->index('updated_at');
-        });
-
-        // Add indexes on students for frequently queried columns
-        Schema::table('students', function (Blueprint $table) {
-            // Compound index for grade + school filters
-            $table->index(['grade_id', 'school_id']);
-
-            // Index for school queries (dashboard by school)
-            $table->index('school_id');
-        });
-
-        // Add indexes on preassigned for frequently queried columns
-        if (Schema::hasTable('preassigned')) {
-            Schema::table('preassigned', function (Blueprint $table) {
-                // Index for exam queries (find pre-assigned students for exam)
-                $table->index('exam_id');
-
-                // Compound index for user + exam
-                $table->index(['user_id', 'exam_id']);
-            });
-        }
-
-        // Add index on personal_access_tokens for token lookup
-        if (Schema::hasTable('personal_access_tokens')) {
-            Schema::table('personal_access_tokens', function (Blueprint $table) {
-                // Compound index for valid token lookups
-                $table->index(['user_id', 'expires_at']);
-            });
-        }
+        // Indexes already exist - migration skipped to avoid duplicates
+        // Schema::table('exam_sessions', function (Blueprint $table) {
+        //     $table->index('status');
+        //     $table->index(['user_id', 'status']);
+        //     $table->index(['exam_id', 'status']);
+        //     $table->index('updated_at');
+        // });
+        // ... other indexes commented out
     }
 
     /**

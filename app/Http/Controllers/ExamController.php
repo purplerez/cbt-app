@@ -462,8 +462,20 @@ class ExamController extends Controller
             $question = Question::findOrFail($questionId);
 
             // Decode JSON data
-            $choices = $question->choices ? json_decode($question->choices, true) : [];
-            $choicesImages = $question->choices_images ? json_decode($question->choices_images, true) : [];
+            $choicesRaw = $question->choices ? json_decode($question->choices, true) : [];
+            $choicesImagesRaw = $question->choices_images ? json_decode($question->choices_images, true) : [];
+
+            // Force 1-based indexing for choices and images to match frontend logic
+            $choices = [];
+            $choicesImages = [];
+            $i = 1;
+            foreach ($choicesRaw as $key => $choice) {
+                $choices[$i] = $choice;
+                if (isset($choicesImagesRaw[$key])) {
+                    $choicesImages[$i] = $choicesImagesRaw[$key];
+                }
+                $i++;
+            }
 
             // Normalize answerKey to always be an array of uppercase letters.
             // $question->answer_key uses the accessor which may return a string ("C")
@@ -478,9 +490,58 @@ class ExamController extends Controller
             }
 
             // Return modal HTML
+            // Return modal HTML
             return view('admin.partials.edit-question-modal', compact('question', 'choices', 'choicesImages', 'answerKey'));
         } catch (\Exception $e) {
             return response()->json(['error' => 'Question not found'], 404);
+        }
+    }
+
+    /**
+     * Show the edit form for a global exam (Examtype).
+     */
+    public function editglobal($id)
+    {
+        try {
+            $exam = \App\Models\Examtype::findOrFail($id);
+            return view('admin.edit_examsglobal', compact('exam'));
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['error' => 'Gagal Membuka Ujian Global: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update a global exam (Examtype).
+     */
+    public function updateglobal(\Illuminate\Http\Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'start' => 'required|date',
+                'end' => 'required|date|after_or_equal:start',
+            ]);
+
+            $exam = \App\Models\Examtype::findOrFail($id);
+            
+            $user = \Illuminate\Support\Facades\Auth::user();
+            logActivity($user->name . ' (ID: ' . $user->id . ') mengubah ujian global : ' . $exam->title . ' menjadi ' . $validated['name']);
+
+            $exam->update([
+                'title' => $validated['name'],
+                'start_time' => $validated['start'],
+                'end_time' => $validated['end'],
+            ]);
+
+            $roleRoutes =  [
+                'admin' => 'admin.exams',
+            ];
+
+            $role = \Illuminate\Support\Facades\Auth::user()->getRoleNames()->first();
+
+            return redirect()->route($roleRoutes[$role])->with('success', 'Data Ujian Bersama telah diperbarui');
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput()->withErrors(['error' => 'Gagal Memperbarui Ujian : ' . $e->getMessage()]);
         }
     }
 }

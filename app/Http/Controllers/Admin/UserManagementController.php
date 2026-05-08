@@ -20,7 +20,7 @@ class UserManagementController extends Controller
     {
         try {
             // Get all users atau dengan filter
-            $query = User::with('roles')->orderBy('role', 'asc');
+$query = User::with(['roles', 'student.school', 'teacher.school', 'head.school'])->orderBy('role', 'asc');
 
             // Apply filters
             $query = $this->applyFilters($query);

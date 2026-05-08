@@ -154,7 +154,21 @@
                                  @forelse($users as $user)
                                     <tr class="hover:bg-gray-50">
                                         <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
-                                            {{ $user->name }}
+                                            {{ $user->name }}<br/>
+                                            <span class="text-sm text-gray-500 whitespace-nowrap">
+                                                {{-- school name --}}
+                                                @php
+                                                    $schoolName = '-';
+                                                    if ($user->student?->school) {
+                                                        $schoolName = $user->student->school->name;
+                                                    } elseif ($user->head?->school) {
+                                                        $schoolName = $user->head->school->name;
+                                                    } elseif ($user->teacher?->school) {
+                                                        $schoolName = $user->teacher->school->name;
+                                                    }
+                                                @endphp
+                                                {{ $schoolName }}
+                                            </span>
                                         </td>
                                         <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">
                                             {{ $user->email }}

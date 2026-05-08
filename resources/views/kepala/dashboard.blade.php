@@ -1,6 +1,6 @@
 <x-app-layout>
 
-    {{-- <x-slot name="header">
+    <x-slot name="header">
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold leading-tight text-gray-800">Dashboard Kepala Madrasah</h2>
@@ -14,13 +14,13 @@
                 </button>
             </div>
         </div>
-    </x-slot> --}}
+    </x-slot>
 
     <div class="py-6">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8 space-y-6">
 
             {{-- ── STAT CARDS ── --}}
-            {{-- <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div class="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 <div class="bg-white rounded-xl shadow-sm p-5 border-l-4 border-blue-500">
                     <p class="text-xs font-medium text-gray-500 uppercase tracking-wide">Total Siswa</p>
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-students">—</p>
@@ -41,10 +41,10 @@
                     <p class="mt-1 text-3xl font-bold text-gray-900" id="stat-total-exams">—</p>
                     <p class="text-xs text-gray-400 mt-1" id="stat-preassigned">— terdaftar</p>
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ── LIVE MONITORING PANEL ── --}}
-            {{-- <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                     <div class="flex items-center gap-2">
                         <span class="relative flex h-2.5 w-2.5">
@@ -54,7 +54,7 @@
                         <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50">
+<select id="exam-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900">
                             <option value="">— Pilih Ujian —</option>
                         </select>
                         <span class="hidden sm:flex items-center gap-2 text-xs">
@@ -81,10 +81,10 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
+            </div>
 
             {{-- ── RECENT SCORES ── --}}
-            {{-- <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100">
                     <h3 class="text-base font-semibold text-gray-800">Ringkasan Nilai Ujian Terbaru</h3>
                 </div>
@@ -103,13 +103,13 @@
                         </tbody>
                     </table>
                 </div>
-            </div> --}}
+            </div>
 
         </div>
     </div>
 
     {{-- ── RESET LOGIN MODAL ── --}}
-    {{-- <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+    <div id="reset-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
         <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
             <h4 class="text-base font-semibold text-gray-800 mb-2">Reset Login Siswa</h4>
             <p class="text-sm text-gray-600 mb-1">Yakin ingin mereset login untuk:</p>
@@ -120,14 +120,12 @@
                 <button onclick="confirmReset()" id="confirm-reset-btn" class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Reset Login</button>
             </div>
         </div>
-    </div> --}}
+    </div>
 
 
 
 @push('scripts')
-{{-- ALL JAVASCRIPT COMMENTED OUT TO REDUCE CPU USAGE --}}
 <script>
-/*
 const API = window.apiToken;
 const HEADERS = { 'Authorization': 'Bearer ' + API, 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' };
 const CSRF = document.querySelector('meta[name="csrf-token"]').content;
@@ -191,7 +189,7 @@ async function fetchMonitor(examId) {
         document.getElementById('cnt-not-started').textContent = (res.counts.not_started ?? 0) + ' Belum';
         if (!res.data || !res.data.length) { document.getElementById('monitor-body').innerHTML = '<tr><td colspan="6" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta terdaftar.</td></tr>'; return; }
         document.getElementById('monitor-body').innerHTML = res.data.map(p => {
-            const badge = { 'progress': '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>', 'submited': '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">✓ Submit</span>', 'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>' }[p.status] ?? p.status;
+            const badge = { 'progress': '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>', 'submited': '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Submit</span>', 'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>' }[p.status] ?? p.status;
             const timeD = p.status === 'progress' ? `<span class="font-mono text-sm text-orange-600" data-seconds="${p.time_remaining}">${fmtTime(p.time_remaining)}</span>` : '<span class="text-gray-400 text-xs">—</span>';
             const score = p.score !== null ? `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` : '—';
             return `<tr class="hover:bg-gray-50 transition">
@@ -201,7 +199,7 @@ async function fetchMonitor(examId) {
                 <td class="px-4 py-3">${timeD}</td>
                 <td class="px-4 py-3">${score}</td>
                 <td class="px-4 py-3"><div class="flex gap-1.5 cursor-default">
-                    ${parseInt(p.is_active) === 0 ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition cursor-pointer">Reset</button>` : ''}
+${ (p.is_logout === 0 || parseInt(p.is_logout) === 0) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition cursor-pointer">Reset</button>` : ''}
                 </div></td>
             </tr>`;
         }).join('');
@@ -264,7 +262,6 @@ function toast(type, msg) { const t=document.createElement('div'); t.className=`
 function refreshAll() { fetchStats(); fetchActiveExams(); const id=document.getElementById('exam-select').value; if(id) fetchMonitor(id); fetchRecentScores(); }
 fetchStats(); fetchActiveExams(); fetchRecentScores();
 setInterval(()=>{ fetchStats(); fetchActiveExams(); }, 30000);
-*/
 </script>
 @endpush
 </x-app-layout>

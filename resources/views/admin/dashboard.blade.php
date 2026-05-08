@@ -47,13 +47,13 @@
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                             <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
                         </span>
-                        <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian Live</h3>
+<h3 class="text-base font-semibold text-gray-800">Monitoring Ujian (Semua Exam)</h3>
                     </div>
                     <div class="flex items-center gap-3">
-                        <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]">
+                        <select id="exam-select" onchange="onExamSelectChange()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]">
                             <option value="">— Pilih Ujian —</option>
                         </select>
-                        <select id="school-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 flex-1 max-w-[200px]" disabled>
+                        <select id="school-select" onchange="loadMonitor()" class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]" disabled>
                             <option value="">— Semua Sekolah —</option>
                         </select>
 
@@ -89,8 +89,11 @@
 
             {{-- ── RECENT ACTIVITY LOG ── --}}
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
-                <div class="p-5 border-b border-gray-100">
-                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru</h3>
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru (10 Log Terakhir)</h3>
+                    <a href="{{ route('admin.logs') }}" class="text-sm text-indigo-600 hover:text-indigo-700 font-medium">
+                        Lihat Semua →
+                    </a>
                 </div>
                 <div class="divide-y divide-gray-50" id="activity-log">
                     <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
@@ -266,7 +269,7 @@ async function fetchMonitor(examId) {
         tbody.innerHTML = res.data.map(p => {
             const statusBadge = {
                 'progress':    '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>',
-                'submited':    '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">✓ Submit</span>',
+                'submited':    '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Submit</span>',
                 'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>',
             }[p.status] ?? `<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">${p.status}</span>`;
 
@@ -279,7 +282,7 @@ async function fetchMonitor(examId) {
             const actions = `
                 <div class="flex gap-1.5">
                     ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${parseInt(p.is_active) === 1 ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
+${ (p.is_logout === 0 || parseInt(p.is_logout) === 0) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
                         class="px-2 py-1 text-xs bg-yellow-50 text-yellow-700 rounded hover:bg-yellow-100 transition">Reset</button>` : ''}
                     ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
                         class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
@@ -332,25 +335,33 @@ function formatTime(seconds) {
 
 // ── ACTIVITY LOG ───────────────────────────────────────────────────
 async function fetchActivityLog() {
-    // Placeholder — show if ActivityLog model/table exists
+    // Fetch recent activity logs from the new API endpoint
     try {
-        const r = await fetch('/api/admin/activity-log', { headers });
+        const r = await fetch('/api/admin/logs/recent', { headers });
         if (!r.ok) throw new Error();
-        const logs = await r.json();
+        const result = await r.json();
+        if (!result.success) throw new Error(result.message || 'Failed to load logs');
+
+        const logs = result.data;
         const el = document.getElementById('activity-log');
-        if (!logs.length) {
+        if (!logs || logs.length === 0) {
             el.innerHTML = '<div class="px-5 py-8 text-center text-gray-400 text-sm">Belum ada aktivitas.</div>';
             return;
         }
-        el.innerHTML = logs.slice(0,10).map(l => `
-            <div class="px-5 py-3 flex items-start gap-3">
+        el.innerHTML = logs.map(l => `
+            <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50">
                 <div class="w-2 h-2 mt-1.5 rounded-full bg-indigo-400 flex-shrink-0"></div>
-                <div>
-                    <p class="text-sm text-gray-700">${escHtml(l.activity)}</p>
-                    <p class="text-xs text-gray-400 mt-0.5">${l.created_at ?? ''}</p>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-700">${escHtml(l.log_desc)}</p>
+                    <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                        <span>${escHtml(l.user_name)}</span>
+                        <span>•</span>
+                        <span title="${l.created_at}">${l.created_at_human || l.created_at}</span>
+                    </div>
                 </div>
             </div>`).join('');
     } catch(e) {
+        console.error('Activity log error:', e);
         document.getElementById('activity-log').innerHTML =
             '<div class="px-5 py-8 text-center text-gray-400 text-sm">Log tidak tersedia.</div>';
     }

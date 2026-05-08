@@ -1,6 +1,14 @@
 {{-- Edit Question Modal Content (loaded via AJAX) --}}
+@role('admin')
 <form action="{{ route('admin.exams.question.update', $question->id) }}" method="post" enctype="multipart/form-data"
+
     class="space-y-4">
+@endrole
+
+@role('super')
+<form action="{{ route('super.exams.question.update', $question->id) }}" method="post" enctype="multipart/form-data"
+    class="space-y-4">
+@endrole
     @csrf
     @method('PUT')
 

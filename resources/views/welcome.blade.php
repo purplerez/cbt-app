@@ -1519,6 +1519,8 @@
     @endif
 </head>
 
+
+
 <body class="bg-white text-[#1b1b18] flex p-6 lg:p-8 items-center lg:justify-center min-h-screen flex-col">
     <header class="w-full lg:max-w-4xl max-w-[335px] text-sm mb-6 not-has-[nav]:hidden">
         @if (Route::has('login'))
@@ -1528,6 +1530,13 @@
                         <a href="{{ route('admin.dashboard') }}"
                             class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
                             Admin Dashboard
+                        </a>
+                    @endrole
+
+                    @role('super')
+                        <a href="{{ route('super.dashboard') }}"
+                            class="inline-block px-5 py-1.5 text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 hover:border-blue-700 rounded-sm text-sm leading-normal font-medium transition-colors">
+                            Dashboard Yayasan
                         </a>
                     @endrole
 
