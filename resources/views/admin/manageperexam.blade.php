@@ -202,6 +202,57 @@
                                                             </a> -->
                                                         </form>
 
+                                                        <!-- Excel Import Form -->
+                                                        @role('admin')
+                                                            <form id="excelImportFormAdmin"
+                                                                action="{{ route('admin.exams.questions.import', session('perexamid')) }}"
+                                                                method="POST" enctype="multipart/form-data"
+                                                                class="flex items-center space-x-2">
+                                                                @csrf
+                                                                <input type="file" name="excel_file" id="excel_file_admin"
+                                                                    accept=".xlsx,.xls" class="hidden"
+                                                                    onchange="this.form.submit()">
+                                                                <button type="button"
+                                                                    onclick="document.getElementById('excel_file_admin').click()"
+                                                                    class="flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                                    <svg class="w-4 h-4 mr-1" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Import Excel
+                                                                </button>
+                                                            </form>
+                                                        @endrole
+
+                                                        @role('super')
+                                                            <form id="excelImportFormSuper"
+                                                                action="{{ route('super.exams.questions.import', session('perexamid')) }}"
+                                                                method="POST" enctype="multipart/form-data"
+                                                                class="flex items-center space-x-2">
+                                                                @csrf
+                                                                <input type="file" name="excel_file" id="excel_file_super"
+                                                                    accept=".xlsx,.xls" class="hidden"
+                                                                    onchange="this.form.submit()">
+                                                                <button type="button"
+                                                                    onclick="document.getElementById('excel_file_super').click()"
+                                                                    class="flex items-center px-3 py-1.5 bg-green-600 text-white text-sm font-medium rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition">
+                                                                    <svg class="w-4 h-4 mr-1" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Import Excel
+                                                                </button>
+                                                            </form>
+                                                        @endrole
+
                                                         <!-- Export Button -->
                                                         <!-- <a href="{{-- route('admin.exams.questions.export', session('perexamid')) --}}"
                                                             class="px-4 py-2 text-sm font-medium text-white transition bg-yellow-600 rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
