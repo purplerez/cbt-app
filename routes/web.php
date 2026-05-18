@@ -488,6 +488,12 @@ Route::middleware(['auth', 'role:super'])->prefix('super')->name('super.')->grou
     Route::post('schools/nonaktif', [SchoolController::class, 'inactive'])->name('school.inactive');
     Route::get('schools/{school}/active', [SchoolController::class, 'active'])->name('school.active');
 
+    // Routing for headmaster management
+    Route::post('headmasters', [TeacherController::class, 'storeHeadmaster'])->name('head.store');
+    Route::get('headmasters/{headmaster}/edit', [TeacherController::class, 'editHeadmaster'])->name('head.edit');
+    Route::post('headmasters/update', [TeacherController::class, 'updateHeadmaster'])->name('head.update');
+    Route::delete('headmasters/{headmaster}', [TeacherController::class, 'destroyHeadmaster'])->name('head.destroy');
+
     // route for grades management
     Route::get('grades', [GradeController::class, 'index'])->name('grades');
     Route::get('grades/create', function () {

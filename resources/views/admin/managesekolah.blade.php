@@ -458,7 +458,7 @@
                                     </div>
                                     <div class="p-4">
                                         @forelse($head as $headmaster)
-                                        <form id="kepalaSekolahForm" action="{{ route('admin.head.update') }}" method="POST" enctype="multipart/form-data">
+                                        <form id="kepalaSekolahForm" action="{{ Auth::user()->hasRole('super') ? route('super.head.update') : route('admin.head.update') }}" method="POST" enctype="multipart/form-data">
                                             @csrf
                                             {{-- @method('PUT') --}} {{-- kalau pakai RESTful update --}}
 
@@ -506,26 +506,26 @@
                                             <div class="flex gap-2 mt-6">
                                                 @if(session('edit'))
                                                     <input type="hidden" name="h_id" value="{{ $headmaster->id }}" />
-                                                    @role('admin')
+                                                    @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super'))
                                                         <button type="submit"
                                                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                                                             Simpan Perubahan
                                                         </button>
-                                                    @endrole
+                                                    @endif
                                                 @else
-                                                    @role('admin')
-                                                        <a href="{{ route('admin.head.edit', $headmaster->id) }}"
+                                                    @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super'))
+                                                        <a href="{{ Auth::user()->hasRole('super') ? route('super.head.edit', $headmaster->id) : route('admin.head.edit', $headmaster->id) }}"
                                                             class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-md hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500">
                                                             Rubah Data
                                                         </a>
-                                                    @endrole
+                                                    @endif
                                                 @endif
                                             </div>
                                         </form>
 
                                         {{-- Form khusus hapus --}}
-                                        @role('admin')
-                                        <form action="{{ route('admin.head.destroy', $headmaster->id) }}" method="POST" class="mt-2">
+                                        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super'))
+                                        <form action="{{ Auth::user()->hasRole('super') ? route('super.head.destroy', $headmaster->id) : route('admin.head.destroy', $headmaster->id) }}" method="POST" class="mt-2">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit"
@@ -533,16 +533,16 @@
                                                 Hapus Data
                                             </button>
                                         </form>
-                                        @endrole
+                                        @endif
 
                                     @empty
                                         <p class="text-center text-gray-500">
-                                        @role('admin')
+                                        @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('super'))
                                             <button class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
                                                 onclick="openModal('addKepalaModal')">
                                                 + Tambah Data Kepala Madrasah
                                             </button>
-                                        @endrole
+                                        @endif
                                         </p>
                                     @endforelse
 
@@ -901,7 +901,7 @@
                     </svg>
                 </button>
             </div>
-            <form id="addHeadForm" class="mt-4" action="{{ route('admin.head.store') }}" method="post" enctype="multipart/form-data">
+            <form id="addHeadForm" class="mt-4" action="{{ Auth::user()->hasRole('super') ? route('super.head.store') : route('admin.head.store') }}" method="post" enctype="multipart/form-data">
                 @csrf
                 <div class="space-y-4">
                     <div>
