@@ -35,7 +35,8 @@ class UserSeeder extends Seeder
                 'name' => 'Administrator',
                 'password' => Hash::make('12345678'),
                 'role' => 'admin',
-                'is_active' => 1,
+                'is_active' => true,
+                'is_logout' => false,
                 'email_verified_at' => now()
             ]
         );
@@ -46,7 +47,8 @@ class UserSeeder extends Seeder
                 'name' => 'Super - Administrator',
                 'password' => Hash::make('12345678'),
                 'role' => 'super',
-                'is_active' => 1,
+                'is_active' => true,
+                'is_logout' => false,
                 'email_verified_at' => now()
             ]
         );
@@ -87,7 +89,8 @@ class UserSeeder extends Seeder
                         'name' => $userData['name'],
                         'password' => bcrypt('12345678'),
                         'role' => $role,
-                        'is_active' => 1,
+                        'is_active' => ($role !== 'siswa'),  // kepala, guru, super = true; siswa = false
+                        'is_logout' => false,  // Initial state: not logged out
                         'email_verified_at' => now()
                     ]
                 );

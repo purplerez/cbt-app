@@ -69,24 +69,24 @@ class KepalaApiDashboardController extends Controller
             $totalGrades = Grade::where('school_id', $schoolId)->count();
 
             // Get active exams (exam_sessions with progress status for this school, only valid for today)
-// $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
-                //     ->whereHas('exam', function ($q) {
-                //         $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-                //           ->whereDate('end_date', '>=', \Carbon\Carbon::today());
-                //     })
-                //     ->whereHas('user.student', function ($q) use ($schoolId) {
-                //         $q->where('school_id', $schoolId);
-                //     })
-                //     ->distinct('exam_id')
-                //     ->count('exam_id');
-                $activeExams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
-                    ->count();
+            // $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
+            //     ->whereHas('exam', function ($q) {
+            //         $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
+            //           ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+            //     })
+            //     ->whereHas('user.student', function ($q) use ($schoolId) {
+            //         $q->where('school_id', $schoolId);
+            //     })
+            //     ->distinct('exam_id')
+            //     ->count('exam_id');
+            $activeExams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
+                ->count();
 
             // Get active participant count
             $activeParticipants = ExamSession::where('status', 'progress')
                 ->whereHas('exam', function ($q) {
                     $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-                      ->whereDate('end_date', '>=', \Carbon\Carbon::today());
+                        ->whereDate('end_date', '>=', \Carbon\Carbon::today());
                 })
                 ->whereHas('user.student', function ($q) use ($schoolId) {
                     $q->where('school_id', $schoolId);
@@ -97,7 +97,7 @@ class KepalaApiDashboardController extends Controller
             $totalPreassigned = Preassigned::whereHas('user.student', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
-            ->count();
+                ->count();
 
             // Get total exams this school's students are registered for
             $totalExams = Exam::whereHas('preassigneds', function ($q) use ($schoolId) {
@@ -105,8 +105,8 @@ class KepalaApiDashboardController extends Controller
                     $subQ->where('school_id', $schoolId);
                 });
             })
-            ->distinct()
-            ->count();
+                ->distinct()
+                ->count();
 
             // Determine exam status
             $examStatusText = $activeExams > 0 ? 'Ada Ujian Aktif' : 'Tidak Ada Ujian';
@@ -244,7 +244,8 @@ class KepalaApiDashboardController extends Controller
                         'started_at'     => $session->started_at?->format('H:i:s'),
                         'score'          => $session->status === 'submited' ? $session->total_score : null,
                         'ip_address'     => $session->ip_address,
-                        'is_active'      => (isset($session->user) && $session->user->is_active !== 1 && $session->user->is_active !== true) ? 0 : 1,
+                        'is_active'      => (bool) $session->user?->is_active,
+                        'is_logout'      => (bool) $session->user?->is_logout,
                     ];
                 });
 
@@ -265,7 +266,8 @@ class KepalaApiDashboardController extends Controller
                     'started_at'     => null,
                     'score'          => null,
                     'ip_address'     => null,
-                    'is_active'      => (isset($student->user) && $student->user->is_active !== 1 && $student->user->is_active !== true) ? 0 : 1,
+                    'is_active'      => (bool) $student->user?->is_active,
+                    'is_logout'      => (bool) $student->user?->is_logout,
                 ]);
 
             $all = $sessions->concat($notStarted)->sortBy('name')->values();
@@ -431,7 +433,8 @@ class KepalaApiDashboardController extends Controller
                     $data->avg(function ($s) use ($totalPossibleScore) {
                         $score = (float) str_replace('.', '', str_replace(',', '.', $s['total_score']));
                         return $totalPossibleScore > 0 ? ($score / $totalPossibleScore) * 100 : 0;
-                    }), 2
+                    }),
+                    2
                 ) : 0,
                 'scores' => $allData
             ]);

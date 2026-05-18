@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\Admin\LogsController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\KepalaExamApiController;
+use App\Http\Controllers\Api\ProctorController;
 use App\Http\Controllers\Api\ParticipantController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\ExamScoreController;
@@ -18,6 +19,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+Route::post('/proctor/reactivate', [ProctorController::class, 'reactivate'])
+    ->middleware(['auth:sanctum', 'role:admin|super|kepala|guru']);
 
 
 Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('api.admin.')->group(function () {
@@ -65,7 +68,7 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
 
 
 // peserta routes - API endpoints
-Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.siswa.')->group(function () {
+Route::middleware(['auth:sanctum', 'role:siswa', 'student.exam.state'])->prefix('siswa')->name('api.siswa.')->group(function () {
     // Heartbeat: frontend memanggil ini setiap 2-3 menit agar siswa tetap is_active = 1
     // Throttle: Max 120 requests per minute per user (1 per 30 seconds is normal, 120 allows for double rate)
     Route::post('/heartbeat', [AuthController::class, 'heartbeat'])
@@ -102,6 +105,10 @@ Route::middleware(['auth:sanctum', 'role:siswa'])->prefix('siswa')->name('api.si
             ->name('session.progress');
     });
 });
+
+Route::post('/exam/force-exit', [ParticipantController::class, 'forceExit'])
+    ->middleware(['auth:sanctum', 'role:siswa'])
+    ->name('api.siswa.exam.force-exit');
 
 Route::get('/user', function (Request $request) {
     return $request->user();

@@ -9,18 +9,62 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 
 
 class UserManagementController extends Controller
 {
     //
+    public function create()
+    {
+        return view('admin.input_users');
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+            'role' => ['required', Rule::in(['admin', 'kepala', 'guru', 'siswa', 'super'])],
+            'is_active' => ['nullable', 'boolean'],
+        ]);
+
+        try {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => $validated['role'],
+                'is_active' => $request->boolean('is_active', true),
+                'is_logout' => true,
+            ]);
+
+            $user->syncRoles([$validated['role']]);
+
+            $actor = Auth::user();
+            logActivity($actor->name . ' (ID: ' . $actor->id . ') Menambahkan user baru ' . $user->email . ' dengan role ' . $user->role);
+
+            return redirect()->route('admin.users')->with('success', 'User baru berhasil ditambahkan.');
+        } catch (\Throwable $e) {
+            Log::error('UserManagement Store Error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return back()->withInput()->with('error', 'Gagal menambahkan user baru: ' . $e->getMessage());
+        }
+    }
+
     public function index()
     {
         try {
             // Get all users atau dengan filter
-$query = User::with(['roles', 'student.school', 'teacher.school', 'head.school'])->orderBy('role', 'asc');
+            $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school'])->orderBy('role', 'asc');
 
             // Apply filters
             $query = $this->applyFilters($query);
@@ -61,7 +105,7 @@ $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school']
             $search = request('search');
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%');
+                    ->orWhere('email', 'like', '%' . $search . '%');
             });
         }
 
@@ -76,8 +120,8 @@ $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school']
             $user->is_active = !$user->is_active;
             $user->save();
 
-            $usrAktif = auth()->user();
-            logActivity($usrAktif->name.' (ID: '.$usrAktif->id.') Tonggle = '.$user->is_active.' untuk user '. $user->email);
+            $usrAktif = Auth::user();
+            logActivity($usrAktif->name . ' (ID: ' . $usrAktif->id . ') Tonggle = ' . $user->is_active . ' untuk user ' . $user->email);
 
 
             return redirect()->route('admin.users')->with('success', 'Status user berhasil diubah.');
@@ -94,7 +138,7 @@ $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school']
             if ($role == 'super') {
                 //  dd("super here");
                 $user->password = Hash::make('superpass125');
-            }elseif ($role == 'kepala') {
+            } elseif ($role == 'kepala') {
                 // dd($user->id." kepala here");
                 $head = Headmaster::where('user_id', $user->id)->first();
                 // dd($head);
@@ -103,8 +147,7 @@ $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school']
                 } else {
                     throw new \Exception('User Kepala Sekolah tidak ditemukan');
                 }
-            }
-            elseif ($role == 'guru') {
+            } elseif ($role == 'guru') {
                 //  dd("guru here");
                 $guru = Teacher::where('user_id', $user->id)->first();
                 if ($guru) {
@@ -112,37 +155,35 @@ $query = User::with(['roles', 'student.school', 'teacher.school', 'head.school']
                 } else {
                     throw new \Exception('User Guru tidak ditemukan');
                 }
-            }
-            elseif ($role == 'siswa') {
+            } elseif ($role == 'siswa') {
                 //  dd("siswa here");
-               $siswa = Student::where('user_id', $user->id)->first();
+                $siswa = Student::where('user_id', $user->id)->first();
                 if ($siswa) {
                     $user->password = Hash::make($siswa->nis);
                 } else {
                     throw new \Exception('User Siswa tidak ditemukan');
                 }
-            }
-            else {
+            } else {
                 // dd('role else here');
                 throw new \Exception('Role user tidak dikenali');
             }
 
             $user->save();
 
-            $usrAktif = auth()->user();
-            logActivity($usrAktif->name.' (ID: '.$usrAktif->id.') Berhasil Merubah password '. $user->email);
+            $usrAktif = Auth::user();
+            logActivity($usrAktif->name . ' (ID: ' . $usrAktif->id . ') Berhasil Merubah password ' . $user->email);
 
 
             return redirect()->route('admin.users')->with('success', 'Password berhasil diubah.');
         } catch (\Exception $e) {
             Log::error('SetPassword Error', [
-            'user_id' => $user->id,
-            'role' => $user->role,
-            'error_message' => $e->getMessage(),
-            'timestamp' => now()
-        ]);
+                'user_id' => $user->id,
+                'role' => $user->role,
+                'error_message' => $e->getMessage(),
+                'timestamp' => now()
+            ]);
 
-        return redirect()->route('admin.users')->with('error', $e->getMessage());
+            return redirect()->route('admin.users')->with('error', $e->getMessage());
         }
     }
 }

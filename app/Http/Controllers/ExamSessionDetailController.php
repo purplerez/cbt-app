@@ -142,42 +142,44 @@ class ExamSessionDetailController extends Controller
             $student = Student::where('nis', $studentNis)->firstOrFail();
             $user    = $student->user;
 
-            // Check conditions for reset: is_logout == 0 AND ongoing session (time_remaining > 0 OR status = 'progress')
+            // Check conditions for reset: should have force exit lock (is_active = 1, is_logout = 1)
+            // with ongoing session (status = 'progress')
             $ongoingSessions = $user->examSessions()
                 ->where('status', 'progress')
-                ->orWhere('time_remaining', '>', 0)
                 ->exists();
 
-            if ($user->is_logout == 1 || !$ongoingSessions) {
+            // Only allow reset if force exit locked AND has ongoing session
+            if (!($user->is_active === true && $user->is_logout === true) || !$ongoingSessions) {
                 if ($request->expectsJson() || $request->ajax()) {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Reset tidak diperlukan: is_logout sudah 1 atau tidak ada sesi ongoing.',
+                        'message' => 'Reset tidak dapat dilakukan: siswa tidak dalam status force exit lock atau tidak ada sesi ujian yang sedang berjalan.',
                     ], 400);
                 }
-                return redirect()->back()->with('info', 'Reset tidak diperlukan: is_logout sudah 1 atau tidak ada sesi ongoing.');
+                return redirect()->back()->with('info', 'Reset tidak dapat dilakukan: siswa tidak dalam status force exit lock atau tidak ada sesi ujian yang sedang berjalan.');
             }
 
-            // Lock the user account
-            $user->is_active = 0;
+            // Unlock the user account from force exit: set is_active = 1, is_logout = 0
+            $user->is_active = true;
+            $user->is_logout = false;
             $user->save();
 
             // Log who performed the reset
             $actor = auth()->user();
             logActivity(
-                $actor->name . ' (ID: ' . $actor->id . ') Kunci login untuk siswa ' .
-                $student->name . ' (NIS: ' . $student->nis . ') - ongoing session detected'
+                $actor->name . ' (ID: ' . $actor->id . ') Unlock login untuk siswa ' .
+                    $student->name . ' (NIS: ' . $student->nis . ') - from force exit lock'
             );
 
             // Return JSON for AJAX calls from dashboard monitoring panel
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success'      => true,
-                    'message'      => 'Akun siswa ' . $student->name . ' berhasil direset (is_active = 0, ongoing session).',
+                    'message'      => 'Akun siswa ' . $student->name . ' berhasil direset (is_active = 1, is_logout = 0).',
                     'student_name' => $student->name,
                     'nis'          => $student->nis,
-                    'is_active'    => 0,
-                    'is_logout'    => $user->is_logout,
+                    'is_active'    => true,
+                    'is_logout'    => false,
                 ]);
             }
 
@@ -191,7 +193,6 @@ class ExamSessionDetailController extends Controller
             }
 
             return redirect()->back()->with('success', 'Akun siswa berhasil direset.');
-
         } catch (\Exception $e) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
@@ -212,7 +213,7 @@ class ExamSessionDetailController extends Controller
             $actor = auth()->user();
             logActivity(
                 $actor->name . ' (ID: ' . $actor->id . ') Menghapus sesi ujian ' .
-                $session->id . ' untuk user ID: ' . $session->user_id
+                    $session->id . ' untuk user ID: ' . $session->user_id
             );
 
             // Delete associated student answer explicitly if not cascaded
@@ -241,4 +242,3 @@ class ExamSessionDetailController extends Controller
         }
     }
 }
-

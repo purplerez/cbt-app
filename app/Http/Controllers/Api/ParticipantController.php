@@ -81,6 +81,31 @@ class ParticipantController extends Controller
         try {
             $user = $request->user();
 
+            // Validate user is student and check force exit lock
+            if (!$user->hasRole('siswa')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya siswa yang dapat mengikuti ujian'
+                ], 403);
+            }
+
+            // Check if student is locked (force exit: is_active = 1, is_logout = 1)
+            if ($user->is_active === true && $user->is_logout === true) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Akun Anda sedang dikunci karena force exit. Hubungi proctor untuk reaktivasi.',
+                    'force_exit' => true
+                ], 403);
+            }
+
+            // Validate student is logged in (is_active = 1, is_logout = 0)
+            if ($user->is_active !== true || $user->is_logout !== false) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda harus login untuk mengikuti ujian'
+                ], 403);
+            }
+
             // Get exam data first and validate
             $exam = Exam::find($examId);
             if (!$exam) {
@@ -199,6 +224,10 @@ class ParticipantController extends Controller
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->header('User-Agent'),
                 ]);
+
+                $user->is_active = true;
+                $user->is_logout = false;
+                $user->save();
 
                 $questions = Question::where('exam_id', $examId)
                     ->limit($totalQuest)
@@ -321,6 +350,10 @@ class ParticipantController extends Controller
                 ->where('exam_id', $examId)
                 ->delete();
 
+            $user->is_active = false;
+            $user->is_logout = true;
+            $user->save();
+
             // Log the deletion for debugging
             Log::info('Preassigned deleted after exam submission', [
                 'user_id' => $user->id,
@@ -367,6 +400,72 @@ class ParticipantController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat menyimpan hasil ujian. Silakan coba lagi.'
+            ], 500);
+        }
+    }
+
+    public function forceExit(Request $request)
+    {
+        try {
+            $user = $request->user();
+            $examId = $request->input('exam_id');
+            $sessionToken = $request->input('session_token');
+
+            // Mark student as force-exit locked: is_active = 1, is_logout = 1
+            $user->is_active = true;
+            $user->is_logout = true;
+            $user->save();
+
+            $examSessionQuery = ExamSession::where('user_id', $user->id)
+                ->whereIn('status', ['pending', 'process', 'progress']);
+
+            if ($examId) {
+                $examSessionQuery->where('exam_id', $examId);
+            }
+
+            if ($sessionToken) {
+                $examSessionQuery->where('session_token', $sessionToken);
+            }
+
+            $examSession = $examSessionQuery->latest('id')->first();
+
+            if ($examSession) {
+                ExamLog::create([
+                    'session_id' => $examSession->id,
+                    'action' => 'force_exit',
+                    'details' => [
+                        'user_id' => $user->id,
+                        'exam_id' => $examSession->exam_id,
+                        'reason' => $request->input('reason', 'client_detected_cheat'),
+                        'ip_address' => $request->ip(),
+                        'user_agent' => $request->header('User-Agent'),
+                        'force_exit_at' => Carbon::now()->toISOString(),
+                    ],
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->header('User-Agent'),
+                    'created_at' => Carbon::now(),
+                ]);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Force exit berhasil diproses. Akun Anda sedang dikunci, hubungi proctor untuk reaktivasi.',
+                'force_exit' => true,
+                'data' => [
+                    'is_active' => true,
+                    'is_logout' => true,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Force exit failed', [
+                'user_id' => $request->user()->id ?? null,
+                'exam_id' => $examId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memproses force exit.',
             ], 500);
         }
     }

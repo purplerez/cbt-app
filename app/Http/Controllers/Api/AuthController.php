@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ExamSession;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,13 +26,23 @@ class AuthController extends Controller
             ], 401);
         }
 
+        /** @var User|null $user */
         $user = Auth::user();
 
-        // Untuk siswa: selalu izinkan login dan set is_active = true (auto online status)
-        if ($user->hasRole('siswa')) {
-            $user->is_active = true;
-            $user->save();
+        // Check if student is locked (force exit: is_active = 1, is_logout = 1)
+        if ($user->hasRole('siswa') && $this->isForceExitLocked($user->id)) {
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'Akun sedang dikunci karena force exit. Hubungi proctor untuk reaktivasi.',
+                'force_exit' => true,
+            ], 403);
         }
+
+        // Successful login: set is_active = 1, is_logout = 0
+        $user->is_active = true;
+        $user->is_logout = false;
+        $user->save();
 
         $token = $user->createToken('API Token')->plainTextToken;
 
@@ -44,18 +56,38 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        /** @var User|null $user */
         $user = Auth::user();
 
-        if ($user && $user->hasRole('siswa')) {
-            $doSetLogout = $request->input('is_logout', 0);
-            if ($doSetLogout) {
-                $user->is_logout = true;
+        if ($user) {
+            // For student users: check if they have an active exam session in progress
+            if ($user->hasRole('siswa')) {
+                $activeSession = $user->examSessions()
+                    ->where('status', 'progress')
+                    ->exists();
+
+                if ($activeSession) {
+                    // Force exit scenario: logout while exam is in progress
+                    // is_active = 1 (stay active), is_logout = 1 (marked as force logout)
+                    $user->is_active = true;
+                    $user->is_logout = true;
+                } else {
+                    // Normal logout: no active exam
+                    // is_active = 0, is_logout = 0
+                    $user->is_active = false;
+                    $user->is_logout = false;
+                }
+            } else {
+                // Non-student roles (admin, guru, kepala, super): normal logout
+                $user->is_active = false;
+                $user->is_logout = false;
             }
-            $user->is_active = false;
             $user->save();
         }
 
-        $user->tokens()->delete();
+        if ($user) {
+            $user->tokens()->delete();
+        }
 
         return response()->json([
             'message' => 'Logout Berhasil',
@@ -72,22 +104,46 @@ class AuthController extends Controller
      */
     public function heartbeat(Request $request)
     {
+        /** @var User|null $user */
         $user = $request->user();
 
         if ($user && $user->hasRole('siswa')) {
-            // Only update if is_active is false, to minimize database writes
-            // This reduces writes from ~16,800/hour (700 students) to ~280/hour
-            if (!$user->is_active) {
+            if ($this->isForceExitLocked($user->id)) {
+                return response()->json([
+                    'message' => 'Akun sedang dikunci karena force exit.',
+                    'force_exit' => true,
+                ], 403);
+            }
+
+            if ($this->hasActiveExamSession($user->id)) {
                 $user->is_active = true;
+                $user->is_logout = false;
                 $user->save();
             }
-            // Touch updated_at for session tracking (if needed for other purposes)
-            // but don't repeatedly save the same data
         }
 
         return response()->json([
             'message' => 'OK',
             'timestamp' => now()->toISOString(),
         ]);
+    }
+
+    private function hasActiveExamSession(int $userId): bool
+    {
+        return ExamSession::where('user_id', $userId)
+            ->whereIn('status', ['pending', 'process', 'progress'])
+            ->exists();
+    }
+
+    private function isForceExitLocked(int $userId): bool
+    {
+        /** @var User|null $user */
+        $user = Auth::user();
+
+        if (!$user || $user->id !== $userId) {
+            return false;
+        }
+
+        return $user->is_active === true && $user->is_logout === true;
     }
 }

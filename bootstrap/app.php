@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use App\Http\Middleware\EnsureStudentExamState;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -18,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission'          => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission'  => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
             'ensure.kepala.session' => \App\Http\Middleware\EnsureKepalaSession::class,
+            'student.exam.state' => EnsureStudentExamState::class,
         ]);
 
         // Add security monitoring to API routes
