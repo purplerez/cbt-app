@@ -102,8 +102,8 @@ class TeacherController extends Controller
                 $photoPath = $request->file('t_photo')->storeAs('assets/images/teachers', $imageName, 'public');
                 $validated['t_photo'] = $photoPath;
                 // delete old photo if exists
-                if ($teacher->photo && file_exists(public_path($teacher->photo))) {
-                    unlink(public_path($teacher->photo));
+                if ($teacher->photo && $teacher->photo !== 'assets/images/teachers/default.jpg' && \Illuminate\Support\Facades\Storage::disk('public')->exists($teacher->photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->photo);
                 }
                 $teacher->photo = $photoPath;
                 // dd($teacher->photo, $request->file('t_photo'));
@@ -141,8 +141,8 @@ class TeacherController extends Controller
             $user = User::findOrFail($teacher->user_id);
 
             // delete existing photo
-            if ($teacher->photo && file_exists(public_path($teacher->photo))) {
-                unlink(public_path($teacher->photo));
+            if ($teacher->photo && $teacher->photo !== 'assets/images/teachers/default.jpg' && \Illuminate\Support\Facades\Storage::disk('public')->exists($teacher->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->photo);
             }
 
             $userlog = auth()->user();
@@ -277,8 +277,8 @@ class TeacherController extends Controller
                 $photoPath = $request->file('h_photo')->storeAs('assets/images/head', $imageName, 'public');
                 $validated['h_photo'] = $photoPath;
                 // delete old photo if exists
-                if ($head->photo && file_exists(public_path($head->photo))) {
-                    unlink(public_path($head->photo));
+                if ($head->photo && $head->photo !== 'assets/images/head/default.jpg' && \Illuminate\Support\Facades\Storage::disk('public')->exists($head->photo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($head->photo);
                 }
                 $head->update([
                     'photo' => $validated['h_photo'],

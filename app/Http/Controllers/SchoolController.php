@@ -142,8 +142,8 @@ class SchoolController extends Controller
                 $logo = $request->file('logo');
 
                 // delete old logo if exists
-                if ($school->logo && file_exists(public_path($school->logo))) {
-                    unlink(public_path($school->logo));
+                if ($school->logo && $school->logo !== 'assets/images/school/default.png' && \Illuminate\Support\Facades\Storage::disk('public')->exists($school->logo)) {
+                    \Illuminate\Support\Facades\Storage::disk('public')->delete($school->logo);
                 }
 
                 // save new logo
@@ -174,8 +174,8 @@ class SchoolController extends Controller
         //
         try{
         // delete logo file if exists
-        if ($school->logo && file_exists(public_path($school->logo))) {
-            unlink(public_path($school->logo));
+        if ($school->logo && $school->logo !== 'assets/images/school/default.png' && \Illuminate\Support\Facades\Storage::disk('public')->exists($school->logo)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($school->logo);
         }
         $school->delete();
 

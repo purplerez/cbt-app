@@ -551,8 +551,8 @@ class DashboardController extends Controller
             $user = User::findOrFail($teacher->user_id);
 
             // delete existing photo
-            if ($teacher->photo && file_exists(public_path($teacher->photo) && $teacher->photo !== "assets/images/students/default.jpg")) {
-                unlink(public_path($teacher->photo));
+            if ($teacher->photo && $teacher->photo !== "assets/images/teachers/default.jpg" && \Illuminate\Support\Facades\Storage::disk('public')->exists($teacher->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($teacher->photo);
             }
 
             $userlog = auth()->user();
