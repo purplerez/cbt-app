@@ -313,16 +313,16 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
 
     // DISABLED: Rooms feature for kepala (to be re-enabled later)
-    // Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
-    // Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
-    // Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
-    // Route::delete('/rooms/{room}', [RoomController::class, 'roomDestroy'])->name('room.destroy');
+    Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
+    Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
+    Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
+    Route::delete('/rooms/{room}', [RoomController::class, 'roomDestroy'])->name('room.destroy');
 
     // DISABLED: Room participants for kepala (to be re-enabled later)
-    // Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
-    // Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
 
-    // Route::delete('/room/{room}/participants/{participant}', [KepalaController::class, 'roomParticipantsDestroy'])->name('room.participants.destroy');
+    Route::delete('/room/{room}/participants/{participant}', [KepalaController::class, 'roomParticipantsDestroy'])->name('room.participants.destroy');
 
 
 
@@ -336,15 +336,15 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
 
     //routing for exams in kepala dashboard
     // DISABLED: Daftarkan Siswa routes for kepala (to be re-enabled later)
-    // Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
-    // Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
-    // Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
-    // Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
-    //     ->name('exams.participants.delete');
+    Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
+    Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
+    Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
+        ->name('exams.participants.delete');
     // new route for registering selected students into a chosen exam
-    // Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
+    Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
     // ajax: return students + registration status for selected exam_id
-    // Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
+    Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
     Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
     Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
@@ -407,26 +407,26 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('/students/import', [KepalaController::class, 'importStudents'])->name('student.import');
 
     // DISABLED: Rooms feature for guru (to be re-enabled later)
-    // Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
-    // Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
-    // Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
+    Route::get('/rooms/{examtype}/view', [RoomController::class, 'index'])->name('rooms');
+    Route::get('/rooms/create', [RoomController::class, 'roomCreate'])->name('room.create');
+    Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
 
     // DISABLED: Room participants for guru (to be re-enabled later)
-    // Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
-    // Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
 
 
     //routing for exams in guru dashboard
-    // DISABLED: Daftarkan Siswa routes for guru (to be re-enabled later)
-    // Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
-    // Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
-    // Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
-    // Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
-    //     ->name('exams.participants.delete');
+   
+    Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
+    Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
+    Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');
+    Route::delete('/exams/participants/delete', [KepalaExamController::class, 'deleteParticipant'])
+        ->name('exams.participants.delete');
     // new route for registering selected students into a chosen exam
-    // Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
+    Route::post('/exams/register', [KepalaExamController::class, 'registerParticipants'])->name('exams.participants.register');
     // ajax: return students + registration status for selected exam_id
-    // Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
+    Route::get('/exams/{exam}/students-by-exam', [KepalaExamController::class, 'studentsByExam'])->name('exams.students.by_exam');
     Route::get('/exams/global', [KepalaExamController::class, 'indexAll'])->name('indexall');
     Route::post('/exams/{exam}/manage', [KepalaExamController::class, 'manage'])->name('exams.manage');
     Route::get('/exams/{exam}/manage', [KepalaExamController::class, 'manageView'])->name('exams.manage.view');
