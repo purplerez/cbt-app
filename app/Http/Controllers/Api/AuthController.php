@@ -29,20 +29,17 @@ class AuthController extends Controller
         /** @var User|null $user */
         $user = Auth::user();
 
-        // Check if student is locked (force exit: is_active = 1, is_logout = 1)
-        if ($user->hasRole('siswa') && $this->isForceExitLocked($user->id)) {
-            Auth::logout();
+        $forceExitLocked = $user->hasRole('siswa') && $this->isForceExitLocked($user->id);
 
-            return response()->json([
-                'message' => 'Akun sedang dikunci karena force exit. Hubungi proctor untuk reaktivasi.',
-                'force_exit' => true,
-            ], 403);
+        // Allow login even when the account is force-exit locked.
+        // The lock state is preserved so the dashboard can show the current status,
+        // while exam entry middleware/endpoints continue to block prohibited actions.
+        if (!$forceExitLocked) {
+            // Successful login: set is_active = 1, is_logout = 0
+            $user->is_active = true;
+            $user->is_logout = false;
+            $user->save();
         }
-
-        // Successful login: set is_active = 1, is_logout = 0
-        $user->is_active = true;
-        $user->is_logout = false;
-        $user->save();
 
         $token = $user->createToken('API Token')->plainTextToken;
 

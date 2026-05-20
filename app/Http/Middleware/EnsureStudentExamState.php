@@ -18,7 +18,16 @@ class EnsureStudentExamState
             return $next($request);
         }
 
-        if ($request->routeIs('api.siswa.exam.force-exit')) {
+        // Allow non-exam endpoints so students can still open the dashboard,
+        // inspect their status, and keep heartbeat/user info flowing while locked.
+        $allowedPaths = [
+            'api/siswa/dashboard',
+            'api/siswa/me',
+            'api/user',
+            'api/heartbeat',
+        ];
+
+        if (in_array($request->path(), $allowedPaths, true) || $request->routeIs('api.siswa.exam.force-exit')) {
             return $next($request);
         }
 
