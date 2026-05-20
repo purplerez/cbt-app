@@ -23,7 +23,6 @@ class LogApiRequests
 
         // Heavy endpoints to monitor
         $heavyEndpoints = [
-            'api/siswa/heartbeat',
             'api/siswa/exam-session/save-answers',
             'api/siswa/exam-session/update-answer',
             'api/kepala/dashboard/stats',
@@ -57,8 +56,7 @@ class LogApiRequests
         // Check for IP passed from proxy
         elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
-        }
-        else {
+        } else {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
 
@@ -100,14 +98,7 @@ class LogApiRequests
         }
 
         // Pattern 2: Bulk requests to heavy endpoints
-        if (str_contains($endpoint, 'heartbeat')) {
-            $heartbeatKey = "api:heartbeat_burst:{$ip}";
-            $heartbeatCount = Cache::get($heartbeatKey, 0);
-            if ($heartbeatCount > 10) { // More than 10 heartbeats per minute
-                return true;
-            }
-            Cache::put($heartbeatKey, $heartbeatCount + 1, 60);
-        }
+        // (heartbeat checks removed — heartbeat endpoint retired)
 
         // Pattern 3: Non-authenticated bulk requests
         if (!auth()->check() && str_contains($endpoint, 'api')) {

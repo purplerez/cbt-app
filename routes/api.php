@@ -69,11 +69,7 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
 
 // peserta routes - API endpoints
 Route::middleware(['auth:sanctum', 'role:siswa', 'student.exam.state'])->prefix('siswa')->name('api.siswa.')->group(function () {
-    // Heartbeat: frontend memanggil ini setiap 2-3 menit agar siswa tetap is_active = 1
-    // Throttle: Max 120 requests per minute per user (1 per 30 seconds is normal, 120 allows for double rate)
-    Route::post('/heartbeat', [AuthController::class, 'heartbeat'])
-        ->middleware('throttle:120,1')
-        ->name('heartbeat');
+    // (heartbeat endpoint removed — inactivity handled by token last_used_at + scheduler)
 
     Route::get('/dashboard', [ParticipantController::class, 'index'])->name('dashboard');
     Route::post('/exams/{examId}/start', [ParticipantController::class, 'start'])->name('exam.start');

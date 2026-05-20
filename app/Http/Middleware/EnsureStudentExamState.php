@@ -24,7 +24,6 @@ class EnsureStudentExamState
             'api/siswa/dashboard',
             'api/siswa/me',
             'api/user',
-            'api/heartbeat',
         ];
 
         if (in_array($request->path(), $allowedPaths, true) || $request->routeIs('api.siswa.exam.force-exit')) {
