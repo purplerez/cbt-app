@@ -342,9 +342,9 @@ class ParticipantController extends Controller
                 ->where('exam_id', $examId)
                 ->delete();
 
-            $user->is_active = false;
-            $user->is_logout = true;
-            $user->save();
+            // NOTE: Do NOT change `is_active` or `is_logout` here.
+            // State changes related to force-exit must only be performed
+            // by the dedicated force-exit endpoint or middleware.
 
             // Log the deletion for debugging
             Log::info('Preassigned deleted after exam submission', [
