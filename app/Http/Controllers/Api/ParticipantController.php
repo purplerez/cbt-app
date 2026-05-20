@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SubmitExamRequest;
 use App\Services\ExamScoringService;
-use App\Events\ExamSubmitted;
 use App\Models\Exam;
 use App\Models\ExamSession;
 use App\Models\Question;
@@ -336,13 +335,6 @@ class ParticipantController extends Controller
                 'user_agent' => $request->header('User-Agent'),
                 'created_at' => Carbon::now()
             ]);
-
-            // Fire event for additional processing
-            event(new ExamSubmitted($examSession, $scoreDetails, [
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->header('User-Agent'),
-                'submission_method' => $forceSubmit ? 'force' : 'normal'
-            ]));
 
             // Delete preassigned record after successful submission
             // This helps to save database space and indicates exam completion
