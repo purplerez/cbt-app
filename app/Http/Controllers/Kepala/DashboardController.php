@@ -72,14 +72,23 @@ class DashboardController extends Controller
 
     public function index()
     {
-        // dd(session()->all());
-        $school = School::find($this->getSchoolId())->first();
+        // Temporary test - return simple response
+        try {
+            $schoolId = $this->getSchoolId();
+            \Log::info('DashboardController: schoolId = ' . $schoolId);
 
-        if (!$school) {
-            return redirect()->route('kepala.dashboard')->with('error', 'Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
+            if (!$schoolId) {
+                return view('kepala.dashboard', ['school' => null]);
+            }
+
+            $school = School::find($schoolId);
+            \Log::info('DashboardController: school found = ' . ($school ? 'yes' : 'no'));
+
+            return view('kepala.dashboard', compact('school'));
+        } catch (\Exception $e) {
+            \Log::error('DashboardController Error: ' . $e->getMessage());
+            return response('Error: ' . $e->getMessage(), 500);
         }
-
-        return view('kepala.dashboard', compact('school'));
     }
 
 
