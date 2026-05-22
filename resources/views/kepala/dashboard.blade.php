@@ -129,10 +129,9 @@
             <div class="bg-white rounded-xl shadow-sm overflow-hidden">
                 <div class="p-5 border-b border-gray-100 flex items-center justify-between">
                     <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru (10 Log Terakhir)</h3>
-                    <a href="{{ route('kepala.logs') }}"
-                        class="text-sm text-indigo-600 hover:text-indigo-700 font-medium" style="display:none;">
+                    <span class="text-sm text-indigo-600 hover:text-indigo-700 font-medium" style="display:none;">
                         Lihat Semua →
-                    </a>
+                    </span>
                 </div>
                 <div class="divide-y divide-gray-50" id="activity-log">
                     <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
