@@ -124,6 +124,9 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     // Route::get('/dashboard/stats', [App\Http\Controllers\Api\Kepala\DashboardStatisticsController::class, 'getOverviewStats'])
     //     ->name('dashboard.stats');
 
+    // Activity Logs Routes
+    Route::get('/logs/recent', [LogsController::class, 'getRecentLogs'])->name('logs.recent');
+
     //dashboard api starts
     Route::prefix('dashboard')->middleware('throttle:20,1')->name('dashboard.')->group(function () {
         // Get overview statistics

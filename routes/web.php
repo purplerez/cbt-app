@@ -361,6 +361,12 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
 
     // Route for user login reset
     Route::post('/exam-sessions/{studentNis}/reset', [ExamSessionDetailController::class, 'resetLogin'])->name('exam-sessions.reset-login');
+
+    // Force Submit Route
+    Route::post('/exam-sessions/{examSession}/force-submit', [\App\Http\Controllers\ForceSubmitController::class, 'forceSubmitSession'])
+        ->name('exam-sessions.force-submit');
+
+    // Delete session route
     Route::delete('/exam-sessions/{examSession}', [ExamSessionDetailController::class, 'destroy'])->name('exam-sessions.destroy');
 
     // Room Assignment routes (Assign students to rooms for exams)
@@ -417,7 +423,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
 
 
     //routing for exams in guru dashboard
-   
+
     Route::get('/exams/{exam}/participants', [KepalaExamController::class, 'participants'])->name('exams.participant');
     Route::post('/exams/{exam}/participants', [KepalaExamController::class, 'storeParticipants'])->name('exams.participants.store');
     Route::post('/exams/{exam}/oneparticipant', [KepalaExamController::class, 'storeOneParticipant'])->name('exams.participants.store.one');

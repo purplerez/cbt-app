@@ -125,6 +125,20 @@
                 </div>
             </div>
 
+            {{-- ── ACTIVITY LOG ── --}}
+            <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center justify-between">
+                    <h3 class="text-base font-semibold text-gray-800">Log Aktivitas Terbaru (10 Log Terakhir)</h3>
+                    <a href="{{ route('kepala.logs') }}"
+                        class="text-sm text-indigo-600 hover:text-indigo-700 font-medium" style="display:none;">
+                        Lihat Semua →
+                    </a>
+                </div>
+                <div class="divide-y divide-gray-50" id="activity-log">
+                    <div class="px-5 py-8 text-center text-gray-400 text-sm">Memuat log...</div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -146,6 +160,40 @@
         </div>
     </div>
 
+    {{-- ── FORCE SUBMIT MODAL ── --}}
+    <div id="force-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h4 class="text-base font-semibold text-gray-800 mb-2">Force Submit Ujian</h4>
+            <p class="text-sm text-gray-600 mb-1">Yakin ingin paksa submit ujian untuk:</p>
+            <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-force-name">—</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeForceModal()"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button onclick="confirmForce()" id="confirm-force-btn"
+                    class="px-4 py-2 text-sm bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition">Force
+                    Submit</button>
+            </div>
+        </div>
+    </div>
+
+    {{-- ── DELETE SESSION MODAL ── --}}
+    <div id="delete-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/40">
+        <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4">
+            <h4 class="text-base font-semibold text-gray-800 mb-2">Hapus Sesi Ujian</h4>
+            <p class="text-sm text-gray-600 mb-1">Yakin ingin menghapus sesi ujian untuk:</p>
+            <p class="text-sm font-semibold text-gray-900 mb-4" id="modal-delete-name">—</p>
+            <p class="text-xs text-red-500 mb-4 bg-red-50 p-2 rounded border border-red-100">Peringatan: Seluruh data
+                jawaban siswa pada sesi ini akan ikut terhapus.</p>
+            <div class="flex gap-3 justify-end">
+                <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition">Batal</button>
+                <button onclick="confirmDelete()" id="confirm-delete-btn"
+                    class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition">Hapus
+                    Sesi</button>
+            </div>
+        </div>
+    </div>
+
 
 
     @push('scripts')
@@ -159,6 +207,7 @@
             const CSRF = document.querySelector('meta[name="csrf-token"]').content;
             let currentNis = null,
                 currentSessionId = null,
+                currentStudentName = '',
                 monitorInterval = null,
                 timerTick = null;
 
@@ -270,15 +319,20 @@
                         const score = p.score !== null ?
                             `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` :
                             '—';
+                        const actions = `
+                <div class="flex gap-1.5">
+                    ${p.session_id ? `<a href="/kepala/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
+                    ${(p.is_active === true || p.is_active === 1) && (p.is_logout === true || parseInt(p.is_logout) === 1) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition" title="Unlock dari force exit">Unlock</button>` : ''}
+                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
+                    ${p.session_id ? `<button onclick="openDeleteModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Delete</button>` : ''}
+                </div>`;
                         return `<tr class="hover:bg-gray-50 transition">
                 <td class="px-4 py-3"><div class="font-medium text-gray-800 text-sm">${esc(p.name)}</div><div class="text-xs text-gray-400">${esc(p.nis)}</div></td>
                 <td class="px-4 py-3 text-sm text-gray-600">${esc(p.grade)}</td>
                 <td class="px-4 py-3">${badge}</td>
                 <td class="px-4 py-3">${timeD}</td>
                 <td class="px-4 py-3">${score}</td>
-                <td class="px-4 py-3"><div class="flex gap-1.5 cursor-default">
-                    ${(p.is_active === true || p.is_active === 1) && (p.is_logout === true || parseInt(p.is_logout) === 1) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition cursor-pointer" title="Unlock dari force exit">Unlock</button>` : ''}
-                </div></td>
+                <td class="px-4 py-3">${actions}</td>
             </tr>`;
                     }).join('');
                     startTick();
@@ -350,12 +404,35 @@
             // ── MODALS ─────────────────────────────────────────────────────────
             function openReset(nis, name) {
                 currentNis = nis;
+                currentStudentName = name;
                 document.getElementById('modal-student-name').textContent = name + ' (NIS: ' + nis + ')';
                 document.getElementById('reset-modal').classList.remove('hidden');
             }
 
             function closeResetModal() {
                 document.getElementById('reset-modal').classList.add('hidden');
+            }
+
+            function openForceModal(sessionId, name) {
+                currentSessionId = sessionId;
+                currentStudentName = name;
+                document.getElementById('modal-force-name').textContent = name;
+                document.getElementById('force-modal').classList.remove('hidden');
+            }
+
+            function closeForceModal() {
+                document.getElementById('force-modal').classList.add('hidden');
+            }
+
+            function openDeleteModal(sessionId, name) {
+                currentSessionId = sessionId;
+                currentStudentName = name;
+                document.getElementById('modal-delete-name').textContent = name;
+                document.getElementById('delete-modal').classList.remove('hidden');
+            }
+
+            function closeDeleteModal() {
+                document.getElementById('delete-modal').classList.add('hidden');
             }
 
             async function confirmReset() {
@@ -374,11 +451,62 @@
                     const res = await r.json();
                     closeResetModal();
                     toast(res.success ? 'success' : 'error', res.message);
+                    if (res.success) loadMonitor();
                 } catch (e) {
                     toast('error', 'Gagal mereset login.');
                 } finally {
                     btn.disabled = false;
-                    btn.textContent = 'Reset Login';
+                    btn.textContent = 'Unlock Akun';
+                }
+            }
+
+            async function confirmForce() {
+                const btn = document.getElementById('confirm-force-btn');
+                btn.disabled = true;
+                btn.textContent = 'Memproses...';
+                try {
+                    const r = await fetch(`/kepala/exam-sessions/${currentSessionId}/force-submit`, {
+                        method: 'POST',
+                        headers: {
+                            ...HEADERS,
+                            'X-CSRF-TOKEN': CSRF,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const res = await r.json();
+                    closeForceModal();
+                    toast(res.success ? 'success' : 'error', res.message);
+                    if (res.success) loadMonitor();
+                } catch (e) {
+                    toast('error', 'Gagal force submit.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Force Submit';
+                }
+            }
+
+            async function confirmDelete() {
+                const btn = document.getElementById('confirm-delete-btn');
+                btn.disabled = true;
+                btn.textContent = 'Menghapus...';
+                try {
+                    const r = await fetch(`/kepala/exam-sessions/${currentSessionId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            ...HEADERS,
+                            'X-CSRF-TOKEN': CSRF,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const res = await r.json();
+                    closeDeleteModal();
+                    toast(res.success ? 'success' : 'error', res.message);
+                    if (res.success) loadMonitor();
+                } catch (e) {
+                    toast('error', 'Gagal menghapus sesi.');
+                } finally {
+                    btn.disabled = false;
+                    btn.textContent = 'Hapus Sesi';
                 }
             }
 
@@ -409,10 +537,49 @@
                 const id = document.getElementById('exam-select').value;
                 if (id) fetchMonitor(id);
                 fetchRecentScores();
+                fetchActivityLog();
             }
+
+            // ── ACTIVITY LOG ───────────────────────────────────────────────────
+            async function fetchActivityLog() {
+                try {
+                    const r = await fetch('/api/kepala/logs/recent', {
+                        headers: HEADERS
+                    });
+                    if (!r.ok) throw new Error();
+                    const result = await r.json();
+                    if (!result.success) throw new Error(result.message || 'Failed to load logs');
+
+                    const logs = result.data;
+                    const el = document.getElementById('activity-log');
+                    if (!logs || logs.length === 0) {
+                        el.innerHTML =
+                        '<div class="px-5 py-8 text-center text-gray-400 text-sm">Belum ada aktivitas.</div>';
+                        return;
+                    }
+                    el.innerHTML = logs.map(l => `
+            <div class="px-5 py-3 flex items-start gap-3 hover:bg-gray-50">
+                <div class="w-2 h-2 mt-1.5 rounded-full bg-indigo-400 flex-shrink-0"></div>
+                <div class="flex-1">
+                    <p class="text-sm text-gray-700">${esc(l.log_desc)}</p>
+                    <div class="text-xs text-gray-400 mt-1 flex items-center gap-2">
+                        <span>${esc(l.user_name)}</span>
+                        <span>•</span>
+                        <span title="${l.created_at}">${l.created_at_human || l.created_at}</span>
+                    </div>
+                </div>
+            </div>`).join('');
+                } catch (e) {
+                    console.error('Activity log error:', e);
+                    document.getElementById('activity-log').innerHTML =
+                        '<div class="px-5 py-8 text-center text-gray-400 text-sm">Log tidak tersedia.</div>';
+                }
+            }
+
             fetchStats();
             fetchActiveExams();
             fetchRecentScores();
+            fetchActivityLog();
             setInterval(() => {
                 fetchStats();
                 fetchActiveExams();
