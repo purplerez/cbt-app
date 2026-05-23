@@ -261,7 +261,7 @@
                     sel.innerHTML = '<option value="">— Pilih Ujian —</option>';
                     list.forEach(e => {
                         const o = document.createElement('option');
-                        o.value = e.exam_id;
+                        o.value = e.exam_id ?? e.id;
                         o.textContent = e.name;
                         sel.appendChild(o);
                     });
