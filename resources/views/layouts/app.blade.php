@@ -8,10 +8,15 @@
     <!-- API Token: set early so dashboard scripts can access it before @stack('scripts') -->
     @auth
         @php
-            // Auto-generate API token in session if missing (e.g. existing sessions before token-on-login was added)
-            if (!session('api_token') && auth()->check()) {
+            // Refresh the dashboard API token on every dashboard render so stale or mismatched tokens
+            // do not block the monitoring cards after session changes or token churn.
+            $dashboardRoutes = ['admin.dashboard', 'guru.dashboard', 'kepala.dashboard', 'super.dashboard'];
+            if (request()->routeIs($dashboardRoutes)) {
                 $freshToken = auth()->user()->createToken('dashboard-token')->plainTextToken;
-                session(['api_token' => $freshToken]);
+                session([
+                    'api_token' => $freshToken,
+                    'api_token_user_id' => auth()->id(),
+                ]);
             }
         @endphp
         <meta name="api_token" content="{{ session('api_token', '') }}">

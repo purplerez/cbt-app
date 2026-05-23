@@ -39,8 +39,12 @@ class AuthenticatedSessionController extends Controller
         }
 
         //sanctum token
+        $user->tokens()->delete();
         $token = $user->createToken('dashboard-token')->plainTextToken;
-        session(['api_token' => $token]);
+        session([
+            'api_token' => $token,
+            'api_token_user_id' => $user->id,
+        ]);
 
         logActivity("$user->name (ID: {$user->id}) berhasil login");
 
