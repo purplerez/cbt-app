@@ -97,7 +97,8 @@ class QuestionController extends Controller
             if ($type != 3) {
                 // Build validation rules with proper in: rule for answer_key
                 // Ensure validChoiceKeys uses string keys for consistency
-                $validChoiceKeys = implode(',', array_map('strval', array_keys($choices)));
+                // Build validChoiceKeys based on 1-based indices (matching frontend radio values)
+                $validChoiceKeys = implode(',', range(1, count($choices)));
 
                 $rules = [
                     'question_text' => 'required_without:question_image|string|nullable',
@@ -119,31 +120,23 @@ class QuestionController extends Controller
                 ];
 
                 $validated = $request->validate($rules, $messages);
-                
-                // Force 0-based indexing for choices before saving to match word import
+
+                // Standardize choices to 0-based indexing for database consistency
                 $choicesRaw = $validated['choices'];
                 $choicesStandardized = [];
-                $keyMapping = [];
                 $i = 0;
                 foreach ($choicesRaw as $oldKey => $c) {
                     $choicesStandardized[(string)$i] = $c;
-                    $keyMapping[$oldKey] = $i;
                     $i++;
                 }
                 $validated['choices'] = json_encode($choicesStandardized);
 
-                // Sort answer_key numerically to maintain consistent order regardless of checkbox click order
+                // Keep answer_key as 1-based from frontend - model mutator will handle conversion
+                // The radio button values from frontend are 1-based (1=A, 2=B, 3=C, 4=D)
+                // AnswerKeyHelper::indexToLetter() expects 1-based indices
                 $answerKeyArray = $validated['answer_key'];
-                $mappedAnswerKey = [];
-                foreach($answerKeyArray as $ak) {
-                    if (isset($keyMapping[$ak])) {
-                        $mappedAnswerKey[] = $keyMapping[$ak];
-                    } else {
-                        $mappedAnswerKey[] = $ak;
-                    }
-                }
-                sort($mappedAnswerKey, SORT_NUMERIC);
-                $validated['answer_key'] = json_encode($mappedAnswerKey);
+                sort($answerKeyArray, SORT_NUMERIC);
+                $validated['answer_key'] = json_encode($answerKeyArray);
             } else {
                 $validated = $request->validate([
                     'question_text' => 'required|string',
@@ -260,7 +253,8 @@ class QuestionController extends Controller
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
 
-            // Cast answer_key values to integers ONLY if it's an array (multiple choice)
+            // Cast answer_key values to integers - keep as 1-based from frontend
+            // The model mutator and AnswerKeyHelper will handle conversion to letters
             if (is_array($answerKey)) {
                 $answerKey = array_map('intval', $answerKey);
                 $request->merge(['answer_key' => $answerKey]);
@@ -277,9 +271,9 @@ class QuestionController extends Controller
 
             // Normalize choices from request to be 0-indexed numeric keys
             $normalizedChoices = [];
-            $keyMapping = []; 
+            $keyMapping = [];
             $index = 0;
-            
+
             foreach ($choices as $oldKey => $choiceText) {
                 // Determine the numeric key (0-based)
                 if (preg_match('/^[A-Z]$/i', (string)$oldKey)) {
@@ -291,14 +285,14 @@ class QuestionController extends Controller
                     // becomes index 0 in the database.
                     $numericKey = $index;
                 }
-                
+
                 // Map the old key to the new numeric key for answer_key update
                 $keyMapping[$oldKey] = $numericKey;
-                
+
                 // Use input choice text or fall back to existing if empty
                 $finalText = !empty($choiceText) ? $choiceText : ($existingChoices[$numericKey] ?? '');
                 $normalizedChoices[$numericKey] = $finalText;
-                
+
                 $index++;
             }
 
@@ -306,22 +300,6 @@ class QuestionController extends Controller
             $choices = [];
             foreach ($normalizedChoices as $k => $v) {
                 $choices[(string)$k] = $v;
-            }
-
-            // Re-fetch answer_key if it's an array and map it using keyMapping
-            if (is_array($answerKey)) {
-                $answerKey = array_map(function($key) use ($keyMapping) {
-                    // Try mapping through keyMapping first
-                    if (isset($keyMapping[$key])) {
-                        return $keyMapping[$key];
-                    }
-                    // If key is a letter (A-E), map to 0-4
-                    if (preg_match('/^[A-E]$/i', (string)$key)) {
-                        return ord(strtoupper($key)) - ord('A');
-                    }
-                    return intval($key);
-                }, $answerKey);
-                $request->merge(['answer_key' => $answerKey]);
             }
 
             $request->merge(['choices' => $choices]);
@@ -348,8 +326,9 @@ class QuestionController extends Controller
 
             if ($type != '3') {
                 // Build validation rules with proper in: rule for answer_key
-                // Ensure validChoiceKeys uses string keys for consistency
-                $validChoiceKeys = implode(',', array_map('strval', array_keys($choices)));
+                // answer_key from frontend uses 1-based indices (1, 2, 3, 4, 5 for A, B, C, D, E)
+                // So validChoiceKeys should be 1-based range matching the number of choices
+                $validChoiceKeys = implode(',', range(1, count($choices)));
 
                 $validated = $request->validate([
                     'question_text' => 'required|string',
@@ -411,7 +390,7 @@ class QuestionController extends Controller
 
             // Handle choice images upload
             $existingChoicesImagesRaw = $question->choices_images ? json_decode($question->choices_images, true) : [];
-            
+
             $choicesImages = [];
             foreach ($existingChoicesImagesRaw as $oldImgKey => $imgPath) {
                  $newKey = isset($keyMapping[$oldImgKey]) ? (string)$keyMapping[$oldImgKey] : (string)$oldImgKey;

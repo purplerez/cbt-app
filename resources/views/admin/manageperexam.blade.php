@@ -1115,9 +1115,9 @@
                         } else if (answerKey) {
                             // answerKey might be a string like "A" or "B" - convert to index
                             if (typeof answerKey === 'string') {
-                                // If it's a letter (A, B, C, D), convert to index (0, 1, 2, 3)
+                                // If it's a letter (A, B, C, D), convert to 1-based index (1, 2, 3, 4)
                                 if (answerKey.match(/^[A-Z]$/)) {
-                                    let index = answerKey.charCodeAt(0) - 65; // A=0, B=1, etc
+                                    let index = answerKey.charCodeAt(0) - 64; // A=1, B=2, etc (1-based)
                                     normalizedAnswerKey = [index];
                                 } else {
                                     normalizedAnswerKey = [parseInt(answerKey) || answerKey];
@@ -1343,14 +1343,14 @@
                     if (choiceElements.length === 0) return;
 
                     // Read answer key letters from the hidden input injected by the modal partial.
-                    // Convert letters (A/B/C/D/E) to 0-based indices (0/1/2/3/4) so they match
-                    // each choice's data-choice-id attribute.
+                    // Convert letters (A/B/C/D/E) to 1-based indices (1/2/3/4/5) to match
+                    // each choice's data-choice-id attribute (which uses 1-based indexing).
                     const letterToIdx = {
-                        'A': 0,
-                        'B': 1,
-                        'C': 2,
-                        'D': 3,
-                        'E': 4
+                        'A': 1,
+                        'B': 2,
+                        'C': 3,
+                        'D': 4,
+                        'E': 5
                     };
                     let selectedIndices = [];
                     const answerKeyDataEl = document.getElementById('modal-answer-key-data');
