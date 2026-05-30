@@ -304,7 +304,8 @@ class DashboardController extends Controller
     {
         try {
             $student = Student::findOrFail($id);
-            $grade = Grade::all();
+            $school_id = $this->getSchoolId();
+            $grade = Grade::where('school_id', $school_id)->get();
 
             return view('kepala.edit_siswa', compact('student', 'grade'));
         } catch (\Exception $e) {
