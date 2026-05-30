@@ -213,7 +213,8 @@ class DashboardController extends Controller
 
     public function createStudent()
     {
-        $grade = Grade::all();
+        $school_id = $this->getSchoolId();
+        $grade = Grade::where('school_id', $school_id)->get();
         return view('kepala.input_siswa', compact('grade'));
     }
 
