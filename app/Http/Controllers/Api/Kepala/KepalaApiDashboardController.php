@@ -199,8 +199,14 @@ class KepalaApiDashboardController extends Controller
                 return response()->json(['error' => 'School not found for this user'], 400);
             }
 
-            // Get all exams with preassigned from this school
+            $today = now()->toDateString();
+
+            // Get exams that are active today (start_date <= today AND end_date >= today)
+            // AND have preassigned from this school
             $exams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
+                ->where('is_active', true)
+                ->whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
                 ->select('id', 'title as name')
                 ->orderBy('title')
                 ->get();
