@@ -36,7 +36,7 @@
     {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> --}}
 
     <!-- Place the first <script> tag in your HTML's head -->
-<script src="https://cdn.tiny.cloud/1/ixd83mcwv8lib28tn8hz2mt251yu99tf4t5y9rr1az5fdi13/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+<script src="https://cdn.tiny.cloud/1/m74oj0scxb80ztto8ggadpnlq1qir1584o16gx5mev19xo4u/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
 
 
 </head>
