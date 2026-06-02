@@ -60,7 +60,7 @@
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NIS</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Siswa</th>
-                                                    
+
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Total Skor</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Persentase</th>
                                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Aksi</th>
@@ -72,7 +72,7 @@
                                                 </tr>
                                             </tbody>
                                             <!-- untuk detail button: -->
-                                            
+
                                         </table>
                                     </div>
                                 </div>
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td class="px-6 py-4 text-sm text-center text-gray-900 whitespace-nowrap">${s.total_score ?? '-'}/${s.total_possible ?? '-'}</td>
                         <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
+                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700" style="display: none;">
                                 Detail
                             </button>
                             ${(Number(s.is_active) === 1)
