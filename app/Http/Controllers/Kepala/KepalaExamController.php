@@ -56,7 +56,7 @@ class KepalaExamController extends Controller
             //             ->where('start_date', 'like', now()->format('Y-m-d').'%')
             //             ->get();
             $mapels = Exam::where('exam_type_id', session('exam_id'))
-                        // ->where('start_date', 'like', now()->format('Y-m-d').'%')
+                            ->whereDate('start_date', today()) //untuk filter exam pada hari ini, di comment ketika exam sudah selesai
                             ->get();
             $grades = Grade::where('school_id', $schoolId)->get();
 
@@ -437,7 +437,7 @@ class KepalaExamController extends Controller
             $school = School::findOrFail($schoolId);
             $headmaster = Headmaster::where('school_id', $schoolId)->first();
 
-            // Gunakan fungsi path asli bawaan Storage agar dia secara otomatis 
+            // Gunakan fungsi path asli bawaan Storage agar dia secara otomatis
             // menembak ke public_html saat di server, dan ke app/public saat di lokal.
             $logoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($school->logo);
 
@@ -454,7 +454,7 @@ class KepalaExamController extends Controller
             $preassignedUsers = Preassigned::whereIn('exam_id', $examIds)
                 ->with(['user.student.grade'])
                 ->whereHas('user.student', function ($q) use ($schoolId) {
-                    $q->where('school_id', $schoolId);  
+                    $q->where('school_id', $schoolId);
                 })
                 ->get()
                 ->groupBy('user_id')
