@@ -163,11 +163,11 @@ class StudentAnswer extends Model
       * 
       * @param int $sessionId
       * @param int $questionId
-      * @param string $answer
+      * @param string|null $answer
       * @param bool $isEssay
       * @return bool
       */
-     public static function updateSingleAnswer(int $sessionId, int $questionId, string $answer, bool $isEssay = false): bool
+     public static function updateSingleAnswer(int $sessionId, int $questionId, ?string $answer, bool $isEssay = false): bool
      {
           try {
                $studentAnswer = self::firstOrNew(['session_id' => $sessionId]);

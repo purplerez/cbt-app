@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\Admin\DashboardStatisticsController;
 use App\Http\Controllers\Api\Admin\DashboardMonitorController;
 use App\Http\Controllers\Api\Admin\LogsController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\BenchmarkController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\KepalaExamApiController;
 use App\Http\Controllers\Api\ProctorController;
@@ -158,4 +159,13 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
 
     //dashboard api ends
 
+});
+
+Route::prefix('benchmark')->name('api.benchmark.')->group(function () {
+    Route::get('/health', [BenchmarkController::class, 'health'])->name('health');
+    Route::post('/login', [BenchmarkController::class, 'login'])->name('login');
+    Route::post('/dashboard', [BenchmarkController::class, 'dashboard'])->name('dashboard');
+    Route::post('/start-exam', [BenchmarkController::class, 'startExam'])->name('start-exam');
+    Route::post('/save-answer', [BenchmarkController::class, 'saveAnswer'])->name('save-answer');
+    Route::post('/submit-exam', [BenchmarkController::class, 'submitExam'])->name('submit-exam');
 });

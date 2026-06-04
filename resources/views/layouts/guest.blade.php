@@ -20,7 +20,7 @@
                 {{-- <a href="/">
                     <x-application-logo class="w-20 h-20 text-gray-500 fill-current" />
                 </a> --}}
-                <img src="{{ Storage::url('public/assets/images/school/default.png') }}" alt="School Logo" class="object-cover w-24 h-24">
+                <img src="{{ Storage::url('assets/images/school/default.png') }}" alt="School Logo" class="object-cover w-24 h-24">
             </div>
 
             <div class="w-full px-6 py-4 mt-6 overflow-hidden bg-white shadow-md sm:max-w-md sm:rounded-lg">

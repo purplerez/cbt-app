@@ -19,9 +19,9 @@ class StudentAnswerBackupController extends Controller
           $validator = Validator::make($request->all(), [
                'session_id' => 'required|integer|exists:exam_sessions,id',
                'answers' => 'sometimes|array', // {"1":"A","2":"B","3":"C"}
-               'answers.*' => 'string|max:1', // A, B, C, D for multiple choice
+               'answers.*' => 'nullable|string|max:1', // A, B, C, D for multiple choice
                'essay_answers' => 'sometimes|array', // {"5":"Long text..."}
-               'essay_answers.*' => 'string|max:65535' // For essay questions
+               'essay_answers.*' => 'nullable|string|max:65535' // For essay questions
           ]);
 
           if ($validator->fails()) {
@@ -218,7 +218,7 @@ class StudentAnswerBackupController extends Controller
           $validator = Validator::make($request->all(), [
                'session_id' => 'required|integer|exists:exam_sessions,id',
                'question_id' => 'required|integer',
-               'answer' => 'required|string',
+               'answer' => 'nullable|string',
                'type' => 'required|in:choice,essay'
           ]);
 

@@ -210,7 +210,7 @@ class ParticipantController extends Controller
                 // Use explicit integer casting and addMinutes method for safety
                 $endTime = Carbon::parse($startTime)->addMinutes(intval($duration));
 
-                $user->examSessions()->create([
+                $examSession = $user->examSessions()->create([
                     'user_id' => $user->id,
                     'exam_id' => $examId,
                     'session_token' => $sessionToken,
@@ -223,6 +223,9 @@ class ParticipantController extends Controller
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->header('User-Agent'),
                 ]);
+
+                // Initialize empty student answers right away
+                StudentAnswer::saveAnswers($examSession->id, [], []);
 
                 $user->is_active = true;
                 $user->is_logout = false;
