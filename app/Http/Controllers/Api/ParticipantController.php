@@ -345,9 +345,11 @@ class ParticipantController extends Controller
                 ->where('exam_id', $examId)
                 ->delete();
 
-            // NOTE: Do NOT change `is_active` or `is_logout` here.
-            // State changes related to force-exit must only be performed
-            // by the dedicated force-exit endpoint or middleware.
+            // Reset is_logout to 0 after successful submission
+            // Allows student to take next exam without manual proctor unlock
+            $user->is_active = true;
+            $user->is_logout = false;
+            $user->save();
 
             // Log the deletion for debugging
             Log::info('Preassigned deleted after exam submission', [
