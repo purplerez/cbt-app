@@ -147,22 +147,31 @@ class QuestionController extends Controller
                 $validated['choices'] = null;
             }
 
+            // Remove file objects from validated data - they are not storable
+            unset($validated['question_image']);
+            unset($validated['choice_images']);
+
             // Handle question image upload
             if ($request->hasFile('question_image')) {
                 $questionImage = $request->file('question_image');
                 $questionImagePath = $questionImage->store('question_images', 'public');
-                $validated['question_image'] = $questionImagePath;
+                if ($questionImagePath !== false) {
+                    $validated['question_image'] = $questionImagePath;
+                }
             }
 
-            // Handle choice images upload
+            // Handle choice images upload - use 0-based keys matching re-indexed choices
             $choicesImages = [];
             if ($request->hasFile('choice_images')) {
+                $choiceIndex = 0;
                 foreach ($request->file('choice_images') as $choiceId => $image) {
                     if ($image) {
-                        $mappedId = isset($keyMapping[$choiceId]) ? (string)$keyMapping[$choiceId] : (string)$choiceId;
                         $choiceImagePath = $image->store('choice_images', 'public');
-                        $choicesImages[$mappedId] = $choiceImagePath;
+                        if ($choiceImagePath !== false) {
+                            $choicesImages[(string)$choiceIndex] = $choiceImagePath;
+                        }
                     }
+                    $choiceIndex++;
                 }
             }
 
@@ -371,6 +380,10 @@ class QuestionController extends Controller
                 throw new \Exception('Anda tidak memiliki akses untuk merubah soal');
             }
 
+            // Remove file objects from validated data - handled separately below
+            unset($validated['question_image']);
+            unset($validated['choice_images']);
+
             // Handle question image upload
             if ($request->hasFile('question_image')) {
                 // Delete old image if exists
@@ -379,7 +392,9 @@ class QuestionController extends Controller
                 }
                 $questionImage = $request->file('question_image');
                 $questionImagePath = $questionImage->store('question_images', 'public');
-                $validated['question_image'] = $questionImagePath;
+                if ($questionImagePath !== false) {
+                    $validated['question_image'] = $questionImagePath;
+                }
             } elseif ($request->input('remove_question_image') == '1') {
                 // Handle removal of question image
                 if ($question->question_image) {
@@ -387,6 +402,8 @@ class QuestionController extends Controller
                 }
                 $validated['question_image'] = null;
             }
+            // If neither upload nor remove, question_image is NOT in validated data,
+            // so the existing value in the database is preserved.
 
             // Handle choice images upload
             $existingChoicesImagesRaw = $question->choices_images ? json_decode($question->choices_images, true) : [];
@@ -418,12 +435,21 @@ class QuestionController extends Controller
                             Storage::disk('public')->delete($choicesImages[$mappedId]);
                         }
                         $choiceImagePath = $image->store('choice_images', 'public');
-                        $choicesImages[$mappedId] = $choiceImagePath;
+                        if ($choiceImagePath !== false) {
+                            $choicesImages[$mappedId] = $choiceImagePath;
+                        }
                     }
                 }
             }
 
-            $validated['choices_images'] = !empty($choicesImages) ? json_encode($choicesImages) : null;
+            // Only set choices_images if there are changes; otherwise preserve existing value
+            if (!empty($choicesImages)) {
+                $validated['choices_images'] = json_encode($choicesImages);
+            } elseif ($request->has('remove_choice_images')) {
+                $validated['choices_images'] = null;
+            }
+            // If no changes to choice images, choices_images is NOT in validated data,
+            // so the existing value in the database is preserved.
 
             $question->update($validated);
 

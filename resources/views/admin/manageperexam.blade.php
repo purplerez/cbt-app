@@ -1317,18 +1317,6 @@
                             if (typeof loadAnswerKeyChoices === 'function') {
                                 loadAnswerKeyChoices(questionId);
                             }
-
-                            // Add form submit listener for the modal form
-                            const editForm = modalContent.querySelector('form.question-form');
-                            if (editForm) {
-                                editForm.addEventListener('submit', function(e) {
-                                    // Trigger TinyMCE to save all content to textareas
-                                    if (typeof tinymce !== 'undefined') {
-                                        tinymce.triggerSave();
-                                    }
-                                    // Form will submit normally with all data including images
-                                });
-                            }
                         })
                         .catch(error => {
                             console.error('Error loading modal:', error);
