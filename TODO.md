@@ -1,0 +1,1 @@
+# TODO: Fix School Name Display Error\n\n## Plan Progress\n\n### [ ] 1. Create TODO.md (IN PROGRESS)\n### [ ] 2. Update resources/views/admin/view_users.blade.php - Fix school name logic\n### [ ] 3. Update app/Http/Controllers/Admin/UserManagementController.php - Add eager loading\n### [ ] 4. Test the fix\n### [ ] 5. Mark complete
