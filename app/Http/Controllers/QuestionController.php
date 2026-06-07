@@ -31,13 +31,7 @@ class QuestionController extends Controller
 
     public function store(Request $request)
     {
-        Log::debug('STORE - hasFile question_image: ' . ($request->hasFile('question_image') ? 'true' : 'false'));
-        Log::debug('STORE - all files: ' . json_encode(array_keys($request->allFiles() ?? [])));
-        Log::debug('STORE - file question_image: ' . json_encode($request->file('question_image') ? $request->file('question_image')->getClientOriginalName() : 'no file'));
-        Log::debug('STORE - _FILES keys: ' . json_encode(array_keys($_FILES ?? [])));
-        if (isset($_FILES['question_image'])) {
-            Log::debug('STORE - _FILES question_image error: ' . $_FILES['question_image']['error']);
-        }
+        //dd($request->all());
         try {
             $choices = $request->input('choices', []);
             $answerKey = $request->input('answer_key', []);
@@ -200,8 +194,6 @@ class QuestionController extends Controller
                 throw new \Exception('Anda tidak memiliki akses untuk menambah ujian');
             }
             // dd($validated);
-            Log::debug('STORE - final validated question_image: ' . ($validated['question_image'] ?? 'NOT SET'));
-            Log::debug('STORE - final validated choices_images: ' . ($validated['choices_images'] ?? 'NOT SET'));
             Question::create($validated);
 
             $user = auth()->user();
@@ -388,14 +380,6 @@ class QuestionController extends Controller
                 throw new \Exception('Anda tidak memiliki akses untuk merubah soal');
             }
 
-            Log::debug('UPDATE - hasFile question_image: ' . ($request->hasFile('question_image') ? 'true' : 'false'));
-            Log::debug('UPDATE - has remove_question_image: ' . ($request->has('remove_question_image') ? 'true' : 'false'));
-            Log::debug('UPDATE - remove_question_image value: ' . ($request->input('remove_question_image') ?? 'NOT SET'));
-            Log::debug('UPDATE - old question_image: ' . ($question->question_image ?? 'NULL'));
-            if ($request->hasFile('question_image')) {
-                Log::debug('UPDATE - file name: ' . $request->file('question_image')->getClientOriginalName());
-            }
-
             // Remove file objects from validated data - handled separately below
             unset($validated['question_image']);
             unset($validated['choice_images']);
@@ -408,7 +392,6 @@ class QuestionController extends Controller
                 }
                 $questionImage = $request->file('question_image');
                 $questionImagePath = $questionImage->store('question_images', 'public');
-                Log::debug('UPDATE - store result: ' . ($questionImagePath === false ? 'FALSE' : $questionImagePath));
                 if ($questionImagePath !== false) {
                     $validated['question_image'] = $questionImagePath;
                 }
@@ -468,8 +451,6 @@ class QuestionController extends Controller
             // If no changes to choice images, choices_images is NOT in validated data,
             // so the existing value in the database is preserved.
 
-            Log::debug('UPDATE - final validated question_image: ' . ($validated['question_image'] ?? 'NOT SET'));
-            Log::debug('UPDATE - final validated choices_images: ' . ($validated['choices_images'] ?? 'NOT SET'));
             $question->update($validated);
 
             $user = auth()->user();
