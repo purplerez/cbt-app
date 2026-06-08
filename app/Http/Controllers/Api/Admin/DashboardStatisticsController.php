@@ -40,8 +40,7 @@ class DashboardStatisticsController extends Controller
                           ->whereDate('end_date', '>=', Carbon::today());
                     })
                     ->distinct('exam_id')
-                    ->count('exam_id')
-                    ->orderBy('exam_id', 'asc');
+                    ->count('exam_id');
 
                 // Submitted today
                 $submittedToday = ExamSession::where('status', 'submited')
@@ -89,7 +88,7 @@ class DashboardStatisticsController extends Controller
             // All exams with preassigned participants (not just active/progress)
             $exams = Exam::whereHas('preassigneds')
                 ->select('id', 'title')
-                ->orderBy('title')
+                ->orderBy('id')
                 ->get()
                 ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
 
