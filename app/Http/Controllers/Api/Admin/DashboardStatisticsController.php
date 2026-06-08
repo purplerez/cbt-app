@@ -40,7 +40,8 @@ class DashboardStatisticsController extends Controller
                           ->whereDate('end_date', '>=', Carbon::today());
                     })
                     ->distinct('exam_id')
-                    ->count('exam_id');
+                    ->count('exam_id')
+                    ->orderBy('exam_id', 'asc');
 
                 // Submitted today
                 $submittedToday = ExamSession::where('status', 'submited')
