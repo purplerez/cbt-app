@@ -55,9 +55,10 @@ class KepalaExamController extends Controller
             // $mapels = Exam::where('exam_type_id', session('exam_id'))
             //             ->where('start_date', 'like', now()->format('Y-m-d').'%')
             //             ->get();
-            $mapels = Exam::where('exam_type_id', session('exam_id'))
-                            ->whereDate('start_date', today()) //untuk filter exam pada hari ini, di comment ketika exam sudah selesai
-                            ->get();
+            // $mapels = Exam::where('exam_type_id', session('exam_id'))
+            //                 ->whereDate('start_date', today()) //untuk filter exam pada hari ini, di comment ketika exam sudah selesai
+            //                 ->get();
+            $mapels = Exam::where('exam_type_id', session('exam_id'))->get(); //allexams on the exam type selected
             $grades = Grade::where('school_id', $schoolId)->get();
 
             return view('kepala.manageexam', compact('mapels', 'grades'));
