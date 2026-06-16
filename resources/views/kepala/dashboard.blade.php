@@ -320,10 +320,7 @@
                             '—';
                         const actions = `
                 <div class="flex gap-1.5">
-                    ${p.session_id ? `<a href="/kepala/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${(p.is_active === true || p.is_active === 1) && (p.is_logout === true || parseInt(p.is_logout) === 1) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openReset('${p.nis}','${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition" title="Unlock dari force exit">Unlock</button>` : ''}
                     ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
-                    ${p.session_id ? `<button onclick="openDeleteModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')" class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Delete</button>` : ''}
                 </div>`;
                         return `<tr class="hover:bg-gray-50 transition">
                 <td class="px-4 py-3"><div class="font-medium text-gray-800 text-sm">${esc(p.name)}</div><div class="text-xs text-gray-400">${esc(p.nis)}</div></td>
