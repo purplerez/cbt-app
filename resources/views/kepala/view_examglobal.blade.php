@@ -49,8 +49,8 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             <div class="flex flex-wrap gap-2">
-                                                
-                                                @role('kepala')
+
+                                                @role('admin')
                                                     <a href="{{ route('kepala.exams.participant', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
                                                        title="Daftarkan siswa">
@@ -58,7 +58,7 @@
                                                     </a>
                                                 @endrole
 
-                                                @role('guru')
+                                                @role('admin')
                                                     <a href="{{ route('guru.exams.participant', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
                                                        title="Daftarkan siswa">
@@ -66,7 +66,7 @@
                                                     </a>
                                                 @endrole
 
-                                                @role('kepala')
+                                                @role('admin')
                                                     <a href="{{ route('kepala.rooms', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-blue-600 transition border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white"
                                                        title="Ruang">
@@ -74,16 +74,16 @@
                                                     </a>
                                                 @endrole
 
-                                                @role('guru')
+                                                @role('admin')
                                                     <a href="{{ route('guru.rooms', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-blue-600 transition border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white"
                                                        title="Ruang">
                                                         Ruang
                                                     </a>
                                                 @endrole
-                                               
 
-                                                @role('kepala')
+
+                                                @role('admin')
                                                     <a href="{{ route('kepala.exams.print-participants', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-purple-600 transition border border-purple-600 rounded-md hover:bg-purple-600 hover:text-white"
                                                        title="Cetak Kartu Peserta"
@@ -92,7 +92,7 @@
                                                     </a>
                                                 @endrole
 
-                                                @role('guru')
+                                                @role('admin')
                                                     <a href="{{ route('guru.exams.print-participants', $exam->id) }}"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-purple-600 transition border border-purple-600 rounded-md hover:bg-purple-600 hover:text-white"
                                                        title="Cetak Kartu Peserta"

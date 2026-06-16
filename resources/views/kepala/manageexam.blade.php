@@ -170,12 +170,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         <td class="px-6 py-4 text-sm text-center text-gray-900 whitespace-nowrap">${s.total_score ?? '-'}/${s.total_possible ?? '-'}</td>
                         <td class="px-6 py-4 text-sm text-right text-gray-900 whitespace-nowrap">${s.percentage ?? '-'}%</td>
                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
-                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700" style="display: none;">
+                            <button onclick="showDetail('${s.id}')" class="px-3 py-1 text-sm text-white bg-blue-600 rounded hover:bg-blue-700">
                                 Detail
                             </button>
-                            ${(Number(s.is_active) === 1)
-                                    ? `<a href="/kepala/exam-sessions/${s.nis}/reset" class="px-3 py-1 text-sm text-white bg-red-600 rounded hover:bg-red-700">Reset Login</a>`
-                                    : ''}
+
                         </td>
                     `;
                     scoresBody.appendChild(tr);
