@@ -33,7 +33,7 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
         ->name('exam.stats');
 
     // Dashboard Statistics Routes - throttled to prevent CPU spike
-    Route::middleware('throttle:20,1')->group(function () {
+    Route::middleware('throttle:60,1')->group(function () {
         Route::get('/dashboard/stats', [DashboardStatisticsController::class, 'getOverviewStats'])
             ->name('dashboard.stats');
         Route::get('/dashboard/active-exams', [DashboardStatisticsController::class, 'getActiveExams'])
@@ -127,7 +127,7 @@ Route::middleware(['auth:sanctum', 'role:kepala|guru'])->prefix('kepala')->name(
     Route::get('/logs/recent', [LogsController::class, 'getRecentLogs'])->name('logs.recent');
 
     //dashboard api starts
-    Route::prefix('dashboard')->middleware('throttle:20,1')->name('dashboard.')->group(function () {
+    Route::prefix('dashboard')->middleware('throttle:60,1')->name('dashboard.')->group(function () {
         // Get overview statistics
         Route::get('/stats', [KepalaApiDashboardController::class, 'getStats'])
             ->name('stats');
