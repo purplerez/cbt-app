@@ -1,5 +1,4 @@
 import './bootstrap';
-import './kepala-dashboard';
 
 import Alpine from 'alpinejs';
 

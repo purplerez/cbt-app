@@ -381,7 +381,9 @@ class KephalaDashboardManager {
     }
 }
 
-// Initialize dashboard when DOM is ready
+// Initialize dashboard only if the target container exists
 document.addEventListener('DOMContentLoaded', () => {
-    window.kephalaDashboard = new KephalaDashboardManager();
+    if (document.getElementById('gradeStats') || document.getElementById('activeExamsBody')) {
+        window.kephalaDashboard = new KephalaDashboardManager();
+    }
 });
