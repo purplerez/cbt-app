@@ -19,7 +19,7 @@
                         <!-- Logo -->
                         <div class="flex items-center justify-center mb-4">
 
-                                <img src="{{ Storage::url($school->logo) }}" alt="School Logo" class="object-cover w-24 h-24 rounded-full">
+                                <img src="{{ Storage::url($school->logo) }}" alt="School Logo" class="object-cover w-24 h-24 rounded-full" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/school/default.png') }}';">
 
                         </div>
 

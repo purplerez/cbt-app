@@ -53,7 +53,7 @@
 
                                                 <div>
                                                     <label for="photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                                                    <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
+                                                    <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/head/default.jpg') }}';">
                                                     <input type="file" id="photo" name="photo"
                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                                                 </div>

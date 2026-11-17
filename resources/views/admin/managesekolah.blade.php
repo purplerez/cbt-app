@@ -14,7 +14,7 @@
                         <div class="w-1/4 pr-6">
                             <div class="p-4 bg-white rounded-lg shadow">
                                 <div class="flex items-center mb-4 space-x-4">
-                                    <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full">
+                                    <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/school/default.png') }}';">
                                     <div>
                                         <h3 class="text-lg font-medium">{{ $school->name }}</h3>
                                         <p class="text-sm text-gray-500">NPSN: {{ $school->npsn }}</p>
@@ -98,7 +98,7 @@
                                         <div class="overflow-x-auto">
                                             {{-- style for the logo --}}
                                             <div class="flex items-center pb-4 mb-4 space-x-4 border-b">
-                                                <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full place-items-center">
+                                                <img src="{{ Storage::url($school->logo)}}" alt="School Logo" class="w-12 h-12 rounded-full place-items-center" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/school/default.png') }}';">
                                             </div>
                                             <h2 class="mt-2 text-lg font-semibold">Nama Madrasah : {{ $school->name }}</h2>
                                             <h4 class="mt-2 text-lg font-semibold">Kepala Madrasah : {{ $school->headmasters->name ?? 'Belum ada' }}</h4>
@@ -496,7 +496,7 @@
 
                                                 <div>
                                                     <label for="h_photo" class="block text-sm font-medium text-gray-700">Photo</label>
-                                                    <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full">
+                                                    <img src="{{ Storage::url($headmaster->photo) }}" alt="Current Photo" class="w-12 h-12 mb-2 rounded-full" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/head/default.jpg') }}';">
                                                     <input type="file" id="h_photo" name="h_photo"
                                                         class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                                                         @if(!session('edit')) disabled @endif>

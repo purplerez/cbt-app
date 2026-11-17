@@ -28,4 +28,12 @@ class Headmaster extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function getPhotoAttribute($value)
+    {
+        if (!$value || !file_exists(storage_path('app/public/' . $value))) {
+            return 'assets/images/head/default.jpg';
+        }
+        return $value;
+    }
+
 }

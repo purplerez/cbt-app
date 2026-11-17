@@ -71,7 +71,7 @@
                         <div>
                             {{-- <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label> --}}
                             <label for="" class="block text-sm font-medium text-gray-700">Current Logo</label>
-                            <img src="{{ Storage::url($dataSchool->logo)}}" alt="Logo Sekolah" class="w-6 h-10 mb-4">
+                            <img src="{{ Storage::url($dataSchool->logo)}}" alt="Logo Sekolah" class="w-6 h-10 mb-4" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/school/default.png') }}';">
 
                             <input type="file" name="logo" id="logo"
                                 class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">

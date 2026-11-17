@@ -72,7 +72,7 @@
                         <!-- Logo -->
                         <div>
                             <label for="logo" class="block text-sm font-medium text-gray-700">Logo Sekolah</label>
-                            <img src="{{ Storage::url($school->logo) }}" alt="School Logo" class="object-cover w-24 h-24 rounded-full">
+                            <img src="{{ Storage::url($school->logo) }}" alt="School Logo" class="object-cover w-24 h-24 rounded-full" onerror="this.onerror=null;this.src='{{ Storage::url('assets/images/school/default.png') }}';">
                             <input type="file" name="logo" id="logo"
                                 class="block w-full mt-1 text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
                             <x-input-error :messages="$errors->get('logo')" class="mb-4" />

@@ -49,4 +49,12 @@ class School extends Model
     {
         return $this->hasMany(Grade::class);
     }
+
+    public function getLogoAttribute($value)
+    {
+        if (!$value || !file_exists(storage_path('app/public/' . $value))) {
+            return 'assets/images/school/default.png';
+        }
+        return $value;
+    }
 }
