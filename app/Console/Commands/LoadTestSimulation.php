@@ -270,7 +270,7 @@ class LoadTestSimulation extends Command
 
         $rps = $this->metrics['total_requests'] / max($totalTime, 1);
         if ($rps > 100) {
-            $this->info("✓ Requests per second is HIGH (${rps}/sec) - server handling load well");
+            $this->info("✓ Requests per second is HIGH ({$rps}/sec) - server handling load well");
         }
     }
 }
