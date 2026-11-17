@@ -57,46 +57,28 @@ class KepalaApiDashboardController extends Controller
 
             // Get online students (from active exam sessions)
             $onlineStudents = ExamSession::where('status', 'progress')
-                ->whereHas('user.student', function ($q) use ($schoolId) {
-                    $q->where('school_id', $schoolId);
-                })
-                ->distinct('user_id')
-                ->count('user_id');
+                ->join('students', 'students.user_id', '=', 'exam_sessions.user_id')
+                ->where('students.school_id', $schoolId)
+                ->distinct('exam_sessions.user_id')
+                ->count('exam_sessions.user_id');
 
             $onlinePercentage = $totalStudents > 0 ? round(($onlineStudents / $totalStudents) * 100, 2) : 0;
 
             // Get total grades
             $totalGrades = Grade::where('school_id', $schoolId)->count();
 
-            // Get active exams (exam_sessions with progress status for this school, only valid for today)
-            // $activeExams = ExamSession::whereIn('status', ['progress', 'waiting'])
-            //     ->whereHas('exam', function ($q) {
-            //         $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-            //           ->whereDate('end_date', '>=', \Carbon\Carbon::today());
-            //     })
-            //     ->whereHas('user.student', function ($q) use ($schoolId) {
-            //         $q->where('school_id', $schoolId);
-            //     })
-            //     ->distinct('exam_id')
-            //     ->count('exam_id');
             $activeExams = Exam::whereHas('preassigneds.user.student', fn($q) => $q->where('school_id', $schoolId))
                 ->count();
 
             // Get active participant count
             $activeParticipants = ExamSession::where('status', 'progress')
-                ->whereHas('exam', function ($q) {
-                    $q->whereDate('start_date', '<=', \Carbon\Carbon::today())
-                        ->whereDate('end_date', '>=', \Carbon\Carbon::today());
-                })
-                ->whereHas('user.student', function ($q) use ($schoolId) {
-                    $q->where('school_id', $schoolId);
-                })
+                ->join('students', 'students.user_id', '=', 'exam_sessions.user_id')
+                ->where('students.school_id', $schoolId)
                 ->count();
 
             // Get total preassigned (registered for exams, not yet started)
-            $totalPreassigned = Preassigned::whereHas('user.student', function ($q) use ($schoolId) {
-                $q->where('school_id', $schoolId);
-            })
+            $totalPreassigned = Preassigned::join('students', 'students.user_id', '=', 'preassigneds.user_id')
+                ->where('students.school_id', $schoolId)
                 ->count();
 
             // Get total exams this school's students are registered for
