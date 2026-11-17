@@ -278,14 +278,19 @@
                     return;
                 }
                 clearInterval(monitorInterval);
-                fetchMonitor(id);
-                monitorInterval = setInterval(() => fetchMonitor(id), 30000);
+                fetchMonitor(id, false);
+                monitorInterval = setInterval(() => {
+                    if (!document.hidden) fetchMonitor(id, true);
+                }, 20000);
             }
 
-            async function fetchMonitor(examId) {
+            async function fetchMonitor(examId, isSilent = false) {
                 try {
-                    document.getElementById('monitor-body').innerHTML =
-                        '<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
+                    const tbody = document.getElementById('monitor-body');
+                    if (!isSilent && (!tbody.children.length || tbody.querySelector('.text-gray-400'))) {
+                        tbody.innerHTML =
+                            '<tr><td colspan="6" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
+                    }
                     const r = await fetch(`/api/kepala/monitor/exam/${examId}/participants`, {
                         headers: HEADERS
                     });
@@ -578,9 +583,17 @@
             fetchRecentScores();
             fetchActivityLog();
             setInterval(() => {
-                fetchStats();
-                fetchActiveExams();
+                if (!document.hidden) {
+                    fetchStats();
+                    fetchActiveExams();
+                }
             }, 30000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    refreshAll();
+                }
+            });
         </script>
     @endpush
 </x-app-layout>

@@ -304,14 +304,19 @@
                     return;
                 }
                 clearInterval(monitorInterval);
-                fetchMonitor(examId);
-                monitorInterval = setInterval(() => fetchMonitor(examId), 30000);
+                fetchMonitor(examId, false);
+                monitorInterval = setInterval(() => {
+                    if (!document.hidden) fetchMonitor(examId, true);
+                }, 20000);
             }
 
-            async function fetchMonitor(examId) {
+            async function fetchMonitor(examId, isSilent = false) {
                 try {
-                    document.getElementById('monitor-body').innerHTML =
-                        '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
+                    const tbody = document.getElementById('monitor-body');
+                    if (!isSilent && (!tbody.children.length || tbody.querySelector('.text-gray-400'))) {
+                        tbody.innerHTML =
+                            '<tr><td colspan="7" class="px-4 py-6 text-center text-gray-400 text-xs">Memuat data...</td></tr>';
+                    }
                     const schoolQuery = document.getElementById('school-select').value ?
                         `?school_id=${document.getElementById('school-select').value}` : '';
                     const r = await fetch(`/api/admin/monitor/exam/${examId}/participants${schoolQuery}`, {
@@ -595,9 +600,17 @@
             fetchActiveExams();
             fetchActivityLog();
             setInterval(() => {
-                fetchStats();
-                fetchActiveExams();
+                if (!document.hidden) {
+                    fetchStats();
+                    fetchActiveExams();
+                }
             }, 30000);
+
+            document.addEventListener('visibilitychange', () => {
+                if (!document.hidden) {
+                    refreshAll();
+                }
+            });
         </script>
     @endpush
 </x-app-layout>
