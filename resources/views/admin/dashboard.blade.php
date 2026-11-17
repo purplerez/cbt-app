@@ -55,13 +55,23 @@
                         </span>
                         <h3 class="text-base font-semibold text-gray-800">Monitoring Ujian (Semua Exam)</h3>
                     </div>
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" id="search-student" oninput="renderMonitorTable()" placeholder="Cari Siswa / NIS..."
+                            class="text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 w-36 sm:w-44">
+                        <select id="status-filter" onchange="renderMonitorTable()"
+                            class="text-xs border border-gray-200 rounded-lg px-2 py-1.5 bg-gray-50 text-gray-900">
+                            <option value="">Semua Status</option>
+                            <option value="progress">Live</option>
+                            <option value="submited">Submit</option>
+                            <option value="not_started">Belum</option>
+                            <option value="needs_unlock">Perlu Unlock</option>
+                        </select>
                         <select id="exam-select" onchange="onExamSelectChange()"
-                            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]">
+                            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[180px]">
                             <option value="">— Pilih Ujian —</option>
                         </select>
                         <select id="school-select" onchange="loadMonitor()"
-                            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[200px]"
+                            class="text-sm border border-gray-200 rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-gray-50 text-gray-900 flex-1 max-w-[180px]"
                             disabled>
                             <option value="">— Semua Sekolah —</option>
                         </select>
@@ -197,6 +207,7 @@
             let currentSessionId = null;
             let currentStudentName = '';
             let monitorInterval = null;
+            let monitorData = [];
 
             // ── STATS ──────────────────────────────────────────────────────────
             async function fetchStats() {
@@ -338,54 +349,98 @@
                     document.getElementById('cnt-submited').textContent = (res.counts.submited ?? 0) + ' Submit';
                     document.getElementById('cnt-not-started').textContent = (res.counts.not_started ?? 0) + ' Belum';
 
-                    const tbody = document.getElementById('monitor-body');
-                    if (!res.data || res.data.length === 0) {
-                        tbody.innerHTML =
-                            '<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta terdaftar.</td></tr>';
-                        return;
+                    monitorData = res.data || [];
+                    renderMonitorTable();
+                    startTick();
+                } catch (e) {
+                    document.getElementById('monitor-body').innerHTML =
+                        `<tr><td colspan="7" class="px-4 py-6 text-center text-red-400 text-sm">${e.message}</td></tr>`;
+                }
+            }
+
+            function renderMonitorTable() {
+                const search = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
+                const statusFilter = document.getElementById('status-filter')?.value || '';
+                const tbody = document.getElementById('monitor-body');
+
+                if (!monitorData || monitorData.length === 0) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta terdaftar.</td></tr>';
+                    return;
+                }
+
+                const filtered = monitorData.filter(p => {
+                    const matchSearch = !search || 
+                        (p.name && p.name.toLowerCase().includes(search)) || 
+                        (p.nis && p.nis.toLowerCase().includes(search));
+                    const needsUnlock = (p.is_active === true || p.is_active === 1) && 
+                                        (p.is_logout === true || parseInt(p.is_logout) === 1) && 
+                                        (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0);
+                    let matchStatus = true;
+                    if (statusFilter === 'needs_unlock') {
+                        matchStatus = needsUnlock;
+                    } else if (statusFilter) {
+                        matchStatus = (p.status === statusFilter);
                     }
+                    return matchSearch && matchStatus;
+                });
 
-                    tbody.innerHTML = res.data.map(p => {
-                        const statusBadge = {
-                                'progress': '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>',
-                                'submited': '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Submit</span>',
-                                'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>',
-                            } [p.status] ??
-                            `<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">${p.status}</span>`;
+                if (filtered.length === 0) {
+                    tbody.innerHTML =
+                        '<tr><td colspan="7" class="px-4 py-10 text-center text-gray-400 text-sm">Tidak ada peserta yang cocok dengan filter pencarian.</td></tr>';
+                    return;
+                }
 
-                        const timeDisplay = p.status === 'progress' ?
-                            `<span class="font-mono text-sm text-orange-600" data-seconds="${p.time_remaining}">${formatTime(p.time_remaining)}</span>` :
-                            (p.status === 'submited' ? '<span class="text-blue-500 text-xs">—</span>' :
-                                '<span class="text-gray-400 text-xs">Belum mulai</span>');
+                tbody.innerHTML = filtered.map(p => {
+                    const needsUnlock = (p.is_active === true || p.is_active === 1) && 
+                                        (p.is_logout === true || parseInt(p.is_logout) === 1) && 
+                                        (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0);
 
-                        const score = p.score !== null ?
-                            `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` :
-                            '—';
+                    const statusBadge = {
+                            'progress': '<span class="inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium"><span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse inline-block"></span>Live</span>',
+                            'submited': '<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">Submit</span>',
+                            'not_started': '<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs font-medium">Belum</span>',
+                        } [p.status] ??
+                        `<span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-full text-xs">${p.status}</span>`;
 
-                        const actions = `
-                <div class="flex gap-1.5">
-                    ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
-                    ${(p.is_active === true || p.is_active === 1) && (p.is_logout === true || parseInt(p.is_logout) === 1) && (p.status === 'progress' || parseInt(p.time_remaining || 0) > 0) ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
-                                class="px-2 py-1 text-xs bg-blue-50 text-blue-700 rounded hover:bg-blue-100 transition" title="Unlock dari force exit">Unlock</button>` : ''}
-                    ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
-                                class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
-                    ${p.session_id ? `<button onclick="openDeleteModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
-                                class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Delete</button>` : ''}
-                </div>`;
+                    const timeDisplay = p.status === 'progress' ?
+                        `<span class="font-mono text-sm text-orange-600" data-seconds="${p.time_remaining}">${formatTime(p.time_remaining)}</span>` :
+                        (p.status === 'submited' ? '<span class="text-blue-500 text-xs">—</span>' :
+                            '<span class="text-gray-400 text-xs">Belum mulai</span>');
 
-                        return `<tr class="hover:bg-gray-50 transition">
-                <td class="px-4 py-3">
-                    <div class="font-medium text-gray-800 text-sm">${escHtml(p.name)}</div>
-                    <div class="text-xs text-gray-400">${escHtml(p.nis)}</div>
-                </td>
-                <td class="px-4 py-3 text-sm text-gray-600">${escHtml(p.grade)}</td>
-                <td class="px-4 py-3 text-xs text-gray-500">${escHtml(p.school || '—')}</td>
-                <td class="px-4 py-3">${statusBadge}</td>
-                <td class="px-4 py-3">${timeDisplay}</td>
-                <td class="px-4 py-3">${score}</td>
-                <td class="px-4 py-3">${actions}</td>
-            </tr>`;
-                    }).join('');
+                    const score = p.score !== null ?
+                        `<span class="font-semibold text-green-700">${parseFloat(p.score).toFixed(2)}</span>` :
+                        '—';
+
+                    const actions = `
+            <div class="flex gap-1.5">
+                ${p.session_id ? `<a href="/admin/exam-sessions/${p.session_id}/detail" class="px-2 py-1 text-xs bg-indigo-50 text-indigo-600 rounded hover:bg-indigo-100 transition">Detail</a>` : ''}
+                ${needsUnlock ? `<button onclick="openResetModal('${p.nis}','${p.name.replace(/'/g,"\\'")}','${p.user_id}')"
+                            class="px-2 py-1 text-xs bg-blue-600 text-white font-medium rounded hover:bg-blue-700 shadow-sm transition" title="Unlock dari force exit">Unlock</button>` : ''}
+                ${p.session_id && p.status === 'progress' ? `<button onclick="openForceModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
+                            class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Force</button>` : ''}
+                ${p.session_id ? `<button onclick="openDeleteModal(${p.session_id},'${p.name.replace(/'/g,"\\'")}')"
+                            class="px-2 py-1 text-xs bg-red-50 text-red-600 rounded hover:bg-red-100 transition">Delete</button>` : ''}
+            </div>`;
+
+                    const rowBg = needsUnlock ? 'bg-amber-50 hover:bg-amber-100/70 border-l-4 border-amber-500' : 'hover:bg-gray-50';
+
+                    return `<tr class="${rowBg} transition">
+            <td class="px-4 py-3">
+                <div class="font-medium text-gray-800 text-sm flex items-center gap-1.5">
+                    ${escHtml(p.name)}
+                    ${needsUnlock ? '<span class="px-1.5 py-0.2 bg-amber-200 text-amber-800 text-[10px] rounded font-semibold">Terkunci</span>' : ''}
+                </div>
+                <div class="text-xs text-gray-400">${escHtml(p.nis)}</div>
+            </td>
+            <td class="px-4 py-3 text-sm text-gray-600">${escHtml(p.grade)}</td>
+            <td class="px-4 py-3 text-xs text-gray-500">${escHtml(p.school || '—')}</td>
+            <td class="px-4 py-3">${statusBadge}</td>
+            <td class="px-4 py-3">${timeDisplay}</td>
+            <td class="px-4 py-3">${score}</td>
+            <td class="px-4 py-3">${actions}</td>
+        </tr>`;
+                }).join('');
 
                     // Tick down timers every second
                     startTimerTick();
