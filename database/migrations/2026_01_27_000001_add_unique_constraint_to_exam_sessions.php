@@ -14,20 +14,22 @@ return new class extends Migration
     {
         // First, delete duplicate 'progress' sessions
         // Keep only the earliest progress session for each user-exam combination
-        DB::statement("
-            DELETE es1 FROM exam_sessions es1
-            INNER JOIN (
-                SELECT user_id, exam_id, MIN(id) as min_id
-                FROM exam_sessions
-                WHERE status = 'progress'
-                GROUP BY user_id, exam_id
-                HAVING COUNT(*) > 1
-            ) es2
-            ON es1.user_id = es2.user_id 
-            AND es1.exam_id = es2.exam_id
-            AND es1.status = 'progress'
-            AND es1.id > es2.min_id
-        ");
+        if (DB::getDriverName() === 'mysql') {
+            DB::statement("
+                DELETE es1 FROM exam_sessions es1
+                INNER JOIN (
+                    SELECT user_id, exam_id, MIN(id) as min_id
+                    FROM exam_sessions
+                    WHERE status = 'progress'
+                    GROUP BY user_id, exam_id
+                    HAVING COUNT(*) > 1
+                ) es2
+                ON es1.user_id = es2.user_id 
+                AND es1.exam_id = es2.exam_id
+                AND es1.status = 'progress'
+                AND es1.id > es2.min_id
+            ");
+        }
 
         // Note: We cannot add a unique constraint on (user_id, exam_id, status) 
         // because students can have multiple 'submited' sessions (retakes)

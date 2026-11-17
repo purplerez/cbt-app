@@ -33,9 +33,10 @@ Route::get('/', function () {
 // If this route is hit, it means the web server (Nginx/Apache) couldn't find the file,
 // likely due to a missing or broken symlink. We'll simply try to serve it directly.
 Route::get('/storage/{path}', function (string $path) {
-    $fullPath = storage_path('app/public/' . $path);
+    $baseDir = realpath(storage_path('app/public'));
+    $fullPath = realpath(storage_path('app/public/' . $path));
 
-    if (!file_exists($fullPath) || !is_file($fullPath)) {
+    if (!$baseDir || !$fullPath || !str_starts_with($fullPath, $baseDir) || !is_file($fullPath)) {
         abort(404);
     }
 
@@ -81,7 +82,7 @@ Route::get('/force-symlink', function () {
     } catch (\Exception $e) {
         return "GAGAL Membuat symlink: " . $e->getMessage() . "<br>Periksa ulang hak akses.";
     }
-});
+})->middleware(['auth', 'role:super|admin']);
 
 // Route::get('/dashboard', function () {
 //     return view('dashboard');
@@ -319,10 +320,9 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::delete('/rooms/{room}', [RoomController::class, 'roomDestroy'])->name('room.destroy');
 
     // DISABLED: Room participants for kepala (to be re-enabled later)
-    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
-    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
-
-    Route::delete('/room/{room}/participants/{participant}', [KepalaController::class, 'roomParticipantsDestroy'])->name('room.participants.destroy');
+    // Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    // Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+    // Route::delete('/room/{room}/participants/{participant}', [KepalaController::class, 'roomParticipantsDestroy'])->name('room.participants.destroy');
 
 
 
@@ -383,7 +383,8 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'show'])->name('berita-acara.show');
     Route::get('berita-acara/{beritaAcara}/edit', [BeritaAcaraController::class, 'edit'])->name('berita-acara.edit');
     Route::put('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'update'])->name('berita-acara.update');
-    Route::delete('berita-acara/delete', [BeritaAcaraController::class, 'destroy'])->name('berita-acara.destroy');
+    Route::delete('berita-acara/{beritaAcara}', [BeritaAcaraController::class, 'destroy'])->name('berita-acara.destroy');
+    Route::delete('berita-acara/delete', [BeritaAcaraController::class, 'destroy'])->name('berita-acara.delete');
     Route::post('berita-acara/{beritaAcara}/finalize', [BeritaAcaraController::class, 'finalize'])->name('berita-acara.finalize');
     Route::post('berita-acara/{beritaAcara}/approve', [BeritaAcaraController::class, 'approve'])->name('berita-acara.approve');
     Route::post('berita-acara/{beritaAcara}/archive', [BeritaAcaraController::class, 'archive'])->name('berita-acara.archive');
@@ -418,8 +419,8 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::post('/rooms/create', [RoomController::class, 'roomStore'])->name('room.store');
 
     // DISABLED: Room participants for guru (to be re-enabled later)
-    Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
-    Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
+    // Route::get('/room/{room}/participants', [RoomController::class, 'roomParticipants'])->name('room.participants');
+    // Route::post('/room/{room}/participants', [RoomController::class, 'roomParticipantsStore'])->name('room.participants.store');
 
 
     //routing for exams in guru dashboard

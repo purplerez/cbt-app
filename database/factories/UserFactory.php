@@ -29,7 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => bcrypt('password'), // Using bcrypt directly for consistency
             'remember_token' => Str::random(10),
-            'role' => null, // Let the seeder explicitly set this to match Spatie role
+            'role' => 'siswa',
             'is_active' => 1,
         ];
     }

@@ -306,4 +306,35 @@ class TeacherController extends Controller
                      ->with('success', $e->getMessage().'Data kepala sekolah Gagal diubah <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
         }
     }
+
+    public function destroyHeadmaster($id)
+    {
+        DB::beginTransaction();
+        try {
+            $head = Headmaster::findOrFail($id);
+            $user = User::findOrFail($head->user_id);
+
+            // delete existing photo
+            if ($head->photo && $head->photo !== 'assets/images/head/default.jpg' && \Illuminate\Support\Facades\Storage::disk('public')->exists($head->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($head->photo);
+            }
+
+            $userlog = auth()->user();
+            logActivity($userlog->name . ' (ID: ' . $userlog->id . ') Berhasil Menghapus Data Kepala Sekolah ' . $head->name . ' Sekolah ' . session('school_name'));
+
+            // delete user associated with headmaster
+            $user->delete();
+
+            // delete headmaster record
+            $head->delete();
+
+            DB::commit();
+            $prefix = auth()->user()->hasRole('super') ? 'super' : 'admin';
+            return redirect()->route($prefix . '.schools.manage', session()->get('school_id'))
+                   ->with('success', 'Data kepala sekolah berhasil dihapus <script>setTimeout(function(){ showTab(\'kepala\'); }, 100);</script>');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->withErrors(['error' => 'Delete Failed : ' . $e->getMessage()]);
+        }
+    }
 }

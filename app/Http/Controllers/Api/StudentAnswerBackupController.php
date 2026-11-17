@@ -174,10 +174,17 @@ class StudentAnswerBackupController extends Controller
                $restored = StudentAnswer::restoreFromCompact($sessionId, $answersJson, $essayJson);
 
                if ($restored) {
-                    // Update session status if it was expired
+                    // Update session status if it was expired, but only if exam and session time have not passed
                     if ($session->status === 'expired') {
-                         $session->status = 'progress';
-                         $session->save();
+                         $session->load('exam');
+                         $now = now();
+                         $examEnded = $session->exam && $session->exam->end_date && $now->greaterThan(\Carbon\Carbon::parse($session->exam->end_date));
+                         $sessionEnded = $session->submited_at && $now->greaterThan(\Carbon\Carbon::parse($session->submited_at));
+
+                         if (!$examEnded && !$sessionEnded) {
+                              $session->status = 'progress';
+                              $session->save();
+                         }
                     }
 
                     // Get stats after restore

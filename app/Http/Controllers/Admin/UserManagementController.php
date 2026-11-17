@@ -133,10 +133,15 @@ class UserManagementController extends Controller
     public function setPassword(Request $request, User $user)
     {
         try {
+            $currentUser = Auth::user();
+
+            // Proteksi: Admin biasa tidak diizinkan mereset password Super Admin
+            if (($user->role === 'super' || $user->hasRole('super')) && !$currentUser->hasRole('super')) {
+                return redirect()->route('admin.users')->with('error', 'Anda tidak memiliki hak akses untuk mereset password akun Super Admin.');
+            }
+
             $role = $user->role;
-            //dd($role);
             if ($role == 'super') {
-                //  dd("super here");
                 $user->password = Hash::make('superpass125');
             } elseif ($role == 'kepala') {
                 // dd($user->id." kepala here");

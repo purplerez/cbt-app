@@ -46,10 +46,8 @@ Route::middleware(['auth:sanctum', 'role:admin|super'])->prefix('admin')->name('
             ->name('monitor.participants');
     });
 
-    Route::apiResource('exams', ExamController::class);
+    Route::apiResource('exams', ExamController::class)->only(['index']);
 
-    Route::get('/schools/{schoolId}/students', [StudentController::class, 'getStudentsBySchool'])
-        ->name('school.students');
     Route::post('/exams/add-student', [StudentController::class, 'addStudentToExam'])
         ->name('exam.add-student');
 

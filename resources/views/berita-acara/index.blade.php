@@ -161,7 +161,7 @@
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
                                             <div class="flex space-x-2">
-                                                <form action="{{route('kepala.berita-acara.destroy')}}" method="post">
+                                                <form action="{{route('kepala.berita-acara.destroy', $ba)}}" method="post">
                                                     @csrf
                                                         @method('DELETE')
                                                     <button type="submit" onclick="return confirm('Apakah Anda yakin ingin menghapus berita acara ini?');" class="text-red-600 hover:text-red-900" title="Hapus">

@@ -282,22 +282,23 @@ class BeritaAcaraController extends Controller
     /**
      * Remove the specified berita acara
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request, $beritaAcara = null)
     {
-        // dd($request->all());
-        try{
+        try {
+            $beritaAcaraId = $beritaAcara ?? $request->route('beritaAcara') ?? $request->input('berita_acara_id');
 
-        $beritaAcaraId = $request->input('berita_acara_id');
-        $beritaAcara = BeritaAcara::findOrFail($beritaAcaraId);
+            if ($beritaAcaraId instanceof BeritaAcara) {
+                $targetBA = $beritaAcaraId;
+            } else {
+                $targetBA = BeritaAcara::findOrFail($beritaAcaraId);
+            }
 
-        return $this->deleteBeritaAcara($beritaAcara);
-        }
-        catch(\Exception $e){
+            return $this->deleteBeritaAcara($targetBA);
+        } catch (\Exception $e) {
             return redirect()
-            ->back()
-            ->withErrors(['error' => 'Berita Acara tidak ditemukan']);
+                ->back()
+                ->withErrors(['error' => 'Berita Acara tidak ditemukan']);
         }
-
     }
 
     private function deleteBeritaAcara(BeritaAcara $beritaAcara)
