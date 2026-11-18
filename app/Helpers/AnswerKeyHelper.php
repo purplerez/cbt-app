@@ -8,18 +8,24 @@ class AnswerKeyHelper
       * Convert choice index (0,1,2...) to letter (A,B,C...)
       *
       * @param int $index
+      * @param int|null $questionType
       * @return string
       */
-     public static function indexToLetter($index)
+     public static function indexToLetter($index, $questionType = null)
      {
           if (!is_numeric($index)) {
                return strtoupper(trim($index));
           }
 
           $index = (int)$index;
-          // Updated to 64 because choice IDs start from 1 in frontend and Word import
-          // 64 + 1 = 65 ('A')
-          return chr(64 + $index);
+
+          // For True/False (question type 2)
+          if ($questionType == 2) {
+               return $index === 0 ? 'T' : 'F';
+          }
+
+          // 0-based index: 0->A (65), 1->B (66), 2->C (67), etc.
+          return chr(65 + $index);
      }
 
      /**
@@ -32,16 +38,15 @@ class AnswerKeyHelper
      {
           $letter = strtoupper(trim($letter));
 
-          // Handle True/False (1-based index)
+          // Handle True/False (0-based index: 0=True/T, 1=False/F)
           if ($letter === 'T') {
-               return 1;
+               return 0;
           }
           if ($letter === 'F') {
-               return 2;
+               return 1;
           }
 
-          //return ord($letter) - 65; // 65 is ASCII for 'A'
-          return ord($letter) - 64; // 65 is ASCII for 'A'
+          return ord($letter) - 65; // 65 is ASCII for 'A' (0 = A, 1 = B, ...)
      }
 
      /**
@@ -103,9 +108,9 @@ class AnswerKeyHelper
                $normalized = [];
                foreach ($answerKey as $key) {
                     if (is_numeric($key)) {
-                         // For True/False (type 2), convert 1 to T, 2 to F
+                         // For True/False (type 2), convert 0 to T, 1 to F
                          if ($questionType == 2) {
-                              $normalized[] = $key == 1 ? 'T' : 'F';
+                              $normalized[] = ((int)$key === 0) ? 'T' : 'F';
                          } else {
                               $normalized[] = self::indexToLetter((int)$key);
                          }
@@ -126,9 +131,9 @@ class AnswerKeyHelper
 
           // Handle single value (string or number)
           if (is_numeric($answerKey)) {
-               // For True/False (type 2), convert 1 to T, 2 to F
+               // For True/False (type 2), convert 0 to T, 1 to F
                if ($questionType == 2) {
-                    return $answerKey == 1 ? 'T' : 'F';
+                    return ((int)$answerKey === 0) ? 'T' : 'F';
                }
                return self::indexToLetter((int)$answerKey);
           }

@@ -35,8 +35,8 @@ class AnswerKeyConversionTest extends TestCase
      public function it_handles_true_false_conversion()
      {
           // Index to letter with question type 2 (True/False)
-          $this->assertEquals('T', AnswerKeyHelper::indexToLetter(0));
-          $this->assertEquals('F', AnswerKeyHelper::indexToLetter(1));
+          $this->assertEquals('T', AnswerKeyHelper::indexToLetter(0, 2));
+          $this->assertEquals('F', AnswerKeyHelper::indexToLetter(1, 2));
 
           // Letter to index for True/False
           $this->assertEquals(0, AnswerKeyHelper::letterToIndex('T'));

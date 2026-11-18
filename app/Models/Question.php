@@ -56,9 +56,9 @@ class Question extends Model
                     return strtoupper(trim($item));
                 }
 
-                // For True/False (type 2), convert 1 to T, 2 to F
+                // For True/False (type 2), convert 0 to T, 1 to F
                 if ($questionType == '2') {
-                    return $item == 1 ? 'T' : 'F';
+                    return (int)$item === 0 ? 'T' : 'F';
                 }
 
                 // For other types, convert index to letter (0->A, 1->B, etc)
@@ -76,9 +76,9 @@ class Question extends Model
             $questionType = $this->question_type_id ?? $this->attributes['question_type_id'] ?? null;
 
             if (is_numeric($value)) {
-                // For True/False (type 2), convert 1 to T, 2 to F
+                // For True/False (type 2), convert 0 to T, 1 to F
                 if ($questionType == '2') {
-                    $this->attributes['answer_key'] = $value == 1 ? 'T' : 'F';
+                    $this->attributes['answer_key'] = (int)$value === 0 ? 'T' : 'F';
                 } else {
                     $this->attributes['answer_key'] = AnswerKeyHelper::indexToLetter((int)$value);
                 }
@@ -96,8 +96,8 @@ class Question extends Model
      */
     public function getAnswerKeyAttribute($value)
     {
-        // If it's empty, return as-is
-        if (empty($value)) {
+        // If it's empty (null or empty string, but keep "0"), return as-is
+        if ($value === null || $value === '') {
             return $value;
         }
 
@@ -123,7 +123,7 @@ class Question extends Model
             $questionType = $this->question_type_id ?? $this->attributes['question_type_id'] ?? null;
 
             if ($questionType == '2') {
-                return $value == 1 ? 'T' : 'F';
+                return (int)$value === 0 ? 'T' : 'F';
             }
 
             return AnswerKeyHelper::indexToLetter((int)$value);
@@ -141,6 +141,11 @@ class Question extends Model
     private function isJsonString($string)
     {
         if (!is_string($string)) {
+            return false;
+        }
+
+        $trimmed = trim($string);
+        if (!str_starts_with($trimmed, '[') && !str_starts_with($trimmed, '{')) {
             return false;
         }
 
