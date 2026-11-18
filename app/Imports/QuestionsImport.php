@@ -22,18 +22,21 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
 
     public function collection(Collection $rows)
     {
-        // Skip example and instruction rows
+        // Filter out instruction, example, and empty rows
         $dataRows = $rows->filter(function ($row) {
-            // Skip if this is an instruction row (contains ===) or empty row
-            if (empty($row['soal']) || strpos($row['soal'], '===') !== false) {
-                return false;
-            }
-            return true;
+            return !$this->isInstructionOrEmptyRow($row);
         });
 
-        foreach ($dataRows as $row) {
-            if (empty($row['soal'])) {
-                continue; // Skip empty rows
+        foreach ($dataRows as $index => $row) {
+            $soalText = trim((string)($row['soal'] ?? ''));
+            $kunciJawaban = trim((string)($row['kunci_jawaban'] ?? ''));
+
+            if ($soalText === '') {
+                continue;
+            }
+
+            if ($kunciJawaban === '') {
+                throw new \Exception("Baris " . ($index + 2) . ": Kolom kunci jawaban wajib diisi untuk soal \"{$soalText}\"");
             }
 
             // Handle choices and answer key based on question type
@@ -44,13 +47,32 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
             Question::create([
                 'exam_id' => $this->examId,
                 'question_type_id' => $type,
-                'question_text' => $row['soal'],
+                'question_text' => $soalText,
                 'choices' => $choices,
                 'answer_key' => $answerKey,
-                'points' => $row['poin'] ?? 1,
+                'points' => !empty($row['poin']) && is_numeric($row['poin']) ? (float)$row['poin'] : 1,
                 'created_by' => $this->userId
             ]);
         }
+    }
+
+    private function isInstructionOrEmptyRow($row): bool
+    {
+        $soal = trim((string)($row['soal'] ?? ''));
+        if ($soal === '') {
+            return true;
+        }
+
+        // Check comment or instruction markers
+        if (str_starts_with($soal, '//') || str_starts_with($soal, '===') || str_starts_with($soal, '#')) {
+            return true;
+        }
+
+        if (stripos($soal, 'PETUNJUK') !== false) {
+            return true;
+        }
+
+        return false;
     }
 
     private function determineQuestionType($row)
@@ -64,7 +86,7 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         // Check if multiple answers
-        $answers = explode(',', $row['kunci_jawaban']);
+        $answers = explode(',', (string)$row['kunci_jawaban']);
         if (count($answers) > 1) {
             return '1'; // Complex Multiple Choice
         }
@@ -79,12 +101,12 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         $choices = [];
-        $options = ['a', 'b', 'c', 'd', 'e'];
+        $options = ['a', 'b', 'c', 'd'];
 
         foreach ($options as $index => $option) {
             $columnName = 'pilihan_' . $option;
-            if (isset($row[$columnName]) && !empty($row[$columnName])) {
-                $choices[$index + 1] = $row[$columnName];
+            if (isset($row[$columnName]) && !empty(trim((string)$row[$columnName]))) {
+                $choices[$index + 1] = trim((string)$row[$columnName]);
             }
         }
 
@@ -124,8 +146,6 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
     public function rules(): array
     {
         return [
-            '*.soal' => 'required_unless:soal,===*|string',
-            '*.kunci_jawaban' => 'required_unless:soal,===*|string',
             '*.poin' => 'nullable|numeric|min:1',
             '*.pilihan_a' => 'nullable|string',
             '*.pilihan_b' => 'nullable|string',

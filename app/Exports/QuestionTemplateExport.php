@@ -15,44 +15,44 @@ class QuestionTemplateExport implements FromArray, WithHeadings, WithStyles, Wit
     {
         return [
             [
-                'Ibukota Indonesia adalah...',
+                'Ibukota negara Indonesia adalah...',
                 'Jakarta',
                 'Surabaya',
                 'Bandung',
                 'Medan',
                 'A',
                 '1',
-                '// Contoh soal Pilihan Ganda'
+                '// Contoh Pilihan Ganda (1 jawaban)'
             ],
             [
-                'Jakarta adalah ibukota Indonesia',
+                'Kota yang terletak di Pulau Jawa adalah...',
+                'Jakarta',
+                'Bandung',
+                'Medan',
+                'Makassar',
+                'A,B',
+                '1',
+                '// Contoh PG Kompleks (jawaban dipisah koma)'
+            ],
+            [
+                'Matahari terbit dari sebelah barat.',
                 'Benar',
                 'Salah',
                 '',
                 '',
-                'A',
+                'B',
                 '1',
-                '// Contoh soal True/False'
+                '// Contoh Benar/Salah (cukup isi pilihan A dan B)'
             ],
             [
-                'Jelaskan 3 alasan mengapa Jakarta dipilih sebagai ibukota Indonesia!',
+                '// === PETUNJUK PENGISIAN ===',
+                '// 1. Hapus baris contoh atau ganti dengan soal Anda',
+                '// 2. Pilihan jawaban hanya A s/d D',
+                '// 3. True/False cukup isi pilihan A dan B',
                 '',
                 '',
                 '',
-                '',
-                'Alasan: 1) Lokasi strategis 2) Pusat ekonomi 3) Sejarah',
-                '2',
-                '// Contoh soal Essay'
-            ],
-            [
-                '// PETUNJUK PENGISIAN:',
-                '1. Hapus contoh soal di atas',
-                '2. Isi soal mulai dari sini',
-                '3. Pilihan Ganda: isi semua pilihan',
-                '4. True/False: isi A dan B saja',
-                '5. Essay: kosongkan semua pilihan',
-                '',
-                '// Kunci jawaban: A,B,C,D atau A,B untuk multi jawaban'
+                '// Baris diawali // otomatis dilewati sistem'
             ]
         ];
     }
