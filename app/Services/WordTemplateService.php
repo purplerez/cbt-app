@@ -47,14 +47,12 @@ class WordTemplateService
                 'color' => 'C00000',
             ]);
 
-            $section->addText('1. Soal dimulai dengan nomor: 1., 2., 3., dst (diikuti spasi)', ['size' => 11]);
-            $section->addText('2. Pilihan jawaban dimulai dengan: A., B., C., D.', ['size' => 11]);
-            $section->addText('3. Soal tanpa pilihan dianggap Essay (tidak perlu kunci jawaban)', ['size' => 11]);
-            $section->addText('4. Soal dengan 2 pilihan (A, B) dianggap Benar/Salah', ['size' => 11]);
-            $section->addText('5. Soal dengan 3-4 pilihan dianggap Pilihan Ganda', ['size' => 11]);
-            $section->addText('6. JANGAN ada baris kosong antara pertanyaan dan pilihan', ['size' => 11]);
-            $section->addText('7. Tulis ANSWER KEY di bagian bawah dengan format: JAWAB:[nomor soal]=[huruf jawaban]', ['size' => 11]);
-            $section->addText('8. Untuk Pilihan Ganda Kompleks, pisahkan dengan koma: JAWAB:2=A,B,C', ['size' => 11]);
+            $section->addText('• Soal dimulai dengan nomor: 1., 2., 3., dst (diikuti spasi)', ['size' => 11]);
+            $section->addText('• Pilihan jawaban dimulai dengan: A., B., C., D.', ['size' => 11]);
+            $section->addText('• Soal dengan 2 pilihan (A, B) dianggap Benar/Salah', ['size' => 11]);
+            $section->addText('• Soal dengan 3-4 pilihan (A s/d D) dianggap Pilihan Ganda', ['size' => 11]);
+            $section->addText('• Kunci jawaban ditulis di bawah soal: Kunci Jawaban: A (atau Kunci Jawaban: A,B,C untuk multi jawaban)', ['size' => 11]);
+            $section->addText('• JANGAN ada baris kosong antara pertanyaan dan pilihan', ['size' => 11]);
 
             $section->addText('');
             $section->addText('');
@@ -150,75 +148,10 @@ class WordTemplateService
             $section->addText('');
             $section->addText('');
 
-            // ===== CONTOH 4: ESSAY =====
-            $section->addText('CONTOH 4: ESSAY/ISIAN SINGKAT', [
-                'size' => 12,
-                'bold' => true,
-                'color' => '0070C0',
-            ]);
-
-            $section->addText('Soal tanpa pilihan jawaban (A, B, C, D) dianggap Essay:', [
-                'size' => 10,
-                'italic' => true,
-            ]);
-
-            $section->addText('');
-
-            // Format soal 4
-            $section->addText('4. Jelaskan proses fotosintesis!', ['size' => 11]);
-
-            $section->addText('');
-            $section->addText('(Essay tidak memiliki kunci jawaban otomatis, dinilai manual)', [
-                'size' => 10,
-                'italic' => true,
-            ]);
-
-            $section->addText('');
-            $section->addText('');
-
-            // ===== BAGIAN KUNCI JAWABAN =====
+            // ===== INSTRUKSI UNTUK PENGGUNA =====
             $section->addText('');
             $section->addText(str_repeat('=', 80), ['size' => 10]);
             $section->addText('');
-
-            $section->addText('KUNCI JAWABAN - COPY FORMAT INI DI BAWAH SEMUA SOAL', [
-                'size' => 12,
-                'bold' => true,
-                'color' => 'C00000',
-            ]);
-
-            $section->addText('');
-            $section->addText('Format untuk Pilihan Ganda Single Answer:', [
-                'size' => 11,
-                'bold' => true,
-            ]);
-            $section->addText('JAWAB:1=A', ['size' => 11]);
-
-            $section->addText('');
-            $section->addText('Format untuk Pilihan Ganda Kompleks (multiple answers):', [
-                'size' => 11,
-                'bold' => true,
-            ]);
-            $section->addText('JAWAB:2=A,B,C', ['size' => 11]);
-
-            $section->addText('');
-            $section->addText('Format untuk Benar/Salah:', [
-                'size' => 11,
-                'bold' => true,
-            ]);
-            $section->addText('JAWAB:3=A', ['size' => 11]);
-
-            $section->addText('');
-            $section->addText('Format untuk Essay (kosongkan atau tidak perlu):', [
-                'size' => 11,
-                'bold' => true,
-            ]);
-            $section->addText('(Tidak perlu kunci jawaban untuk Essay)', ['size' => 11]);
-
-            $section->addText('');
-            $section->addText('');
-
-            // ===== INSTRUKSI UNTUK PENGGUNA =====
             $section->addText('CARA MENGGUNAKAN TEMPLATE INI:', [
                 'size' => 12,
                 'bold' => true,
@@ -226,16 +159,13 @@ class WordTemplateService
             ]);
 
             $instructions = [
-                'Hapus semua contoh soal di atas (1, 2, 3, 4)',
+                'Hapus atau ganti contoh soal di atas (1, 2, 3) dengan soal Anda',
                 'Tulis soal Anda mulai dari nomor 1 dengan format yang sama',
                 'Pastikan TIDAK ADA BARIS KOSONG antara soal dan pilihan jawaban',
-                'Gunakan format: A., B., C., D. untuk pilihan (jangan yang lain)',
-                'Setelah semua soal, buat section baru dengan judul "KUNCI JAWABAN"',
-                'Tulis kunci jawaban dengan format: JAWAB:[nomor]=[jawaban]',
-                'Untuk multiple answers, gunakan koma: JAWAB:2=A,B,C',
-                'Simpan file ini sebagai .docx',
-                'Upload ke sistem CBT',
-                'Sistem akan otomatis mendeteksi jawaban dari format JAWAB:...',
+                'Gunakan format: A., B., C., D. untuk pilihan jawaban (maksimal 4 pilihan)',
+                'Tulis kunci jawaban tepat di bawah pilihan, contoh: Kunci Jawaban: A',
+                'Untuk Pilihan Ganda Kompleks (multi jawaban), pisahkan dengan koma: Kunci Jawaban: A, B',
+                'Simpan file ini sebagai .docx lalu upload ke sistem CBT',
             ];
 
             foreach ($instructions as $instruction) {
