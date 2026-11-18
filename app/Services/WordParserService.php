@@ -328,18 +328,34 @@ class WordParserService
                 }
             }
 
-            // ── Answer key ────────────────────────────────────────────────
-            // Must be checked BEFORE plain-text append so "Jawaban: C" is
-            // not accidentally appended to the last option's text.
-            if (preg_match('/^(jawaban|answer|kunci)\s*:\s*([A-Ea-e](?:[,\s]+[A-Ea-e])*)/iu', $line, $am)) {
+            // ── Answer key (Inline: "Kunci Jawaban: A", "Jawaban: A,B", "Kunci: C") ──
+            if (preg_match('/^(?:kunci\s*jawaban|jawaban|answer|kunci)\s*:\s*([A-Da-d](?:[,\s]+[A-Da-d])*)/iu', $line, $am)) {
                 if ($currentQ !== null) {
                     // Flush any pending plain choices BEFORE storing the answer key
                     $flushPlainChoices();
 
-                    $raw    = preg_replace('/\s+/', '', strtoupper($am[2]));
+                    $raw = preg_replace('/\s+/', '', strtoupper($am[1]));
                     $currentQ['correct_answer'] = $raw;
                     $this->log("  Answer: " . $raw);
                 }
+                continue;
+            }
+
+            // ── Answer key (Bottom format: "JAWAB:1=A" or "JAWAB: 2 = A,B") ──
+            if (preg_match('/^JAWAB\s*:\s*(\d+)\s*=\s*([A-Da-d](?:[,\s]+[A-Da-d])*)/iu', $line, $jm)) {
+                $targetQNum = (int) $jm[1];
+                $rawAns     = preg_replace('/\s+/', '', strtoupper($jm[2]));
+
+                foreach ($questions as &$q) {
+                    if (($q['question_number'] ?? null) === $targetQNum) {
+                        $q['correct_answer'] = $rawAns;
+                        break;
+                    }
+                }
+                if ($currentQ !== null && ($currentQ['question_number'] ?? null) === $targetQNum) {
+                    $currentQ['correct_answer'] = $rawAns;
+                }
+                $this->log("  Bottom Answer Key Q#{$targetQNum}: " . $rawAns);
                 continue;
             }
 
@@ -352,8 +368,18 @@ class WordParserService
                 continue; // Do NOT fall through to plain-text append
             }
 
+            // ── Skip section headers, templates guide, and decorative lines ──
+            if (preg_match('/^(contoh\s+\d+|panduan|petunjuk|kunci\s+jawaban|catatan|cara\s+menggunakan|[=\-_]{3,}|tuliskan\s+soal|format\s+penulisan|template\s+soal)/iu', $line)) {
+                continue;
+            }
+
             // ── PLAIN TEXT: append to active context ─────────────────────
             if ($currentQ !== null) {
+                // If answer key already found, do not append subsequent text to the last choice
+                if (!empty($currentQ['correct_answer'])) {
+                    continue;
+                }
+
                 if ($questionDone && $lastOptLetter !== null) {
                     // Continuation of last lettered option
                     $currentQ['option_' . $lastOptLetter] .= '<br>' . $htmlText;
