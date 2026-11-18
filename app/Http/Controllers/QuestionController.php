@@ -887,16 +887,13 @@ class QuestionController extends Controller
                         'answer_key' => $answerKey
                     ]);
 
-                    // solusi tebak2 berhadiah, karena copilot solution doesn't work
-                    $questionType++;
-
-                    // Create question in database - use question_type exactly as provided
+                    // Create question in database - use question_type exactly as detected
                     $question = Question::create([
                         'exam_id' => $exam,
                         'created_by' => $userId,
                         'question_text' => $questionText,
                         'question_html' => !empty($questionHtml) ? $questionHtml : null,
-                        'question_type_id' => $questionType,
+                        'question_type_id' => (string)$questionType,
                         'points' => $points,
                         'answer_key' => !empty($answerKey) ? json_encode(array_map('intval', $answerKey)) : null,
                         'choices' => !empty($choices) ? json_encode($choices) : null,
