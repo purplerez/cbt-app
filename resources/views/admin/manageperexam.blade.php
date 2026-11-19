@@ -146,6 +146,15 @@
                                                                 'admin.exams.questions.template-word',
                                                                 session('perexamid'),
                                                             );
+                                                        $templateExcelRoute = auth()->user()->hasRole('super')
+                                                            ? route(
+                                                                'super.exams.questions.template',
+                                                                session('perexamid'),
+                                                            )
+                                                            : route(
+                                                                'admin.exams.questions.template',
+                                                                session('perexamid'),
+                                                            );
                                                         $exportRoute = auth()->user()->hasRole('super')
                                                             ? route(
                                                                 'super.exams.questions.export',
@@ -188,8 +197,9 @@
                                                                 </svg>
                                                                 Import Word
                                                             </button>
-                                                            <!-- <a href="{{ route('admin.exams.questions.template-word', session('perexamid')) }}"
-                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition">
+                                                            <a href="{{ $templateRoute }}"
+                                                                class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition"
+                                                                title="Download Template Soal Word (.docx)">
                                                                 <svg class="w-4 h-4 mr-1" fill="none"
                                                                     stroke="currentColor" viewBox="0 0 24 24"
                                                                     xmlns="http://www.w3.org/2000/svg">
@@ -198,8 +208,8 @@
                                                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
                                                                     </path>
                                                                 </svg>
-                                                                Download Template
-                                                            </a> -->
+                                                                Template Word
+                                                            </a>
                                                         </form>
 
                                                         <!-- Excel Import Form -->
@@ -225,6 +235,19 @@
                                                                     </svg>
                                                                     Import Excel
                                                                 </button>
+                                                                <a href="{{ $templateExcelRoute }}"
+                                                                    class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition"
+                                                                    title="Download Template Soal Excel (.xlsx)">
+                                                                    <svg class="w-4 h-4 mr-1" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Template Excel
+                                                                </a>
                                                             </form>
                                                         @endrole
 
@@ -250,6 +273,19 @@
                                                                     </svg>
                                                                     Import Excel
                                                                 </button>
+                                                                <a href="{{ $templateExcelRoute }}"
+                                                                    class="flex items-center px-3 py-1.5 bg-gray-600 text-white text-sm font-medium rounded hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 transition"
+                                                                    title="Download Template Soal Excel (.xlsx)">
+                                                                    <svg class="w-4 h-4 mr-1" fill="none"
+                                                                        stroke="currentColor" viewBox="0 0 24 24"
+                                                                        xmlns="http://www.w3.org/2000/svg">
+                                                                        <path stroke-linecap="round"
+                                                                            stroke-linejoin="round" stroke-width="2"
+                                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4">
+                                                                        </path>
+                                                                    </svg>
+                                                                    Template Excel
+                                                                </a>
                                                             </form>
                                                         @endrole
 
