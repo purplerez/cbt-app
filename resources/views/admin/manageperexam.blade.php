@@ -1289,6 +1289,13 @@
                         return;
                     }
 
+                    // Clean up any existing tinymce editors inside modalContent before clearing
+                    if (typeof tinymce !== 'undefined') {
+                        modalContent.querySelectorAll('.tinymce-editor').forEach(textarea => {
+                            tinymce.remove(textarea);
+                        });
+                    }
+
                     // Show loading
                     modal.classList.remove('hidden');
                     modalContent.innerHTML = '<p class="text-center text-gray-500">Loading...</p>';
@@ -1333,9 +1340,6 @@
 
                             // Initialize TinyMCE for newly added textarea elements
                             if (typeof tinymce !== 'undefined') {
-                                // First remove any existing tinymce instances
-                                tinymce.remove();
-
                                 // Initialize for all tinymce-editor textareas
                                 const textareas = modalContent.querySelectorAll('.tinymce-editor');
                                 textareas.forEach(textarea => {
@@ -1352,6 +1356,14 @@
                                         content_css: '{{ asset('tinymce/skins/content/default/content.min.css') }}'
                                     });
                                 });
+
+                                // Ensure TinyMCE content is saved to textarea on form submit
+                                const modalForm = modalContent.querySelector('form');
+                                if (modalForm) {
+                                    modalForm.addEventListener('submit', function() {
+                                        tinymce.triggerSave();
+                                    });
+                                }
                             }
 
                             // Load answer key choices if not essay type
@@ -1675,6 +1687,14 @@
                     window.closeModal = function(modalId) {
                         const modal = document.getElementById(modalId);
                         if (modal) {
+                            if (modalId === 'editSoalModal' && typeof tinymce !== 'undefined') {
+                                const modalContent = document.getElementById('modalContent');
+                                if (modalContent) {
+                                    modalContent.querySelectorAll('.tinymce-editor').forEach(el => {
+                                        tinymce.remove(el);
+                                    });
+                                }
+                            }
                             modal.classList.add('hidden');
                             document.body.classList.remove('overflow-hidden');
                         }
