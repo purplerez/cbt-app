@@ -101,7 +101,7 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
         }
 
         $choices = [];
-        $options = ['a', 'b', 'c', 'd'];
+        $options = ['a', 'b', 'c', 'd', 'e'];
 
         foreach ($options as $index => $option) {
             $columnName = 'pilihan_' . $option;
@@ -151,6 +151,7 @@ class QuestionsImport implements ToCollection, WithHeadingRow, WithValidation
             '*.pilihan_b' => 'nullable|string',
             '*.pilihan_c' => 'nullable|string',
             '*.pilihan_d' => 'nullable|string',
+            '*.pilihan_e' => 'nullable|string',
         ];
     }
 
