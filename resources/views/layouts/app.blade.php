@@ -32,11 +32,8 @@
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    <!-- TinyMCE Editor -->
-    {{-- <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script> --}}
-
-    <!-- Place the first <script> tag in your HTML's head -->
-<script src="https://cdn.tiny.cloud/1/eso9axupoonw3lceemtkaw5mpn9lz62tx369lo49hmza0bzh/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+    <!-- TinyMCE Editor (self-hosted, no API key / no quota) -->
+<script src="{{ asset('tinymce/tinymce.min.js') }}"></script>
 
 
 </head>
@@ -83,7 +80,10 @@
                     plugins: 'lists link table code',
                     toolbar: 'bold italic | bullist numlist | link table | code',
                     branding: false,
-                    statusbar: false
+                    statusbar: false,
+                    skin_url: '{{ asset('tinymce/skins/ui/oxide') }}',
+                    content_css: '{{ asset('tinymce/skins/content/default/content.min.css') }}',
+                    license_key: 'gpl'
                 });
             }
         });

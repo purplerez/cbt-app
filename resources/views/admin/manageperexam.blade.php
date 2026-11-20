@@ -1244,6 +1244,8 @@
                                     tinymce.init({
                                         target: newEditTextarea,
                                         license_key: 'gpl',
+                                        skin_url: '{{ asset('tinymce/skins/ui/oxide') }}',
+                                        content_css: '{{ asset('tinymce/skins/content/default/content.min.css') }}',
                                         theme: 'silver',
                                         plugins: [
                                             'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
@@ -1344,7 +1346,10 @@
                                         plugins: 'lists link table code',
                                         toolbar: 'bold italic | bullist numlist | link table | code',
                                         branding: false,
-                                        statusbar: false
+                                        statusbar: false,
+                                        license_key: 'gpl',
+                                        skin_url: '{{ asset('tinymce/skins/ui/oxide') }}',
+                                        content_css: '{{ asset('tinymce/skins/content/default/content.min.css') }}'
                                     });
                                 });
                             }
@@ -1531,6 +1536,8 @@
                                 tinymce.init({
                                     target: textarea,
                                     license_key: 'gpl',
+                                    skin_url: '{{ asset('tinymce/skins/ui/oxide') }}',
+                                    content_css: '{{ asset('tinymce/skins/content/default/content.min.css') }}',
                                     theme: 'silver',
                                     plugins: [
                                         'advlist', 'autolink', 'lists', 'link', 'image', 'charmap',
