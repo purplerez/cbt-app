@@ -1469,7 +1469,7 @@
                 }
 
                 if (typeof choiceCounter === 'undefined') var choiceCounter = 1;
-                let selectedAnswerKeys = [];
+                if (typeof selectedAnswerKeys === 'undefined') var selectedAnswerKeys = [];
 
                 function initChoiceHandlers() {
                     const container = document.getElementById('choices-container');
