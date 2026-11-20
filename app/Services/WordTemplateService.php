@@ -48,9 +48,9 @@ class WordTemplateService
             ]);
 
             $section->addText('• Soal dimulai dengan nomor: 1., 2., 3., dst (diikuti spasi)', ['size' => 11]);
-            $section->addText('• Pilihan jawaban dimulai dengan: A., B., C., D.', ['size' => 11]);
+            $section->addText('• Pilihan jawaban dimulai dengan: A., B., C., D., E.', ['size' => 11]);
             $section->addText('• Soal dengan 2 pilihan (A, B) dianggap Benar/Salah', ['size' => 11]);
-            $section->addText('• Soal dengan 3-4 pilihan (A s/d D) dianggap Pilihan Ganda', ['size' => 11]);
+            $section->addText('• Soal dengan 3-5 pilihan (A s/d E) dianggap Pilihan Ganda', ['size' => 11]);
             $section->addText('• Kunci jawaban ditulis di bawah soal: Kunci Jawaban: A (atau Kunci Jawaban: A,B,C untuk multi jawaban)', ['size' => 11]);
             $section->addText('• JANGAN ada baris kosong antara pertanyaan dan pilihan', ['size' => 11]);
 
@@ -77,6 +77,7 @@ class WordTemplateService
             $section->addText('B. Proses pernapasan sel', ['size' => 11]);
             $section->addText('C. Proses pencernaan makanan', ['size' => 11]);
             $section->addText('D. Proses pembuangan limbah', ['size' => 11]);
+            $section->addText('E. Proses pembentukan energi seluler', ['size' => 11]);
 
             $section->addText('');
             $section->addText('Kunci Jawaban: A', [
@@ -108,9 +109,10 @@ class WordTemplateService
             $section->addText('B. Memerlukan cahaya matahari', ['size' => 11]);
             $section->addText('C. Menghasilkan oksigen dan glukosa', ['size' => 11]);
             $section->addText('D. Merupakan proses katabolisme', ['size' => 11]);
+            $section->addText('E. Berlangsung dengan bantuan klorofil', ['size' => 11]);
 
             $section->addText('');
-            $section->addText('Kunci Jawaban: A, B, C', [
+            $section->addText('Kunci Jawaban: A, B, C, E', [
                 'size' => 10,
                 'italic' => true,
                 'color' => '70AD47',
@@ -162,9 +164,9 @@ class WordTemplateService
                 'Hapus atau ganti contoh soal di atas (1, 2, 3) dengan soal Anda',
                 'Tulis soal Anda mulai dari nomor 1 dengan format yang sama',
                 'Pastikan TIDAK ADA BARIS KOSONG antara soal dan pilihan jawaban',
-                'Gunakan format: A., B., C., D. untuk pilihan jawaban (maksimal 4 pilihan)',
+                'Gunakan format: A., B., C., D., E. untuk pilihan jawaban (maksimal 5 pilihan)',
                 'Tulis kunci jawaban tepat di bawah pilihan, contoh: Kunci Jawaban: A',
-                'Untuk Pilihan Ganda Kompleks (multi jawaban), pisahkan dengan koma: Kunci Jawaban: A, B',
+                'Untuk Pilihan Ganda Kompleks (multi jawaban), pisahkan dengan koma: Kunci Jawaban: A, B, E',
                 'Simpan file ini sebagai .docx lalu upload ke sistem CBT',
             ];
 

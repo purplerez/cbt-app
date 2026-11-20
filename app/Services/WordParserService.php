@@ -329,7 +329,7 @@ class WordParserService
             }
 
             // ── Answer key (Inline: "Kunci Jawaban: A", "Jawaban: A,B", "Kunci: C") ──
-            if (preg_match('/^(?:kunci\s*jawaban|jawaban|answer|kunci)\s*:\s*([A-Da-d](?:[,\s]+[A-Da-d])*)/iu', $line, $am)) {
+            if (preg_match('/^(?:kunci\s*jawaban|jawaban|answer|kunci)\s*:\s*([A-Ea-e](?:[,\s]+[A-Ea-e])*)/iu', $line, $am)) {
                 if ($currentQ !== null) {
                     // Flush any pending plain choices BEFORE storing the answer key
                     $flushPlainChoices();
@@ -342,7 +342,7 @@ class WordParserService
             }
 
             // ── Answer key (Bottom format: "JAWAB:1=A" or "JAWAB: 2 = A,B") ──
-            if (preg_match('/^JAWAB\s*:\s*(\d+)\s*=\s*([A-Da-d](?:[,\s]+[A-Da-d])*)/iu', $line, $jm)) {
+            if (preg_match('/^JAWAB\s*:\s*(\d+)\s*=\s*([A-Ea-e](?:[,\s]+[A-Ea-e])*)/iu', $line, $jm)) {
                 $targetQNum = (int) $jm[1];
                 $rawAns     = preg_replace('/\s+/', '', strtoupper($jm[2]));
 
