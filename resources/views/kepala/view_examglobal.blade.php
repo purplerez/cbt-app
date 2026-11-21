@@ -48,60 +48,30 @@
                                             </span>
                                         </td>
                                         <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">
+                                            @php
+                                                $rolePrefix = auth()->user()->hasRole('guru') ? 'guru' : 'kepala';
+                                            @endphp
                                             <div class="flex flex-wrap gap-2">
+                                                <a href="{{ route($rolePrefix . '.exams.participant', $exam->id) }}"
+                                                   class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
+                                                   title="Daftarkan siswa">
+                                                    Daftarkan Siswa
+                                                </a>
 
-                                                @role('admin')
-                                                    <a href="{{ route('kepala.exams.participant', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
-                                                       title="Daftarkan siswa">
-                                                        Daftarkan Siswa
-                                                    </a>
-                                                @endrole
+                                                <a href="{{ route($rolePrefix . '.rooms', $exam->id) }}"
+                                                   class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-blue-600 transition border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white"
+                                                   title="Ruang">
+                                                    Ruang
+                                                </a>
 
-                                                @role('admin')
-                                                    <a href="{{ route('guru.exams.participant', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-green-600 transition border border-green-600 rounded-md hover:bg-green-600 hover:text-white"
-                                                       title="Daftarkan siswa">
-                                                        Daftarkan Siswa
-                                                    </a>
-                                                @endrole
+                                                <a href="{{ route($rolePrefix . '.exams.print-participants', $exam->id) }}"
+                                                   class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-purple-600 transition border border-purple-600 rounded-md hover:bg-purple-600 hover:text-white"
+                                                   title="Cetak Kartu Peserta"
+                                                   target="_blank">
+                                                    Cetak Kartu Peserta
+                                                </a>
 
-                                                @role('admin')
-                                                    <a href="{{ route('kepala.rooms', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-blue-600 transition border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white"
-                                                       title="Ruang">
-                                                        Ruang
-                                                    </a>
-                                                @endrole
-
-                                                @role('admin')
-                                                    <a href="{{ route('guru.rooms', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-blue-600 transition border border-blue-600 rounded-md hover:bg-blue-600 hover:text-white"
-                                                       title="Ruang">
-                                                        Ruang
-                                                    </a>
-                                                @endrole
-
-
-                                                @role('admin')
-                                                    <a href="{{ route('kepala.exams.print-participants', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-purple-600 transition border border-purple-600 rounded-md hover:bg-purple-600 hover:text-white"
-                                                       title="Cetak Kartu Peserta"
-                                                       target="_blank">
-                                                        Cetak Kartu Peserta
-                                                    </a>
-                                                @endrole
-
-                                                @role('admin')
-                                                    <a href="{{ route('guru.exams.print-participants', $exam->id) }}"
-                                                       class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-purple-600 transition border border-purple-600 rounded-md hover:bg-purple-600 hover:text-white"
-                                                       title="Cetak Kartu Peserta"
-                                                       target="_blank">
-                                                        Cetak Kartu Peserta
-                                                    </a>
-                                                @endrole
-
-                                                <form action="{{ route('kepala.exams.manage', $exam->id) }}" method="post" style="display:inline;">
+                                                <form action="{{ route($rolePrefix . '.exams.manage', $exam->id) }}" method="post" style="display:inline;">
                                                     @csrf
                                                     <button type="submit"
                                                        class="inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-blue-600 border border-transparent rounded-md hover:bg-blue-700"
