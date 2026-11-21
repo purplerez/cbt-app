@@ -467,29 +467,60 @@ class KepalaExamController extends Controller
                 })
                 ->values();
 
-            if ($preassignedUsers->isEmpty()) {
-                return back()->with('error', 'Belum ada siswa dari madrasah Anda yang didaftarkan pada ujian ' . $examType->title . '. Silakan daftarkan siswa terlebih dahulu.');
+            if ($preassignedUsers->isNotEmpty()) {
+                $students = $preassignedUsers->map(function ($preassigned) {
+                    $user = $preassigned->user;
+                    $student = $user->student;
+
+                    $tglLahir = $student?->d_birth ? \Carbon\Carbon::parse($student->d_birth)->translatedFormat('d F Y') : '-';
+                    $tempatLahir = $student?->p_birth ?? '';
+                    $ttl = trim($tempatLahir ? $tempatLahir . ', ' . $tglLahir : $tglLahir);
+
+                    return [
+                        'name' => $user->name ?? ($student?->name ?? 'N/A'),
+                        'email' => $user->email ?? ($student?->nis ?? '-'),
+                        'tgl_lahir' => $tglLahir,
+                        'tempat_lahir' => $tempatLahir ?: '-',
+                        'ttl' => $ttl ?: '-',
+                        'password' => $student?->nis ?? '-', // Default password siswa adalah NIS
+                        'nis' => $student?->nis ?? '-',
+                        'class' => $student?->grade?->name ?? '-',
+                    ];
+                });
+            } else {
+                // Fallback: Jika belum ada siswa yang didaftarkan ke sesi ujian spesifik,
+                // tampilkan seluruh siswa aktif di madrasah ini agar kartu peserta tetap dapat dicetak
+                $allStudents = Student::with(['user', 'grade'])
+                    ->where('school_id', $schoolId)
+                    ->get();
+
+                if ($allStudents->isEmpty()) {
+                    return response('<div style="font-family:sans-serif; text-align:center; padding:50px;">' .
+                        '<h2>Tidak Ada Data Siswa</h2>' .
+                        '<p>Belum ada siswa yang terdaftar di madrasah Anda. Silakan tambahkan atau import siswa terlebih dahulu.</p>' .
+                        '</div>', 404);
+                }
+
+                $students = $allStudents->map(function ($student) {
+                    $user = $student->user;
+                    $tglLahir = $student->d_birth ? \Carbon\Carbon::parse($student->d_birth)->translatedFormat('d F Y') : '-';
+                    $tempatLahir = $student->p_birth ?? '';
+                    $ttl = trim($tempatLahir ? $tempatLahir . ', ' . $tglLahir : $tglLahir);
+
+                    return [
+                        'name' => $student->name ?? ($user?->name ?? 'N/A'),
+                        'email' => $user?->email ?? ($student->nis ?? '-'),
+                        'tgl_lahir' => $tglLahir,
+                        'tempat_lahir' => $tempatLahir ?: '-',
+                        'ttl' => $ttl ?: '-',
+                        'password' => $student->nis ?? '-',
+                        'nis' => $student->nis ?? '-',
+                        'class' => $student->grade?->name ?? '-',
+                    ];
+                });
             }
 
-            $students = $preassignedUsers->map(function ($preassigned) {
-                $user = $preassigned->user;
-                $student = $user->student;
-
-                $tglLahir = $student?->d_birth ? \Carbon\Carbon::parse($student->d_birth)->translatedFormat('d F Y') : '-';
-                $tempatLahir = $student?->p_birth ?? '';
-                $ttl = trim($tempatLahir ? $tempatLahir . ', ' . $tglLahir : $tglLahir);
-
-                return [
-                    'name' => $user->name ?? 'N/A',
-                    'email' => $user->email ?? ($student?->nis ?? '-'),
-                    'tgl_lahir' => $tglLahir,
-                    'tempat_lahir' => $tempatLahir ?: '-',
-                    'ttl' => $ttl ?: '-',
-                    'password' => $student?->nis ?? '-', // Default password siswa adalah NIS
-                    'nis' => $student?->nis ?? '-',
-                    'class' => $student?->grade?->name ?? '-',
-                ];
-            })->sortBy([
+            $students = $students->sortBy([
                 ['class', 'asc'],
                 ['name', 'asc'],
             ])->values();
@@ -508,9 +539,13 @@ class KepalaExamController extends Controller
             $pdf->setOption('dpi', 150);
             $pdf->setOption('isPhpEnabled', true);
 
-            return $pdf->download('Data Kartu Peserta - ' . $examType->title . '.pdf');
+            // Gunakan stream() agar PDF terbuka langsung di tab baru (preview inline)
+            return $pdf->stream('Kartu Peserta - ' . $examType->title . '.pdf');
         } catch (\Exception $e) {
-            return back()->with('error', 'Error mencetak kartu peserta: ' . $e->getMessage());
+            return response('<div style="font-family:sans-serif; text-align:center; padding:50px;">' .
+                '<h2 style="color:red;">Gagal Mencetak Kartu</h2>' .
+                '<p>' . htmlspecialchars($e->getMessage()) . '</p>' .
+                '</div>', 500);
         }
     }
 
