@@ -438,13 +438,16 @@ class KepalaExamController extends Controller
             $school = School::findOrFail($schoolId);
             $headmaster = Headmaster::where('school_id', $schoolId)->first();
 
-            // Gunakan fungsi path asli bawaan Storage agar dia secara otomatis
-            // menembak ke public_html saat di server, dan ke app/public saat di lokal.
-            $logoPath = \Illuminate\Support\Facades\Storage::disk('public')->path($school->logo);
-
+            // Ambil logo sekolah secara aman (hindari membaca direktori jika logo kosong)
             $logo = null;
-            if (file_exists($logoPath)) {
-                $logo = base64_encode(file_get_contents($logoPath));
+            if (!empty($school->logo)) {
+                $disk = \Illuminate\Support\Facades\Storage::disk('public');
+                if ($disk->exists($school->logo)) {
+                    $logoPath = $disk->path($school->logo);
+                    if (is_file($logoPath)) {
+                        $logo = base64_encode(file_get_contents($logoPath));
+                    }
+                }
             }
 
             // Get all preassigned students for this exam type's exams
@@ -464,19 +467,32 @@ class KepalaExamController extends Controller
                 })
                 ->values();
 
+            if ($preassignedUsers->isEmpty()) {
+                return back()->with('error', 'Belum ada siswa dari madrasah Anda yang didaftarkan pada ujian ' . $examType->title . '. Silakan daftarkan siswa terlebih dahulu.');
+            }
+
             $students = $preassignedUsers->map(function ($preassigned) {
                 $user = $preassigned->user;
                 $student = $user->student;
 
+                $tglLahir = $student?->d_birth ? \Carbon\Carbon::parse($student->d_birth)->translatedFormat('d F Y') : '-';
+                $tempatLahir = $student?->p_birth ?? '';
+                $ttl = trim($tempatLahir ? $tempatLahir . ', ' . $tglLahir : $tglLahir);
+
                 return [
                     'name' => $user->name ?? 'N/A',
-                    'email' => $user->email ?? '-',
-                    'tgl_lahir' => $student?->d_birth ? \Carbon\Carbon::parse($student->d_birth)->format('d F Y') : '-',
-                    'password' => $student?->nis ?? '-', // Use NIS as password (was used during user creation)
+                    'email' => $user->email ?? ($student?->nis ?? '-'),
+                    'tgl_lahir' => $tglLahir,
+                    'tempat_lahir' => $tempatLahir ?: '-',
+                    'ttl' => $ttl ?: '-',
+                    'password' => $student?->nis ?? '-', // Default password siswa adalah NIS
                     'nis' => $student?->nis ?? '-',
                     'class' => $student?->grade?->name ?? '-',
                 ];
-            });
+            })->sortBy([
+                ['class', 'asc'],
+                ['name', 'asc'],
+            ])->values();
 
             // Load view and generate PDF
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('exports.participant-cards', [
