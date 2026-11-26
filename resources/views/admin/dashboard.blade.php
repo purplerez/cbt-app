@@ -257,7 +257,12 @@
                         opt.textContent = e.name;
                         sel.appendChild(opt);
                     });
-                    if (cur) sel.value = cur;
+                    if (cur) {
+                        sel.value = cur;
+                    } else if (list && list.length > 0) {
+                        sel.value = list[0].exam_id;
+                        onExamSelectChange();
+                    }
                 } catch (e) {
                     console.error('Exams error:', e);
                 }
@@ -351,7 +356,7 @@
 
                     monitorData = res.data || [];
                     renderMonitorTable();
-                    startTick();
+                    startTimerTick();
                 } catch (e) {
                     document.getElementById('monitor-body').innerHTML =
                         `<tr><td colspan="7" class="px-4 py-6 text-center text-red-400 text-sm">${e.message}</td></tr>`;
@@ -359,7 +364,8 @@
             }
 
             function renderMonitorTable() {
-                const search = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
+                try {
+                    const search = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
                 const statusFilter = document.getElementById('status-filter')?.value || '';
                 const tbody = document.getElementById('monitor-body');
 
@@ -464,6 +470,10 @@
                         if (s === 0) el.classList.replace('text-orange-600', 'text-red-600');
                     });
                 }, 1000);
+            }
+
+            function startTick() {
+                startTimerTick();
             }
 
             function formatTime(seconds) {

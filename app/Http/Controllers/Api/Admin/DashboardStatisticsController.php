@@ -85,12 +85,16 @@ class DashboardStatisticsController extends Controller
     public function getActiveExams(): JsonResponse
     {
         try {
-            // All exams with preassigned participants (not just active/progress)
-            $exams = Exam::whereHas('preassigneds')
-                ->select('id', 'title')
-                ->orderBy('id')
-                ->get()
-                ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
+            // All exams with preassigned participants, active sessions, or active exam type
+            $exams = Exam::where(function ($query) {
+                $query->whereHas('preassigneds')
+                    ->orWhereHas('examSessions')
+                    ->orWhereHas('examtype', fn($q) => $q->where('is_active', true));
+            })
+            ->select('id', 'title')
+            ->orderBy('id', 'asc')
+            ->get()
+            ->map(fn($e) => ['exam_id' => $e->id, 'name' => $e->title]);
 
             return response()->json($exams);
         } catch (\Exception $e) {

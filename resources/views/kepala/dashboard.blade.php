@@ -276,7 +276,12 @@
                         o.textContent = e.name;
                         sel.appendChild(o);
                     });
-                    if (cur) sel.value = cur;
+                    if (cur) {
+                        sel.value = cur;
+                    } else if (list && list.length > 0) {
+                        sel.value = list[0].exam_id ?? list[0].id;
+                        loadMonitor();
+                    }
                 } catch (e) {}
             }
 
@@ -327,7 +332,8 @@
             }
 
             function renderMonitorTable() {
-                const search = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
+                try {
+                    const search = (document.getElementById('search-student')?.value || '').toLowerCase().trim();
                 const statusFilter = document.getElementById('status-filter')?.value || '';
                 const tbody = document.getElementById('monitor-body');
 
