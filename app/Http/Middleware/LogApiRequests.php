@@ -128,7 +128,11 @@ class LogApiRequests
             'user_agent' => request()->userAgent(),
         ];
 
-        Log::channel('security')->warning(json_encode($alert));
+        try {
+            Log::channel('security')->warning(json_encode($alert));
+        } catch (\Throwable $e) {
+            Log::warning(json_encode($alert));
+        }
 
         // Store in database for investigation
         try {
