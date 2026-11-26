@@ -51,7 +51,7 @@ class KepalaExamController extends Controller
                 throw new \Exception('Ujian Tidak ditemukan');
             }
 
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
             // $mapels = Exam::where('exam_type_id', session('exam_id'))
             //             ->where('start_date', 'like', now()->format('Y-m-d').'%')
             //             ->get();
@@ -73,7 +73,7 @@ class KepalaExamController extends Controller
     public function scores(Request $request, Exam $exam)
     {
     try {
-        $schoolId = session('school_id');
+        $schoolId = $this->getSchoolId();
         $gradeId = $request->query('grade_id');
 
         if (!$schoolId) {
@@ -136,26 +136,30 @@ class KepalaExamController extends Controller
     public function participants(Request $request, $id)
     {
         // Fetch users (students) who belong to the currently selected school
-        $schoolId = session('school_id');
+        $schoolId = $this->getSchoolId();
 
         $selGrade = $request->query('grade_id');
         $selExam = $request->query('exam_id');
 
-
-        $students = User::with(['preassigned' => function ($q) use ($id) {
+        $query = User::with(['preassigned' => function ($q) use ($id) {
             $q->where('exam_id', $id);
-        }, 'student.grade'])
-        ->whereHas('student', function ($q) use ($schoolId) {
-            $q->where('school_id', $schoolId);
-        })
-        ->join('students', 'users.id', '=', 'students.user_id')
-        ->join('grades', 'students.grade_id', '=', 'grades.id')
-        ->orderBy('grades.name', 'asc')
-        ->orderBy('users.name', 'asc')
-        ->select('users.*')
-        ->get();
+        }, 'student.grade']);
 
-        $grade = Grade::where('school_id', $schoolId)->get();
+        if ($schoolId) {
+            $query->whereHas('student', function ($q) use ($schoolId) {
+                $q->where('school_id', $schoolId);
+            });
+        }
+
+        $students = $query
+            ->leftJoin('students', 'users.id', '=', 'students.user_id')
+            ->leftJoin('grades', 'students.grade_id', '=', 'grades.id')
+            ->orderBy('grades.name', 'asc')
+            ->orderBy('users.name', 'asc')
+            ->select('users.*')
+            ->get();
+
+        $grade = $schoolId ? Grade::where('school_id', $schoolId)->get() : collect();
 
         // also fetch exams for the given exam_type_id (passed via URL)
         $examsList = Exam::where('exam_type_id', $id)->get();
@@ -215,6 +219,9 @@ class KepalaExamController extends Controller
             }
         }
         catch(\Exception $e){
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            }
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
@@ -263,7 +270,7 @@ class KepalaExamController extends Controller
             return response()->json(['error' => 'exam_id is required'], 400);
         }
 
-        $schoolId = session('school_id');
+        $schoolId = $this->getSchoolId();
         if (!$schoolId) {
             return response()->json(['error' => 'school not found in session'], 400);
         }
@@ -272,8 +279,8 @@ class KepalaExamController extends Controller
             ->whereHas('student', function ($q) use ($schoolId) {
                 $q->where('school_id', $schoolId);
             })
-            ->join('students', 'users.id', '=', 'students.user_id')
-            ->join('grades', 'students.grade_id', '=', 'grades.id');
+            ->leftJoin('students', 'users.id', '=', 'students.user_id')
+            ->leftJoin('grades', 'students.grade_id', '=', 'grades.id');
 
         // Apply grade filter if provided
         if ($gradeId) {
@@ -363,7 +370,7 @@ class KepalaExamController extends Controller
     public function exportScoresPDF(Request $request, Exam $exam)
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
             $gradeId = $request->query('grade_id');
 
             if (!$schoolId) {
@@ -425,7 +432,7 @@ class KepalaExamController extends Controller
     public function printParticipantCards(Request $request, $examTypeId)
     {
         try {
-            $schoolId = session('school_id');
+            $schoolId = $this->getSchoolId();
 
             if (!$schoolId) {
                 return back()->with('error', 'Sekolah tidak ditemukan di session');
@@ -561,6 +568,40 @@ class KepalaExamController extends Controller
         }
 
         return 'admin';
+    }
+
+    /**
+     * Get current school ID with fallback to headmaster or teacher
+     */
+    private function getSchoolId()
+    {
+        $schoolId = session('school_id');
+
+        if (!$schoolId) {
+            $user = auth()->user();
+            $headmaster = $user?->head;
+
+            if ($headmaster) {
+                $schoolId = $headmaster->school_id;
+                session([
+                    'school_id' => $schoolId,
+                    'school_name' => $headmaster->school?->name ?? 'Madrasah',
+                    'kepala_id' => $headmaster->id
+                ]);
+            } else {
+                $teacher = $user?->teacher;
+                if ($teacher) {
+                    $schoolId = $teacher->school_id;
+                    session([
+                        'school_id' => $schoolId,
+                        'school_name' => $teacher->school?->name ?? 'Madrasah',
+                        'guru_id' => $teacher->id
+                    ]);
+                }
+            }
+        }
+
+        return $schoolId;
     }
 
 }

@@ -1,12 +1,35 @@
+@php
+    $rolePrefix = auth()->user()->hasRole('guru') ? 'guru' : 'kepala';
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="text-xl font-semibold leading-tight text-gray-800">
-            {{ __('Master Data Siswa'.session('schoolname')) }}
+            {{ __('Data Siswa Ujian - ' . (session('school_name') ?? session('schoolname') ?? 'Madrasah')) }}
         </h2>
     </x-slot>
 
     <div class="py-12">
         <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <!-- Flash Messages -->
+            @if(session('success'))
+                <div class="mb-6 p-4 text-sm text-green-800 bg-green-100 border border-green-200 rounded-lg flex items-center shadow-sm">
+                    <svg class="w-5 h-5 mr-2 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div class="mb-6 p-4 text-sm text-red-800 bg-red-100 border border-red-200 rounded-lg flex items-center shadow-sm">
+                    <svg class="w-5 h-5 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>{{ session('error') }}</span>
+                </div>
+            @endif
+
             <!-- Filters Section -->
             <div class="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6">
@@ -24,18 +47,13 @@
                         </div>
 
                         <!-- Exam Select and Register Button -->
-                        @role('kepala')
-                            <form id="bulkRegisterForm" action="{{ route('kepala.exams.participants.register') }}" method="POST" class="md:col-span-2 flex items-end gap-2">
-                        @endrole
-                        @role('guru')
-                            <form id="bulkRegisterForm" action="{{ route('guru.exams.participants.register') }}" method="POST" class="md:col-span-2 flex items-end gap-2">
-                        @endrole
+                        <form id="bulkRegisterForm" action="{{ route($rolePrefix . '.exams.participants.register') }}" method="POST" class="md:col-span-2 flex items-end gap-2">
                             @csrf
                             <input type="hidden" name="exam_id" id="bulk_exam_id" value="">
                             <div class="flex-1">
-                                <label for="exam_select" class="block text-sm font-medium text-gray-700">Ujian</label>
+                                <label for="exam_select" class="block text-sm font-medium text-gray-700">Ujian Mapel</label>
                                 <select id="exam_select" onchange="document.getElementById('bulk_exam_id').value=this.value" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                                    <option value="">-- Pilih Ujian --</option>
+                                    <option value="">-- Pilih Ujian Mapel --</option>
                                     @foreach($examsList as $ex)
                                         <option value="{{ $ex->id }}">{{ $ex->title }}</option>
                                     @endforeach
@@ -85,9 +103,6 @@
                                                 <button type="button" data-student-id="{{ $student->id }}" class="delete-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-red-600 border border-transparent rounded-md hover:bg-red-700">
                                                     Batalkan Daftar
                                                 </button>
-                                                {{-- <span class="inline-flex px-2 py-1 text-xs font-semibold leading-5 rounded-full bg-green-100 text-green-800">
-                                                    Sudah Terdaftar
-                                                </span> --}}
                                             @else
                                                 <button type="button" data-student-id="{{ $student->id }}" class="single-register-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-green-600 border border-transparent rounded-md hover:bg-green-700">
                                                     Daftarkan
@@ -120,6 +135,9 @@
             const bulkBtn = document.getElementById('bulkRegisterBtn');
             const gradeFilter = document.getElementById('grade_id');
             const examTypeId = '{{ $examId ?? "" }}';
+            const rolePrefix = '{{ $rolePrefix }}';
+            const registerUrl = '{{ route($rolePrefix . ".exams.participants.register") }}';
+            const deleteUrl = '{{ route($rolePrefix . ".exams.participants.delete") }}';
 
             if (bulkForm) {
                 bulkForm.addEventListener('submit', function(e) {
@@ -154,7 +172,10 @@
                                 'X-Requested-With': 'XMLHttpRequest'
                             }
                         })
-                        .then(response => response.json())
+                        .then(response => {
+                            if (!response.ok) throw response;
+                            return response.json();
+                        })
                         .then(data => {
                             if (data.added > 0) {
                                 alert('Berhasil menambahkan ' + data.added + ' peserta.');
@@ -163,9 +184,11 @@
                                 alert('Tidak ada peserta baru yang ditambahkan.');
                             }
                         })
-                        .catch(error => {
+                        .catch(async (error) => {
                             console.error('Error:', error);
-                            alert('Terjadi kesalahan saat mendaftarkan siswa.');
+                            let msg = 'Terjadi kesalahan saat mendaftarkan siswa.';
+                            try { const ebody = await error.json(); if (ebody.error) msg = ebody.error; } catch(e){}
+                            alert(msg);
                         });
                     }
                 });
@@ -195,14 +218,8 @@
                             alert('Pilih ujian terlebih dahulu');
                             return;
                         }
-                        @role('kepala')
-                            const url = '{{ route("kepala.exams.participants.register") }}';
-                        @endrole
-                        @role('guru')
-                            const url = '{{ route("guru.exams.participants.register") }}';
-                        @endrole
 
-                        fetch(url, {
+                        fetch(registerUrl, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -245,14 +262,7 @@
                             return;
                         }
 
-                        @role('kepala')
-                            const url = '{{ route("kepala.exams.participants.delete") }}';
-                        @endrole
-                        @role('guru')
-                            const url = '{{ route("guru.exams.participants.delete") }}';
-                        @endrole
-
-                        fetch(url, {
+                        fetch(deleteUrl, {
                             method: 'DELETE',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -297,7 +307,7 @@
                 const gradeId = gradeFilter ? gradeFilter.value : '';
 
                 try {
-                    const webUrl = '{{ url('/kepala/exams') }}' + '/' + examTypeId + '/students-by-exam?exam_id=' + examId + (gradeId ? '&grade_id=' + gradeId : '');
+                    const webUrl = '{{ url("/") }}/' + rolePrefix + '/exams/' + examTypeId + '/students-by-exam?exam_id=' + examId + (gradeId ? '&grade_id=' + gradeId : '');
                     const fres = await fetch(webUrl, { headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }, credentials: 'include' });
 
                     if (!fres.ok) {
@@ -317,32 +327,30 @@
                             const tr = document.createElement('tr');
                             tr.className = 'hover:bg-gray-50';
                             const actionCell = s.registered
-                                        ? `<button type="button"
-                                                data-student-id="${s.id}"
-                                                class="delete-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-red-600 border border-transparent rounded-md hover:bg-red-700">
-                                            Batalkan Daftar
-                                        </button>`
-                                        : `<button type="button"
-                                                data-student-id="${s.id}"
-                                                class="single-register-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-green-600 border border-transparent rounded-md hover:bg-green-700">
-                                            Daftarkan
-                                        </button>`;
+                                ? `<button type="button"
+                                        data-student-id="${s.id}"
+                                        class="delete-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-red-600 border border-transparent rounded-md hover:bg-red-700">
+                                    Batalkan Daftar
+                                </button>`
+                                : `<button type="button"
+                                        data-student-id="${s.id}"
+                                        class="single-register-btn inline-flex items-center px-3 py-1.5 text-xs font-semibold text-white transition bg-green-600 border border-transparent rounded-md hover:bg-green-700">
+                                    Daftarkan
+                                </button>`;
 
-                                    tr.innerHTML = `
-                                        <td class="px-6 py-4 whitespace-nowrap"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">${s.name}</td>
-                                        <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${s.grade}</td>
-                                        <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">${actionCell}</td>
-                                    `;
-                                    tableBody.appendChild(tr);
-                                });
-
+                            tr.innerHTML = `
+                                <td class="px-6 py-4 whitespace-nowrap"><input type="checkbox" name="student_ids[]" value="${s.id}"></td>
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">${s.name}</td>
+                                <td class="px-6 py-4 text-sm text-gray-500 whitespace-nowrap">${s.grade}</td>
+                                <td class="px-6 py-4 text-sm font-medium whitespace-nowrap">${actionCell}</td>
+                            `;
+                            tableBody.appendChild(tr);
+                        });
                     }
 
                     if (bulkExamInput) bulkExamInput.value = examId;
                     if (selectAll) {
-                        selectAll.checked = true;
-                        selectAll.dispatchEvent(new Event('change'));
+                        selectAll.checked = false;
                     }
                     if (bulkBtn) bulkBtn.disabled = !(json.students && json.students.length);
                     attachActionHandlers();
