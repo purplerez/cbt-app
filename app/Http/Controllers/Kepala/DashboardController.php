@@ -106,20 +106,28 @@ class DashboardController extends Controller
 
         if (!$school_id) {
             $user = Auth::user();
-            $headmaster = $user->head;
+            $headmaster = $user?->head;
 
-            if (!$headmaster) {
-                throw new \Exception('Data kepala sekolah tidak ditemukan. Silakan hubungi administrator.');
+            if ($headmaster) {
+                $school_id = $headmaster->school_id;
+                session([
+                    'school_id' => $school_id,
+                    'school_name' => $headmaster->school?->name ?? 'Madrasah',
+                    'kepala_id' => $headmaster->id
+                ]);
+            } else {
+                $teacher = $user?->teacher;
+                if ($teacher) {
+                    $school_id = $teacher->school_id;
+                    session([
+                        'school_id' => $school_id,
+                        'school_name' => $teacher->school?->name ?? 'Madrasah',
+                        'guru_id' => $teacher->id
+                    ]);
+                } else {
+                    throw new \Exception('Data kepala sekolah / guru tidak ditemukan. Silakan hubungi administrator.');
+                }
             }
-
-            $school_id = $headmaster->school_id;
-
-            // Set session untuk penggunaan selanjutnya
-            session([
-                'school_id' => $school_id,
-                'school_name' => $headmaster->school->name,
-                'kepala_id' => $headmaster->id
-            ]);
         }
 
         return $school_id;
@@ -376,27 +384,37 @@ class DashboardController extends Controller
     {
         try {
             $student = Student::findOrFail($id);
+            $studentName = $student->name;
+            $userId = $student->user_id;
 
-            // Delete the associated user
-            if ($student->user) {
-                $student->user->delete();
-            }
-            // Delete the photo if it exists and is not the default photo
-            if ($student->photo && $student->photo !== "assets/images/students/default.jpg") {
-                Storage::disk('public')->delete($student->photo);
-            }
+            DB::transaction(function () use ($student, $userId) {
+                // Delete preassigned records first to prevent foreign key constraint violations
+                if ($userId) {
+                    \App\Models\Preassigned::where('user_id', $userId)->delete();
+                }
 
-            $user = auth()->user();
-            logActivity($user->name . ' (ID: ' . $user->id . ') Berhasil Menghapus Data ' . $student->name);
+                // Delete photo if exists and is not default
+                if ($student->photo && $student->photo !== "assets/images/students/default.jpg") {
+                    Storage::disk('public')->delete($student->photo);
+                }
 
-            $student->delete();
+                $user = $student->user;
+                $student->delete();
+
+                if ($user) {
+                    $user->delete();
+                }
+            });
+
+            $authUser = auth()->user();
+            logActivity(($authUser?->name ?? 'User') . ' (ID: ' . ($authUser?->id ?? '-') . ') Berhasil Menghapus Data ' . $studentName);
 
             return redirect()->route($this->getRoutePrefix() . '.students')->with('success', 'Data siswa berhasil dihapus');
         } catch (\Exception $e) {
-            $user = auth()->user();
-            logActivity($user->name . ' (ID: ' . $user->id . ') Gagal Menghapus Data Siswa' . $student->name);
+            $authUser = auth()->user();
+            logActivity(($authUser?->name ?? 'User') . ' Gagal Menghapus Data Siswa: ' . $e->getMessage());
 
-            return redirect()->back()->with('error', 'Delete Failed : ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal menghapus siswa: ' . $e->getMessage());
         }
     }
 
