@@ -308,6 +308,7 @@ Route::middleware(['auth', 'role:kepala', 'ensure.kepala.session'])->prefix('kep
     Route::get('/students/{student}/edit', [KepalaController::class, 'editStudent'])->name('student.edit');
     Route::put('/students/{student}/edit', [KepalaController::class, 'updateStudent'])->name('student.update');
     Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
+    Route::delete('/students-bulk/delete', [KepalaController::class, 'bulkDestroyStudent'])->name('student.bulkDestroy');
 
     // Excel import routes
     Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');
@@ -408,6 +409,7 @@ Route::middleware(['auth', 'role:guru'])->prefix('guru')->name('guru.')->group(f
     Route::get('/students/{student}/edit', [KepalaController::class, 'editStudent'])->name('student.edit');
     Route::put('/students/{student}/edit', [KepalaController::class, 'updateStudent'])->name('student.update');
     Route::delete('/students/{student}', [KepalaController::class, 'destroyStudent'])->name('student.destroy');
+    Route::delete('/students-bulk/delete', [KepalaController::class, 'bulkDestroyStudent'])->name('student.bulkDestroy');
 
     // Excel import routes
     Route::get('/students/template/download', [KepalaController::class, 'downloadTemplate'])->name('student.template');

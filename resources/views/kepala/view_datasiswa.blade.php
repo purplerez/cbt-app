@@ -92,10 +92,34 @@
             <!-- Table -->
             <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
+                    <!-- Bulk Action Toolbar -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <button id="bulkDeleteBtn" type="button"
+                                class="hidden inline-flex items-center px-3.5 py-2 text-xs font-semibold tracking-wider text-white uppercase transition bg-red-600 rounded-md hover:bg-red-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50" disabled>
+                                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                </svg>
+                                Hapus (<span id="selectedCount">0</span>) Siswa Terpilih
+                            </button>
+                            <span id="selectedHint" class="hidden text-xs text-gray-500 font-medium">siswa dipilih</span>
+                        </div>
+                    </div>
+
+                    <!-- Hidden Form for Bulk Delete -->
+                    <form id="bulkDeleteForm" action="{{ route($rolePrefix . '.student.bulkDestroy') }}" method="POST" class="hidden">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
+                                    <th class="w-12 px-6 py-3 text-left">
+                                        <input type="checkbox" id="selectAll"
+                                            class="w-4 h-4 text-red-600 border-gray-300 rounded cursor-pointer focus:ring-red-500">
+                                    </th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">NISN</th>
                                     <th class="px-6 py-3 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">Nama Siswa</th>
@@ -106,6 +130,10 @@
                             <tbody class="bg-white divide-y divide-gray-200">
                                 @forelse($students as $index => $student)
                                     <tr class="hover:bg-gray-50">
+                                        <td class="w-12 px-6 py-4 whitespace-nowrap">
+                                            <input type="checkbox" name="student_ids[]" value="{{ $student->id }}"
+                                                class="student-checkbox w-4 h-4 text-red-600 border-gray-300 rounded cursor-pointer focus:ring-red-500">
+                                        </td>
                                         <td class="px-6 py-4 text-sm font-medium text-gray-900 whitespace-nowrap">
                                             {{ $loop->iteration }}
                                         </td>
@@ -137,7 +165,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-4 text-sm text-center text-gray-500">
+                                        <td colspan="6" class="px-6 py-4 text-sm text-center text-gray-500">
                                             Tidak ada data siswa.
                                         </td>
                                     </tr>
@@ -154,4 +182,80 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.student-checkbox');
+            const bulkDeleteBtn = document.getElementById('bulkDeleteBtn');
+            const selectedCountSpan = document.getElementById('selectedCount');
+            const selectedHint = document.getElementById('selectedHint');
+            const bulkDeleteForm = document.getElementById('bulkDeleteForm');
+
+            function updateBulkDeleteState() {
+                const checked = document.querySelectorAll('.student-checkbox:checked');
+                const count = checked.length;
+
+                if (selectedCountSpan) selectedCountSpan.textContent = count;
+
+                if (count > 0) {
+                    if (bulkDeleteBtn) {
+                        bulkDeleteBtn.classList.remove('hidden');
+                        bulkDeleteBtn.removeAttribute('disabled');
+                    }
+                    if (selectedHint) selectedHint.classList.remove('hidden');
+                } else {
+                    if (bulkDeleteBtn) {
+                        bulkDeleteBtn.classList.add('hidden');
+                        bulkDeleteBtn.setAttribute('disabled', 'disabled');
+                    }
+                    if (selectedHint) selectedHint.classList.add('hidden');
+                }
+
+                if (selectAll) {
+                    selectAll.checked = (checkboxes.length > 0 && checked.length === checkboxes.length);
+                    selectAll.indeterminate = (checked.length > 0 && checked.length < checkboxes.length);
+                }
+            }
+
+            if (selectAll) {
+                selectAll.addEventListener('change', function() {
+                    checkboxes.forEach(cb => {
+                        cb.checked = selectAll.checked;
+                    });
+                    updateBulkDeleteState();
+                });
+            }
+
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', updateBulkDeleteState);
+            });
+
+            if (bulkDeleteBtn && bulkDeleteForm) {
+                bulkDeleteBtn.addEventListener('click', function() {
+                    const checked = document.querySelectorAll('.student-checkbox:checked');
+                    if (!checked.length) {
+                        alert('Pilih minimal satu siswa untuk dihapus.');
+                        return;
+                    }
+
+                    if (confirm('Konfirmasi Hapus: Apakah Anda yakin ingin menghapus ' + checked.length + ' data siswa yang dipilih? Tindakan ini akan menghapus akun dan data ujian siswa secara permanen.')) {
+                        // Clear any previously appended inputs in form
+                        bulkDeleteForm.querySelectorAll('input[name="student_ids[]"]').forEach(el => el.remove());
+
+                        // Append selected student IDs to form
+                        checked.forEach(cb => {
+                            const hiddenInput = document.createElement('input');
+                            hiddenInput.type = 'hidden';
+                            hiddenInput.name = 'student_ids[]';
+                            hiddenInput.value = cb.value;
+                            bulkDeleteForm.appendChild(hiddenInput);
+                        });
+
+                        bulkDeleteForm.submit();
+                    }
+                });
+            }
+        });
+    </script>
 </x-app-layout>

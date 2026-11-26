@@ -418,6 +418,67 @@ class DashboardController extends Controller
         }
     }
 
+    public function bulkDestroyStudent(Request $request)
+    {
+        try {
+            $request->validate([
+                'student_ids' => 'required|array|min:1',
+                'student_ids.*' => 'integer|exists:students,id',
+            ]);
+
+            $studentIds = $request->input('student_ids');
+            $schoolId = $this->getSchoolId();
+
+            // Ensure only students belonging to the user's school are deleted
+            $students = Student::whereIn('id', $studentIds)
+                ->when($schoolId, function ($q) use ($schoolId) {
+                    $q->where('school_id', $schoolId);
+                })
+                ->get();
+
+            if ($students->isEmpty()) {
+                return redirect()->back()->with('error', 'Tidak ada data siswa yang valid untuk dihapus.');
+            }
+
+            $deletedCount = 0;
+
+            DB::transaction(function () use ($students, &$deletedCount) {
+                $userIds = $students->pluck('user_id')->filter()->all();
+
+                // Delete preassigned records first to prevent foreign key violations
+                if (!empty($userIds)) {
+                    \App\Models\Preassigned::whereIn('user_id', $userIds)->delete();
+                }
+
+                foreach ($students as $student) {
+                    // Delete photo if exists and is not default
+                    if ($student->photo && $student->photo !== "assets/images/students/default.jpg") {
+                        Storage::disk('public')->delete($student->photo);
+                    }
+
+                    $user = $student->user;
+                    $student->delete();
+
+                    if ($user) {
+                        $user->delete();
+                    }
+
+                    $deletedCount++;
+                }
+            });
+
+            $authUser = auth()->user();
+            logActivity(($authUser?->name ?? 'User') . ' (ID: ' . ($authUser?->id ?? '-') . ') Berhasil Menghapus ' . $deletedCount . ' Data Siswa');
+
+            return redirect()->route($this->getRoutePrefix() . '.students')->with('success', "Berhasil menghapus $deletedCount data siswa terpilih.");
+        } catch (\Exception $e) {
+            $authUser = auth()->user();
+            logActivity(($authUser?->name ?? 'User') . ' Gagal Menghapus Banyak Siswa: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Gagal menghapus siswa terpilih: ' . $e->getMessage());
+        }
+    }
+
     public function teacherAll()
     {
         try {
